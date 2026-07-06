@@ -93,13 +93,13 @@ int main(int argc, char *argv[])
     exit(1);
   }
   filepointers = calloc(numfiles, sizeof(FILE *));  // NOLINT
-  if (filepointers == NULL) {
+  if (filepointers == nullptr) {
     fprintf(stderr, "Error allocating memory for %ld files\n", (long)numfiles);
     exit(1);
   }
   for (i = 0; i < numfiles; i++) {
     filepointers[i] = fopen(argv[i + optnr], append ? "ab" : "wb");
-    if (filepointers[i] == NULL) {
+    if (filepointers[i] == nullptr) {
       fprintf(stderr, "Can't open \"%s\"\n", argv[i + optnr]);
       exit(1);
     }
@@ -108,7 +108,7 @@ int main(int argc, char *argv[])
   setmode(fileno(stdin),  O_BINARY);
   fflush(stdout);  // needed for _fsetmode(stdout)
   setmode(fileno(stdout),  O_BINARY);
-  setvbuf(stdout, NULL, _IONBF, 0);  // unbuffered for immediate output
+  setvbuf(stdout, nullptr, _IONBF, 0);  // unbuffered for immediate output
 #endif
 
   while ((n = fread(buf, 1, sizeof(buf), stdin)) > 0) {

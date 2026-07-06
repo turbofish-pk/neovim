@@ -92,7 +92,7 @@ pub fn add_lua_modules(
 ) !void {
     const flags = [_][]const u8{
         // Standard version used in Lua Makefile
-        "-std=gnu99",
+        "-std=gnu23",
         if (is_nlua0) "-DNVIM_NLUA0" else "",
     };
 

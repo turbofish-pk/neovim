@@ -62,13 +62,13 @@ VTerm *vterm_build(const struct VTermBuilder *builder)
 
   vt->parser.state = NORMAL;
 
-  vt->parser.callbacks = NULL;
-  vt->parser.cbdata = NULL;
+  vt->parser.callbacks = nullptr;
+  vt->parser.cbdata = nullptr;
 
   vt->parser.emit_nul = false;
 
-  vt->outfunc = NULL;
-  vt->outdata = NULL;
+  vt->outfunc = nullptr;
+  vt->outdata = nullptr;
 
   vt->outbuffer_len = DEFAULT(builder->outbuffer_len, 4096);
   vt->outbuffer_cur = 0;

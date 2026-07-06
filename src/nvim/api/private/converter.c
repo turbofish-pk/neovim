@@ -58,7 +58,7 @@ static Object typval_cbuf_to_obj(EncodedData *edata, const char *data, size_t le
   do { \
     const size_t len_ = (size_t)(len); \
     const char *const str_ = (str); \
-    assert(len_ == 0 || str_ != NULL); \
+    assert(len_ == 0 || str_ != nullptr); \
     kvi_push(edata->stack, typval_cbuf_to_obj(edata, str_, len_)); \
   } while (0)
 
@@ -78,7 +78,7 @@ static Object typval_cbuf_to_obj(EncodedData *edata, const char *data, size_t le
   do { \
     const char *const fun_ = (fun); \
     ufunc_T *fp; \
-    if (fun_ != NULL && (fp = find_func(fun_)) != NULL && fp->uf_flags & FC_LUAREF) { \
+    if (fun_ != nullptr && (fp = find_func(fun_)) != nullptr && fp->uf_flags & FC_LUAREF) { \
       kvi_push(edata->stack, LUAREF_OBJ(api_new_luaref(fp->uf_luaref))); \
     } else { \
       TYPVAL_ENCODE_CONV_NIL(tv); \
@@ -238,10 +238,10 @@ static inline void typval_encode_dict_end(EncodedData *const edata)
 /// Arrays/Dictionaries.
 ///
 /// @param obj The source object
-/// @param arena if NULL, use direct allocation
+/// @param arena if nullptr, use direct allocation
 /// @param reuse_strdata when true, don't copy string data to Arena but reference
 ///                      typval strings directly. takes no effect when arena is
-///                      NULL
+///                      nullptr
 /// @return The converted value
 Object vim_to_object(typval_T *obj, Arena *arena, bool reuse_strdata)
 {

@@ -212,7 +212,7 @@ int ns_get_hl(NS *ns_hl, int hl_id, bool link, bool nodefault)
 
     Error err = ERROR_INIT;
     recursive++;
-    Object ret = nlua_call_ref(p->hl_def, "hl_def", args, kRetObject, NULL, &err);
+    Object ret = nlua_call_ref(p->hl_def, "hl_def", args, kRetObject, nullptr, &err);
     recursive--;
 
     // TODO(bfredl): or "inherit", combine with global value?
@@ -223,7 +223,7 @@ int ns_get_hl(NS *ns_hl, int hl_id, bool link, bool nodefault)
       fallback = false;
       Dict(highlight) dict = KEYDICT_INIT;
       if (api_dict_to_keydict(&dict, KeyDict_highlight_get_field, ret.data.dict, &err)) {
-        attrs = dict2hlattrs(&dict, true, &it.link_id, NULL, &err);
+        attrs = dict2hlattrs(&dict, true, &it.link_id, nullptr, &err);
         fallback = GET_BOOL_OR_TRUE(&dict, highlight, fallback);
         tmp = dict.fallback;  // or false
         if (it.link_id >= 0) {
@@ -284,7 +284,7 @@ bool hl_check_ns(void)
   return true;
 }
 
-/// prepare for drawing window `wp` or global elements if NULL
+/// prepare for drawing window `wp` or global elements if nullptr
 ///
 /// Note: pum should be drawn in the context of the current window!
 bool win_check_ns_hl(win_T *wp)
@@ -297,7 +297,7 @@ bool win_check_ns_hl(win_T *wp)
 ///
 /// @param ns_id Namespace ID (0 for global namespace)
 /// @param hl_id Highlight group ID (1-based)
-/// @param[in] optional If non-NULL, passed to syn_ns_id2attr to track
+/// @param[in] optional If non-nullptr, passed to syn_ns_id2attr to track
 ///                      whether the group was explicitly defined in the namespace.
 /// @param[out] attrs Pointer to store the attributes
 /// @return true if highlight group exists and has valid attributes
@@ -365,7 +365,7 @@ void update_window_hl(win_T *wp, bool invalid)
   int ns_id = wp->w_ns_hl;
 
   update_ns_hl(ns_id);
-  if (ns_id != wp->w_ns_hl_active || wp->w_ns_hl_attr == NULL) {
+  if (ns_id != wp->w_ns_hl_active || wp->w_ns_hl_attr == nullptr) {
     wp->w_ns_hl_active = ns_id;
 
     NSHlAttr *hl_def_ptr = (NSHlAttr *)pmap_get(int)(&ns_hl_attr, ns_id);
@@ -447,8 +447,8 @@ void update_ns_hl(int ns_id)
     return;
   }
 
-  NSHlAttr **alloc = (NSHlAttr **)pmap_put_ref(int)(&ns_hl_attr, ns_id, NULL, NULL);
-  if (*alloc == NULL) {
+  NSHlAttr **alloc = (NSHlAttr **)pmap_put_ref(int)(&ns_hl_attr, ns_id, nullptr, nullptr);
+  if (*alloc == nullptr) {
     *alloc = xmalloc(sizeof(**alloc));
   }
   int *hl_attrs = **alloc;
@@ -541,10 +541,10 @@ const char *hl_get_url(uint32_t index)
 // Intern a font name and return its stable index for use in HlAttrs.font.
 ///
 /// @param font_name The font name to add
-/// @return Font index, or -1 if font_name is NULL or empty
+/// @return Font index, or -1 if font_name is nullptr or empty
 int32_t hl_add_font_idx(const char *font_name)
 {
-  if (font_name == NULL || *font_name == '\0') {
+  if (font_name == nullptr || *font_name == '\0') {
     return -1;
   }
 
@@ -560,11 +560,11 @@ int32_t hl_add_font_idx(const char *font_name)
 /// Get a font name by its index.
 ///
 /// @param index Font index
-/// @return Font name, or NULL if index is invalid
+/// @return Font name, or nullptr if index is invalid
 const char *hl_get_font(int32_t index)
 {
   if (index < 0 || !fonts.keys) {
-    return NULL;
+    return nullptr;
   }
   return fonts.keys[index];
 }
@@ -579,7 +579,7 @@ int hl_get_term_attr(HlAttrs *aep)
 /// Clear all highlight tables.
 void clear_hl_tables(bool reinit)
 {
-  const char *url = NULL;
+  const char *url = nullptr;
   set_foreach(&urls, url, {
     xfree((void *)url);
   });
@@ -596,7 +596,7 @@ void clear_hl_tables(bool reinit)
     highlight_changed();
     screen_invalidate_highlights();
   } else {
-    const char *font = NULL;
+    const char *font = nullptr;
     set_foreach(&fonts, font, {
       xfree((void *)font);
     });
@@ -944,7 +944,7 @@ Dict hl_get_attr_by_id(Integer attr_id, Boolean rgb, Arena *arena, Error *err)
     return dic;
   }
   Dict retval = arena_dict(arena, HLATTRS_DICT_SIZE);
-  hlattrs2dict(&retval, NULL, syn_attr2entry((int)attr_id), rgb, false);
+  hlattrs2dict(&retval, nullptr, syn_attr2entry((int)attr_id), rgb, false);
   return retval;
 }
 
@@ -1050,7 +1050,7 @@ void hlattrs2dict(Dict *hl, Dict *hl_attrs, HlAttrs ae, bool use_rgb, bool short
     }
 
     const char *font = hl_get_font(ae.font);
-    if (font != NULL) {
+    if (font != nullptr) {
       PUT_C(*hl, "font", STRING_OBJ(cstr_as_string(font)));
     }
   } else {
@@ -1273,7 +1273,7 @@ int object_to_color(Object val, char *key, bool rgb, Error *err)
     });
     return color;
   } else {
-    VALIDATE_EXP(false, key, "String or Integer", NULL, {
+    VALIDATE_EXP(false, key, "String or Integer", nullptr, {
       return 0;
     });
   }

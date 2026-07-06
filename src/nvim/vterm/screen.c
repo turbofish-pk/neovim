@@ -27,10 +27,10 @@ static inline void clearcell(const VTermScreen *screen, ScreenCell *cell)
 ScreenCell *getcell(const VTermScreen *screen, int row, int col)
 {
   if (row < 0 || row >= screen->rows) {
-    return NULL;
+    return nullptr;
   }
   if (col < 0 || col >= screen->cols) {
-    return NULL;
+    return nullptr;
   }
   return screen->buffer + (screen->cols * row) + col;
 }
@@ -866,7 +866,7 @@ static VTermScreen *screen_new(VTerm *vt)
 {
   VTermState *state = vterm_obtain_state(vt);
   if (!state) {
-    return NULL;
+    return nullptr;
   }
 
   VTermScreen *screen = vterm_allocator_malloc(vt, sizeof(VTermScreen));
@@ -887,8 +887,8 @@ static VTermScreen *screen_new(VTerm *vt)
   screen->global_reverse = false;
   screen->reflow = false;
 
-  screen->callbacks = NULL;
-  screen->cbdata = NULL;
+  screen->callbacks = nullptr;
+  screen->cbdata = nullptr;
 
   screen->buffers[BUFIDX_PRIMARY] = alloc_buffer(screen, rows, cols);
 

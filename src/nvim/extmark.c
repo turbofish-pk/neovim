@@ -54,7 +54,7 @@ void extmark_set(buf_T *buf, uint32_t ns_id, uint32_t *idp, int row, colnr_T col
                  colnr_T end_col, DecorInline decor, uint16_t decor_flags, bool right_gravity,
                  bool end_right_gravity, bool no_undo, bool invalidate, Error *err)
 {
-  uint32_t *ns = map_put_ref(uint32_t, uint32_t)(buf->b_extmark_ns, ns_id, NULL, NULL);
+  uint32_t *ns = map_put_ref(uint32_t, uint32_t)(buf->b_extmark_ns, ns_id, nullptr, nullptr);
   uint32_t id = idp ? *idp : 0;
 
   uint16_t flags = mt_flags(right_gravity, no_undo, invalidate, decor.ext) | decor_flags;
@@ -204,9 +204,9 @@ bool extmark_clear(buf_T *buf, uint32_t ns_id, int l_row, colnr_T l_col, int u_r
   }
 
   bool all_ns = (ns_id == 0);
-  uint32_t *ns = NULL;
+  uint32_t *ns = nullptr;
   if (!all_ns) {
-    ns = map_ref(uint32_t, uint32_t)(buf->b_extmark_ns, ns_id, NULL);
+    ns = map_ref(uint32_t, uint32_t)(buf->b_extmark_ns, ns_id, nullptr);
     if (!ns) {
       // nothing to do
       return false;
@@ -241,7 +241,7 @@ bool extmark_clear(buf_T *buf, uint32_t ns_id, int l_row, colnr_T l_col, int u_r
       map_destroy(uint32_t, buf->b_extmark_ns);
       *buf->b_extmark_ns = (Map(uint32_t, uint32_t)) MAP_INIT;
     } else {
-      map_del(uint32_t, uint32_t)(buf->b_extmark_ns, ns_id, NULL);
+      map_del(uint32_t, uint32_t)(buf->b_extmark_ns, ns_id, nullptr);
     }
   }
 
@@ -280,7 +280,7 @@ ExtmarkInfoArray extmark_get(buf_T *buf, uint32_t ns_id, int l_row, colnr_T l_co
   } else {
     // Find all the marks beginning with the start position
     marktree_itr_get_ext(buf->b_marktree, MTPos(l_row, l_col),
-                         itr, false, false, NULL, NULL);
+                         itr, false, false, nullptr, nullptr);
   }
 
   while ((int64_t)kv_size(array) < amount) {
@@ -291,7 +291,7 @@ ExtmarkInfoArray extmark_get(buf_T *buf, uint32_t ns_id, int l_row, colnr_T l_co
       break;
     }
     if (!mt_end(mark)) {
-      MTKey end = marktree_get_alt(buf->b_marktree, mark, NULL);
+      MTKey end = marktree_get_alt(buf->b_marktree, mark, nullptr);
       push_mark(&array, ns_id, type_filter, mtpair_from(mark, end));
     }
     marktree_itr_next(buf->b_marktree, itr);
@@ -321,12 +321,12 @@ static void push_mark(ExtmarkInfoArray *array, uint32_t ns_id, ExtmarkType type_
 /// Lookup an extmark by id
 MTPair extmark_from_id(buf_T *buf, uint32_t ns_id, uint32_t id)
 {
-  MTKey mark = marktree_lookup_ns(buf->b_marktree, ns_id, id, false, NULL);
+  MTKey mark = marktree_lookup_ns(buf->b_marktree, ns_id, id, false, nullptr);
   if (!mark.id) {
     return mtpair_from(mark, mark);  // invalid
   }
   assert(mark.pos.row >= 0);
-  MTKey end = marktree_get_alt(buf->b_marktree, mark, NULL);
+  MTKey end = marktree_get_alt(buf->b_marktree, mark, nullptr);
 
   return mtpair_from(mark, end);
 }
@@ -415,7 +415,7 @@ void extmark_splice_delete(buf_T *buf, int l_row, colnr_T l_col, int u_row, coln
     }
 
     // Push mark to undo header
-    if (copy && (only_copy || (uvp != NULL && op == kExtmarkUndo && !mt_no_undo(mark)))) {
+    if (copy && (only_copy || (uvp != nullptr && op == kExtmarkUndo && !mt_no_undo(mark)))) {
       ExtmarkSavePos pos = {
         .mark = mt_lookup_key(mark),
         .invalidated = invalidated,
@@ -483,7 +483,7 @@ void extmark_adjust(buf_T *buf, linenr_T line1, linenr_T line2, linenr_T amount,
   if (curbuf_splice_pending) {
     return;
   }
-  bcount_t start_byte = ml_find_line_or_offset(buf, line1, NULL, true);
+  bcount_t start_byte = ml_find_line_or_offset(buf, line1, nullptr, true);
   bcount_t old_byte = 0;
   bcount_t new_byte = 0;
   int old_row;
@@ -502,7 +502,7 @@ void extmark_adjust(buf_T *buf, linenr_T line1, linenr_T line2, linenr_T amount,
     new_row = (int)amount;
   }
   if (new_row > 0) {
-    new_byte = ml_find_line_or_offset(buf, line1 + new_row, NULL, true)
+    new_byte = ml_find_line_or_offset(buf, line1 + new_row, nullptr, true)
                - start_byte;
   }
   extmark_splice_impl(buf,
@@ -532,7 +532,7 @@ void extmark_splice(buf_T *buf, int start_row, colnr_T start_col, int old_row, c
                     bcount_t old_byte, int new_row, colnr_T new_col, bcount_t new_byte,
                     ExtmarkOp undo)
 {
-  int offset = ml_find_line_or_offset(buf, start_row + 1, NULL, true);
+  int offset = ml_find_line_or_offset(buf, start_row + 1, nullptr, true);
 
   // On empty buffers, when editing the first line, the line is buffered,
   // causing offset to be < 0. While the buffer is not actually empty, the
@@ -540,7 +540,7 @@ void extmark_splice(buf_T *buf, int start_row, colnr_T start_col, int old_row, c
   // valid but an edge case.
   //
   // TODO(vigoux): maybe the is a better way of testing that ?
-  if (offset < 0 && buf->b_ml.ml_chunksize == NULL) {
+  if (offset < 0 && buf->b_ml.ml_chunksize == nullptr) {
     offset = 0;
   }
   extmark_splice_impl(buf, start_row, start_col, offset + start_col,
@@ -564,7 +564,7 @@ void extmark_splice_impl(buf_T *buf, int start_row, colnr_T start_col, bcount_t 
     int end_row = start_row + old_row;
     int end_col = (old_row ? 0 : start_col) + old_col;
     u_header_T *uhp = u_force_get_undo_header(buf);
-    extmark_undo_vec_t *uvp = uhp ? &uhp->uh_extmark : NULL;
+    extmark_undo_vec_t *uvp = uhp ? &uhp->uh_extmark : nullptr;
     extmark_splice_delete(buf, start_row, start_col, end_row, end_col, uvp, false, undo);
   }
 

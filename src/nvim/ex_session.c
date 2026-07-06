@@ -74,7 +74,7 @@ static int ses_winsizes(FILE *fd, bool restore_size, win_T *tab_firstwin)
 {
   if (restore_size && (ssop_flags & kOptSsopFlagWinsize)) {
     int n = 0;
-    for (win_T *wp = tab_firstwin; wp != NULL; wp = wp->w_next) {
+    for (win_T *wp = tab_firstwin; wp != nullptr; wp = wp->w_next) {
       if (!ses_do_win(wp)) {
         continue;
       }
@@ -123,8 +123,8 @@ static int ses_win_rec(FILE *fd, frame_T *fr)
   // Find first frame that's not skipped and then create a window for
   // each following one (first frame is already there).
   frame_T *frc = ses_skipframe(fr->fr_child);
-  if (frc != NULL) {
-    while ((frc = ses_skipframe(frc->fr_next)) != NULL) {
+  if (frc != nullptr) {
+    while ((frc = ses_skipframe(frc->fr_next)) != nullptr) {
       // Make window as big as possible so that we have lots of room
       // to split.
       if (fprintf(fd, "%s%s",
@@ -144,11 +144,11 @@ static int ses_win_rec(FILE *fd, frame_T *fr)
 
   // Recursively create frames/windows in each window of this column or row.
   frc = ses_skipframe(fr->fr_child);
-  while (frc != NULL) {
+  while (frc != nullptr) {
     ses_win_rec(fd, frc);
     frc = ses_skipframe(frc->fr_next);
     // Go to next window.
-    if (frc != NULL && put_line(fd, "wincmd w") == FAIL) {
+    if (frc != nullptr && put_line(fd, "wincmd w") == FAIL) {
       return FAIL;
     }
   }
@@ -158,7 +158,7 @@ static int ses_win_rec(FILE *fd, frame_T *fr)
 
 /// Skip frames that don't contain windows we want to save in the Session.
 ///
-/// @return  NULL when there none.
+/// @return  nullptr when there none.
 static frame_T *ses_skipframe(frame_T *fr)
 {
   frame_T *frc;
@@ -196,7 +196,7 @@ static int ses_do_win(win_T *wp)
   if (wp->w_floating) {
     return false;
   }
-  if (wp->w_buffer->b_fname == NULL
+  if (wp->w_buffer->b_fname == nullptr
       // When 'buftype' is "nofile" can't restore the window contents.
       || (!wp->w_buffer->terminal && bt_nofilename(wp->w_buffer))) {
     return ssop_flags & kOptSsopFlagBlank;
@@ -221,15 +221,15 @@ static int ses_do_win(win_T *wp)
 /// @returns FAIL if writing fails.
 static int ses_arglist(FILE *fd, char *cmd, garray_T *gap, bool fullname, unsigned *flagp)
 {
-  char *buf = NULL;
+  char *buf = nullptr;
 
   if (fprintf(fd, "%s\n%s\n", cmd, "%argdel") < 0) {
     return FAIL;
   }
   for (int i = 0; i < gap->ga_len; i++) {
-    // NULL file names are skipped (only happens when out of memory).
+    // nullptr file names are skipped (only happens when out of memory).
     char *s = alist_name(&((aentry_T *)gap->ga_data)[i]);
-    if (s != NULL) {
+    if (s != nullptr) {
       if (fullname) {
         buf = xmalloc(MAXPATHL);
         vim_FullName(s, buf, MAXPATHL, false);
@@ -256,7 +256,7 @@ static char *ses_get_fname(buf_T *buf, const unsigned *flagp)
   // Don't do this for ":mkview", we don't know the current directory.
   // Don't do this after ":lcd", we don't keep track of what the current
   // directory is.
-  if (buf->b_sfname != NULL
+  if (buf->b_sfname != nullptr
       && flagp == &ssop_flags
       && (ssop_flags & (kOptSsopFlagCurdir | kOptSsopFlagSesdir))
       && !p_acd
@@ -284,11 +284,11 @@ static int ses_fname(FILE *fd, buf_T *buf, unsigned *flagp, bool add_eol)
 /// Takes care of "slash" flag in 'sessionoptions' and escapes special
 /// characters.
 ///
-/// @return  allocated string or NULL.
+/// @return  allocated string or nullptr.
 static char *ses_escape_fname(char *name, unsigned *flagp)
 {
   char *p;
-  char *sname = home_replace_save(NULL, name);
+  char *sname = home_replace_save(nullptr, name);
 
   // Always kOptSsopFlagSlash: change all backslashes to forward slashes.
   for (p = sname; *p != NUL; MB_PTR_ADV(p)) {
@@ -339,8 +339,8 @@ static int put_view(FILE *fd, win_T *wp, tabpage_T *tp, bool add_edit, unsigned 
     if (ses_arglist(fd, "arglocal", &wp->w_alist->al_ga,
                     flagp == &vop_flags
                     || !(*flagp & kOptSsopFlagCurdir)
-                    || tp->tp_localdir != NULL
-                    || wp->w_localdir != NULL, flagp) == FAIL) {
+                    || tp->tp_localdir != nullptr
+                    || wp->w_localdir != nullptr, flagp) == FAIL) {
       return FAIL;
     }
   }
@@ -374,7 +374,7 @@ static int put_view(FILE *fd, win_T *wp, tabpage_T *tp, bool add_edit, unsigned 
         xfree(fname_esc);
         return FAIL;
       }
-    } else if (wp->w_buffer->b_ffname != NULL
+    } else if (wp->w_buffer->b_ffname != nullptr
                && (!bt_nofilename(wp->w_buffer) || wp->w_buffer->terminal)) {
       // Load the file.
 
@@ -400,7 +400,7 @@ static int put_view(FILE *fd, win_T *wp, tabpage_T *tp, bool add_edit, unsigned 
     } else {
       // No file in this buffer, just make it empty.
       PUTLINE_FAIL("enew");
-      if (wp->w_buffer->b_ffname != NULL) {
+      if (wp->w_buffer->b_ffname != nullptr) {
         // The buffer does have a name, but it's not a file name.
         if (fprintf(fd, "file %s\n", fname_esc) < 0) {
           xfree(fname_esc);
@@ -416,7 +416,7 @@ static int put_view(FILE *fd, win_T *wp, tabpage_T *tp, bool add_edit, unsigned 
     buf_T *const alt = buflist_findnr(wp->w_alt_fnum);
 
     // Set the alternate file if the buffer is listed.
-    if ((flagp == &ssop_flags) && alt != NULL && alt->b_fname != NULL
+    if ((flagp == &ssop_flags) && alt != nullptr && alt->b_fname != nullptr
         && *alt->b_fname != NUL
         && alt->b_p_bl
         // do not set balt if buffer is terminal and "terminal" is not set in options
@@ -457,7 +457,7 @@ static int put_view(FILE *fd, win_T *wp, tabpage_T *tp, bool add_edit, unsigned 
 
   // Save Folds when 'buftype' is empty and for help files.
   if ((*flagp & kOptSsopFlagFolds)
-      && wp->w_buffer->b_ffname != NULL
+      && wp->w_buffer->b_ffname != nullptr
       && (bt_normal(wp->w_buffer)
           || bt_help(wp->w_buffer))) {
     if (put_folds(fd, wp) == FAIL) {
@@ -518,7 +518,7 @@ static int put_view(FILE *fd, win_T *wp, tabpage_T *tp, bool add_edit, unsigned 
 
   // Local directory, if the current flag is not view options or the "curdir"
   // option is included.
-  if (wp->w_localdir != NULL
+  if (wp->w_localdir != nullptr
       && (flagp != &vop_flags || (*flagp & kOptSsopFlagCurdir))) {
     if (fputs("lcd ", fd) < 0
         || ses_put_fname(fd, wp->w_localdir, flagp) == FAIL
@@ -588,7 +588,7 @@ static int makeopens(FILE *fd, char *dirnow)
 {
   bool only_save_windows = true;
   bool restore_size = true;
-  win_T *edited_win = NULL;
+  win_T *edited_win = nullptr;
   win_T *tab_firstwin;
   frame_T *tab_topframe;
   int cur_arg_idx = 0;
@@ -620,7 +620,7 @@ static int makeopens(FILE *fd, char *dirnow)
   if (ssop_flags & kOptSsopFlagSesdir) {
     PUTLINE_FAIL("exe \"cd \" . escape(expand(\"<sfile>:p:h\"), ' ')");
   } else if (ssop_flags & kOptSsopFlagCurdir) {
-    char *sname = home_replace_save(NULL, globaldir != NULL ? globaldir : dirnow);
+    char *sname = home_replace_save(nullptr, globaldir != nullptr ? globaldir : dirnow);
     char *fname_esc = ses_escape_fname(sname, &ssop_flags);
     if (fprintf(fd, "cd %s\n", fname_esc) < 0) {
       xfree(fname_esc);
@@ -658,7 +658,7 @@ static int makeopens(FILE *fd, char *dirnow)
     if (!(only_save_windows && buf->b_nwindows == 0)
         && !(buf->b_help && !(ssop_flags & kOptSsopFlagHelp))
         && !(bt_terminal(buf) && !(ssop_flags & kOptSsopFlagTerminal))
-        && buf->b_fname != NULL
+        && buf->b_fname != nullptr
         && buf->b_p_bl) {
       if (fprintf(fd, "badd +%" PRId64 " ",
                   kv_size(buf->b_wininfo) == 0
@@ -688,7 +688,7 @@ static int makeopens(FILE *fd, char *dirnow)
   // will be displayed when creating the next tab.  That resizes the windows
   // in the first tab, which may cause problems.  Set 'showtabline' to 2
   // temporarily to avoid that.
-  if (p_stal == 1 && first_tabpage->tp_next != NULL) {
+  if (p_stal == 1 && first_tabpage->tp_next != nullptr) {
     PUTLINE_FAIL("set stal=2");
     restore_stal = true;
   }
@@ -701,12 +701,12 @@ static int makeopens(FILE *fd, char *dirnow)
       // Use `bufhidden=wipe` to remove empty "placeholder" buffers once
       // they are not needed. This prevents creating extra buffers (see
       // cause of Vim patch 8.1.0829)
-      if (tp->tp_next != NULL && put_line(fd, "tabnew +setlocal\\ bufhidden=wipe") == FAIL) {
+      if (tp->tp_next != nullptr && put_line(fd, "tabnew +setlocal\\ bufhidden=wipe") == FAIL) {
         return FAIL;
       }
     }
 
-    if (first_tabpage->tp_next != NULL && put_line(fd, "tabrewind") == FAIL) {
+    if (first_tabpage->tp_next != nullptr && put_line(fd, "tabrewind") == FAIL) {
       return FAIL;
     }
   }
@@ -742,9 +742,9 @@ static int makeopens(FILE *fd, char *dirnow)
     // Before creating the window layout, try loading one file.  If this
     // is aborted we don't end up with a number of useless windows.
     // This may have side effects! (e.g., compressed or network file).
-    for (win_T *wp = tab_firstwin; wp != NULL; wp = wp->w_next) {
+    for (win_T *wp = tab_firstwin; wp != nullptr; wp = wp->w_next) {
       if (ses_do_win(wp)
-          && wp->w_buffer->b_ffname != NULL
+          && wp->w_buffer->b_ffname != nullptr
           && !bt_help(wp->w_buffer)
           && !bt_nofilename(wp->w_buffer)) {
         if (need_tabnext && put_line(fd, "tabnext") == FAIL) {
@@ -783,7 +783,7 @@ static int makeopens(FILE *fd, char *dirnow)
     // Check if window sizes can be restored (no windows omitted).
     // Remember the window number of the current window after restoring.
     int nr = 0;
-    for (win_T *wp = tab_firstwin; wp != NULL; wp = wp->w_next) {
+    for (win_T *wp = tab_firstwin; wp != nullptr; wp = wp->w_next) {
       if (ses_do_win(wp)) {
         nr++;
       } else if (!wp->w_floating) {
@@ -794,7 +794,7 @@ static int makeopens(FILE *fd, char *dirnow)
       }
     }
 
-    if (tab_firstwin != NULL && tab_firstwin->w_next != NULL) {
+    if (tab_firstwin != nullptr && tab_firstwin->w_next != nullptr) {
       // Go to the first window.
       PUTLINE_FAIL("wincmd t");
 
@@ -825,7 +825,7 @@ static int makeopens(FILE *fd, char *dirnow)
     // Restore the tab-local working directory if specified
     // Do this before the windows, so that the window-local directory can
     // override the tab-local directory.
-    if ((ssop_flags & kOptSsopFlagCurdir) && tp->tp_localdir != NULL) {
+    if ((ssop_flags & kOptSsopFlagCurdir) && tp->tp_localdir != nullptr) {
       if (fputs("tcd ", fd) < 0
           || ses_put_fname(fd, tp->tp_localdir, &ssop_flags) == FAIL
           || put_eol(fd) == FAIL) {
@@ -835,7 +835,7 @@ static int makeopens(FILE *fd, char *dirnow)
     }
 
     // Restore the view of the window (options, file, cursor, etc.).
-    for (win_T *wp = tab_firstwin; wp != NULL; wp = wp->w_next) {
+    for (win_T *wp = tab_firstwin; wp != nullptr; wp = wp->w_next) {
       if (!ses_do_win(wp)) {
         continue;
       }
@@ -929,11 +929,11 @@ static int makeopens(FILE *fd, char *dirnow)
 void ex_loadview(exarg_T *eap)
 {
   char *fname = get_view_file(*eap->arg);
-  if (fname == NULL) {
+  if (fname == nullptr) {
     return;
   }
 
-  if (do_source(fname, false, DOSO_NONE, NULL) == FAIL) {
+  if (do_source(fname, false, DOSO_NONE, nullptr) == FAIL) {
     semsg(_(e_notopen), fname);
   }
   xfree(fname);
@@ -948,7 +948,7 @@ void ex_mkrc(exarg_T *eap)
 {
   bool view_session = false;  // :mkview, :mksession
   int using_vdir = false;  // using 'viewdir'?
-  char *viewFile = NULL;
+  char *viewFile = nullptr;
 
   if (eap->cmdidx == CMD_mksession || eap->cmdidx == CMD_mkview) {
     view_session = true;
@@ -965,7 +965,7 @@ void ex_mkrc(exarg_T *eap)
           || (ascii_isdigit(*eap->arg) && eap->arg[1] == NUL))) {
     eap->forceit = true;
     fname = get_view_file(*eap->arg);
-    if (fname == NULL) {
+    if (fname == nullptr) {
       return;
     }
     viewFile = fname;
@@ -986,7 +986,7 @@ void ex_mkrc(exarg_T *eap)
   }
 
   FILE *fd = open_exfile(fname, eap->forceit, WRITEBIN);
-  if (fd != NULL) {
+  if (fd != nullptr) {
     bool failed = false;
     unsigned *flagp;
     if (eap->cmdidx == CMD_mkview) {
@@ -995,7 +995,7 @@ void ex_mkrc(exarg_T *eap)
       flagp = &ssop_flags;
     }
 
-    apply_autocmds(EVENT_SESSIONWRITEPRE, NULL, NULL, false, curbuf);
+    apply_autocmds(EVENT_SESSIONWRITEPRE, nullptr, nullptr, false, curbuf);
 
     // Write the version command for :mkvimrc
     if (eap->cmdidx == CMD_mkvimrc) {
@@ -1015,7 +1015,7 @@ void ex_mkrc(exarg_T *eap)
       if (eap->cmdidx == CMD_mksession && (*flagp & kOptSsopFlagSkiprtp)) {
         flags |= OPT_SKIPRTP;
       }
-      failed |= (makemap(fd, NULL) == FAIL
+      failed |= (makemap(fd, nullptr) == FAIL
                  || makeset(fd, flags, false) == FAIL);
     }
 
@@ -1040,7 +1040,7 @@ void ex_mkrc(exarg_T *eap)
             shorten_fnames(true);
           }
         } else if (*dirnow != NUL
-                   && (ssop_flags & kOptSsopFlagCurdir) && globaldir != NULL) {
+                   && (ssop_flags & kOptSsopFlagCurdir) && globaldir != nullptr) {
           if (os_chdir(globaldir) == 0) {
             shorten_fnames(true);
           }
@@ -1051,7 +1051,7 @@ void ex_mkrc(exarg_T *eap)
         // restore original dir
         if (*dirnow != NUL && ((ssop_flags & kOptSsopFlagSesdir)
                                || ((ssop_flags & kOptSsopFlagCurdir) && globaldir !=
-                                   NULL))) {
+                                   nullptr))) {
           if (os_chdir(dirnow) != 0) {
             emsg(_(e_prev_dir));
           }
@@ -1102,17 +1102,17 @@ void ex_mkrc(exarg_T *eap)
 
   xfree(viewFile);
 
-  apply_autocmds(EVENT_SESSIONWRITEPOST, NULL, NULL, false, curbuf);
+  apply_autocmds(EVENT_SESSIONWRITEPOST, nullptr, nullptr, false, curbuf);
 }
 
 /// @return  the name of the view file for the current buffer.
 static char *get_view_file(char c)
 {
-  if (curbuf->b_ffname == NULL) {
+  if (curbuf->b_ffname == nullptr) {
     emsg(_(e_noname));
-    return NULL;
+    return nullptr;
   }
-  char *sname = home_replace_save(NULL, curbuf->b_ffname);
+  char *sname = home_replace_save(nullptr, curbuf->b_ffname);
 
   // We want a file name without separators, because we're not going to make
   // a directory.

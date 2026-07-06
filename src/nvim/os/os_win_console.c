@@ -10,9 +10,9 @@
 #include "os/os_win_console.c.generated.h"
 
 static char origTitle[256] = { 0 };
-static HWND hWnd = NULL;
-static HICON hOrigIconSmall = NULL;
-static HICON hOrigIcon = NULL;
+static HWND hWnd = nullptr;
+static HICON hOrigIconSmall = nullptr;
+static HICON hOrigIcon = nullptr;
 
 /// Re-enable normal Ctrl-C processing after detached startup.
 ///
@@ -21,7 +21,7 @@ static HICON hOrigIcon = NULL;
 /// once the embedded server has a console so terminal jobs inherit it.
 void os_enable_ctrl_c(void)
 {
-  SetConsoleCtrlHandler(NULL, false);
+  SetConsoleCtrlHandler(nullptr, false);
 }
 
 int os_open_conin_fd(void)
@@ -29,8 +29,8 @@ int os_open_conin_fd(void)
   const HANDLE conin_handle = CreateFile("CONIN$",
                                          GENERIC_READ | GENERIC_WRITE,
                                          FILE_SHARE_READ | FILE_SHARE_WRITE,
-                                         (LPSECURITY_ATTRIBUTES)NULL,
-                                         OPEN_EXISTING, 0, (HANDLE)NULL);
+                                         (LPSECURITY_ATTRIBUTES)nullptr,
+                                         OPEN_EXISTING, 0, (HANDLE)nullptr);
   assert(conin_handle != INVALID_HANDLE_VALUE);
   int conin_fd = _open_osfhandle((intptr_t)conin_handle, _O_RDONLY);
   assert(conin_fd != -1);
@@ -39,7 +39,7 @@ int os_open_conin_fd(void)
 
 void os_clear_hwnd(void)
 {
-  hWnd = NULL;
+  hWnd = nullptr;
 }
 
 void os_redirect_stdin_to_conin(void)
@@ -55,8 +55,8 @@ void os_redirect_stdout_stderr_to_conout(void)
     CreateFile("CONOUT$",
                GENERIC_READ | GENERIC_WRITE,
                FILE_SHARE_READ | FILE_SHARE_WRITE,
-               (LPSECURITY_ATTRIBUTES)NULL,
-               OPEN_EXISTING, 0, (HANDLE)NULL);
+               (LPSECURITY_ATTRIBUTES)nullptr,
+               OPEN_EXISTING, 0, (HANDLE)nullptr);
   assert(conout_handle != INVALID_HANDLE_VALUE);
   close(STDOUT_FILENO);
   const int conout_fd = _open_osfhandle((intptr_t)conout_handle, 0);
@@ -91,7 +91,7 @@ void os_swap_to_hidden_console(void)
 /// Resets Windows console icon if we got an original one on startup.
 void os_icon_reset(void)
 {
-  if (hWnd == NULL) {
+  if (hWnd == nullptr) {
     return;
   }
 
@@ -108,17 +108,17 @@ void os_icon_reset(void)
 /// Saves the original icon so it can be restored at exit.
 void os_icon_init(void)
 {
-  if ((hWnd = GetConsoleWindow()) == NULL) {
+  if ((hWnd = GetConsoleWindow()) == nullptr) {
     return;
   }
 
   char *vimruntime = os_getenv("VIMRUNTIME");
-  if (vimruntime != NULL) {
+  if (vimruntime != nullptr) {
     snprintf(NameBuff, MAXPATHL, "%s/neovim.ico", vimruntime);
     if (!os_path_exists(NameBuff)) {
       WLOG("neovim.ico not found: %s", NameBuff);
     } else {
-      HICON hVimIcon = LoadImage(NULL, NameBuff, IMAGE_ICON, 64, 64,
+      HICON hVimIcon = LoadImage(nullptr, NameBuff, IMAGE_ICON, 64, 64,
                                  LR_LOADFROMFILE | LR_LOADMAP3DCOLORS);
       hOrigIconSmall = (HICON)SendMessage(hWnd, WM_SETICON, (WPARAM)ICON_SMALL, (LPARAM)hVimIcon);
       hOrigIcon = (HICON)SendMessage(hWnd, WM_SETICON, (WPARAM)ICON_BIG, (LPARAM)hVimIcon);
@@ -161,7 +161,7 @@ void os_tty_guess_term(const char **term, int out_fd)
     }
   }
 
-  if (*term == NULL) {
+  if (*term == nullptr) {
     if (vtp) {
       *term = "vtpcon";
     } else if (conemu_ansi) {

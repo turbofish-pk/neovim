@@ -72,7 +72,7 @@ static bool pending_default_colors = false;
 
 #ifdef NVIM_LOG_DEBUG
 static size_t uilog_seen = 0;
-static const char *uilog_last_event = NULL;
+static const char *uilog_last_event = nullptr;
 
 static void ui_log(const char *funname)
 {
@@ -86,10 +86,10 @@ static void ui_log(const char *funname)
     uilog_seen++;
   } else {
     if (uilog_seen > 0) {
-      logmsg(LOGLVL_DBG, "UI: ", NULL, -1, true,
+      logmsg(LOGLVL_DBG, "UI: ", nullptr, -1, true,
              "%s (+%zu times...)", uilog_last_event, uilog_seen);
     }
-    logmsg(LOGLVL_DBG, "UI: ", NULL, -1, true, "%s", funname);
+    logmsg(LOGLVL_DBG, "UI: ", nullptr, -1, true, "%s", funname);
     uilog_seen = 0;
     uilog_last_event = funname;
   }
@@ -286,7 +286,7 @@ static void ui_refresh_event(void **argv)
 
 void ui_schedule_refresh(void)
 {
-  multiqueue_put(resize_events, ui_refresh_event, NULL);
+  multiqueue_put(resize_events, ui_refresh_event, nullptr);
 }
 
 void ui_default_colors_set(void)
@@ -356,7 +356,7 @@ void vim_beep(unsigned val)
   // When 'debug' contains "beep" produce a message.  If we are sourcing
   // a script or executing a function give the user a hint where the beep
   // comes from.
-  if (vim_strchr(p_debug, 'e') != NULL) {
+  if (vim_strchr(p_debug, 'e') != nullptr) {
     msg_source(HLF_W);
     msg(_("Beep!"), HLF_W);
   }
@@ -647,7 +647,7 @@ bool ui_mouse_has(int mode)
   for (char *p = p_mouse; *p; p++) {
     switch (*p) {
     case 'a':
-      if (vim_strchr(MOUSE_A, mode) != NULL) {
+      if (vim_strchr(MOUSE_A, mode) != nullptr) {
         return true;
       }
 
@@ -762,7 +762,7 @@ void ui_grid_resize(handle_T grid_handle, int width, int height, Error *err)
   }
 
   win_T *wp = get_win_by_grid_handle(grid_handle);
-  VALIDATE_INT((wp != NULL), "window handle", (int64_t)grid_handle, {
+  VALIDATE_INT((wp != nullptr), "window handle", (int64_t)grid_handle, {
     return;
   });
 
@@ -801,7 +801,7 @@ void ui_call_event(char *name, Array args)
   map_foreach(&ui_event_cbs, ui_event_ns_id, event_cb, {
     Error err = ERROR_INIT;
     uint32_t ns_id = ui_event_ns_id;
-    Object res = nlua_call_ref_ctx(fast, event_cb->cb, name, args, kRetNilBool, NULL, &err);
+    Object res = nlua_call_ref_ctx(fast, event_cb->cb, name, args, kRetNilBool, nullptr, &err);
     ui_event_ns_id = 0;
     if (LUARET_TRUTHY(res)) {
       handled = true;
@@ -853,7 +853,7 @@ void ui_add_cb(uint32_t ns_id, LuaRef cb, bool *ext_widgets)
     event_cb->ext_widgets[kUICmdline] = true;
   }
 
-  ptr_t *item = pmap_put_ref(uint32_t)(&ui_event_cbs, ns_id, NULL, NULL);
+  ptr_t *item = pmap_put_ref(uint32_t)(&ui_event_cbs, ns_id, nullptr, nullptr);
   if (*item) {
     free_ui_event_callback((UIEventCallback *)(*item));
   }
@@ -867,7 +867,7 @@ void ui_remove_cb(uint32_t ns_id, bool checkerr)
 {
   UIEventCallback *item = pmap_get(uint32_t)(&ui_event_cbs, ns_id);
   if (item && (!checkerr || ++item->errors > CB_MAX_ERROR)) {
-    pmap_del(uint32_t)(&ui_event_cbs, ns_id, NULL);
+    pmap_del(uint32_t)(&ui_event_cbs, ns_id, nullptr);
     free_ui_event_callback(item);
     ui_cb_update_ext();
     ui_refresh();

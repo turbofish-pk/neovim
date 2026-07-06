@@ -120,7 +120,7 @@ static int count_n_matched_chars(mmfile_t **sp, const size_t n, bool iwhite)
   int matched = 0;
   for (size_t i = 0; i < n; i++) {
     for (size_t j = i + 1; j < n; j++) {
-      if (sp[i]->ptr != NULL && sp[j]->ptr != NULL) {
+      if (sp[i]->ptr != nullptr && sp[j]->ptr != nullptr) {
         matched++;
         // TODO(lewis6991): handle whitespace ignoring higher up in the stack
         matched_chars += iwhite ? matching_chars_iwhite(sp[i], sp[j])

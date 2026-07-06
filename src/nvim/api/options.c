@@ -62,7 +62,7 @@ static int validate_option_value_args(Dict(option) *opts, char *name, bool allow
     } else if (!strcmp(opts->scope.data, "global")) {
       *opt_flags = OPT_GLOBAL;
     } else {
-      VALIDATE_EXP(false, "scope", "'local' or 'global'", NULL, {
+      VALIDATE_EXP(false, "scope", "'local' or 'global'", nullptr, {
         return FAIL;
       });
     }
@@ -70,7 +70,7 @@ static int validate_option_value_args(Dict(option) *opts, char *name, bool allow
 
   *scope = kOptScopeGlobal;
 
-  if (filetype != NULL && HAS_KEY_X(opts, filetype)) {
+  if (filetype != nullptr && HAS_KEY_X(opts, filetype)) {
     *filetype = opts->filetype.data;
   }
 
@@ -109,7 +109,7 @@ static int validate_option_value_args(Dict(option) *opts, char *name, bool allow
     return FAIL;
   }
 
-  if (operation != NULL && HAS_KEY_X(opts, operation)) {
+  if (operation != nullptr && HAS_KEY_X(opts, operation)) {
     if (strequal(opts->operation.data, "set")) {
       *operation = OP_NONE;
     } else if (strequal(opts->operation.data, "append")) {
@@ -119,7 +119,7 @@ static int validate_option_value_args(Dict(option) *opts, char *name, bool allow
     } else if (strequal(opts->operation.data, "remove")) {
       *operation = OP_REMOVING;
     } else {
-      VALIDATE_EXP(false, "operation", "'set', 'append', 'prepend', or 'remove'", NULL, {
+      VALIDATE_EXP(false, "operation", "'set', 'append', 'prepend', or 'remove'", nullptr, {
         return FAIL;
       });
     }
@@ -133,7 +133,7 @@ static int validate_option_value_args(Dict(option) *opts, char *name, bool allow
     });
   }
 
-  if (dry_run != NULL && HAS_KEY_X(opts, dry_run)) {
+  if (dry_run != nullptr && HAS_KEY_X(opts, dry_run)) {
     *dry_run = opts->dry_run;
   }
 
@@ -164,15 +164,15 @@ static int validate_option_value_args(Dict(option) *opts, char *name, bool allow
 static buf_T *do_ft_buf(const char *filetype, aco_save_T *aco, Error *err)
   FUNC_ATTR_NONNULL_ARG(2, 3)
 {
-  if (filetype == NULL) {
-    return NULL;
+  if (filetype == nullptr) {
+    return nullptr;
   }
 
   // Allocate a buffer without putting it in the buffer list.
-  buf_T *ftbuf = buflist_new(NULL, NULL, 1, BLN_DUMMY);
-  if (ftbuf == NULL) {
+  buf_T *ftbuf = buflist_new(nullptr, nullptr, 1, BLN_DUMMY);
+  if (ftbuf == nullptr) {
     api_set_error(err, kErrorTypeException, "Could not create internal buffer");
-    return NULL;
+    return nullptr;
   }
 
   // Open a memline for use by autocommands.
@@ -207,7 +207,7 @@ static buf_T *do_ft_buf(const char *filetype, aco_save_T *aco, Error *err)
     if (!ERROR_SET(err)) {
       api_set_error(err, kErrorTypeException, "Internal buffer was deleted");
     }
-    return NULL;
+    return nullptr;
   }
 
   if (!did_au_ft && !ERROR_SET(err)) {
@@ -263,11 +263,11 @@ Object nvim_get_option_value(String name, Dict(option) *opts, Error *err)
   OptIndex opt_idx = 0;
   int opt_flags = 0;
   OptScope scope = kOptScopeGlobal;
-  void *from = NULL;
-  char *filetype = NULL;
+  void *from = nullptr;
+  char *filetype = nullptr;
 
   if (!validate_option_value_args(opts, name.data, true, &opt_idx, &opt_flags, &scope, &from,
-                                  &filetype, NULL, NULL, err)) {
+                                  &filetype, nullptr, nullptr, err)) {
     return (Object)OBJECT_INIT;
   }
 
@@ -277,13 +277,13 @@ Object nvim_get_option_value(String name, Dict(option) *opts, Error *err)
   if (ERROR_SET(err)) {
     // Restore curwin/curbuf and a few other things.
     aucmd_restbuf(&aco);
-    if (ftbuf != NULL) {
+    if (ftbuf != nullptr) {
       wipe_ft_buf(ftbuf);
     }
     return (Object)OBJECT_INIT;
   }
 
-  if (ftbuf != NULL) {
+  if (ftbuf != nullptr) {
     assert(!from);
     from = ftbuf;
   }
@@ -292,7 +292,7 @@ Object nvim_get_option_value(String name, Dict(option) *opts, Error *err)
 
   // Restore curwin/curbuf and a few other things.
   aucmd_restbuf(&aco);
-  if (ftbuf != NULL) {
+  if (ftbuf != nullptr) {
     wipe_ft_buf(ftbuf);
   }
 
@@ -341,9 +341,9 @@ Object nvim_set_option_value(uint64_t channel_id, String name, Object value, Dic
   int opt_flags = 0;
   OptScope scope = kOptScopeGlobal;
   set_op_T operation = OP_NONE;
-  void *to = NULL;
+  void *to = nullptr;
   bool dry_run = false;
-  if (!validate_option_value_args(opts, name.data, true, &opt_idx, &opt_flags, &scope, &to, NULL,
+  if (!validate_option_value_args(opts, name.data, true, &opt_idx, &opt_flags, &scope, &to, nullptr,
                                   &operation, &dry_run, err)) {
     return NIL;
   }
@@ -369,7 +369,7 @@ Object nvim_set_option_value(uint64_t channel_id, String name, Object value, Dic
   });
 
   OptVal merged_val = NIL_OPTVAL;
-  const char *errmsg = NULL;
+  const char *errmsg = nullptr;
   vimoption_T *option = get_option(opt_idx);
 
   // Need to use varp specific to buf/win to ensure that merges are handled
@@ -377,7 +377,7 @@ Object nvim_set_option_value(uint64_t channel_id, String name, Object value, Dic
   buf_T *buf = scope == kOptScopeBuf ? to : curbuf;
   win_T *win = scope == kOptScopeWin ? to : curwin;
   void *varp = get_varp_from(option, buf, win);
-  char *argp = NULL;
+  char *argp = nullptr;
 
   switch (optval_right.type) {
   case kOptValTypeNil:
@@ -403,8 +403,8 @@ Object nvim_set_option_value(uint64_t channel_id, String name, Object value, Dic
   if (optval_right.type == kOptValTypeNumber || optval_right.type == kOptValTypeString) {
     OptVal oldval = optval_from_varp(opt_idx, varp);
     merged_val = get_option_newval(opt_idx, opt_flags, PREFIX_NONE, &argp, 0, operation,
-                                   option->flags, varp, &oldval, NULL, 0, &errmsg);
-    VALIDATE(errmsg == NULL, "%s", errmsg, {
+                                   option->flags, varp, &oldval, nullptr, 0, &errmsg);
+    VALIDATE(errmsg == nullptr, "%s", errmsg, {
       return NIL;
     });
   }
@@ -492,10 +492,10 @@ DictAs(get_option_info) nvim_get_option_info2(String name, Dict(option) *opts, A
   OptIndex opt_idx = 0;
   int opt_flags = 0;
   OptScope scope = kOptScopeGlobal;
-  void *from = NULL;
+  void *from = nullptr;
   // TODO(justinmk): support tab-local option.
-  if (!validate_option_value_args(opts, name.data, false, &opt_idx, &opt_flags, &scope, &from, NULL,
-                                  NULL, NULL, err)) {
+  if (!validate_option_value_args(opts, name.data, false, &opt_idx, &opt_flags, &scope, &from, nullptr,
+                                  nullptr, nullptr, err)) {
     return (Dict)ARRAY_DICT_INIT;
   }
 

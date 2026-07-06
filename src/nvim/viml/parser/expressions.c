@@ -79,7 +79,7 @@ typedef enum {
   /// Values: literals, variables, nested expressions, unary operators.
   ///
   /// For unrestricted expressions as well, implies that top item in AST stack
-  /// points to NULL.
+  /// points to nullptr.
   kENodeValue,
 } ExprASTWantedNode;
 
@@ -193,7 +193,7 @@ LexExprToken viml_pexpr_next_token(ParserState *const pstate, const int flags)
 #define GET_CCS(ret, pline) \
   do { \
     if (ret.len < pline.size \
-        && strchr("?#", pline.data[ret.len]) != NULL) { \
+        && strchr("?#", pline.data[ret.len]) != nullptr) { \
       ret.data.cmp.ccs = \
         (ExprCaseCompareStrategy)pline.data[ret.len]; \
       ret.len++; \
@@ -369,8 +369,8 @@ LexExprToken viml_pexpr_next_token(ParserState *const pstate, const int flags)
         significand_part = significand_part * 10 + (pline.data[i] - '0');
       }
       if (exp_start) {
-        vim_str2nr(pline.data + exp_start, NULL, NULL, 0, NULL, &exp_part,
-                   (int)(ret.len - exp_start), false, NULL);
+        vim_str2nr(pline.data + exp_start, nullptr, nullptr, 0, nullptr, &exp_part,
+                   (int)(ret.len - exp_start), false, nullptr);
       }
       if (exp_negative) {
         exp_part += frac_size;
@@ -387,8 +387,8 @@ LexExprToken viml_pexpr_next_token(ParserState *const pstate, const int flags)
     } else {
       int len;
       int prep;
-      vim_str2nr(pline.data, &prep, &len, STR2NR_ALL, NULL,
-                 &ret.data.num.val.integer, (int)pline.size, false, NULL);
+      vim_str2nr(pline.data, &prep, &len, STR2NR_ALL, nullptr,
+                 &ret.data.num.val.integer, (int)pline.size, false, nullptr);
       ret.len = (size_t)len;
       const uint8_t bases[] = {
         [0] = 10,
@@ -478,7 +478,7 @@ LexExprToken viml_pexpr_next_token(ParserState *const pstate, const int flags)
     } else if (ret.len == 1
                && pline.size > 1
                && memchr(EXPR_VAR_SCOPE_LIST, schar,
-                         sizeof(EXPR_VAR_SCOPE_LIST)) != NULL
+                         sizeof(EXPR_VAR_SCOPE_LIST)) != nullptr
                && pline.data[ret.len] == ':'
                && !(flags & kELFlagForbidScope)) {
       ret.len++;
@@ -486,7 +486,7 @@ LexExprToken viml_pexpr_next_token(ParserState *const pstate, const int flags)
       CHARREG(kExprLexPlainIdentifier, ISWORD_OR_AUTOLOAD);
       ret.data.var.autoload = (
                                memchr(pline.data + 2, AUTOLOAD_CHAR, ret.len - 2)
-                               != NULL);
+                               != nullptr);
       // Previous CHARREG stopped at autoload character in order to make it
       // possible to detect `is#`. Continue now with autoload characters
       // included.
@@ -525,7 +525,7 @@ LexExprToken viml_pexpr_next_token(ParserState *const pstate, const int flags)
     if (pline.size > 2
         && pline.data[2] == ':'
         && memchr(EXPR_OPT_SCOPE_LIST, pline.data[1],
-                  sizeof(EXPR_OPT_SCOPE_LIST)) != NULL) {
+                  sizeof(EXPR_OPT_SCOPE_LIST)) != nullptr) {
       ret.len += 2;
       ret.data.opt.scope = (ExprOptScope)pline.data[1];
       ret.data.opt.name = pline.data + 3;
@@ -780,12 +780,12 @@ static const char *const eltkn_opt_scope_tab[] = {
 /// Intended for testing and debugging purposes.
 ///
 /// @param[in]  pstate  Parser state, needed to get token string from it. May be
-///                     NULL, in which case in place of obtaining part of the
+///                     nullptr, in which case in place of obtaining part of the
 ///                     string represented by token only token length is
 ///                     returned.
 /// @param[in]  token  Token to represent.
 /// @param[out]  ret_size  Return string size, for cases like NULs inside
-///                        a string. May be NULL.
+///                        a string. May be nullptr.
 ///
 /// @return Token represented in a string form, in a static buffer (overwritten
 ///         on each call).
@@ -841,7 +841,7 @@ const char *viml_pexpr_repr_token(const ParserState *const pstate, const LexExpr
     break;
 #undef TKNARGS
   }
-  if (pstate == NULL) {
+  if (pstate == nullptr) {
     ADDSTR("::%zu", token.len);
   } else {
     *p++ = ':';
@@ -852,7 +852,7 @@ const char *viml_pexpr_repr_token(const ParserState *const pstate, const LexExpr
   }
 #undef ADDSTR
 viml_pexpr_repr_token_end:
-  if (ret_size != NULL) {
+  if (ret_size != nullptr) {
     *ret_size = (size_t)(p - ret);
   }
   return ret;
@@ -937,8 +937,8 @@ REAL_FATTR_UNUSED
 static inline void viml_pexpr_debug_print_ast_node(const ExprASTNode *const *const eastnode_p,
                                                    const char *const prefix)
 {
-  if (*eastnode_p == NULL) {
-    fprintf(stderr, "%s %p : NULL\n", prefix, (void *)eastnode_p);
+  if (*eastnode_p == nullptr) {
+    fprintf(stderr, "%s %p : nullptr\n", prefix, (void *)eastnode_p);
   } else {
     fprintf(stderr, "%s %p : %p : %s : %zu:%zu:%zu\n",
             prefix, (void *)eastnode_p, (void *)(*eastnode_p),
@@ -964,7 +964,7 @@ static inline void viml_pexpr_debug_print_token(const ParserState *const pstate,
                                                 const LexExprToken token)
   FUNC_ATTR_ALWAYS_INLINE
 {
-  fprintf(stderr, "\ntkn: %s\n", viml_pexpr_repr_token(pstate, token, NULL));
+  fprintf(stderr, "\ntkn: %s\n", viml_pexpr_repr_token(pstate, token, nullptr));
 }
 # define PSTACK(msg) \
   viml_pexpr_debug_print_ast_stack(&ast_stack, #msg)
@@ -1035,23 +1035,23 @@ void viml_pexpr_free_ast(ExprAST ast)
       assert(*kv_A(ast_stack, i) != *cur_node);
     }
 #endif
-    if (*cur_node == NULL) {
+    if (*cur_node == nullptr) {
       assert(kv_size(ast_stack) == 1);
       kv_drop(ast_stack, 1);
-    } else if ((*cur_node)->children != NULL) {
+    } else if ((*cur_node)->children != nullptr) {
 #ifndef NDEBUG
       const uint8_t maxchildren = node_maxchildren[(*cur_node)->type];
       assert(maxchildren > 0);
       assert(maxchildren <= 2);
       assert(maxchildren == 1
-             ? (*cur_node)->children->next == NULL
-             : ((*cur_node)->children->next == NULL
-                || (*cur_node)->children->next->next == NULL));
+             ? (*cur_node)->children->next == nullptr
+             : ((*cur_node)->children->next == nullptr
+                || (*cur_node)->children->next->next == nullptr));
 #endif
       kvi_push(ast_stack, &(*cur_node)->children);
-    } else if ((*cur_node)->next != NULL) {
+    } else if ((*cur_node)->next != nullptr) {
       kvi_push(ast_stack, &(*cur_node)->next);
-    } else if (*cur_node != NULL) {
+    } else if (*cur_node != nullptr) {
       kv_drop(ast_stack, 1);
       switch ((*cur_node)->type) {
       case kExprNodeDoubleQuotedString:
@@ -1098,7 +1098,7 @@ void viml_pexpr_free_ast(ExprAST ast)
         break;
       }
       xfree(*cur_node);
-      *cur_node = NULL;
+      *cur_node = nullptr;
     }
   }
   kvi_destroy(ast_stack);
@@ -1131,8 +1131,8 @@ static inline ExprASTNode *viml_pexpr_new_node(const ExprASTNodeType type)
 {
   ExprASTNode *ret = xmalloc(sizeof(*ret));
   ret->type = type;
-  ret->children = NULL;
-  ret->next = NULL;
+  ret->children = nullptr;
+  ret->next = nullptr;
   return ret;
 }
 
@@ -1253,7 +1253,7 @@ static bool viml_pexpr_handle_bop(const ParserState *const pstate, ExprASTStack 
   FUNC_ATTR_NONNULL_ALL
 {
   bool ret = true;
-  ExprASTNode **top_node_p = NULL;
+  ExprASTNode **top_node_p = nullptr;
   ExprASTNode *top_node;
   ExprOpLvl top_node_lvl;
   ExprOpAssociativity top_node_ass;
@@ -1265,10 +1265,10 @@ static bool viml_pexpr_handle_bop(const ParserState *const pstate, ExprASTStack 
   do {
     ExprASTNode **new_top_node_p = kv_last(*ast_stack);
     ExprASTNode *new_top_node = *new_top_node_p;
-    assert(new_top_node != NULL);
+    assert(new_top_node != nullptr);
     const ExprOpLvl new_top_node_lvl = node_lvl(*new_top_node);
     const ExprOpAssociativity new_top_node_ass = node_ass(*new_top_node);
-    if (top_node_p != NULL
+    if (top_node_p != nullptr
         && ((bop_node_lvl > new_top_node_lvl
              || (bop_node_lvl == new_top_node_lvl
                  && new_top_node_ass == kEOpAssNo)))) {
@@ -1290,15 +1290,15 @@ static bool viml_pexpr_handle_bop(const ParserState *const pstate, ExprASTStack 
     //         Other stack elements unknown
     //
     // After: top_node_p = outer(*), points to new_op(op(x,y))
-    //        &bop_node->children->next = new_op(op(x,y),*), points to NULL
+    //        &bop_node->children->next = new_op(op(x,y),*), points to nullptr
     *top_node_p = bop_node;
     bop_node->children = top_node;
-    assert(bop_node->children->next == NULL);
+    assert(bop_node->children->next == nullptr);
     kvi_push(*ast_stack, top_node_p);
     kvi_push(*ast_stack, &bop_node->children->next);
   } else {
     assert(top_node_lvl == bop_node_lvl && top_node_ass == kEOpAssRight);
-    assert(top_node->children != NULL && top_node->children->next != NULL);
+    assert(top_node->children != nullptr && top_node->children->next != nullptr);
     // outer(op(x,y)) -> outer(op(x,new_op(y,*)))
     //
     // Before: top_node_p = outer(*), points to op(x,y)
@@ -1306,10 +1306,10 @@ static bool viml_pexpr_handle_bop(const ParserState *const pstate, ExprASTStack 
     //
     // After: top_node_p = outer(*), points to op(x,new_op(y))
     //        &top_node->children->next = op(x,*), points to new_op(y)
-    //        &bop_node->children->next = new_op(y,*), points to NULL
+    //        &bop_node->children->next = new_op(y,*), points to nullptr
     bop_node->children = top_node->children->next;
     top_node->children->next = bop_node;
-    assert(bop_node->children->next == NULL);
+    assert(bop_node->children->next == nullptr);
     kvi_push(*ast_stack, top_node_p);
     kvi_push(*ast_stack, &top_node->children->next);
     kvi_push(*ast_stack, &bop_node->children->next);
@@ -1420,7 +1420,7 @@ static inline ParserPosition recol_pos(const ParserPosition pos, const size_t ne
       /* viml_parser_advance(). */ \
       goto viml_pexpr_parse_end; \
     } else { \
-      assert(*top_node_p != NULL); \
+      assert(*top_node_p != nullptr); \
       ERROR_FROM_TOKEN_AND_MSG(cur_token, _("E15: Missing operator: %.*s")); \
       NEW_NODE_WITH_CUR_POS(cur_node, kExprNodeOpMissing); \
       cur_node->len = 0; \
@@ -1453,13 +1453,13 @@ static inline void east_set_error(const ParserState *const pstate, ExprASTError 
                                   const char *const msg, const ParserPosition start)
   FUNC_ATTR_NONNULL_ALL FUNC_ATTR_ALWAYS_INLINE
 {
-  if (ret_ast_err->msg != NULL) {
+  if (ret_ast_err->msg != nullptr) {
     return;
   }
   const ParserLine pline = pstate->reader.lines.items[start.line];
   ret_ast_err->msg = msg;
   ret_ast_err->arg_len = (int)(pline.size - start.col);
-  ret_ast_err->arg = pline.data ? pline.data + start.col : NULL;
+  ret_ast_err->arg = pline.data ? pline.data + start.col : nullptr;
 }
 
 /// Set error from the given token and given message
@@ -1532,7 +1532,7 @@ static inline void east_set_error(const ParserState *const pstate, ExprASTError 
         *top_node_p = cur_node; \
         kvi_push(ast_stack, &cur_node->children->next); \
         ExprASTNode **const new_top_node_p = kv_last(ast_stack); \
-        assert(*new_top_node_p == NULL); \
+        assert(*new_top_node_p == nullptr); \
         new_ident_node_code; \
         *new_top_node_p = cur_node; \
         HL_CUR_TOKEN(hl); \
@@ -1594,7 +1594,7 @@ static void parse_quoted_string(ParserState *const pstate, ExprASTNode *const no
     viml_parser_highlight(pstate, token.start, 1, HL(SingleQuote));
     while (p < e) {
       const char *const chunk_e = memchr(p, '\'', (size_t)(e - p));
-      if (chunk_e == NULL) {
+      if (chunk_e == nullptr) {
         break;
       }
       size--;
@@ -1610,14 +1610,14 @@ static void parse_quoted_string(ParserState *const pstate, ExprASTNode *const no
     }
     node->data.str.size = size;
     if (size == 0) {
-      node->data.str.value = NULL;
+      node->data.str.value = nullptr;
     } else {
       char *v_p;
       v_p = node->data.str.value = xmallocz(size);
       p = s + 1;
       while (p < e) {
         const char *const chunk_e = memchr(p, '\'', (size_t)(e - p));
-        if (chunk_e == NULL) {
+        if (chunk_e == nullptr) {
           memcpy(v_p, p, (size_t)(e - p));
           break;
         }
@@ -1710,7 +1710,7 @@ static void parse_quoted_string(ParserState *const pstate, ExprASTNode *const no
       }
     }
     if (size == 0) {
-      node->data.str.value = NULL;
+      node->data.str.value = nullptr;
       node->data.str.size = 0;
     } else {
       char *v_p;
@@ -1718,7 +1718,7 @@ static void parse_quoted_string(ParserState *const pstate, ExprASTNode *const no
       p = s + 1;
       while (p < e) {
         const char *const chunk_e = memchr(p, '\\', (size_t)(e - p));
-        if (chunk_e == NULL) {
+        if (chunk_e == nullptr) {
           memcpy(v_p, p, (size_t)(e - p));
           v_p += e - p;
           break;
@@ -1810,7 +1810,7 @@ static void parse_quoted_string(ParserState *const pstate, ExprASTNode *const no
             flags |= FSK_SIMPLIFY;
           }
           const size_t special_len = trans_special(&p, (size_t)(e - p),
-                                                   v_p, flags, false, NULL);
+                                                   v_p, flags, false, nullptr);
           if (special_len != 0) {
             v_p += special_len;
           } else {
@@ -1910,18 +1910,18 @@ ExprAST viml_pexpr_parse(ParserState *const pstate, const int flags)
 {
   ExprAST ast = {
     .err = {
-      .msg = NULL,
+      .msg = nullptr,
       .arg_len = 0,
-      .arg = NULL,
+      .arg = nullptr,
     },
-    .root = NULL,
+    .root = nullptr,
   };
   // Expression stack contains current branch in AST tree: that is
   // - Stack item 0 contains root of the tree, i.e. &ast->root.
   // - Stack item i points to the previous stack items’ last child.
   //
   // When parser expects “value” node that is something like identifier or "["
-  // (list start) last stack item contains NULL. Otherwise last stack item is
+  // (list start) last stack item contains nullptr. Otherwise last stack item is
   // supposed to contain last “finished” value: e.g. "1" or "+(1, 1)" (node
   // representing "1+1").
   ExprASTStack ast_stack;
@@ -1937,7 +1937,7 @@ ExprAST viml_pexpr_parse(ParserState *const pstate, const int flags)
   LexExprToken prev_token = { .type = kExprLexMissing };
   bool highlighted_prev_spacing = false;
   // Lambda node, valid when parsing lambda arguments only.
-  ExprASTNode *lambda_node = NULL;
+  ExprASTNode *lambda_node = nullptr;
   size_t asgn_level = 0;
   do {
     const bool is_concat_or_subscript = (
@@ -1986,23 +1986,23 @@ viml_pexpr_parse_process_token:
     const ParserLine pline = pstate->reader.lines.items[cur_token.start.line];
     ExprASTNode **const top_node_p = kv_last(ast_stack);
     assert(kv_size(ast_stack) >= 1);
-    ExprASTNode *cur_node = NULL;
+    ExprASTNode *cur_node = nullptr;
 #ifndef NDEBUG
     const bool want_value = (want_node == kENodeValue);
-    assert(want_value == (*top_node_p == NULL));
+    assert(want_value == (*top_node_p == nullptr));
     assert(kv_A(ast_stack, 0) == &ast.root);
     // Check that stack item i + 1 points to stack items’ i *last* child.
     for (size_t i = 0; i + 1 < kv_size(ast_stack); i++) {
       const bool item_null = (want_value && i + 2 == kv_size(ast_stack));
       assert((&(*kv_A(ast_stack, i))->children == kv_A(ast_stack, i + 1)
               && (item_null
-                  ? (*kv_A(ast_stack, i))->children == NULL
-                  : (*kv_A(ast_stack, i))->children->next == NULL))
+                  ? (*kv_A(ast_stack, i))->children == nullptr
+                  : (*kv_A(ast_stack, i))->children->next == nullptr))
              || ((&(*kv_A(ast_stack, i))->children->next
                   == kv_A(ast_stack, i + 1))
                  && (item_null
-                     ? (*kv_A(ast_stack, i))->children->next == NULL
-                     : (*kv_A(ast_stack, i))->children->next->next == NULL)));
+                     ? (*kv_A(ast_stack, i))->children->next == nullptr
+                     : (*kv_A(ast_stack, i))->children->next->next == nullptr)));
     }
 #endif
     // Note: in Vim whether expression "cond?d.a:2" is valid depends both on
@@ -2051,7 +2051,7 @@ viml_pexpr_parse_process_token:
                    && !cur_token.data.var.autoload)
               && tok_type != kExprLexArrow)) {
         lambda_node->data.fig.type_guesses.allow_lambda = false;
-        if (lambda_node->children != NULL
+        if (lambda_node->children != nullptr
             && lambda_node->children->type == kExprNodeComma) {
           // If lambda has comma child this means that parser has already seen
           // at least "{arg1,", so node cannot possibly be anything, but
@@ -2066,7 +2066,7 @@ viml_pexpr_parse_process_token:
         } else {
           // Else it may appear that possibly-lambda node is actually
           // a dictionary or curly-braces-name identifier.
-          lambda_node = NULL;
+          lambda_node = nullptr;
           kv_drop(pt_stack, 1);
         }
       }
@@ -2109,7 +2109,7 @@ viml_pexpr_parse_process_token:
     }
     assert(kv_size(pt_stack));
     const ExprASTParseType cur_pt = kv_last(pt_stack);
-    assert(lambda_node == NULL || cur_pt == kEPTLambdaArguments);
+    assert(lambda_node == nullptr || cur_pt == kEPTLambdaArguments);
 #define SIMPLE_UB_OP(op) \
   case kExprLex##op: { \
       if (want_node == kENodeValue) { \
@@ -2274,7 +2274,7 @@ viml_pexpr_parse_process_token:
         want_node = kENodeOperator;
       }
       if (cur_pt == kEPTLambdaArguments) {
-        assert(lambda_node != NULL);
+        assert(lambda_node != nullptr);
         assert(lambda_node->data.fig.type_guesses.allow_lambda);
         SELECT_FIGURE_BRACE_TYPE(lambda_node, Lambda, Lambda);
       }
@@ -2339,8 +2339,8 @@ viml_pexpr_parse_invalid_comma:
           is_ternary = true;
           (*eastnode_p)->data.ter.got_colon = true;
           ADD_VALUE_IF_MISSING(_(EXP_VAL_COLON));
-          assert((*eastnode_p)->children != NULL);
-          assert((*eastnode_p)->children->next == NULL);
+          assert((*eastnode_p)->children != nullptr);
+          assert((*eastnode_p)->children->next == nullptr);
           kvi_push(ast_stack, &(*eastnode_p)->children->next);
           break;
         } else if (eastnode_type == kExprNodeUnknownFigure) {
@@ -2402,13 +2402,13 @@ viml_pexpr_parse_valid_colon:
 #undef EXP_VAL_COLON
     case kExprLexBracket:
       if (cur_token.data.brc.closing) {
-        ExprASTNode **new_top_node_p = NULL;
+        ExprASTNode **new_top_node_p = nullptr;
         // Always drop the topmost value:
         //
         // 1. When want_node != kENodeValue topmost item on stack is
         //    a *finished* left operand, which may as well be "[@a]" which
         //    needs not be finished again.
-        // 2. Otherwise it is pointing to NULL what nobody wants.
+        // 2. Otherwise it is pointing to nullptr what nobody wants.
         kv_drop(ast_stack, 1);
         if (!kv_size(ast_stack)) {
           NEW_NODE_WITH_CUR_POS(cur_node, kExprNodeListLiteral);
@@ -2439,13 +2439,13 @@ viml_pexpr_parse_valid_colon:
         do {
           new_top_node_p = kv_pop(ast_stack);
         } while (kv_size(ast_stack)
-                 && (new_top_node_p == NULL
+                 && (new_top_node_p == nullptr
                      || ((*new_top_node_p)->type != kExprNodeListLiteral
                          && (*new_top_node_p)->type != kExprNodeSubscript)));
         ExprASTNode *new_top_node = *new_top_node_p;
         switch (new_top_node->type) {
         case kExprNodeListLiteral:
-          if (pt_is_assignment(cur_pt) && new_top_node->children == NULL) {
+          if (pt_is_assignment(cur_pt) && new_top_node->children == nullptr) {
             ERROR_FROM_TOKEN_AND_MSG(cur_token, _("E475: Unable to assign to empty list: %.*s"));
           }
           HL_CUR_TOKEN(List);
@@ -2502,7 +2502,7 @@ viml_pexpr_parse_bracket_closing_error:
           ADD_OP_NODE(cur_node);
           HL_CUR_TOKEN(SubscriptBracket);
           if (pt_is_assignment(cur_pt)) {
-            assert(want_node == kENodeValue);  // Subtract 1 for NULL at top.
+            assert(want_node == kENodeValue);  // Subtract 1 for nullptr at top.
             asgn_level = kv_size(ast_stack) - 1;
             kvi_push(pt_stack, kEPTExpr);
           }
@@ -2511,13 +2511,13 @@ viml_pexpr_parse_bracket_closing_error:
       break;
     case kExprLexFigureBrace:
       if (cur_token.data.brc.closing) {
-        ExprASTNode **new_top_node_p = NULL;
+        ExprASTNode **new_top_node_p = nullptr;
         // Always drop the topmost value:
         //
         // 1. When want_node != kENodeValue topmost item on stack is
         //    a *finished* left operand, which may as well be "{@a}" which
         //    needs not be finished again.
-        // 2. Otherwise it is pointing to NULL what nobody wants.
+        // 2. Otherwise it is pointing to nullptr what nobody wants.
         kv_drop(ast_stack, 1);
         if (!kv_size(ast_stack)) {
           NEW_NODE_WITH_CUR_POS(cur_node, kExprNodeUnknownFigure);
@@ -2544,7 +2544,7 @@ viml_pexpr_parse_bracket_closing_error:
         do {
           new_top_node_p = kv_pop(ast_stack);
         } while (kv_size(ast_stack)
-                 && (new_top_node_p == NULL
+                 && (new_top_node_p == nullptr
                      || ((*new_top_node_p)->type != kExprNodeUnknownFigure
                          && (*new_top_node_p)->type != kExprNodeDictLiteral
                          && ((*new_top_node_p)->type
@@ -2553,7 +2553,7 @@ viml_pexpr_parse_bracket_closing_error:
         ExprASTNode *new_top_node = *new_top_node_p;
         switch (new_top_node->type) {
         case kExprNodeUnknownFigure:
-          if (new_top_node->children == NULL) {
+          if (new_top_node->children == nullptr) {
             // No children of curly braces node indicates empty dictionary.
             assert(want_node == kENodeValue);
             assert(new_top_node->data.fig.type_guesses.allow_dict);
@@ -2654,7 +2654,7 @@ viml_pexpr_parse_figure_brace_closing_error:
         }
         if (pt_is_assignment(cur_pt)
             && !pt_is_assignment(kv_last(pt_stack))) {
-          assert(want_node == kENodeValue);  // Subtract 1 for NULL at top.
+          assert(want_node == kENodeValue);  // Subtract 1 for nullptr at top.
           asgn_level = kv_size(ast_stack) - 1;
         }
       }
@@ -2664,7 +2664,7 @@ viml_pexpr_parse_figure_brace_closing_error:
         kv_drop(pt_stack, 1);
         assert(kv_size(pt_stack));
         if (want_node == kENodeValue) {
-          // Wanting value means trailing comma and NULL at the top of the
+          // Wanting value means trailing comma and nullptr at the top of the
           // stack.
           kv_drop(ast_stack, 1);
         }
@@ -2676,17 +2676,17 @@ viml_pexpr_parse_figure_brace_closing_error:
         assert((*kv_last(ast_stack)) == lambda_node);
         SELECT_FIGURE_BRACE_TYPE(lambda_node, Lambda, Lambda);
         NEW_NODE_WITH_CUR_POS(cur_node, kExprNodeArrow);
-        if (lambda_node->children == NULL) {
+        if (lambda_node->children == nullptr) {
           assert(want_node == kENodeValue);
           lambda_node->children = cur_node;
           kvi_push(ast_stack, &lambda_node->children);
         } else {
-          assert(lambda_node->children->next == NULL);
+          assert(lambda_node->children->next == nullptr);
           lambda_node->children->next = cur_node;
           kvi_push(ast_stack, &lambda_node->children->next);
         }
         kvi_push(ast_stack, &cur_node->children);
-        lambda_node = NULL;
+        lambda_node = nullptr;
       } else {
         // Only first branch is valid.
         ADD_VALUE_IF_MISSING(_("E15: Unexpected arrow: %.*s"));
@@ -2791,7 +2791,7 @@ viml_pexpr_parse_figure_brace_closing_error:
             const ExprASTNode *const prev_top_node = *kv_Z(ast_stack, 1);
             if (prev_top_node->type == kExprNodeCall) {
               // Function call without arguments, this is not an error.
-              // But further code does not expect NULL nodes.
+              // But further code does not expect nullptr nodes.
               kv_drop(ast_stack, 1);
               goto viml_pexpr_parse_no_paren_closing_error;
             }
@@ -2807,14 +2807,14 @@ viml_pexpr_parse_figure_brace_closing_error:
           kv_drop(ast_stack, 1);
         }
 viml_pexpr_parse_no_paren_closing_error: {}
-        ExprASTNode **new_top_node_p = NULL;
+        ExprASTNode **new_top_node_p = nullptr;
         while (kv_size(ast_stack)
-               && (new_top_node_p == NULL
+               && (new_top_node_p == nullptr
                    || ((*new_top_node_p)->type != kExprNodeNested
                        && (*new_top_node_p)->type != kExprNodeCall))) {
           new_top_node_p = kv_pop(ast_stack);
         }
-        if (new_top_node_p != NULL
+        if (new_top_node_p != nullptr
             && ((*new_top_node_p)->type == kExprNodeNested
                 || (*new_top_node_p)->type == kExprNodeCall)) {
           if ((*new_top_node_p)->type == kExprNodeNested) {
@@ -2826,7 +2826,7 @@ viml_pexpr_parse_no_paren_closing_error: {}
           // “Always drop the topmost value” branch has got rid of the single
           // value stack had, so there is nothing known to enclose. Correct
           // this.
-          if (new_top_node_p == NULL) {
+          if (new_top_node_p == nullptr) {
             new_top_node_p = top_node_p;
           }
           ERROR_FROM_TOKEN_AND_MSG(cur_token, _("E15: Unexpected closing parenthesis: %.*s"));
@@ -2838,7 +2838,7 @@ viml_pexpr_parse_no_paren_closing_error: {}
           // enclose everything in ().
           cur_node->children = *new_top_node_p;
           *new_top_node_p = cur_node;
-          assert(cur_node->next == NULL);
+          assert(cur_node->next == nullptr);
         }
         kvi_push(ast_stack, new_top_node_p);
         want_node = kENodeOperator;
@@ -2879,8 +2879,8 @@ viml_pexpr_parse_no_paren_closing_error: {}
       ExprASTNode *ter_val_node;
       NEW_NODE_WITH_CUR_POS(ter_val_node, kExprNodeTernaryValue);
       ter_val_node->data.ter.got_colon = false;
-      assert(cur_node->children != NULL);
-      assert(cur_node->children->next == NULL);
+      assert(cur_node->children != nullptr);
+      assert(cur_node->children->next == nullptr);
       assert(kv_last(ast_stack) == &cur_node->children->next);
       *kv_last(ast_stack) = ter_val_node;
       kvi_push(ast_stack, &ter_val_node->children);
@@ -2959,10 +2959,10 @@ viml_pexpr_parse_end:
     // Topmost stack item must be a *finished* value, so it must not be
     // analyzed. E.g. it may contain an already finished nested expression.
     kv_drop(ast_stack, 1);
-    while (ast.err.msg == NULL && kv_size(ast_stack)) {
+    while (ast.err.msg == nullptr && kv_size(ast_stack)) {
       const ExprASTNode *const cur_node = (*kv_pop(ast_stack));
       // This should only happen when want_node == kENodeValue.
-      assert(cur_node != NULL);
+      assert(cur_node != nullptr);
       // TODO(ZyX-I): Rehighlight as invalid?
       switch (cur_node->type) {
       case kExprNodeOpMissing:

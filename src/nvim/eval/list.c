@@ -85,15 +85,15 @@ static void filter_map_dict(dict_T *d, filtermap_T filtermap, const char *func_n
 {
   if (filtermap == FILTERMAP_MAPNEW) {
     rettv->v_type = VAR_DICT;
-    rettv->vval.v_dict = NULL;
+    rettv->vval.v_dict = nullptr;
   }
-  if (d == NULL
+  if (d == nullptr
       || (filtermap == FILTERMAP_FILTER
           && value_check_lock(d->dv_lock, arg_errmsg, TV_TRANSLATE))) {
     return;
   }
 
-  dict_T *d_ret = NULL;
+  dict_T *d_ret = nullptr;
 
   if (filtermap == FILTERMAP_MAPNEW) {
     tv_dict_alloc_ret(rettv);
@@ -151,10 +151,10 @@ static void filter_map_blob(blob_T *blob_arg, filtermap_T filtermap, typval_T *e
 {
   if (filtermap == FILTERMAP_MAPNEW) {
     rettv->v_type = VAR_BLOB;
-    rettv->vval.v_blob = NULL;
+    rettv->vval.v_blob = nullptr;
   }
   blob_T *b = blob_arg;
-  if (b == NULL
+  if (b == nullptr
       || (filtermap == FILTERMAP_FILTER
           && value_check_lock(b->bv_lock, arg_errmsg, TV_TRANSLATE))) {
     return;
@@ -217,7 +217,7 @@ static void filter_map_string(const char *str, filtermap_T filtermap, typval_T *
                               typval_T *rettv)
 {
   rettv->v_type = VAR_STRING;
-  rettv->vval.v_string = NULL;
+  rettv->vval.v_string = nullptr;
 
   // set_vim_var_nr() doesn't set the type
   set_vim_var_type(VV_KEY, VAR_NUMBER);
@@ -274,15 +274,15 @@ static void filter_map_list(list_T *l, filtermap_T filtermap, const char *func_n
 {
   if (filtermap == FILTERMAP_MAPNEW) {
     rettv->v_type = VAR_LIST;
-    rettv->vval.v_list = NULL;
+    rettv->vval.v_list = nullptr;
   }
-  if (l == NULL
+  if (l == nullptr
       || (filtermap == FILTERMAP_FILTER
           && value_check_lock(tv_list_locked(l), arg_errmsg, TV_TRANSLATE))) {
     return;
   }
 
-  list_T *l_ret = NULL;
+  list_T *l_ret = nullptr;
 
   if (filtermap == FILTERMAP_MAPNEW) {
     tv_list_alloc_ret(rettv, kListLenUnknown);
@@ -297,7 +297,7 @@ static void filter_map_list(list_T *l, filtermap_T filtermap, const char *func_n
   }
 
   int idx = 0;
-  for (listitem_T *li = tv_list_first(l); li != NULL;) {
+  for (listitem_T *li = tv_list_first(l); li != nullptr;) {
     if (filtermap == FILTERMAP_MAP
         && value_check_lock(TV_LIST_ITEM_TV(li)->v_lock, arg_errmsg, TV_TRANSLATE)) {
       break;
@@ -438,7 +438,7 @@ void f_add(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
     }
   } else if (argvars[0].v_type == VAR_BLOB) {
     blob_T *const b = argvars[0].vval.v_blob;
-    if (b != NULL
+    if (b != nullptr
         && !value_check_lock(b->bv_lock, N_("add() argument"), TV_TRANSLATE)) {
       bool error = false;
       const varnumber_T n = tv_get_number_chk(&argvars[1], &error);
@@ -461,7 +461,7 @@ static varnumber_T count_string(const char *haystack, const char *needle, bool i
   varnumber_T n = 0;
   const char *p = haystack;
 
-  if (p == NULL || needle == NULL || *needle == NUL) {
+  if (p == nullptr || needle == nullptr || *needle == NUL) {
     return 0;
   }
 
@@ -477,7 +477,7 @@ static varnumber_T count_string(const char *haystack, const char *needle, bool i
     }
   } else {
     const char *next;
-    while ((next = strstr(p, needle)) != NULL) {
+    while ((next = strstr(p, needle)) != nullptr) {
       n++;
       p = next + needlelen;
     }
@@ -496,14 +496,14 @@ static varnumber_T count_list(list_T *l, typval_T *needle, int64_t idx, bool ic)
   }
 
   listitem_T *li = tv_list_find(l, (int)idx);
-  if (li == NULL) {
+  if (li == nullptr) {
     semsg(_(e_list_index_out_of_range_nr), idx);
     return 0;
   }
 
   varnumber_T n = 0;
 
-  for (; li != NULL; li = TV_LIST_ITEM_NEXT(l, li)) {
+  for (; li != nullptr; li = TV_LIST_ITEM_NEXT(l, li)) {
     if (tv_equal(TV_LIST_ITEM_TV(li), needle, ic)) {
       n++;
     }
@@ -517,7 +517,7 @@ static varnumber_T count_list(list_T *l, typval_T *needle, int64_t idx, bool ic)
 /// @param ic  ignore case
 static varnumber_T count_dict(dict_T *d, typval_T *needle, bool ic)
 {
-  if (d == NULL) {
+  if (d == nullptr) {
     return 0;
   }
 
@@ -557,7 +557,7 @@ void f_count(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
   } else if (!error && argvars[0].v_type == VAR_DICT) {
     dict_T *d = argvars[0].vval.v_dict;
 
-    if (d != NULL) {
+    if (d != nullptr) {
       if (argvars[2].v_type != VAR_UNKNOWN
           && argvars[3].v_type != VAR_UNKNOWN) {
         emsg(_(e_invarg));
@@ -578,14 +578,14 @@ void f_count(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
 static void extend_dict(typval_T *argvars, const char *arg_errmsg, bool is_new, typval_T *rettv)
 {
   dict_T *d1 = argvars[0].vval.v_dict;
-  if (d1 == NULL) {
+  if (d1 == nullptr) {
     const bool locked = value_check_lock(VAR_FIXED, arg_errmsg, TV_TRANSLATE);
     (void)locked;
     assert(locked == true);
     return;
   }
   dict_T *const d2 = argvars[1].vval.v_dict;
-  if (d2 == NULL) {
+  if (d2 == nullptr) {
     // Do nothing
     tv_copy(&argvars[0], rettv);
     return;
@@ -596,8 +596,8 @@ static void extend_dict(typval_T *argvars, const char *arg_errmsg, bool is_new, 
   }
 
   if (is_new) {
-    d1 = tv_dict_copy(NULL, d1, false, get_copyID());
-    if (d1 == NULL) {
+    d1 = tv_dict_copy(nullptr, d1, false, get_copyID());
+    if (d1 == nullptr) {
       return;
     }
   }
@@ -608,7 +608,7 @@ static void extend_dict(typval_T *argvars, const char *arg_errmsg, bool is_new, 
     const char *const av[] = { "keep", "force", "error" };
 
     action = tv_get_string_chk(&argvars[2]);
-    if (action == NULL) {
+    if (action == nullptr) {
       if (is_new) {
         tv_dict_unref(d1);
       }
@@ -658,8 +658,8 @@ static void extend_list(typval_T *argvars, const char *arg_errmsg, bool is_new, 
   }
 
   if (is_new) {
-    l1 = tv_list_copy(NULL, l1, false, get_copyID());
-    if (l1 == NULL) {
+    l1 = tv_list_copy(nullptr, l1, false, get_copyID());
+    if (l1 == nullptr) {
       return;
     }
   }
@@ -671,16 +671,16 @@ static void extend_list(typval_T *argvars, const char *arg_errmsg, bool is_new, 
       goto cleanup;  // Type error; errmsg already given.
     }
     if (before == tv_list_len(l1)) {
-      item = NULL;
+      item = nullptr;
     } else {
       item = tv_list_find(l1, before);
-      if (item == NULL) {
+      if (item == nullptr) {
         semsg(_(e_list_index_out_of_range_nr), (int64_t)before);
         goto cleanup;
       }
     }
   } else {
-    item = NULL;
+    item = nullptr;
   }
   tv_list_extend(l1, l2, item);
 
@@ -739,7 +739,7 @@ void f_insert(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
   if (argvars[0].v_type == VAR_BLOB) {
     blob_T *const b = argvars[0].vval.v_blob;
 
-    if (b == NULL
+    if (b == nullptr
         || value_check_lock(b->bv_lock, N_("insert() argument"),
                             TV_TRANSLATE)) {
       return;
@@ -791,15 +791,15 @@ void f_insert(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
       return;
     }
 
-    listitem_T *item = NULL;
+    listitem_T *item = nullptr;
     if (before != tv_list_len(l)) {
       item = tv_list_find(l, (int)before);
-      if (item == NULL) {
+      if (item == nullptr) {
         semsg(_(e_list_index_out_of_range_nr), before);
-        l = NULL;
+        l = nullptr;
       }
     }
-    if (l != NULL) {
+    if (l != nullptr) {
       tv_list_insert_tv(l, &argvars[1], item);
       tv_copy(&argvars[0], rettv);
     }
@@ -841,10 +841,10 @@ void f_reverse(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
     tv_blob_set_ret(rettv, b);
   } else if (argvars[0].v_type == VAR_STRING) {
     rettv->v_type = VAR_STRING;
-    if (argvars[0].vval.v_string != NULL) {
+    if (argvars[0].vval.v_string != nullptr) {
       rettv->vval.v_string = reverse_text(argvars[0].vval.v_string);
     } else {
-      rettv->vval.v_string = NULL;
+      rettv->vval.v_string = nullptr;
     }
   } else if (argvars[0].v_type == VAR_LIST) {
     list_T *const l = argvars[0].vval.v_list;

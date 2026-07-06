@@ -221,7 +221,7 @@ static void fuzzy_match_in_list(list_T *const l, char *const str, const bool mat
       break;
     }
 
-    char *itemstr = NULL;
+    char *itemstr = nullptr;
     bool itemstr_allocate = false;
     typval_T rettv;
 
@@ -230,10 +230,10 @@ static void fuzzy_match_in_list(list_T *const l, char *const str, const bool mat
     if (tv->v_type == VAR_STRING) {  // list of strings
       itemstr = tv->vval.v_string;
     } else if (tv->v_type == VAR_DICT
-               && (key != NULL || item_cb->type != kCallbackNone)) {
+               && (key != nullptr || item_cb->type != kCallbackNone)) {
       // For a dict, either use the specified key to lookup the string or
       // use the specified callback function to get the string.
-      if (key != NULL) {
+      if (key != nullptr) {
         itemstr = tv_dict_get_string(tv->vval.v_dict, key, false);
       } else {
         typval_T argv[2];
@@ -254,10 +254,10 @@ static void fuzzy_match_in_list(list_T *const l, char *const str, const bool mat
     }
 
     int score;
-    if (itemstr != NULL
+    if (itemstr != nullptr
         && fuzzy_match(itemstr, str, matchseq, &score, matches, FUZZY_MATCH_MAX_LEN)) {
       char *itemstr_copy = itemstr_allocate ? xstrdup(itemstr) : itemstr;
-      list_T *match_positions = NULL;
+      list_T *match_positions = nullptr;
 
       // Copy the list of matching positions in itemstr to a list, if
       // "retmatchpos" is set.
@@ -302,7 +302,7 @@ static void fuzzy_match_in_list(list_T *const l, char *const str, const bool mat
     list_T *retlist;
     if (retmatchpos) {
       const listitem_T *const li = tv_list_find(fmatchlist, 0);
-      assert(li != NULL && TV_LIST_ITEM_TV(li)->vval.v_list != NULL);
+      assert(li != nullptr && TV_LIST_ITEM_TV(li)->vval.v_list != nullptr);
       retlist = TV_LIST_ITEM_TV(li)->vval.v_list;
     } else {
       retlist = fmatchlist;
@@ -316,18 +316,18 @@ static void fuzzy_match_in_list(list_T *const l, char *const str, const bool mat
     // next copy the list of matching positions
     if (retmatchpos) {
       const listitem_T *li = tv_list_find(fmatchlist, -2);
-      assert(li != NULL && TV_LIST_ITEM_TV(li)->vval.v_list != NULL);
+      assert(li != nullptr && TV_LIST_ITEM_TV(li)->vval.v_list != nullptr);
       retlist = TV_LIST_ITEM_TV(li)->vval.v_list;
 
       for (int i = 0; i < match_count; i++) {
-        assert(items[i].lmatchpos != NULL);
+        assert(items[i].lmatchpos != nullptr);
         tv_list_append_list(retlist, items[i].lmatchpos);
-        items[i].lmatchpos = NULL;
+        items[i].lmatchpos = nullptr;
       }
 
       // copy the matching scores
       li = tv_list_find(fmatchlist, -1);
-      assert(li != NULL && TV_LIST_ITEM_TV(li)->vval.v_list != NULL);
+      assert(li != nullptr && TV_LIST_ITEM_TV(li)->vval.v_list != nullptr);
       retlist = TV_LIST_ITEM_TV(li)->vval.v_list;
       for (int i = 0; i < match_count; i++) {
         tv_list_append_number(retlist, items[i].score);
@@ -339,7 +339,7 @@ static void fuzzy_match_in_list(list_T *const l, char *const str, const bool mat
     if (items[i].itemstr_allocated) {
       xfree(items[i].itemstr);
     }
-    assert(items[i].lmatchpos == NULL);
+    assert(items[i].lmatchpos == nullptr);
   }
   xfree(items);
 }
@@ -351,17 +351,17 @@ static void do_fuzzymatch(const typval_T *const argvars, typval_T *const rettv,
   FUNC_ATTR_NONNULL_ALL
 {
   // validate and get the arguments
-  if (argvars[0].v_type != VAR_LIST || argvars[0].vval.v_list == NULL) {
+  if (argvars[0].v_type != VAR_LIST || argvars[0].vval.v_list == nullptr) {
     semsg(_(e_listarg), retmatchpos ? "matchfuzzypos()" : "matchfuzzy()");
     return;
   }
-  if (argvars[1].v_type != VAR_STRING || argvars[1].vval.v_string == NULL) {
+  if (argvars[1].v_type != VAR_STRING || argvars[1].vval.v_string == nullptr) {
     semsg(_(e_invarg2), tv_get_string(&argvars[1]));
     return;
   }
 
   Callback cb = CALLBACK_NONE;
-  const char *key = NULL;
+  const char *key = nullptr;
   bool matchseq = false;
   int max_matches = 0;
   if (argvars[2].v_type != VAR_UNKNOWN) {
@@ -373,8 +373,8 @@ static void do_fuzzymatch(const typval_T *const argvars, typval_T *const rettv,
     // specified.
     dict_T *const d = argvars[2].vval.v_dict;
     const dictitem_T *di;
-    if ((di = tv_dict_find(d, "key", -1)) != NULL) {
-      if (di->di_tv.v_type != VAR_STRING || di->di_tv.vval.v_string == NULL
+    if ((di = tv_dict_find(d, "key", -1)) != nullptr) {
+      if (di->di_tv.v_type != VAR_STRING || di->di_tv.vval.v_string == nullptr
           || *di->di_tv.vval.v_string == NUL) {
         semsg(_(e_invargNval), "key", tv_get_string(&di->di_tv));
         return;
@@ -385,12 +385,12 @@ static void do_fuzzymatch(const typval_T *const argvars, typval_T *const rettv,
       return;
     }
 
-    if ((di = tv_dict_find(d, "limit", -1)) != NULL) {
+    if ((di = tv_dict_find(d, "limit", -1)) != nullptr) {
       if (di->di_tv.v_type != VAR_NUMBER) {
         semsg(_(e_invargval), "limit");
         return;
       }
-      max_matches = (int)tv_get_number_chk(&di->di_tv, NULL);
+      max_matches = (int)tv_get_number_chk(&di->di_tv, nullptr);
     }
 
     if (tv_dict_has_key(d, "matchseq")) {
@@ -490,7 +490,7 @@ static void fuzzy_match_func_sort(fuzmatch_str_T *const fm, const int sz)
 int fuzzy_match_str(char *const str, const char *const pat)
   FUNC_ATTR_WARN_UNUSED_RESULT
 {
-  if (str == NULL || pat == NULL) {
+  if (str == nullptr || pat == nullptr) {
     return 0;
   }
 
@@ -502,11 +502,11 @@ int fuzzy_match_str(char *const str, const char *const pat)
 }
 
 /// Fuzzy match the position of string "pat" in string "str".
-/// @returns a dynamic array of matching positions. If there is no match, returns NULL.
+/// @returns a dynamic array of matching positions. If there is no match, returns nullptr.
 garray_T *fuzzy_match_str_with_pos(char *const str, const char *const pat)
 {
-  if (str == NULL || pat == NULL) {
-    return NULL;
+  if (str == nullptr || pat == nullptr) {
+    return nullptr;
   }
 
   garray_T *match_positions = xmalloc(sizeof(garray_T));
@@ -518,7 +518,7 @@ garray_T *fuzzy_match_str_with_pos(char *const str, const char *const pat)
       || score == FUZZY_SCORE_NONE) {
     ga_clear(match_positions);
     xfree(match_positions);
-    return NULL;
+    return nullptr;
   }
 
   int j = 0;
@@ -546,11 +546,11 @@ bool fuzzy_match_str_in_line(char **ptr, char *pat, int *len, pos_T *current_pos
 {
   char *str = *ptr;
   char *strBegin = str;
-  char *end = NULL;
-  char *start = NULL;
+  char *end = nullptr;
+  char *start = nullptr;
   bool found = false;
 
-  if (str == NULL || pat == NULL) {
+  if (str == nullptr || pat == nullptr) {
     return found;
   }
   char *line_end = find_line_end(str);
@@ -641,7 +641,7 @@ bool search_for_fuzzy_match(buf_T *buf, pos_T *pos, char *pattern, int dir, pos_
 
       // If ptr is end of line is reached, move to next line
       // or previous line based on direction
-      if (*ptr != NULL && **ptr != NUL) {
+      if (*ptr != nullptr && **ptr != NUL) {
         if (!whole_line) {
           // Try to find a fuzzy match in the current line starting
           // from current position
@@ -696,7 +696,7 @@ bool search_for_fuzzy_match(buf_T *buf, pos_T *pos, char *pattern, int dir, pos_
 /// Free an array of fuzzy string matches "fuzmatch[count]".
 void fuzmatch_str_free(fuzmatch_str_T *const fuzmatch, int count)
 {
-  if (fuzmatch == NULL) {
+  if (fuzmatch == nullptr) {
     return;
   }
   for (int i = 0; i < count; i++) {

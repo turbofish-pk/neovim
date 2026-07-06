@@ -26,7 +26,7 @@ def set_c_standard():
 
     for f in (
         dir_src / "build_lua.zig",
-        dir_src / "build.zig",
+        dir_root / "build.zig",
         dir_src / "nvim" / "CMakeLists.txt",
         dir_root / "test/unit/preprocess.lua",
     ):

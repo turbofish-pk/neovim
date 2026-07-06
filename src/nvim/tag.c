@@ -95,7 +95,7 @@ typedef struct {
   int len;              // length of pat[]
   char *head;           // start of pattern head
   int headlen;          // length of head[]
-  regmatch_T regmatch;  // regexp program, may be NULL
+  regmatch_T regmatch;  // regexp program, may be nullptr
 } pat_T;
 
 // The matching tags are first stored in one of the hash tables.  In
@@ -118,7 +118,7 @@ static char *mt_names[MT_COUNT/2] =
 { "FSC", "F C", "F  ", "FS ", " SC", "  C", "   ", " S " };
 
 #define NOTAGFILE       99              // return value for jumpto_tag
-static char *nofile_fname = NULL;       // fname for NOTAGFILE error
+static char *nofile_fname = nullptr;       // fname for NOTAGFILE error
 
 /// Return values used when reading lines from a tags file.
 typedef enum {
@@ -211,11 +211,11 @@ static const char e_invalid_return_value_from_tagfunc[]
 static const char e_window_unexpectedly_close_while_searching_for_tags[]
   = N_("E1299: Window unexpectedly closed while searching for tags");
 
-static char *tagmatchname = NULL;   // name of last used tag
+static char *tagmatchname = nullptr;   // name of last used tag
 
 // Tag for preview window is remembered separately, to avoid messing up the
 // normal tagstack.
-static taggy_T ptag_entry = { NULL, INIT_FMARK, 0, 0, NULL };
+static taggy_T ptag_entry = { nullptr, INIT_FMARK, 0, 0, nullptr };
 
 static bool tfu_in_use = false;  // disallow recursive call of tagfunc
 static Callback tfu_cb;          // 'tagfunc' callback function
@@ -240,7 +240,7 @@ const char *did_set_tagfunc(optset_T *args)
     }
   }
 
-  return retval == FAIL ? e_invarg : NULL;
+  return retval == FAIL ? e_invarg : nullptr;
 }
 
 #ifdef EXITFREE
@@ -254,7 +254,7 @@ void free_tagfunc_option(void)
 /// collected.
 bool set_ref_in_tagfunc(int copyID)
 {
-  return set_ref_in_callback(&tfu_cb, copyID, NULL, NULL);
+  return set_ref_in_callback(&tfu_cb, copyID, nullptr, nullptr);
 }
 
 /// Copy the global 'tagfunc' callback function to the buffer-local 'tagfunc'
@@ -283,7 +283,7 @@ void set_buflocal_tfu_callback(buf_T *buf)
 /// type == DT_LTAG:     use location list for displaying tag matches
 /// type == DT_FREE:     free cached matches
 ///
-/// @param eap  excmd args (forwarded to Lua); may be NULL when the caller is not an excmd (e.g. `<C-T>`).
+/// @param eap  excmd args (forwarded to Lua); may be nullptr when the caller is not an excmd (e.g. `<C-T>`).
 /// @param tag  tag (pattern) to jump to
 /// @param forceit  :ta with !
 /// @param verbose  print "tag not found" message
@@ -307,12 +307,12 @@ void do_tag(exarg_T *eap, char *tag, int type, int count, int forceit, bool verb
   bool skip_msg = false;
   char *buf_ffname = curbuf->b_ffname;  // name for priority computation
   bool use_tfu = true;
-  char *tofree = NULL;
+  char *tofree = nullptr;
 
   // remember the matches for the last used tag
   static int num_matches = 0;
   static int max_num_matches = 0;             // limit used for match search
-  static char **matches = NULL;
+  static char **matches = nullptr;
   static int flags;
 
 #ifdef EXITFREE
@@ -341,14 +341,14 @@ void do_tag(exarg_T *eap, char *tag, int type, int count, int forceit, bool verb
 
   int prev_num_matches = num_matches;
   free_string_option(nofile_fname);
-  nofile_fname = NULL;
+  nofile_fname = nullptr;
 
   clearpos(&saved_fmark.mark);          // shutup gcc 4.0
   saved_fmark.fnum = 0;
   saved_fmark.view = (fmarkv_T)INIT_FMARKV;
 
   // Don't add a tag to the tagstack if 'tagstack' has been reset.
-  assert(tag != NULL);
+  assert(tag != nullptr);
   if (!p_tgst && *tag != NUL) {
     use_tagstack = false;
     new_tag = true;
@@ -368,7 +368,7 @@ void do_tag(exarg_T *eap, char *tag, int type, int count, int forceit, bool verb
         && (type == DT_TAG || type == DT_SELECT || type == DT_JUMP
             || type == DT_LTAG)) {
       if (g_do_tagpreview != 0) {
-        if (ptag_entry.tagname != NULL
+        if (ptag_entry.tagname != nullptr
             && strcmp(ptag_entry.tagname, tag) == 0) {
           // Jumping to same tag: keep the current match, so that
           // the CursorHold autocommand example works.
@@ -392,7 +392,7 @@ void do_tag(exarg_T *eap, char *tag, int type, int count, int forceit, bool verb
           for (int i = 1; i < tagstacklen; i++) {
             tagstack[i - 1] = tagstack[i];
           }
-          tagstack[--tagstackidx].user_data = NULL;
+          tagstack[--tagstackidx].user_data = nullptr;
         }
 
         // put the tag name in the tag stack
@@ -405,7 +405,7 @@ void do_tag(exarg_T *eap, char *tag, int type, int count, int forceit, bool verb
 
       new_tag = true;
     } else {
-      if (g_do_tagpreview != 0 ? ptag_entry.tagname == NULL
+      if (g_do_tagpreview != 0 ? ptag_entry.tagname == nullptr
                                : tagstacklen == 0) {
         // empty stack
         emsg(_(e_tag_stack_empty));
@@ -556,7 +556,7 @@ void do_tag(exarg_T *eap, char *tag, int type, int count, int forceit, bool verb
   if (cur_fnum != curbuf->b_fnum) {
     buf_T *buf = buflist_findnr(cur_fnum);
 
-    if (buf != NULL) {
+    if (buf != nullptr) {
       buf_ffname = buf->b_ffname;
     }
   }
@@ -576,7 +576,7 @@ void do_tag(exarg_T *eap, char *tag, int type, int count, int forceit, bool verb
     } else {
       name = tag;
     }
-    bool other_name = (tagmatchname == NULL || strcmp(tagmatchname, name) != 0);
+    bool other_name = (tagmatchname == nullptr || strcmp(tagmatchname, name) != 0);
     if (new_tag
         || (cur_match >= num_matches && max_num_matches != MAXCOL)
         || other_name) {
@@ -678,7 +678,7 @@ void do_tag(exarg_T *eap, char *tag, int type, int count, int forceit, bool verb
         // looking for a match in another file, which wasn't found.
         // There will be an emsg("file doesn't exist") below then.
         if ((type == DT_NEXT || type == DT_FIRST)
-            && nofile_fname == NULL) {
+            && nofile_fname == nullptr) {
           if (num_matches == 1) {
             emsg(_("E427: There is only one matching tag"));
           } else {
@@ -710,7 +710,7 @@ void do_tag(exarg_T *eap, char *tag, int type, int count, int forceit, bool verb
 
       // Only when going to try the next match, report that the previous
       // file didn't exist.  Otherwise an emsg() is given below.
-      if (nofile_fname != NULL && error_cur_match != cur_match) {
+      if (nofile_fname != nullptr && error_cur_match != cur_match) {
         smsg(0, _("File \"%s\" does not exist"), nofile_fname);
       }
 
@@ -745,7 +745,7 @@ void do_tag(exarg_T *eap, char *tag, int type, int count, int forceit, bool verb
       // Jump to the desired match.
       int i = jumpto_tag(matches[cur_match], forceit, true);
 
-      set_vim_var_string(VV_SWAPCOMMAND, NULL, -1);
+      set_vim_var_string(VV_SWAPCOMMAND, nullptr, -1);
 
       if (i == NOTAGFILE) {
         // File not found: try again with another matching tag
@@ -814,11 +814,11 @@ static void select_tag_match(exarg_T *eap, bool new_tag, bool use_tagstack, int 
     dict_T *d = tv_dict_alloc();
     tv_dict_add_str_len(d, S_LEN("tag"), tagp.tagname, (int)(tagp.tagname_end - tagp.tagname));
     tv_dict_add_str(d, S_LEN("pri"), mt_names[matches[i][0] & MT_MASK]);
-    if (tagp.tagkind != NULL) {
+    if (tagp.tagkind != nullptr) {
       tv_dict_add_str_len(d, S_LEN("kind"), tagp.tagkind, (int)(tagp.tagkind_end - tagp.tagkind));
     }
     char *fname = tag_full_fname(&tagp);
-    tv_dict_add_str(d, S_LEN("file"), fname != NULL ? fname : "");
+    tv_dict_add_str(d, S_LEN("file"), fname != nullptr ? fname : "");
     xfree(fname);
     tv_dict_add_bool(d, S_LEN("cur"), cur ? kBoolVarTrue : kBoolVarFalse);
 
@@ -863,7 +863,7 @@ static int add_llist_tags(char *tag, int num_matches, char **matches)
 
     // Save the tag file name
     char *p = tag_full_fname(&tagp);
-    if (p == NULL) {
+    if (p == nullptr) {
       continue;
     }
     xstrlcpy(fname, p, MAXPATHL);
@@ -881,7 +881,7 @@ static int add_llist_tags(char *tag, int num_matches, char **matches)
       // Locate the end of the command
       char *cmd_start = tagp.command;
       char *cmd_end = tagp.command_end;
-      if (cmd_end == NULL) {
+      if (cmd_end == nullptr) {
         for (p = tagp.command;
              *p && *p != '\r' && *p != '\n'; p++) {}
         cmd_end = p;
@@ -946,7 +946,7 @@ static int add_llist_tags(char *tag, int num_matches, char **matches)
   }
 
   vim_snprintf(IObuff, IOSIZE, "ltag %s", tag);
-  set_errorlist(curwin, list, ' ', IObuff, NULL);
+  set_errorlist(curwin, list, ' ', IObuff, nullptr);
 
   tv_list_free(list);
   XFREE_CLEAR(fname);
@@ -981,9 +981,9 @@ void do_tags(exarg_T *eap)
   // Highlight title
   msg_puts_title(_("\n  # TO tag         FROM line  in file/text"));
   for (int i = 0; i < tagstacklen; i++) {
-    if (tagstack[i].tagname != NULL) {
+    if (tagstack[i].tagname != nullptr) {
       char *name = fm_getname(&(tagstack[i].fmark), 30);
-      if (name == NULL) {           // file name not available
+      if (name == nullptr) {           // file name not available
         continue;
       }
 
@@ -1042,7 +1042,7 @@ static void prepare_pats(pat_T *pats, bool has_re)
     } else {
       for (pats->headlen = 0; pats->head[pats->headlen] != NUL; pats->headlen++) {
         if (vim_strchr(magic_isset() ? ".[~*\\$" : "\\$",
-                       (uint8_t)pats->head[pats->headlen]) != NULL) {
+                       (uint8_t)pats->head[pats->headlen]) != nullptr) {
           break;
         }
       }
@@ -1055,7 +1055,7 @@ static void prepare_pats(pat_T *pats, bool has_re)
   if (has_re) {
     pats->regmatch.regprog = vim_regcomp(pats->pat, magic_isset() ? RE_MAGIC : 0);
   } else {
-    pats->regmatch.regprog = NULL;
+    pats->regmatch.regprog = nullptr;
   }
 }
 
@@ -1076,7 +1076,7 @@ static int find_tagfunc_tags(char *pat, garray_T *ga, int *match_count, int flag
   typval_T args[4];
   typval_T rettv;
   char flagString[4];
-  taggy_T *tag = NULL;
+  taggy_T *tag = nullptr;
 
   if (curwin->w_tagstacklen > 0) {
     if (curwin->w_tagstackidx == curwin->w_tagstacklen) {
@@ -1097,10 +1097,10 @@ static int find_tagfunc_tags(char *pat, garray_T *ga, int *match_count, int flag
 
   // create 'info' dict argument
   dict_T *const d = tv_dict_alloc_lock(VAR_FIXED);
-  if (!(flags & TAG_INS_COMP) && tag != NULL && tag->user_data != NULL) {
+  if (!(flags & TAG_INS_COMP) && tag != nullptr && tag->user_data != nullptr) {
     tv_dict_add_str(d, S_LEN("user_data"), tag->user_data);
   }
-  if (buf_ffname != NULL) {
+  if (buf_ffname != nullptr) {
     tv_dict_add_str(d, S_LEN("buf_ffname"), buf_ffname);
   }
 
@@ -1150,16 +1150,16 @@ static int find_tagfunc_tags(char *pat, garray_T *ga, int *match_count, int flag
     }
 
     size_t len = 2;
-    res_name = NULL;
-    res_fname = NULL;
-    res_cmd = NULL;
-    res_kind = NULL;
+    res_name = nullptr;
+    res_fname = nullptr;
+    res_cmd = nullptr;
+    res_kind = nullptr;
 
     TV_DICT_ITER(TV_LIST_ITEM_TV(li)->vval.v_dict, di, {
       const char *dict_key = di->di_key;
       typval_T *tv = &di->di_tv;
 
-      if (tv->v_type != VAR_STRING || tv->vval.v_string == NULL) {
+      if (tv->v_type != VAR_STRING || tv->vval.v_string == nullptr) {
         continue;
       }
 
@@ -1227,7 +1227,7 @@ static int find_tagfunc_tags(char *pat, garray_T *ga, int *match_count, int flag
         TV_DICT_ITER(TV_LIST_ITEM_TV(li)->vval.v_dict, di, {
           const char *dict_key = di->di_key;
           typval_T *tv = &di->di_tv;
-          if (tv->v_type != VAR_STRING || tv->vval.v_string == NULL) {
+          if (tv->v_type != VAR_STRING || tv->vval.v_string == nullptr) {
             continue;
           }
 
@@ -1272,14 +1272,14 @@ static int find_tagfunc_tags(char *pat, garray_T *ga, int *match_count, int flag
 static void findtags_state_init(findtags_state_T *st, char *pat, int flags, int mincount)
 {
   st->tag_fname = xmalloc(MAXPATHL + 1);
-  st->fp = NULL;
+  st->fp = nullptr;
   st->orgpat = xmalloc(sizeof(pat_T));
   st->orgpat->pat = pat;
   st->orgpat->len = (int)strlen(pat);
-  st->orgpat->regmatch.regprog = NULL;
+  st->orgpat->regmatch.regprog = nullptr;
   st->flags = flags;
   st->tag_file_sorted = NUL;
-  st->help_lang_find = NULL;
+  st->help_lang_find = nullptr;
   st->is_txt = false;
   st->did_open = false;
   st->help_only = (flags & TAG_HELP);
@@ -1329,15 +1329,15 @@ static bool findtags_in_help_init(findtags_state_T *st)
   }
   // When searching for a specific language skip tags files for other
   // languages.
-  if (st->help_lang_find != NULL
+  if (st->help_lang_find != nullptr
       && STRICMP(st->help_lang, st->help_lang_find) != 0) {
     return false;
   }
 
   // For CTRL-] in a help file prefer a match with the same language.
   if ((st->flags & TAG_KEEP_LANG)
-      && st->help_lang_find == NULL
-      && curbuf->b_fname != NULL
+      && st->help_lang_find == nullptr
+      && curbuf->b_fname != nullptr
       && (i = (int)strlen(curbuf->b_fname)) > 4
       && curbuf->b_fname[i - 1] == 'x'
       && curbuf->b_fname[i - 4] == '.'
@@ -1351,11 +1351,11 @@ static bool findtags_in_help_init(findtags_state_T *st)
         break;
       }
       st->help_pri++;
-      if ((s = vim_strchr(s, ',')) == NULL) {
+      if ((s = vim_strchr(s, ',')) == nullptr) {
         break;
       }
     }
-    if (s == NULL || *s == NUL) {
+    if (s == nullptr || *s == NUL) {
       // Language not in 'helplang': use last, prefer English, unless
       // found already.
       st->help_pri++;
@@ -1584,7 +1584,7 @@ static tagmatch_status_T findtags_parse_line(findtags_state_T *st, tagptrs_T *ta
     CLEAR_FIELD(*tagpp);
     tagpp->tagname = st->lbuf;
     tagpp->tagname_end = vim_strchr(st->lbuf, TAB);
-    if (tagpp->tagname_end == NULL) {
+    if (tagpp->tagname_end == nullptr) {
       // Corrupted tag line.
       return TAG_MATCH_FAIL;
     }
@@ -1689,7 +1689,7 @@ static tagmatch_status_T findtags_parse_line(findtags_state_T *st, tagptrs_T *ta
     // Can be a matching tag, isolate the file name and command.
     tagpp->fname = tagpp->tagname_end + 1;
     tagpp->fname_end = vim_strchr(tagpp->fname, TAB);
-    if (tagpp->fname_end == NULL) {
+    if (tagpp->fname_end == nullptr) {
       status = FAIL;
     } else {
       tagpp->command = tagpp->fname_end + 1;
@@ -1746,7 +1746,7 @@ static bool findtags_match_tag(findtags_state_T *st, tagptrs_T *tagpp, findtags_
 
   // Has a regexp: Also find tags matching regexp.
   margs->match_re = false;
-  if (!match && st->orgpat->regmatch.regprog != NULL) {
+  if (!match && st->orgpat->regmatch.regprog != nullptr) {
     char cc = *tagpp->tagname_end;
     *tagpp->tagname_end = NUL;
     match = vim_regexec(&st->orgpat->regmatch, tagpp->tagname, 0);
@@ -1772,8 +1772,8 @@ static bool findtags_match_tag(findtags_state_T *st, tagptrs_T *tagpp, findtags_
 /// st->lbuf.
 static void findtags_string_convert(findtags_state_T *st)
 {
-  char *conv_line = string_convert(&st->vimconv, st->lbuf, NULL);
-  if (conv_line == NULL) {
+  char *conv_line = string_convert(&st->vimconv, st->lbuf, nullptr);
+  if (conv_line == nullptr) {
     return;
   }
 
@@ -1858,7 +1858,7 @@ static void findtags_add_match(findtags_state_T *st, tagptrs_T *tagpp, findtags_
         mfp = xmalloc(len + 2);
         xmemcpyz(mfp, tagpp->command + 2, len);
       } else {
-        mfp = NULL;
+        mfp = nullptr;
       }
       st->get_searchpat = false;
     } else {
@@ -1890,7 +1890,7 @@ static void findtags_add_match(findtags_state_T *st, tagptrs_T *tagpp, findtags_
     STRCPY(s, st->lbuf);
   }
 
-  if (mfp != NULL) {
+  if (mfp != nullptr) {
     hashitem_T *hi;
 
     // Don't add identical matches.
@@ -2021,7 +2021,7 @@ static void findtags_in_file(findtags_state_T *st, int flags, char *buf_ffname)
 
   st->vimconv.vc_type = CONV_NONE;
   st->tag_file_sorted = NUL;
-  st->fp = NULL;
+  st->fp = nullptr;
   findtags_matchargs_init(&margs, st->flags);
 
   // A file that doesn't exist is silently ignored.  Only when not a
@@ -2033,7 +2033,7 @@ static void findtags_in_file(findtags_state_T *st, int flags, char *buf_ffname)
   }
 
   st->fp = os_fopen(st->tag_fname, "r");
-  if (st->fp == NULL) {
+  if (st->fp == nullptr) {
     return;
   }
 
@@ -2049,12 +2049,12 @@ static void findtags_in_file(findtags_state_T *st, int flags, char *buf_ffname)
   // Read and parse the lines in the file one by one
   findtags_get_all_tags(st, &margs, buf_ffname);
 
-  if (st->fp != NULL) {
+  if (st->fp != nullptr) {
     fclose(st->fp);
-    st->fp = NULL;
+    st->fp = nullptr;
   }
   if (st->vimconv.vc_type != CONV_NONE) {
-    convert_setup(&st->vimconv, NULL, NULL);
+    convert_setup(&st->vimconv, nullptr, nullptr);
   }
 
   if (margs.sort_error) {
@@ -2075,13 +2075,13 @@ static int findtags_copy_matches(findtags_state_T *st, char ***matchesp)
 
   char **matches = st->match_count > 0
                    ? xmalloc((size_t)st->match_count * sizeof(char *))
-                   : NULL;
+                   : nullptr;
 
   st->match_count = 0;
   for (int mtt = 0; mtt < MT_COUNT; mtt++) {
     for (int i = 0; i < st->ga_match[mtt].ga_len; i++) {
       char *mfp = ((char **)(st->ga_match[mtt].ga_data))[i];
-      if (matches == NULL) {
+      if (matches == nullptr) {
         xfree(mfp);
       } else {
         if (!name_only) {
@@ -2110,7 +2110,7 @@ static int findtags_copy_matches(findtags_state_T *st, char ***matchesp)
 /// find_tags() - search for tags in tags files
 ///
 /// Return FAIL if search completely failed (*num_matches will be 0, *matchesp
-/// will be NULL), OK otherwise.
+/// will be nullptr), OK otherwise.
 ///
 /// There is a priority in which type of tag is recognized.
 ///
@@ -2147,7 +2147,7 @@ int find_tags(char *pat, int *num_matches, char ***matchesp, int flags, int minc
   int retval = FAIL;                    // return value
 
   int i;
-  char *saved_pat = NULL;                // copy of pat[]
+  char *saved_pat = nullptr;                // copy of pat[]
 
   int findall = (mincount == MAXCOL || mincount == TAG_MANY);  // find all matching tags
   bool has_re = (flags & TAG_REGEXP);            // regexp used
@@ -2208,7 +2208,7 @@ int find_tags(char *pat, int *num_matches, char ***matchesp, int flags, int minc
   emsg_off = true;    // don't want error for invalid RE here
   prepare_pats(st.orgpat, has_re);
   emsg_off = save_emsg_off;
-  if (has_re && st.orgpat->regmatch.regprog == NULL) {
+  if (has_re && st.orgpat->regmatch.regprog == nullptr) {
     goto findtag_end;
   }
 
@@ -2222,8 +2222,8 @@ int find_tags(char *pat, int *num_matches, char ***matchesp, int flags, int minc
 
   // Set a flag if the file extension is .txt
   if ((flags & TAG_KEEP_LANG)
-      && st.help_lang_find == NULL
-      && curbuf->b_fname != NULL
+      && st.help_lang_find == nullptr
+      && curbuf->b_fname != nullptr
       && (i = (int)strlen(curbuf->b_fname)) > 4
       && STRICMP(curbuf->b_fname + i - 4, ".txt") == 0) {
     st.is_txt = true;
@@ -2316,8 +2316,8 @@ static bool found_tagfile_cb(int num_fnames, char **fnames, bool all, void *cook
 void free_tag_stuff(void)
 {
   ga_clear_strings(&tag_fnames);
-  if (curwin != NULL) {
-    do_tag(NULL, NULL, DT_FREE, 0, 0, 0);
+  if (curwin != nullptr) {
+    do_tag(nullptr, nullptr, DT_FREE, 0, 0, 0);
   }
   tag_freematch();
 
@@ -2336,7 +2336,7 @@ void free_tag_stuff(void)
 /// @return  FAIL if no more tag file names, OK otherwise.
 int get_tagfname(tagname_T *tnp, int first, char *buf)
 {
-  char *fname = NULL;
+  char *fname = nullptr;
 
   if (first) {
     CLEAR_POINTER(tnp);
@@ -2350,7 +2350,7 @@ int get_tagfname(tagname_T *tnp, int first, char *buf)
       ga_clear_strings(&tag_fnames);
       ga_init(&tag_fnames, (int)sizeof(char *), 10);
       do_in_runtimepath("doc/tags doc/tags-??", DIP_ALL,
-                        found_tagfile_cb, NULL);
+                        found_tagfile_cb, nullptr);
     }
 
     if (tnp->tn_hf_idx >= tag_fnames.ga_len) {
@@ -2389,18 +2389,18 @@ int get_tagfname(tagname_T *tnp, int first, char *buf)
   while (true) {
     if (tnp->tn_did_filefind_init) {
       fname = vim_findfile(tnp->tn_search_ctx);
-      if (fname != NULL) {
+      if (fname != nullptr) {
         break;
       }
 
       tnp->tn_did_filefind_init = false;
     } else {
-      char *filename = NULL;
+      char *filename = nullptr;
 
       // Stop when used all parts of 'tags'.
       if (*tnp->tn_np == NUL) {
         vim_findfile_cleanup(tnp->tn_search_ctx);
-        tnp->tn_search_ctx = NULL;
+        tnp->tn_search_ctx = nullptr;
         return FAIL;
       }
 
@@ -2412,7 +2412,7 @@ int get_tagfname(tagname_T *tnp, int first, char *buf)
       // move the filename one char forward and truncate the
       // filepath with a NUL
       filename = path_tail(buf);
-      if (r_ptr != NULL) {
+      if (r_ptr != nullptr) {
         STRMOVE(r_ptr + 1, r_ptr);
         r_ptr++;
       }
@@ -2424,7 +2424,7 @@ int get_tagfname(tagname_T *tnp, int first, char *buf)
                                              false,                   // don't free visited list
                                              FINDFILE_FILE,           // we search for a file
                                              tnp->tn_search_ctx, true, curbuf->b_ffname);
-      if (tnp->tn_search_ctx != NULL) {
+      if (tnp->tn_search_ctx != nullptr) {
         tnp->tn_did_filefind_init = true;
       }
     }
@@ -2440,7 +2440,7 @@ void tagname_free(tagname_T *tnp)
 {
   xfree(tnp->tn_tags);
   vim_findfile_cleanup(tnp->tn_search_ctx);
-  tnp->tn_search_ctx = NULL;
+  tnp->tn_search_ctx = nullptr;
   ga_clear_strings(&tag_fnames);
 }
 
@@ -2457,7 +2457,7 @@ static int parse_tag_line(char *lbuf, tagptrs_T *tagp)
   // Isolate the tagname, from lbuf up to the first white
   tagp->tagname = lbuf;
   char *p = vim_strchr(lbuf, TAB);
-  if (p == NULL) {
+  if (p == nullptr) {
     return FAIL;
   }
   tagp->tagname_end = p;
@@ -2468,7 +2468,7 @@ static int parse_tag_line(char *lbuf, tagptrs_T *tagp)
   }
   tagp->fname = p;
   p = vim_strchr(p, TAB);
-  if (p == NULL) {
+  if (p == nullptr) {
     return FAIL;
   }
   tagp->fname_end = p;
@@ -2501,7 +2501,7 @@ static bool test_for_static(tagptrs_T *tagp)
 {
   // Check for new style static tag ":...<Tab>file:[<Tab>...]"
   char *p = tagp->command;
-  while ((p = vim_strchr(p, '\t')) != NULL) {
+  while ((p = vim_strchr(p, '\t')) != nullptr) {
     p++;
     if (strncmp(p, "file:", 5) == 0) {
       return true;
@@ -2540,10 +2540,10 @@ static int parse_match(char *lbuf, tagptrs_T *tagp)
   // Find search pattern and the file name for non-etags.
   int retval = parse_tag_line(lbuf, tagp);
 
-  tagp->tagkind = NULL;
-  tagp->user_data = NULL;
+  tagp->tagkind = nullptr;
+  tagp->user_data = nullptr;
   tagp->tagline = 0;
-  tagp->command_end = NULL;
+  tagp->command_end = nullptr;
 
   if (retval != OK) {
     return retval;
@@ -2568,16 +2568,16 @@ static int parse_match(char *lbuf, tagptrs_T *tagp)
         } else if (strncmp(p, "line:", 5) == 0) {
           tagp->tagline = atoi(p + 5);
         }
-        if (tagp->tagkind != NULL && tagp->user_data != NULL) {
+        if (tagp->tagkind != nullptr && tagp->user_data != nullptr) {
           break;
         }
 
         char *pc = vim_strchr(p, ':');
         char *pt = vim_strchr(p, '\t');
-        if (pc == NULL || (pt != NULL && pc > pt)) {
+        if (pc == nullptr || (pt != nullptr && pc > pt)) {
           tagp->tagkind = p;
         }
-        if (pt == NULL) {
+        if (pt == nullptr) {
           break;
         }
         p = pt;
@@ -2585,13 +2585,13 @@ static int parse_match(char *lbuf, tagptrs_T *tagp)
       }
     }
   }
-  if (tagp->tagkind != NULL) {
+  if (tagp->tagkind != nullptr) {
     for (p = tagp->tagkind;
          *p && *p != '\t' && *p != '\r' && *p != '\n';
          MB_PTR_ADV(p)) {}
     tagp->tagkind_end = p;
   }
-  if (tagp->user_data != NULL) {
+  if (tagp->user_data != nullptr) {
     for (p = tagp->user_data;
          *p && *p != '\t' && *p != '\r' && *p != '\n';
          MB_PTR_ADV(p)) {}
@@ -2627,13 +2627,13 @@ static int jumpto_tag(const char *lbuf_arg, int forceit, bool keep_help)
   }
 
   char *pbuf_end;
-  char *tofree_fname = NULL;
+  char *tofree_fname = nullptr;
   tagptrs_T tagp;
   int retval = FAIL;
   int getfile_result = GETFILE_UNUSED;
   int search_options;
-  win_T *curwin_save = NULL;
-  char *full_fname = NULL;
+  win_T *curwin_save = nullptr;
+  char *full_fname = nullptr;
   const bool old_KeyTyped = KeyTyped;       // getting the file may reset it
   const int l_g_do_tagpreview = g_do_tagpreview;
   const size_t len = matching_line_len(lbuf_arg) + 1;
@@ -2644,7 +2644,7 @@ static int jumpto_tag(const char *lbuf_arg, int forceit, bool keep_help)
 
   // parse the match line into the tagp structure
   if (parse_match(lbuf, &tagp) == FAIL) {
-    tagp.fname_end = NULL;
+    tagp.fname_end = nullptr;
     goto erret;
   }
 
@@ -2680,7 +2680,7 @@ static int jumpto_tag(const char *lbuf_arg, int forceit, bool keep_help)
   // file.  Also accept a file name for which there is a matching BufReadCmd
   // autocommand event (e.g., http://sys/file).
   if (!os_path_exists(fname)
-      && !has_autocmd(EVENT_BUFREADCMD, fname, NULL)) {
+      && !has_autocmd(EVENT_BUFREADCMD, fname, nullptr)) {
     retval = NOTAGFILE;
     xfree(nofile_fname);
     nofile_fname = xstrdup(fname);
@@ -2711,9 +2711,9 @@ static int jumpto_tag(const char *lbuf_arg, int forceit, bool keep_help)
   if (postponed_split && (swb_flags & (kOptSwbFlagUseopen | kOptSwbFlagUsetab))) {
     buf_T *const existing_buf = buflist_findname_exp(fname);
 
-    if (existing_buf != NULL) {
+    if (existing_buf != nullptr) {
       // If 'switchbuf' is set jump to the window containing "buf".
-      if (swbuf_goto_win_with_buf(existing_buf) != NULL) {
+      if (swbuf_goto_win_with_buf(existing_buf) != nullptr) {
         // We've switched to the buffer, the usual loading of the file
         // must be skipped.
         getfile_result = GETFILE_SAME_FILE;
@@ -2754,7 +2754,7 @@ static int jumpto_tag(const char *lbuf_arg, int forceit, bool keep_help)
   if (getfile_result == GETFILE_UNUSED) {
     // Careful: getfile() may trigger autocommands and call jumpto_tag()
     // recursively.
-    getfile_result = getfile(0, fname, NULL, true, 0, forceit);
+    getfile_result = getfile(0, fname, nullptr, true, 0, forceit);
   }
   keep_help_flag = false;
 
@@ -2770,7 +2770,7 @@ static int jumpto_tag(const char *lbuf_arg, int forceit, bool keep_help)
     // If 'cpoptions' contains 't', store the search pattern for the "n"
     // command.  If 'cpoptions' does not contain 't', the search pattern
     // is not stored.
-    if (vim_strchr(p_cpo, CPO_TAGPAT) != NULL) {
+    if (vim_strchr(p_cpo, CPO_TAGPAT) != nullptr) {
       search_options = 0;
     } else {
       search_options = SEARCH_KEEP;
@@ -2803,27 +2803,27 @@ static int jumpto_tag(const char *lbuf_arg, int forceit, bool keep_help)
                               // start search before first line
                               : 0;
 
-      if (do_search(NULL, pbuf[0], pbuf[0], pbuf + 1, pbuflen - 1, 1,
-                    search_options, NULL)) {
+      if (do_search(nullptr, pbuf[0], pbuf[0], pbuf + 1, pbuflen - 1, 1,
+                    search_options, nullptr)) {
         retval = OK;
       } else {
         int found = 1;
 
         // try again, ignore case now
         p_ic = true;
-        if (!do_search(NULL, pbuf[0], pbuf[0], pbuf + 1, pbuflen - 1, 1,
-                       search_options, NULL)) {
+        if (!do_search(nullptr, pbuf[0], pbuf[0], pbuf + 1, pbuflen - 1, 1,
+                       search_options, nullptr)) {
           // Failed to find pattern, take a guess: "^func  ("
           found = 2;
           test_for_static(&tagp);
           char cc = *tagp.tagname_end;
           *tagp.tagname_end = NUL;
           pbuflen = (size_t)snprintf(pbuf, LSIZE, "^%s\\s\\*(", tagp.tagname);
-          if (!do_search(NULL, '/', '/', pbuf, pbuflen, 1, search_options, NULL)) {
+          if (!do_search(nullptr, '/', '/', pbuf, pbuflen, 1, search_options, nullptr)) {
             // Guess again: "^char * \<func  ("
             pbuflen = (size_t)snprintf(pbuf, LSIZE, "^\\[#a-zA-Z_]\\.\\*\\<%s\\s\\*(",
                                        tagp.tagname);
-            if (!do_search(NULL, '/', '/', pbuf, pbuflen, 1, search_options, NULL)) {
+            if (!do_search(nullptr, '/', '/', pbuf, pbuflen, 1, search_options, nullptr)) {
               found = 0;
             }
           }
@@ -2930,7 +2930,7 @@ static char *expand_tag_fname(char *fname, char *const tag_fname, const bool exp
   FUNC_ATTR_NONNULL_RET
 {
   char *p;
-  char *expanded_fname = NULL;
+  char *expanded_fname = nullptr;
   expand_T xpc;
 
   fname = TO_SLASH_SAVE(fname);
@@ -2938,12 +2938,12 @@ static char *expand_tag_fname(char *fname, char *const tag_fname, const bool exp
   // Expand file name (for environment variables) when needed.
   // Disallow backticks, they could execute arbitrary shell
   // commands.  This is not needed for tag filenames.
-  if (expand && path_has_wildcard(fname) && vim_strchr(fname, '`') == NULL) {
+  if (expand && path_has_wildcard(fname) && vim_strchr(fname, '`') == nullptr) {
     ExpandInit(&xpc);
     xpc.xp_context = EXPAND_FILES;
-    expanded_fname = ExpandOne(&xpc, fname, NULL,
+    expanded_fname = ExpandOne(&xpc, fname, nullptr,
                                WILD_LIST_NOTFOUND|WILD_SILENT, WILD_EXPAND_FREE);
-    if (expanded_fname != NULL) {
+    if (expanded_fname != nullptr) {
       xfree(fname);
       fname = expanded_fname;
     }
@@ -2976,7 +2976,7 @@ static int test_for_current(char *fname, char *fname_end, char *tag_fname, char 
 {
   int retval = false;
 
-  if (buf_ffname != NULL) {     // if the buffer has a name
+  if (buf_ffname != nullptr) {     // if the buffer has a name
     char c;
     {
       c = *fname_end;
@@ -3005,19 +3005,19 @@ static int find_extra(char **pp)
     } else if (*str == '/' || *str == '?') {
       str = skip_regexp(str + 1, *str, false);
       if (*str != first_char) {
-        str = NULL;
+        str = nullptr;
       } else {
         str++;
       }
     } else {
       // not a line number or search string, look for terminator.
       str = strstr(str, "|;\"");
-      if (str != NULL) {
+      if (str != nullptr) {
         str++;
         break;
       }
     }
-    if (str == NULL || *str != ';'
+    if (str == nullptr || *str != ';'
         || !(ascii_isdigit(str[1]) || str[1] == '/' || str[1] == '?')) {
       break;
     }
@@ -3025,7 +3025,7 @@ static int find_extra(char **pp)
     first_char = *str;
   }
 
-  if (str != NULL && strncmp(str, ";\"", 2) == 0) {
+  if (str != nullptr && strncmp(str, ";\"", 2) == 0) {
     *pp = str;
     return OK;
   }
@@ -3072,7 +3072,7 @@ int expand_tags(bool tagnames, char *pat, int *num_file, char ***file)
 
       memmove(name_buf, t_p.tagname, len);
       name_buf[len++] = 0;
-      name_buf[len++] = (t_p.tagkind != NULL && *t_p.tagkind)
+      name_buf[len++] = (t_p.tagkind != nullptr && *t_p.tagkind)
                         ? *t_p.tagkind : 'f';
       name_buf[len++] = 0;
       memmove((*file)[i] + len, t_p.fname, (size_t)(t_p.fname_end - t_p.fname));
@@ -3088,12 +3088,12 @@ int expand_tags(bool tagnames, char *pat, int *num_file, char ***file)
 /// Return OK or FAIL.
 ///
 /// @param start  start of the value
-/// @param end  after the value; can be NULL
+/// @param end  after the value; can be nullptr
 static int add_tag_field(dict_T *dict, const char *field_name, const char *start, const char *end)
   FUNC_ATTR_NONNULL_ARG(1, 2)
 {
   // Check that the field name doesn't exist yet.
-  if (tv_dict_find(dict, field_name, -1) != NULL) {
+  if (tv_dict_find(dict, field_name, -1) != nullptr) {
     if (p_verbose > 0) {
       verbose_enter();
       smsg(0, _("Duplicate field name: %s"), field_name);
@@ -3103,8 +3103,8 @@ static int add_tag_field(dict_T *dict, const char *field_name, const char *start
   }
   int len = 0;
   char *buf = xmalloc(MAXPATHL);
-  if (start != NULL) {
-    if (end == NULL) {
+  if (start != nullptr) {
+    if (end == nullptr) {
       end = start + strlen(start);
       while (end > start && (end[-1] == '\r' || end[-1] == '\n')) {
         end--;
@@ -3120,7 +3120,7 @@ static int add_tag_field(dict_T *dict, const char *field_name, const char *start
 }
 
 /// Add the tags matching the specified pattern "pat" to the list "list"
-/// as a dictionary. Use "buf_fname" for priority, unless NULL.
+/// as a dictionary. Use "buf_fname" for priority, unless nullptr.
 int get_tags(list_T *list, char *pat, char *buf_fname)
 {
   int num_matches;
@@ -3151,17 +3151,17 @@ int get_tags(list_T *list, char *pat, char *buf_fname)
 
     char *full_fname = tag_full_fname(&tp);
     if (add_tag_field(dict, "name", tp.tagname, tp.tagname_end) == FAIL
-        || add_tag_field(dict, "filename", full_fname, NULL) == FAIL
+        || add_tag_field(dict, "filename", full_fname, nullptr) == FAIL
         || add_tag_field(dict, "cmd", tp.command, tp.command_end) == FAIL
         || add_tag_field(dict, "kind", tp.tagkind,
-                         tp.tagkind ? tp.tagkind_end : NULL) == FAIL
+                         tp.tagkind ? tp.tagkind_end : nullptr) == FAIL
         || tv_dict_add_nr(dict, S_LEN("static"), is_static) == FAIL) {
       ret = FAIL;
     }
 
     xfree(full_fname);
 
-    if (tp.command_end != NULL) {
+    if (tp.command_end != nullptr) {
       for (char *p = tp.command_end + 3;
            *p != NUL && *p != '\n' && *p != '\r';
            MB_PTR_ADV(p)) {
@@ -3305,21 +3305,21 @@ static void tagstack_push_items(win_T *wp, list_T *l)
   int fnum;
 
   // Add one entry at a time to the tag stack
-  for (listitem_T *li = tv_list_first(l); li != NULL; li = TV_LIST_ITEM_NEXT(l, li)) {
+  for (listitem_T *li = tv_list_first(l); li != nullptr; li = TV_LIST_ITEM_NEXT(l, li)) {
     if (TV_LIST_ITEM_TV(li)->v_type != VAR_DICT
-        || TV_LIST_ITEM_TV(li)->vval.v_dict == NULL) {
+        || TV_LIST_ITEM_TV(li)->vval.v_dict == nullptr) {
       continue;  // Skip non-dict items
     }
     dict_T *itemdict = TV_LIST_ITEM_TV(li)->vval.v_dict;
 
     // parse 'from' for the cursor position before the tag jump
-    if ((di = tv_dict_find(itemdict, "from", -1)) == NULL) {
+    if ((di = tv_dict_find(itemdict, "from", -1)) == nullptr) {
       continue;
     }
-    if (list2fpos(&di->di_tv, &mark, &fnum, NULL, false) != OK) {
+    if (list2fpos(&di->di_tv, &mark, &fnum, nullptr, false) != OK) {
       continue;
     }
-    if ((tagname = tv_dict_get_string(itemdict, "tagname", true)) == NULL) {
+    if ((tagname = tv_dict_get_string(itemdict, "tagname", true)) == nullptr) {
       continue;
     }
 
@@ -3359,9 +3359,9 @@ int set_tagstack(win_T *wp, const dict_T *d, int action)
   }
 
   dictitem_T *di;
-  list_T *l = NULL;
+  list_T *l = nullptr;
 
-  if ((di = tv_dict_find(d, "items", -1)) != NULL) {
+  if ((di = tv_dict_find(d, "items", -1)) != nullptr) {
     if (di->di_tv.v_type != VAR_LIST) {
       emsg(_(e_listreq));
       return FAIL;
@@ -3369,7 +3369,7 @@ int set_tagstack(win_T *wp, const dict_T *d, int action)
     l = di->di_tv.vval.v_list;
   }
 
-  if ((di = tv_dict_find(d, "curidx", -1)) != NULL) {
+  if ((di = tv_dict_find(d, "curidx", -1)) != nullptr) {
     tagstack_set_curidx(wp, (int)tv_get_number(&di->di_tv) - 1);
   }
 
@@ -3385,7 +3385,7 @@ int set_tagstack(win_T *wp, const dict_T *d, int action)
     wp->w_tagstacklen = tagstacklen;
   }
 
-  if (l != NULL) {
+  if (l != nullptr) {
     if (action == 'r') {  // replace the stack
       tagstack_clear(wp);
     }

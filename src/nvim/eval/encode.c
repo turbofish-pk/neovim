@@ -65,12 +65,12 @@ void encode_list_write(void *const data, const char *const buf, const size_t len
   listitem_T *li = tv_list_last(list);
 
   // Continue the last list element
-  if (li != NULL) {
+  if (li != nullptr) {
     line_end = xmemscan(buf, NL, len);
     if (line_end != buf) {
       const size_t line_length = (size_t)(line_end - buf);
       char *str = TV_LIST_ITEM_TV(li)->vval.v_string;
-      const size_t li_len = (str == NULL ? 0 : strlen(str));
+      const size_t li_len = (str == nullptr ? 0 : strlen(str));
       TV_LIST_ITEM_TV(li)->vval.v_string = xrealloc(str, li_len + line_length + 1);
       str = TV_LIST_ITEM_TV(li)->vval.v_string + li_len;
       memcpy(str, buf, line_length);
@@ -83,7 +83,7 @@ void encode_list_write(void *const data, const char *const buf, const size_t len
   while (line_end < end) {
     const char *line_start = line_end;
     line_end = xmemscan(line_start, NL, (size_t)(end - line_start));
-    char *str = NULL;
+    char *str = nullptr;
     if (line_end != line_start) {
       const size_t line_length = (size_t)(line_end - line_start);
       str = xmemdupz(line_start, line_length);
@@ -93,7 +93,7 @@ void encode_list_write(void *const data, const char *const buf, const size_t len
     line_end++;
   }
   if (line_end == end) {
-    tv_list_append_allocated_string(list, NULL);
+    tv_list_append_allocated_string(list, nullptr);
   }
 }
 
@@ -133,10 +133,10 @@ static int conv_error(const char *const msg, const MPConvStack *const mpstack,
         .v_type = VAR_STRING,
         .vval = { .v_string =
                     (v.data.d.hi ==
-                     NULL ? v.data.d.dict->dv_hashtab.ht_array : (v.data.d.hi -
+                     nullptr ? v.data.d.dict->dv_hashtab.ht_array : (v.data.d.hi -
                                                                   1))->hi_key },
       };
-      char *const key = encode_tv2string(&key_tv, NULL);
+      char *const key = encode_tv2string(&key_tv, nullptr);
       vim_snprintf(IObuff, IOSIZE, key_msg, key);
       xfree(key);
       ga_concat(&msg_ga, IObuff);
@@ -146,28 +146,28 @@ static int conv_error(const char *const msg, const MPConvStack *const mpstack,
     case kMPConvList: {
       const int idx = (v.data.l.li == tv_list_first(v.data.l.list)
                        ? 0
-                       : (v.data.l.li == NULL
+                       : (v.data.l.li == nullptr
                           ? tv_list_len(v.data.l.list) - 1
                           : tv_list_idx_of_item(v.data.l.list,
                                                 TV_LIST_ITEM_PREV(v.data.l.list,
                                                                   v.data.l.li))));
-      const listitem_T *const li = (v.data.l.li == NULL
+      const listitem_T *const li = (v.data.l.li == nullptr
                                     ? tv_list_last(v.data.l.list)
                                     : TV_LIST_ITEM_PREV(v.data.l.list,
                                                         v.data.l.li));
       if (v.type == kMPConvList
-          || li == NULL
+          || li == nullptr
           || (TV_LIST_ITEM_TV(li)->v_type != VAR_LIST
               && tv_list_len(TV_LIST_ITEM_TV(li)->vval.v_list) <= 0)) {
         vim_snprintf(IObuff, IOSIZE, idx_msg, idx);
         ga_concat(&msg_ga, IObuff);
       } else {
-        assert(li != NULL);
+        assert(li != nullptr);
         listitem_T *const first_item =
           tv_list_first(TV_LIST_ITEM_TV(li)->vval.v_list);
-        assert(first_item != NULL);
+        assert(first_item != nullptr);
         typval_T key_tv = *TV_LIST_ITEM_TV(first_item);
-        char *const key = encode_tv2echo(&key_tv, NULL);
+        char *const key = encode_tv2echo(&key_tv, nullptr);
         vim_snprintf(IObuff, IOSIZE, key_pair_msg, key, idx);
         xfree(key);
         ga_concat(&msg_ga, IObuff);
@@ -206,7 +206,7 @@ static int conv_error(const char *const msg, const MPConvStack *const mpstack,
 ///
 /// @param[in]  list  Converted list.
 /// @param[out]  ret_len  Resulting buffer length.
-/// @param[out]  ret_buf  Allocated buffer with the result or NULL if ret_len is
+/// @param[out]  ret_buf  Allocated buffer with the result or nullptr if ret_len is
 ///                       zero.
 ///
 /// @return true in case of success, false in case of failure.
@@ -219,7 +219,7 @@ bool encode_vim_list_to_buf(const list_T *const list, size_t *const ret_len, cha
       return false;
     }
     len++;
-    if (TV_LIST_ITEM_TV(li)->vval.v_string != NULL) {
+    if (TV_LIST_ITEM_TV(li)->vval.v_string != nullptr) {
       len += strlen(TV_LIST_ITEM_TV(li)->vval.v_string);
     }
   });
@@ -228,7 +228,7 @@ bool encode_vim_list_to_buf(const list_T *const list, size_t *const ret_len, cha
   }
   *ret_len = len;
   if (len == 0) {
-    *ret_buf = NULL;
+    *ret_buf = nullptr;
     return true;
   }
   ListReaderState lrstate = encode_init_lrstate(list);
@@ -262,15 +262,15 @@ int encode_read_from_list(ListReaderState *const state, char *const buf, const s
   char *p = buf;
   while (p < buf_end) {
     assert(state->li_length == 0
-           || TV_LIST_ITEM_TV(state->li)->vval.v_string != NULL);
+           || TV_LIST_ITEM_TV(state->li)->vval.v_string != nullptr);
     for (size_t i = state->offset; i < state->li_length && p < buf_end; i++) {
-      assert(TV_LIST_ITEM_TV(state->li)->vval.v_string != NULL);
+      assert(TV_LIST_ITEM_TV(state->li)->vval.v_string != nullptr);
       const char ch = TV_LIST_ITEM_TV(state->li)->vval.v_string[state->offset++];
       *p++ = (char)(ch == (char)NL ? (char)NUL : ch);
     }
     if (p < buf_end) {
       state->li = TV_LIST_ITEM_NEXT(state->list, state->li);
-      if (state->li == NULL) {
+      if (state->li == nullptr) {
         *read_bytes = (size_t)(p - buf);
         return OK;
       }
@@ -280,14 +280,14 @@ int encode_read_from_list(ListReaderState *const state, char *const buf, const s
         return FAIL;
       }
       state->offset = 0;
-      state->li_length = (TV_LIST_ITEM_TV(state->li)->vval.v_string == NULL
+      state->li_length = (TV_LIST_ITEM_TV(state->li)->vval.v_string == nullptr
                           ? 0
                           : strlen(TV_LIST_ITEM_TV(state->li)->vval.v_string));
     }
   }
   *read_bytes = nbuf;
   return ((state->offset < state->li_length
-           || TV_LIST_ITEM_NEXT(state->list, state->li) != NULL)
+           || TV_LIST_ITEM_NEXT(state->list, state->li) != nullptr)
           ? NOTDONE
           : OK);
 }
@@ -295,7 +295,7 @@ int encode_read_from_list(ListReaderState *const state, char *const buf, const s
 #define TYPVAL_ENCODE_CONV_STRING(tv, buf, len) \
   do { \
     const char *const buf_ = (buf); \
-    if (buf_ == NULL) { \
+    if (buf_ == nullptr) { \
       GA_CONCAT_LITERAL(gap, "''"); \
     } else { \
       const size_t len_ = (len); \
@@ -375,9 +375,9 @@ int encode_read_from_list(ListReaderState *const state, char *const buf, const s
 #define TYPVAL_ENCODE_CONV_FUNC_START(tv, fun, prefix) \
   do { \
     const char *const fun_ = (fun); \
-    if (fun_ == NULL) { \
-      internal_error("string(): NULL function name"); \
-      GA_CONCAT_LITERAL(gap, "function(NULL"); \
+    if (fun_ == nullptr) { \
+      internal_error("string(): nullptr function name"); \
+      GA_CONCAT_LITERAL(gap, "function(nullptr"); \
     } else { \
       const char *const prefix_ = (prefix); \
       GA_CONCAT_LITERAL(gap, "function("); \
@@ -454,7 +454,7 @@ int encode_read_from_list(ListReaderState *const state, char *const buf, const s
   ga_append(gap, ']')
 
 #define TYPVAL_ENCODE_CONV_LIST_BETWEEN_ITEMS(tv) \
-  TYPVAL_ENCODE_CONV_DICT_BETWEEN_ITEMS(tv, NULL)
+  TYPVAL_ENCODE_CONV_DICT_BETWEEN_ITEMS(tv, nullptr)
 
 #define TYPVAL_ENCODE_CONV_RECURSE(val, conv_type) \
   do { \
@@ -623,11 +623,11 @@ static inline int convert_to_json_string(garray_T *const gap, const char *const 
   FUNC_ATTR_NONNULL_ARG(1) FUNC_ATTR_ALWAYS_INLINE
 {
   const char *utf_buf = buf;
-  if (utf_buf == NULL) {
+  if (utf_buf == nullptr) {
     GA_CONCAT_LITERAL(gap, "\"\"");
   } else {
     size_t utf_len = len;
-    char *tofree = NULL;
+    char *tofree = nullptr;
     size_t str_len = 0;
     // Encode character as \uNNNN if
     // 1. It is an ASCII control character (0x0 .. 0x1F; 0x7F not
@@ -793,14 +793,14 @@ bool encode_check_json_key(const typval_T *const tv)
   }
   const dictitem_T *type_di;
   const dictitem_T *val_di;
-  if ((type_di = tv_dict_find(spdict, S_LEN("_TYPE"))) == NULL
+  if ((type_di = tv_dict_find(spdict, S_LEN("_TYPE"))) == nullptr
       || type_di->di_tv.v_type != VAR_LIST
       || type_di->di_tv.vval.v_list != eval_msgpack_type_lists[kMPString]
-      || (val_di = tv_dict_find(spdict, S_LEN("_VAL"))) == NULL
+      || (val_di = tv_dict_find(spdict, S_LEN("_VAL"))) == nullptr
       || val_di->di_tv.v_type != VAR_LIST) {
     return false;
   }
-  if (val_di->di_tv.vval.v_list == NULL) {
+  if (val_di->di_tv.vval.v_list == nullptr) {
     return true;
   }
   TV_LIST_ITER_CONST(val_di->di_tv.vval.v_list, li, {
@@ -865,7 +865,7 @@ bool encode_check_json_key(const typval_T *const tv)
 /// @param[in]  tv  typval_T to convert.
 /// @param[out]  len  Location where length of the result will be saved.
 ///
-/// @return String representation of the variable or NULL.
+/// @return String representation of the variable or nullptr.
 char *encode_tv2string(typval_T *tv, size_t *len)
   FUNC_ATTR_NONNULL_ARG(1) FUNC_ATTR_MALLOC
 {
@@ -876,7 +876,7 @@ char *encode_tv2string(typval_T *tv, size_t *len)
   (void)evs_ret;
   assert(evs_ret == OK);
   did_echo_string_emsg = false;
-  if (len != NULL) {
+  if (len != nullptr) {
     *len = (size_t)ga.ga_len;
   }
   ga_append(&ga, NUL);
@@ -889,14 +889,14 @@ char *encode_tv2string(typval_T *tv, size_t *len)
 /// @param[in]  tv  typval_T to convert.
 /// @param[out]  len  Location where length of the result will be saved.
 ///
-/// @return String representation of the variable or NULL.
+/// @return String representation of the variable or nullptr.
 char *encode_tv2echo(typval_T *tv, size_t *len)
   FUNC_ATTR_NONNULL_ARG(1) FUNC_ATTR_MALLOC
 {
   garray_T ga;
   ga_init(&ga, (int)sizeof(char), 80);
   if (tv->v_type == VAR_STRING || tv->v_type == VAR_FUNC) {
-    if (tv->vval.v_string != NULL) {
+    if (tv->vval.v_string != nullptr) {
       ga_concat(&ga, tv->vval.v_string);
     }
   } else {
@@ -904,7 +904,7 @@ char *encode_tv2echo(typval_T *tv, size_t *len)
     (void)eve_ret;
     assert(eve_ret == OK);
   }
-  if (len != NULL) {
+  if (len != nullptr) {
     *len = (size_t)ga.ga_len;
   }
   ga_append(&ga, NUL);
@@ -917,7 +917,7 @@ char *encode_tv2echo(typval_T *tv, size_t *len)
 /// @param[in]  tv  typval_T to convert.
 /// @param[out]  len  Location where length of the result will be saved.
 ///
-/// @return String representation of the variable or NULL.
+/// @return String representation of the variable or nullptr.
 char *encode_tv2json(typval_T *tv, size_t *len)
   FUNC_ATTR_NONNULL_ARG(1) FUNC_ATTR_MALLOC
 {
@@ -929,7 +929,7 @@ char *encode_tv2json(typval_T *tv, size_t *len)
     ga_clear(&ga);
   }
   did_echo_string_emsg = false;
-  if (len != NULL) {
+  if (len != nullptr) {
     *len = (size_t)ga.ga_len;
   }
   ga_append(&ga, NUL);
@@ -946,7 +946,7 @@ char *encode_tv2json(typval_T *tv, size_t *len)
   mpack_ext(buf, (len), (int8_t)(type), packer); \
 
 #define TYPVAL_ENCODE_CONV_BLOB(tv, blob, len) \
-  mpack_bin(cbuf_as_string((blob) ? (blob)->bv_ga.ga_data : NULL, (size_t)(len)), packer);
+  mpack_bin(cbuf_as_string((blob) ? (blob)->bv_ga.ga_data : nullptr, (size_t)(len)), packer);
 
 #define TYPVAL_ENCODE_CONV_NUMBER(tv, num) \
   mpack_integer(&packer->ptr, (Integer)(num))
@@ -1057,7 +1057,7 @@ ListReaderState encode_init_lrstate(const list_T *const list)
     .list = list,
     .li = tv_list_first(list),
     .offset = 0,
-    .li_length = (TV_LIST_ITEM_TV(tv_list_first(list))->vval.v_string == NULL
+    .li_length = (TV_LIST_ITEM_TV(tv_list_first(list))->vval.v_string == nullptr
                   ? 0
                   : strlen(TV_LIST_ITEM_TV(tv_list_first(list))->vval.v_string)),
   };

@@ -26,21 +26,21 @@
 /// Checks if an address string looks like a TCP endpoint, and returns the end of the host part.
 ///
 /// @param address Address string
-/// @return pointer to the end of the host part of the address, or NULL if it is not a TCP address
+/// @return pointer to the end of the host part of the address, or nullptr if it is not a TCP address
 char *socket_address_tcp_host_end(const char *address)
 {
-  if (address == NULL) {
-    return NULL;
+  if (address == nullptr) {
+    return nullptr;
   }
 
   // Windows drive letter path: "X:\..." or "X:/..." is a local path, not TCP.
   if (ASCII_ISALPHA((uint8_t)address[0]) && address[1] == ':'
       && (address[2] == '\\' || address[2] == '/')) {
-    return NULL;
+    return nullptr;
   }
 
   char *colon = strrchr((char *)address, ':');
-  return colon != NULL && colon != address ? colon : NULL;
+  return colon != nullptr && colon != address ? colon : nullptr;
 }
 
 int socket_watcher_init(Loop *loop, SocketWatcher *watcher, const char *endpoint)
@@ -64,14 +64,14 @@ int socket_watcher_init(Loop *loop, SocketWatcher *watcher, const char *endpoint
     }
 
     if (*port == NUL) {
-      // When no port is given, (uv_)getaddrinfo expects NULL otherwise the
+      // When no port is given, (uv_)getaddrinfo expects nullptr otherwise the
       // implementation may attempt to lookup the service by name (and fail)
-      port = NULL;
+      port = nullptr;
     }
 
     uv_getaddrinfo_t request;
 
-    int retval = uv_getaddrinfo(&loop->uv, &request, NULL, addr, port,
+    int retval = uv_getaddrinfo(&loop->uv, &request, nullptr, addr, port,
                                 &(struct addrinfo){ .ai_family = AF_UNSPEC,
                                                     .ai_socktype = SOCK_STREAM, });
     if (retval != 0) {
@@ -89,10 +89,10 @@ int socket_watcher_init(Loop *loop, SocketWatcher *watcher, const char *endpoint
   }
 
   watcher->stream->data = watcher;
-  watcher->cb = NULL;
-  watcher->close_cb = NULL;
-  watcher->events = NULL;
-  watcher->data = NULL;
+  watcher->cb = nullptr;
+  watcher->close_cb = nullptr;
+  watcher->events = nullptr;
+  watcher->data = nullptr;
 
   return 0;
 }
@@ -111,7 +111,7 @@ static void connect_close_cb(Stream *stream, void *data)
 static bool socket_alive(Loop *loop, const char *addr)
 {
   RStream stream = { 0 };
-  const char *error = NULL;
+  const char *error = nullptr;
 
   // Try to connect with a 500ms timeout (fast failure for dead sockets)
   bool connected = socket_connect(loop, &stream, false, addr, 500, &error);
@@ -124,7 +124,7 @@ static bool socket_alive(Loop *loop, const char *addr)
   stream.s.internal_close_cb = connect_close_cb;
   stream.s.internal_data = &closed;
   stream_may_close(&stream.s);
-  LOOP_PROCESS_EVENTS_UNTIL(&main_loop, NULL, -1, closed);
+  LOOP_PROCESS_EVENTS_UNTIL(&main_loop, nullptr, -1, closed);
 
   return true;
 }
@@ -189,7 +189,7 @@ int socket_watcher_start(SocketWatcher *watcher, int backlog, socket_cb cb)
           bool closed = false;
           watcher->uv.pipe.handle.data = &closed;
           uv_close((uv_handle_t *)&watcher->uv.pipe.handle, early_server_close_cb);
-          LOOP_PROCESS_EVENTS_UNTIL(&main_loop, NULL, -1, closed);
+          LOOP_PROCESS_EVENTS_UNTIL(&main_loop, nullptr, -1, closed);
 
           uv_pipe_init(uv_loop, &watcher->uv.pipe.handle, 0);
           watcher->stream = (uv_stream_t *)(&watcher->uv.pipe.handle);
@@ -242,11 +242,11 @@ int socket_watcher_accept(SocketWatcher *watcher, RStream *stream)
   int result = uv_accept(watcher->stream, client);
 
   if (result) {
-    uv_close((uv_handle_t *)client, NULL);
+    uv_close((uv_handle_t *)client, nullptr);
     return result;
   }
 
-  stream_init(NULL, &stream->s, -1, client);
+  stream_init(nullptr, &stream->s, -1, client);
   return 0;
 }
 
@@ -300,9 +300,9 @@ bool socket_connect(Loop *loop, RStream *stream, bool is_tcp, const char *addres
 
   uv_tcp_t *tcp = &stream->s.uv.tcp;
   uv_getaddrinfo_t addr_req;
-  addr_req.addrinfo = NULL;
-  const struct addrinfo *addrinfo = NULL;
-  char *addr = NULL;
+  addr_req.addrinfo = nullptr;
+  const struct addrinfo *addrinfo = nullptr;
+  char *addr = nullptr;
   if (is_tcp) {
     addr = xstrdup(address);
     char *host_end = strrchr(addr, ':');
@@ -315,7 +315,7 @@ bool socket_connect(Loop *loop, RStream *stream, bool is_tcp, const char *addres
     const struct addrinfo hints = { .ai_family = AF_UNSPEC,
                                     .ai_socktype = SOCK_STREAM,
                                     .ai_flags = AI_NUMERICSERV };
-    int retval = uv_getaddrinfo(&loop->uv, &addr_req, NULL,
+    int retval = uv_getaddrinfo(&loop->uv, &addr_req, nullptr,
                                 addr, host_end + 1, &hints);
     if (retval != 0) {
       *error = _("failed to lookup host or port");
@@ -334,19 +334,19 @@ tcp_retry:
     uv_pipe_connect(&req,  pipe, address, connect_cb);
     uv_stream = (uv_stream_t *)pipe;
   }
-  stream_init(NULL, &stream->s, -1, uv_stream);
+  stream_init(nullptr, &stream->s, -1, uv_stream);
   stream->s.internal_close_cb = connect_close_cb;
   stream->s.internal_data = &closed;
   closed = false;
   status = 1;
-  LOOP_PROCESS_EVENTS_UNTIL(&main_loop, NULL, timeout, status != 1);
+  LOOP_PROCESS_EVENTS_UNTIL(&main_loop, nullptr, timeout, status != 1);
   if (status == 0) {
     success = true;
   } else {
     stream_may_close(&stream->s);
     // Wait for the close callback to arrive before retrying or returning, otherwise
     // it may lead to a hang or stack-use-after-return.
-    LOOP_PROCESS_EVENTS_UNTIL(&main_loop, NULL, -1, closed);
+    LOOP_PROCESS_EVENTS_UNTIL(&main_loop, nullptr, -1, closed);
 
     if (is_tcp && addrinfo->ai_next) {
       addrinfo = addrinfo->ai_next;
@@ -357,8 +357,8 @@ tcp_retry:
   }
 
 cleanup:
-  stream->s.internal_close_cb = NULL;
-  stream->s.internal_data = NULL;
+  stream->s.internal_close_cb = nullptr;
+  stream->s.internal_data = nullptr;
   xfree(addr);
   uv_freeaddrinfo(addr_req.addrinfo);
   return success;

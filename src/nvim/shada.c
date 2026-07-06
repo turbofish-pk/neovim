@@ -284,8 +284,8 @@ typedef struct {
 /// One entry in sized linked list
 typedef struct hm_llist_entry {
   ShadaEntry data;              ///< Entry data.
-  struct hm_llist_entry *next;  ///< Pointer to next entry or NULL.
-  struct hm_llist_entry *prev;  ///< Pointer to previous entry or NULL.
+  struct hm_llist_entry *next;  ///< Pointer to next entry or nullptr.
+  struct hm_llist_entry *prev;  ///< Pointer to previous entry or nullptr.
 } HMLListEntry;
 
 /// Sized linked list structure for history merger
@@ -293,8 +293,8 @@ typedef struct {
   HMLListEntry *entries;  ///< Pointer to the start of the allocated array of
                           ///< entries.
   HMLListEntry *first;    ///< First entry in the list (is not necessary start
-                          ///< of the array) or NULL.
-  HMLListEntry *last;     ///< Last entry in the list or NULL.
+                          ///< of the array) or nullptr.
+  HMLListEntry *last;     ///< Last entry in the list or nullptr.
   HMLListEntry *free_entry;  ///< Last free entry removed by hmll_remove.
   HMLListEntry *last_free_entry;  ///< Last unused element in entries array.
   size_t size;            ///< Number of allocated entries.
@@ -345,7 +345,7 @@ typedef struct {
   [kSDItem##name] = { \
     .timestamp = 0, \
     .type = kSDItem##name, \
-    .additional_data = NULL, \
+    .additional_data = nullptr, \
     .data = { \
       .attr = { __VA_ARGS__ } \
     } \
@@ -366,40 +366,40 @@ static const ShadaEntry sd_default_values[] = {
           .highlighted = false,
           .search_backward = false,
           .pat = STRING_INIT),
-  DEF_SDE(SubString, sub_string, .sub = NULL),
+  DEF_SDE(SubString, sub_string, .sub = nullptr),
   DEF_SDE(HistoryEntry, history_item,
           .histtype = HIST_CMD,
-          .string = NULL,
+          .string = nullptr,
           .sep = NUL),
   DEF_SDE(Register, reg,
           .name = NUL,
           .type = kMTCharWise,
-          .contents = NULL,
+          .contents = nullptr,
           .contents_size = 0,
           .is_unnamed = false,
           .width = 0),
   DEF_SDE(Variable, global_var,
-          .name = NULL,
-          .value = { .v_type = VAR_UNKNOWN, .vval = { .v_string = NULL } }),
+          .name = nullptr,
+          .value = { .v_type = VAR_UNKNOWN, .vval = { .v_string = nullptr } }),
   DEF_SDE(GlobalMark, filemark,
           .name = '"',
           .mark = DEFAULT_POS,
-          .fname = NULL),
+          .fname = nullptr),
   DEF_SDE(Jump, filemark,
           .name = NUL,
           .mark = DEFAULT_POS,
-          .fname = NULL),
+          .fname = nullptr),
   DEF_SDE(BufferList, buffer_list,
           .size = 0,
-          .buffers = NULL),
+          .buffers = nullptr),
   DEF_SDE(LocalMark, filemark,
           .name = '"',
           .mark = DEFAULT_POS,
-          .fname = NULL),
+          .fname = nullptr),
   DEF_SDE(Change, filemark,
           .name = NUL,
           .mark = DEFAULT_POS,
-          .fname = NULL),
+          .fname = nullptr),
 };
 #undef DEFAULT_POS
 #undef DEF_SDE
@@ -413,9 +413,9 @@ static inline void hmll_init(HMLList *const hmll, const size_t size)
 {
   *hmll = (HMLList) {
     .entries = xcalloc(size, sizeof(hmll->entries[0])),
-    .first = NULL,
-    .last = NULL,
-    .free_entry = NULL,
+    .first = nullptr,
+    .last = nullptr,
+    .free_entry = nullptr,
     .size = size,
     .num_entries = 0,
     .contained_entries = MAP_INIT,
@@ -431,7 +431,7 @@ static inline void hmll_init(HMLList *const hmll, const size_t size)
 ///
 /// @return `for` cycle header (use `HMLL_FORALL(hmll, cur_entry) {body}`).
 #define HMLL_FORALL(hmll, cur_entry, code) \
-  for (HMLListEntry *(cur_entry) = (hmll)->first; (cur_entry) != NULL; \
+  for (HMLListEntry *(cur_entry) = (hmll)->first; (cur_entry) != nullptr; \
        (cur_entry) = (cur_entry)->next) { \
     code \
   } \
@@ -446,19 +446,19 @@ static inline void hmll_remove(HMLList *const hmll, HMLListEntry *const hmll_ent
   if (hmll_entry == hmll->last_free_entry - 1) {
     hmll->last_free_entry--;
   } else {
-    assert(hmll->free_entry == NULL);
+    assert(hmll->free_entry == nullptr);
     hmll->free_entry = hmll_entry;
   }
   ptr_t val = pmap_del(cstr_t)(&hmll->contained_entries,
-                               hmll_entry->data.data.history_item.string, NULL);
+                               hmll_entry->data.data.history_item.string, nullptr);
   assert(val);
   (void)val;
-  if (hmll_entry->next == NULL) {
+  if (hmll_entry->next == nullptr) {
     hmll->last = hmll_entry->prev;
   } else {
     hmll_entry->next->prev = hmll_entry->prev;
   }
-  if (hmll_entry->prev == NULL) {
+  if (hmll_entry->prev == nullptr) {
     hmll->first = hmll_entry->next;
   } else {
     hmll_entry->prev->next = hmll_entry->next;
@@ -470,7 +470,7 @@ static inline void hmll_remove(HMLList *const hmll, HMLListEntry *const hmll_ent
 /// Insert entry to the linked list
 ///
 /// @param[out]  hmll            List to insert to.
-/// @param[in]   hmll_entry      Entry to insert after or NULL if it is needed
+/// @param[in]   hmll_entry      Entry to insert after or nullptr if it is needed
 ///                              to insert at the first entry.
 /// @param[in]   data            Data to insert.
 /// @param[in]   can_free_entry  True if data can be freed.
@@ -479,13 +479,13 @@ static inline void hmll_insert(HMLList *const hmll, HMLListEntry *hmll_entry, co
 {
   if (hmll->num_entries == hmll->size) {
     if (hmll_entry == hmll->first) {
-      hmll_entry = NULL;
+      hmll_entry = nullptr;
     }
-    assert(hmll->first != NULL);
+    assert(hmll->first != nullptr);
     hmll_remove(hmll, hmll->first);
   }
   HMLListEntry *target_entry;
-  if (hmll->free_entry == NULL) {
+  if (hmll->free_entry == nullptr) {
     assert((size_t)(hmll->last_free_entry - hmll->entries)
            == hmll->num_entries);
     target_entry = hmll->last_free_entry++;
@@ -493,25 +493,25 @@ static inline void hmll_insert(HMLList *const hmll, HMLListEntry *hmll_entry, co
     assert((size_t)(hmll->last_free_entry - hmll->entries) - 1
            == hmll->num_entries);
     target_entry = hmll->free_entry;
-    hmll->free_entry = NULL;
+    hmll->free_entry = nullptr;
   }
   target_entry->data = data;
   bool new_item = false;
   ptr_t *val = pmap_put_ref(cstr_t)(&hmll->contained_entries, data.data.history_item.string,
-                                    NULL, &new_item);
+                                    nullptr, &new_item);
   if (new_item) {
     *val = target_entry;
   }
   hmll->num_entries++;
   target_entry->prev = hmll_entry;
-  if (hmll_entry == NULL) {
+  if (hmll_entry == nullptr) {
     target_entry->next = hmll->first;
     hmll->first = target_entry;
   } else {
     target_entry->next = hmll_entry->next;
     hmll_entry->next = target_entry;
   }
-  if (target_entry->next == NULL) {
+  if (target_entry->next == nullptr) {
     hmll->last = target_entry;
   } else {
     target_entry->next->prev = target_entry;
@@ -570,7 +570,7 @@ static void close_file(FileDescriptor *cookie)
 
 /// Read ShaDa file
 ///
-/// @param[in]  file   File to read or NULL to use default name.
+/// @param[in]  file   File to read or nullptr to use default name.
 /// @param[in]  flags  Flags, see ShaDaReadFileFlags enum.
 ///
 /// @return FAIL if reading failed for some reason and OK otherwise.
@@ -578,7 +578,7 @@ static int shada_read_file(const char *const file, const int flags)
   FUNC_ATTR_WARN_UNUSED_RESULT
 {
   char *const fname = shada_filename(file);
-  if (fname == NULL) {
+  if (fname == nullptr) {
     return FAIL;
   }
 
@@ -627,7 +627,7 @@ static const void *shada_hist_iter(const void *const iter, const uint8_t history
 {
   histentry_T hist_he;
   const void *const ret = hist_iter(iter, history_type, zero, &hist_he);
-  if (hist_he.hisstr == NULL) {
+  if (hist_he.hisstr == nullptr) {
     *hist = (ShadaEntry) { .type = kSDItemMissing };
   } else {
     *hist = (ShadaEntry) {
@@ -670,7 +670,7 @@ static void hms_insert(HistoryMergerState *const hms_p, const ShadaEntry entry, 
     while (hms_p->last_hist_entry.type != kSDItemMissing
            && hms_p->last_hist_entry.timestamp < entry.timestamp) {
       hms_insert(hms_p, hms_p->last_hist_entry, false);
-      if (hms_p->iter == NULL) {
+      if (hms_p->iter == nullptr) {
         hms_p->last_hist_entry.type = kSDItemMissing;
         break;
       }
@@ -679,7 +679,7 @@ static void hms_insert(HistoryMergerState *const hms_p, const ShadaEntry entry, 
     }
   }
   HMLList *const hmll = &hms_p->hmll;
-  cstr_t *key_alloc = NULL;
+  cstr_t *key_alloc = nullptr;
   ptr_t *val = pmap_ref(cstr_t)(&hms_p->hmll.contained_entries, entry.data.history_item.string,
                                 &key_alloc);
   if (val) {
@@ -699,7 +699,7 @@ static void hms_insert(HistoryMergerState *const hms_p, const ShadaEntry entry, 
   }
   HMLListEntry *insert_after;
   // Iterate over HMLList in backward direction
-  for (insert_after = hmll->last; insert_after != NULL; insert_after = insert_after->prev) {
+  for (insert_after = hmll->last; insert_after != nullptr; insert_after = insert_after->prev) {
     if (insert_after->data.timestamp <= entry.timestamp) {
       break;
     }
@@ -722,7 +722,7 @@ static inline void hms_init(HistoryMergerState *const hms_p, const uint8_t histo
   hmll_init(&hms_p->hmll, num_elements);
   hms_p->do_merge = do_merge;
   hms_p->reading = reading;
-  hms_p->iter = shada_hist_iter(NULL, history_type, hms_p->reading,
+  hms_p->iter = shada_hist_iter(nullptr, history_type, hms_p->reading,
                                 &hms_p->last_hist_entry);
   hms_p->history_type = history_type;
 }
@@ -736,7 +736,7 @@ static inline void hms_insert_whole_neovim_history(HistoryMergerState *const hms
 {
   while (hms_p->last_hist_entry.type != kSDItemMissing) {
     hms_insert(hms_p, hms_p->last_hist_entry, false);
-    if (hms_p->iter == NULL) {
+    if (hms_p->iter == nullptr) {
       break;
     }
     hms_p->iter = shada_hist_iter(hms_p->iter, hms_p->history_type,
@@ -792,12 +792,12 @@ static inline void hms_dealloc(HistoryMergerState *const hms_p)
 /// @warning No modifications to global variable Dict must be performed
 ///          while iteration is in progress.
 ///
-/// @param[in]   iter   Iterator. Pass NULL to start iteration.
+/// @param[in]   iter   Iterator. Pass nullptr to start iteration.
 /// @param[out]  name   Variable name.
 /// @param[out]  rettv  Variable value.
 ///
 /// @return Pointer that needs to be passed to next `var_shada_iter` invocation
-///         or NULL to indicate that iteration is over.
+///         or nullptr to indicate that iteration is over.
 static const void *var_shada_iter(const void *const iter, const char **const name, typval_T *rettv,
                                   var_flavour_T flavour)
   FUNC_ATTR_WARN_UNUSED_RESULT FUNC_ATTR_NONNULL_ARG(2, 3)
@@ -806,8 +806,8 @@ static const void *var_shada_iter(const void *const iter, const char **const nam
   hashtab_T *globvarht = get_globvar_ht();
   const hashitem_T *hifirst = globvarht->ht_array;
   const size_t hinum = (size_t)globvarht->ht_mask + 1;
-  *name = NULL;
-  if (iter == NULL) {
+  *name = nullptr;
+  if (iter == nullptr) {
     hi = globvarht->ht_array;
     while ((size_t)(hi - hifirst) < hinum
            && (HASHITEM_EMPTY(hi)
@@ -815,7 +815,7 @@ static const void *var_shada_iter(const void *const iter, const char **const nam
       hi++;
     }
     if ((size_t)(hi - hifirst) == hinum) {
-      return NULL;
+      return nullptr;
     }
   } else {
     hi = (const hashitem_T *)iter;
@@ -827,7 +827,7 @@ static const void *var_shada_iter(const void *const iter, const char **const nam
       return hi;
     }
   }
-  return NULL;
+  return nullptr;
 }
 
 /// Find buffer for given buffer name (cached)
@@ -835,29 +835,29 @@ static const void *var_shada_iter(const void *const iter, const char **const nam
 /// @param[in,out]  fname_bufs  Cache containing fname to buffer mapping.
 /// @param[in]      fname       File name to find.
 ///
-/// @return Pointer to the buffer or NULL.
+/// @return Pointer to the buffer or nullptr.
 static buf_T *find_buffer(PMap(cstr_t) *const fname_bufs, const char *const fname)
   FUNC_ATTR_WARN_UNUSED_RESULT FUNC_ATTR_NONNULL_ALL
 {
-  cstr_t *key_alloc = NULL;
+  cstr_t *key_alloc = nullptr;
   bool new_item = false;
   buf_T **ref = (buf_T **)pmap_put_ref(cstr_t)(fname_bufs, fname, &key_alloc, &new_item);
   if (new_item) {
     *key_alloc = xstrdup(fname);
   } else {
-    return *ref;  // item already existed (can be a NULL value)
+    return *ref;  // item already existed (can be a nullptr value)
   }
 
   FOR_ALL_BUFFERS(buf) {
-    if (buf->b_ffname != NULL) {
+    if (buf->b_ffname != nullptr) {
       if (path_fnamecmp(fname, buf->b_ffname) == 0) {
         *ref = buf;
         return buf;
       }
     }
   }
-  *ref = NULL;
-  return NULL;
+  *ref = nullptr;
+  return nullptr;
 }
 
 /// Compare two marks
@@ -918,10 +918,10 @@ static void shada_read(FileDescriptor *const sd_reader, const int flags)
                    | kSDReadRegisters
                    | kSDReadGlobalMarks
                    | (p_hi ? kSDReadHistory : 0)
-                   | (find_shada_parameter('!') != NULL
+                   | (find_shada_parameter('!') != nullptr
                       ? kSDReadVariables
                       : 0)
-                   | (find_shada_parameter('%') != NULL
+                   | (find_shada_parameter('%') != nullptr
                       && ARGCOUNT == 0
                       ? kSDReadBufferList
                       : 0))
@@ -946,7 +946,7 @@ static void shada_read(FileDescriptor *const sd_reader, const int flags)
   Set(ptr_t) cl_bufs = SET_INIT;
   PMap(cstr_t) fname_bufs = MAP_INIT;
   Set(path_t) oldfiles_set = SET_INIT;
-  if (get_old_files && (oldfiles_list == NULL || force)) {
+  if (get_old_files && (oldfiles_list == nullptr || force)) {
     oldfiles_list = tv_list_alloc(kListLenUnknown);
     set_vim_var_list(VV_OLDFILES, oldfiles_list);
   }
@@ -981,7 +981,7 @@ static void shada_read(FileDescriptor *const sd_reader, const int flags)
         } else {
           get_search_pattern(&pat);
         }
-        if (pat.pat != NULL && pat.timestamp >= cur_entry.timestamp) {
+        if (pat.pat != nullptr && pat.timestamp >= cur_entry.timestamp) {
           shada_free_shada_entry(&cur_entry);
           break;
         }
@@ -1018,7 +1018,7 @@ static void shada_read(FileDescriptor *const sd_reader, const int flags)
       if (!force) {
         SubReplacementString sub;
         sub_get_replacement(&sub);
-        if (sub.sub != NULL && sub.timestamp >= cur_entry.timestamp) {
+        if (sub.sub != nullptr && sub.timestamp >= cur_entry.timestamp) {
           shada_free_shada_entry(&cur_entry);
           break;
         }
@@ -1052,7 +1052,7 @@ static void shada_read(FileDescriptor *const sd_reader, const int flags)
       }
       if (!force) {
         const yankreg_T *const reg = op_reg_get(cur_entry.data.reg.name);
-        if (reg == NULL || reg->timestamp >= cur_entry.timestamp) {
+        if (reg == nullptr || reg->timestamp >= cur_entry.timestamp) {
           shada_free_shada_entry(&cur_entry);
           break;
         }
@@ -1078,14 +1078,14 @@ static void shada_read(FileDescriptor *const sd_reader, const int flags)
     case kSDItemJump:
     case kSDItemGlobalMark: {
       buf_T *buf = find_buffer(&fname_bufs, cur_entry.data.filemark.fname);
-      if (buf != NULL) {
+      if (buf != nullptr) {
         XFREE_CLEAR(cur_entry.data.filemark.fname);
       }
       xfmark_T fm = (xfmark_T) {
-        .fname = buf == NULL ? cur_entry.data.filemark.fname : NULL,
+        .fname = buf == nullptr ? cur_entry.data.filemark.fname : nullptr,
         .fmark = {
           .mark = cur_entry.data.filemark.mark,
-          .fnum = (buf == NULL ? 0 : buf->b_fnum),
+          .fnum = (buf == nullptr ? 0 : buf->b_fnum),
           .timestamp = cur_entry.timestamp,
           .view = INIT_FMARKV,
           .additional_data = cur_entry.additional_data,
@@ -1102,8 +1102,8 @@ static void shada_read(FileDescriptor *const sd_reader, const int flags)
           const xfmark_T jl_entry = curwin->w_jumplist[i - 1];
           if (jl_entry.fmark.timestamp <= cur_entry.timestamp) {
             if (marks_equal(jl_entry.fmark.mark, cur_entry.data.filemark.mark)
-                && (buf == NULL
-                    ? (jl_entry.fname != NULL && strcmp(fm.fname, jl_entry.fname) == 0)
+                && (buf == nullptr
+                    ? (jl_entry.fname != nullptr && strcmp(fm.fname, jl_entry.fname) == 0)
                     : fm.fmark.fnum == jl_entry.fmark.fnum)) {
               i = -1;
             }
@@ -1138,7 +1138,7 @@ static void shada_read(FileDescriptor *const sd_reader, const int flags)
           path_try_shorten_fname(cur_entry.data.buffer_list.buffers[i].fname);
         buf_T *const buf =
           buflist_new(cur_entry.data.buffer_list.buffers[i].fname, sfname, 0, BLN_LISTED);
-        if (buf != NULL) {
+        if (buf != nullptr) {
           fmarkv_T view = INIT_FMARKV;
           RESET_FMARK(&buf->b_last_cursor,
                       cur_entry.data.buffer_list.buffers[i].pos, 0, view);
@@ -1147,7 +1147,7 @@ static void shada_read(FileDescriptor *const sd_reader, const int flags)
 
           xfree(buf->additional_data);
           buf->additional_data = cur_entry.data.buffer_list.buffers[i].additional_data;
-          cur_entry.data.buffer_list.buffers[i].additional_data = NULL;
+          cur_entry.data.buffer_list.buffers[i].additional_data = nullptr;
         }
       }
       shada_free_shada_entry(&cur_entry);
@@ -1166,7 +1166,7 @@ static void shada_read(FileDescriptor *const sd_reader, const int flags)
         tv_list_append_allocated_string(oldfiles_list, fname);
         if (!want_marks) {
           // Avoid free because this string was already used.
-          cur_entry.data.filemark.fname = NULL;
+          cur_entry.data.filemark.fname = nullptr;
         }
       }
       if (!want_marks) {
@@ -1174,7 +1174,7 @@ static void shada_read(FileDescriptor *const sd_reader, const int flags)
         break;
       }
       buf_T *buf = find_buffer(&fname_bufs, cur_entry.data.filemark.fname);
-      if (buf == NULL) {
+      if (buf == nullptr) {
         shada_free_shada_entry(&cur_entry);
         break;
       }
@@ -1235,7 +1235,7 @@ shada_read_main_cycle_end:
       int *new_hisidx;
       int *new_hisnum;
       histentry_T *hist = hist_get_array((uint8_t)i, &new_hisidx, &new_hisnum);
-      if (hist != NULL) {
+      if (hist != nullptr) {
         hms_to_he_array(&hms[i], hist, new_hisidx, new_hisnum);
       }
       hms_dealloc(&hms[i]);
@@ -1259,13 +1259,13 @@ shada_read_main_cycle_end:
 }
 
 /// Default shada file location: cached path
-static char *default_shada_file = NULL;
+static char *default_shada_file = nullptr;
 
 /// Get the default ShaDa file
 static const char *shada_get_default_file(void)
   FUNC_ATTR_WARN_UNUSED_RESULT
 {
-  if (default_shada_file == NULL) {
+  if (default_shada_file == nullptr) {
     char *shada_dir = stdpaths_user_state_subpath("shada", 0, false);
     default_shada_file = concat_fnames_realloc(shada_dir, "main.shada", true);
   }
@@ -1278,23 +1278,23 @@ static const char *shada_get_default_file(void)
 /// cmdline functions). Otherwise use "-i file_name", value from 'shada' or the
 /// default, and expand environment variables.
 ///
-/// @param[in]  file  Forced file name or NULL.
+/// @param[in]  file  Forced file name or nullptr.
 ///
 /// @return  An allocated string containing shada file name,
-///          or NULL if shada file should not be used.
+///          or nullptr if shada file should not be used.
 static char *shada_filename(const char *file)
   FUNC_ATTR_MALLOC FUNC_ATTR_WARN_UNUSED_RESULT
 {
-  if (file == NULL || *file == NUL) {
-    if (p_shadafile != NULL && *p_shadafile != NUL) {
+  if (file == nullptr || *file == NUL) {
+    if (p_shadafile != nullptr && *p_shadafile != NUL) {
       // Check if writing to ShaDa file was disabled ("-i NONE" or "--clean").
       if (!strequal(p_shadafile, "NONE")) {
         file = p_shadafile;
       } else {
-        return NULL;
+        return nullptr;
       }
     } else {
-      if ((file = find_shada_parameter('n')) == NULL || *file == NUL) {
+      if ((file = find_shada_parameter('n')) == nullptr || *file == NUL) {
         file = shada_get_default_file();
       }
       // XXX It used to be one level lower, so that whatever is in
@@ -1330,7 +1330,7 @@ static uint32_t additional_data_len(AdditionalData *src)
 
 static void dump_additional_data(AdditionalData *src, PackerBuffer *sbuf)
 {
-  if (src != NULL) {
+  if (src != nullptr) {
     mpack_raw(src->data, src->nbytes, sbuf);
   }
 }
@@ -1611,8 +1611,8 @@ static int compare_file_marks(const void *a, const void *b)
 /// @param[in]   sd_reader     Structure containing file reader definition.
 /// @param[in]   length        Object length.
 /// @param[out]  ret_unpacked  Location where read result should be saved. If
-///                            NULL then unpacked data will be freed. Must be
-///                            NULL if `ret_buf` is NULL.
+///                            nullptr then unpacked data will be freed. Must be
+///                            nullptr if `ret_buf` is nullptr.
 /// @param[out]  ret_buf       Buffer containing parsed string.
 ///
 /// @return kSDReadStatusNotShaDa, kSDReadStatusReadError or
@@ -1820,8 +1820,8 @@ static inline ShaDaWriteResult shada_read_when_writing(FileDescriptor *const sd_
           }
           // Ignore duplicates.
           if (wms_entry.timestamp == entry.timestamp
-              && (wms_entry.additional_data == NULL
-                  && entry.additional_data == NULL)
+              && (wms_entry.additional_data == nullptr
+                  && entry.additional_data == nullptr)
               && marks_equal(wms_entry.data.filemark.mark,
                              entry.data.filemark.mark)
               && strcmp(wms_entry.data.filemark.fname,
@@ -1870,13 +1870,13 @@ static inline ShaDaWriteResult shada_read_when_writing(FileDescriptor *const sd_
         break;
       }
       const char *const fname = entry.data.filemark.fname;
-      cstr_t *key = NULL;
+      cstr_t *key = nullptr;
       bool new_item = false;
       ptr_t *val = pmap_put_ref(cstr_t)(&wms->file_marks, fname, &key, &new_item);
       if (new_item) {
         *key = xstrdup(fname);
       }
-      if (*val == NULL) {
+      if (*val == nullptr) {
         *val = xcalloc(1, sizeof(FileMarks));
       }
       FileMarks *const filemarks = *val;
@@ -1907,7 +1907,7 @@ static inline ShaDaWriteResult shada_read_when_writing(FileDescriptor *const sd_
             }
           } else {
             FOR_ALL_BUFFERS(buf) {
-              if (buf->b_ffname != NULL
+              if (buf->b_ffname != nullptr
                   && path_fnamecmp(entry.data.filemark.fname, buf->b_ffname) == 0) {
                 fmark_T fm;
                 mark_get(buf, curwin, &fm, kMarkBufLocal, (int)entry.data.filemark.name);
@@ -1991,7 +1991,7 @@ static inline ShaDaWriteResult shada_read_when_writing(FileDescriptor *const sd_
 static inline bool ignore_buf(const buf_T *const buf, Set(ptr_t) *const removable_bufs)
   FUNC_ATTR_PURE FUNC_ATTR_WARN_UNUSED_RESULT FUNC_ATTR_ALWAYS_INLINE
 {
-  return (buf == NULL || buf->b_ffname == NULL || (!buf->b_p_bl && buf->b_p_initialized)
+  return (buf == nullptr || buf->b_ffname == nullptr || (!buf->b_p_bl && buf->b_p_initialized)
           || bt_quickfix(buf) || bt_terminal(buf) || set_has(ptr_t, removable_bufs, (ptr_t)buf));
 }
 
@@ -2063,7 +2063,7 @@ static inline void add_search_pattern(ShadaEntry *const ret_pse,
   const ShadaEntry defaults = sd_default_values[kSDItemSearchPattern];
   SearchPattern pat;
   get_pattern(&pat);
-  if (pat.pat != NULL) {
+  if (pat.pat != nullptr) {
     *ret_pse = (ShadaEntry) {
       .can_free_entry = false,
       .type = kSDItemSearchPattern,
@@ -2102,7 +2102,7 @@ static inline void add_search_pattern(ShadaEntry *const ret_pse,
 static inline void shada_initialize_registers(WriteMergerState *const wms, int max_reg_lines)
   FUNC_ATTR_NONNULL_ALL FUNC_ATTR_ALWAYS_INLINE
 {
-  const void *reg_iter = NULL;
+  const void *reg_iter = nullptr;
   const bool limit_reg_lines = max_reg_lines >= 0;
   do {
     yankreg_T reg;
@@ -2131,7 +2131,7 @@ static inline void shada_initialize_registers(WriteMergerState *const wms, int m
       },
       .additional_data = reg.additional_data,
     };
-  } while (reg_iter != NULL);
+  } while (reg_iter != nullptr);
 }
 
 /// Replace numbered mark in WriteMergerState
@@ -2165,7 +2165,7 @@ static inline void replace_numbered_mark(WriteMergerState *const wms, const size
 static inline void find_removable_bufs(Set(ptr_t) *removable_bufs)
 {
   FOR_ALL_BUFFERS(buf) {
-    if (buf->b_ffname != NULL && shada_removable(buf->b_ffname)) {
+    if (buf->b_ffname != nullptr && shada_removable(buf->b_ffname)) {
       set_put(ptr_t, removable_bufs, (ptr_t)buf);
     }
   }
@@ -2219,7 +2219,7 @@ static void flush_file_buffer(PackerBuffer *buffer)
 ///
 /// @param[in]  sd_writer  Structure containing file writer definition.
 /// @param[in]  sd_reader  Structure containing file reader definition. If it is
-///                        not NULL then contents of this file will be merged
+///                        not nullptr then contents of this file will be merged
 ///                        with current Neovim runtime.
 static ShaDaWriteResult shada_write(FileDescriptor *const sd_writer,
                                     FileDescriptor *const sd_reader)
@@ -2236,7 +2236,7 @@ static ShaDaWriteResult shada_write(FileDescriptor *const sd_writer,
 
   WriteMergerState *const wms = xcalloc(1, sizeof(*wms));
   bool dump_one_history[HIST_COUNT];
-  const bool dump_global_vars = (find_shada_parameter('!') != NULL);
+  const bool dump_global_vars = (find_shada_parameter('!') != nullptr);
   int max_reg_lines = get_shada_parameter('<');
   if (max_reg_lines < 0) {
     max_reg_lines = get_shada_parameter('"');
@@ -2257,7 +2257,7 @@ static ShaDaWriteResult shada_write(FileDescriptor *const sd_writer,
     if (num_saved > 0) {
       dump_history = true;
       dump_one_history[i] = true;
-      hms_init(&wms->hms[i], (uint8_t)i, (size_t)num_saved, sd_reader != NULL, false);
+      hms_init(&wms->hms[i], (uint8_t)i, (size_t)num_saved, sd_reader != nullptr, false);
     } else {
       dump_one_history[i] = false;
     }
@@ -2313,7 +2313,7 @@ static ShaDaWriteResult shada_write(FileDescriptor *const sd_writer,
   }
 
   // Write buffer list
-  if (find_shada_parameter('%') != NULL) {
+  if (find_shada_parameter('%') != nullptr) {
     ShadaEntry buflist_entry = shada_get_buflist(&removable_bufs);
     if (shada_pack_entry(&packer, buflist_entry, 0) == kSDWriteFailed) {
       xfree(buflist_entry.data.buffer_list.buffers);
@@ -2325,13 +2325,13 @@ static ShaDaWriteResult shada_write(FileDescriptor *const sd_writer,
 
   // Write some of the variables
   if (dump_global_vars) {
-    const void *var_iter = NULL;
+    const void *var_iter = nullptr;
     const Timestamp cur_timestamp = os_time();
     do {
       typval_T vartv;
-      const char *name = NULL;
+      const char *name = nullptr;
       var_iter = var_shada_iter(var_iter, &name, &vartv, VAR_FLAVOUR_SHADA);
-      if (name == NULL) {
+      if (name == nullptr) {
         break;
       }
       switch (vartv.v_type) {
@@ -2342,7 +2342,7 @@ static ShaDaWriteResult shada_write(FileDescriptor *const sd_writer,
       case VAR_DICT: {
         dict_T *di = vartv.vval.v_dict;
         int copyID = get_copyID();
-        if (!set_ref_in_ht(&di->dv_hashtab, copyID, NULL)
+        if (!set_ref_in_ht(&di->dv_hashtab, copyID, nullptr)
             && copyID == di->dv_copyID) {
           tv_clear(&vartv);
           continue;
@@ -2352,7 +2352,7 @@ static ShaDaWriteResult shada_write(FileDescriptor *const sd_writer,
       case VAR_LIST: {
         list_T *l = vartv.vval.v_list;
         int copyID = get_copyID();
-        if (!set_ref_in_list_items(l, copyID, NULL)
+        if (!set_ref_in_list_items(l, copyID, nullptr)
             && copyID == l->lv_copyID) {
           tv_clear(&vartv);
           continue;
@@ -2374,7 +2374,7 @@ static ShaDaWriteResult shada_write(FileDescriptor *const sd_writer,
             .value = tgttv,
           }
         },
-        .additional_data = NULL,
+        .additional_data = nullptr,
       }, max_kbyte)) == kSDWriteFailed) {
         tv_clear(&vartv);
         tv_clear(&tgttv);
@@ -2386,7 +2386,7 @@ static ShaDaWriteResult shada_write(FileDescriptor *const sd_writer,
       if (spe_ret == kSDWriteSuccessful) {
         set_put(cstr_t, &wms->dumped_variables, name);
       }
-    } while (var_iter != NULL);
+    } while (var_iter != nullptr);
   }
 
   if (num_marked_files > 0) {  // Skip if '0 in 'shada'
@@ -2396,7 +2396,7 @@ static ShaDaWriteResult shada_write(FileDescriptor *const sd_writer,
 
   if (dump_one_history[HIST_SEARCH] > 0) {  // Skip if /0 in 'shada'
     const bool search_highlighted = !(no_hlsearch
-                                      || find_shada_parameter('h') != NULL);
+                                      || find_shada_parameter('h') != nullptr);
     const bool search_last_used = search_was_last_used();
 
     // Initialize search pattern
@@ -2410,7 +2410,7 @@ static ShaDaWriteResult shada_write(FileDescriptor *const sd_writer,
     // Initialize substitute replacement string
     SubReplacementString sub;
     sub_get_replacement(&sub);
-    if (sub.sub != NULL) {  // Don't store empty replacement string
+    if (sub.sub != nullptr) {  // Don't store empty replacement string
       wms->replacement = (ShadaEntry) {
         .can_free_entry = false,
         .type = kSDItemSubString,
@@ -2427,7 +2427,7 @@ static ShaDaWriteResult shada_write(FileDescriptor *const sd_writer,
 
   // Initialize global marks
   if (dump_global_marks) {
-    const void *global_mark_iter = NULL;
+    const void *global_mark_iter = nullptr;
     size_t digit_mark_idx = 0;
     do {
       char name = NUL;
@@ -2438,14 +2438,14 @@ static ShaDaWriteResult shada_write(FileDescriptor *const sd_writer,
       }
       const char *fname;
       if (fm.fmark.fnum == 0) {
-        assert(fm.fname != NULL);
+        assert(fm.fname != nullptr);
         if (shada_removable(fm.fname)) {
           continue;
         }
         fname = fm.fname;
       } else {
         const buf_T *const buf = buflist_findnr(fm.fmark.fnum);
-        if (buf == NULL || buf->b_ffname == NULL
+        if (buf == nullptr || buf->b_ffname == nullptr
             || set_has(ptr_t, &removable_bufs, (ptr_t)buf)) {
           continue;
         }
@@ -2469,7 +2469,7 @@ static ShaDaWriteResult shada_write(FileDescriptor *const sd_writer,
       } else {
         wms->global_marks[mark_global_index(name)] = entry;
       }
-    } while (global_mark_iter != NULL);
+    } while (global_mark_iter != nullptr);
   }
 
   // Initialize registers
@@ -2483,15 +2483,15 @@ static ShaDaWriteResult shada_write(FileDescriptor *const sd_writer,
       if (ignore_buf(buf, &removable_bufs)) {
         continue;
       }
-      const void *local_marks_iter = NULL;
+      const void *local_marks_iter = nullptr;
       const char *const fname = buf->b_ffname;
-      cstr_t *map_key = NULL;
+      cstr_t *map_key = nullptr;
       bool new_item = false;
       ptr_t *val = pmap_put_ref(cstr_t)(&wms->file_marks, fname, &map_key, &new_item);
       if (new_item) {
         *map_key = xstrdup(fname);
       }
-      if (*val == NULL) {
+      if (*val == nullptr) {
         *val = xcalloc(1, sizeof(FileMarks));
       }
       FileMarks *const filemarks = *val;
@@ -2518,7 +2518,7 @@ static ShaDaWriteResult shada_write(FileDescriptor *const sd_writer,
         if (fm.timestamp > filemarks->greatest_timestamp) {
           filemarks->greatest_timestamp = fm.timestamp;
         }
-      } while (local_marks_iter != NULL);
+      } while (local_marks_iter != nullptr);
       for (int i = 0; i < buf->b_changelistlen; i++) {
         const fmark_T fm = buf->b_changelist[i];
         filemarks->changes[i] = (ShadaEntry) {
@@ -2541,7 +2541,7 @@ static ShaDaWriteResult shada_write(FileDescriptor *const sd_writer,
     }
   }
 
-  if (sd_reader != NULL) {
+  if (sd_reader != nullptr) {
     const ShaDaWriteResult srww_ret = shada_read_when_writing(sd_reader, srni_flags, max_kbyte, wms,
                                                               &packer);
     if (srww_ret != kSDWriteSuccessful) {
@@ -2563,7 +2563,7 @@ static ShaDaWriteResult shada_write(FileDescriptor *const sd_writer,
           .fname = curbuf->b_ffname,
         }
       },
-      .additional_data = NULL,
+      .additional_data = nullptr,
     });
   }
 
@@ -2662,7 +2662,7 @@ shada_write_exit:
       hms_dealloc(&wms->hms[i]);
     }
   }
-  const char *stored_key = NULL;
+  const char *stored_key = nullptr;
   map_foreach(&wms->file_marks, stored_key, val, {
     xfree((char *)stored_key);
     xfree(val);
@@ -2679,7 +2679,7 @@ shada_write_exit:
 
 /// Write ShaDa file to a given location
 ///
-/// @param[in]  fname    File to write to. If it is NULL or empty then default
+/// @param[in]  fname    File to write to. If it is nullptr or empty then default
 ///                      location is used.
 /// @param[in]  nomerge  If true then old file is ignored.
 ///
@@ -2687,11 +2687,11 @@ shada_write_exit:
 int shada_write_file(const char *const file, bool nomerge)
 {
   char *const fname = shada_filename(file);
-  if (fname == NULL) {
+  if (fname == nullptr) {
     return FAIL;
   }
 
-  char *tempname = NULL;
+  char *tempname = nullptr;
   FileDescriptor sd_writer;
   FileDescriptor sd_reader;
   bool did_open_writer = false;
@@ -2713,7 +2713,7 @@ int shada_write_file(const char *const file, bool nomerge)
       did_open_reader = true;
     }
     tempname = modname(fname, ".tmp.a", false);
-    if (tempname == NULL) {
+    if (tempname == nullptr) {
       nomerge = true;
       goto shada_write_file_nomerge;
     }
@@ -2763,7 +2763,7 @@ shada_write_file_nomerge: {}
       if (!os_isdir(fname)) {
         int ret;
         char *failed_dir;
-        if ((ret = os_mkdir_recurse(fname, 0700, &failed_dir, NULL)) != 0) {
+        if ((ret = os_mkdir_recurse(fname, 0700, &failed_dir, nullptr)) != 0) {
           semsg(_(SERR "Failed to create directory %s "
                   "for writing ShaDa file: %s"),
                 failed_dir, os_strerror(ret));
@@ -2798,7 +2798,7 @@ shada_write_file_nomerge: {}
     verbose_leave();
   }
 
-  const ShaDaWriteResult sw_ret = shada_write(&sd_writer, (nomerge ? NULL : &sd_reader));
+  const ShaDaWriteResult sw_ret = shada_write(&sd_writer, (nomerge ? nullptr : &sd_reader));
   assert(sw_ret != kSDWriteIgnError);
   if (!nomerge) {
     if (did_open_reader) {
@@ -2874,12 +2874,12 @@ shada_write_file_did_not_remove:
 /// @return OK in case of success, FAIL otherwise.
 int shada_read_marks(void)
 {
-  return shada_read_file(NULL, kShaDaWantMarks);
+  return shada_read_file(nullptr, kShaDaWantMarks);
 }
 
 /// Read all information from ShaDa file
 ///
-/// @param[in]  fname    File to write to. If it is NULL or empty then default
+/// @param[in]  fname    File to write to. If it is nullptr or empty then default
 /// @param[in]  forceit  If true, use forced reading (prioritize file contents
 ///                      over current Neovim state).
 /// @param[in]  missing_ok  If true, do not error out when file is missing.
@@ -2895,7 +2895,7 @@ int shada_read_everything(const char *const fname, const bool forceit, const boo
 
 static void shada_free_shada_entry(ShadaEntry *const entry)
 {
-  if (entry == NULL || !entry->can_free_entry) {
+  if (entry == nullptr || !entry->can_free_entry) {
     return;
   }
   switch (entry->type) {
@@ -3094,7 +3094,7 @@ static ShaDaReadResult shada_read_next_item(FileDescriptor *const sd_reader,
   ShaDaReadResult ret = kSDReadStatusMalformed;
 shada_read_next_item_start:
   // Set entry type to kSDItemMissing and also make sure that all pointers in
-  // data union are NULL so they are safe to xfree(). This is needed in case
+  // data union are nullptr so they are safe to xfree(). This is needed in case
   // somebody calls goto shada_read_next_item_error before anything is set in
   // the switch.
   CLEAR_POINTER(entry);
@@ -3113,7 +3113,7 @@ shada_read_next_item_start:
   const uint64_t initial_fpos = sd_reader->bytes_read;
   AdditionalDataBuilder ad = KV_INITIAL_VALUE;
   uint32_t read_additional_array_elements = 0;
-  char *error_alloc = NULL;
+  char *error_alloc = nullptr;
 
   ShaDaReadResult mru_ret;
   if (((mru_ret = msgpack_read_uint64(sd_reader, true, &type_u64))
@@ -3241,7 +3241,7 @@ shada_read_next_item_start:
       semsg(_(READERR("search pattern", "has no pattern")), initial_fpos);
       goto shada_read_next_item_error;
     }
-    entry->data.search_pattern.pat = copy_string(entry->data.search_pattern.pat, NULL);
+    entry->data.search_pattern.pat = copy_string(entry->data.search_pattern.pat, nullptr);
 
     break;
   }
@@ -3275,7 +3275,7 @@ shada_read_next_item_start:
       TO_SLASH(entry->data.filemark.fname);
     }
 
-    if (entry->data.filemark.fname == NULL) {
+    if (entry->data.filemark.fname == nullptr) {
       semsg(_(READERR("mark", "is missing file name")), initial_fpos);
       goto shada_read_next_item_error;
     }
@@ -3305,7 +3305,7 @@ shada_read_next_item_start:
     entry->data.reg.contents_size = it.rc.size;
     entry->data.reg.contents = xmalloc(it.rc.size * sizeof(String));
     for (size_t j = 0; j < it.rc.size; j++) {
-      entry->data.reg.contents[j] = copy_string(it.rc.items[j], NULL);
+      entry->data.reg.contents[j] = copy_string(it.rc.items[j], nullptr);
     }
     kv_destroy(it.rc);
 
@@ -3336,7 +3336,7 @@ shada_read_next_item_start:
       semsg(_(READERR("history", "has wrong history string type")), initial_fpos);
       goto shada_read_next_item_error;
     }
-    if (memchr(item.data, 0, item.size) != NULL) {
+    if (memchr(item.data, 0, item.size) != nullptr) {
       semsg(_(READERR("history", "contains string with zero byte inside")), initial_fpos);
       goto shada_read_next_item_error;
     }
@@ -3476,7 +3476,7 @@ shada_read_next_item_start:
               initial_fpos);
         goto shada_read_next_item_error;
       }
-      if (e->fname == NULL) {
+      if (e->fname == nullptr) {
         semsg(_(RERR "Error while reading ShaDa file: "
                 "buffer list at position %" PRIu64 " "
                 "contains entry that does not have a file name"),
@@ -3534,11 +3534,11 @@ static bool shada_removable(const char *name)
   char part[MAXPATHL + 1];
   bool retval = false;
 
-  char *new_name = home_replace_save(NULL, name);
+  char *new_name = home_replace_save(nullptr, name);
   for (char *p = p_shada; *p;) {
     copy_option_part(&p, part, ARRAY_SIZE(part), ", ");
     if (part[0] == 'r') {
-      size_t n = home_replace(NULL, part + 1, NameBuff, MAXPATHL, true);
+      size_t n = home_replace(nullptr, part + 1, NameBuff, MAXPATHL, true);
       if (mb_strnicmp(NameBuff, new_name, n) == 0) {
         retval = true;
         break;
@@ -3560,7 +3560,7 @@ static inline size_t shada_init_jumps(ShadaEntry *jumps, Set(ptr_t) *const remov
 {
   // Initialize jump list
   size_t jumps_size = 0;
-  const void *jump_iter = NULL;
+  const void *jump_iter = nullptr;
   setpcmark();
   cleanup_jumplist(curwin, false);
   do {
@@ -3573,13 +3573,13 @@ static inline size_t shada_init_jumps(ShadaEntry *jumps, Set(ptr_t) *const remov
              curwin->w_jumplistlen);
       continue;
     }
-    const buf_T *const buf = (fm.fmark.fnum == 0 ? NULL : buflist_findnr(fm.fmark.fnum));
-    if (buf != NULL ? ignore_buf(buf, removable_bufs) : fm.fmark.fnum != 0) {
+    const buf_T *const buf = (fm.fmark.fnum == 0 ? nullptr : buflist_findnr(fm.fmark.fnum));
+    if (buf != nullptr ? ignore_buf(buf, removable_bufs) : fm.fmark.fnum != 0) {
       continue;
     }
     const char *const fname =
-      (fm.fmark.fnum == 0 ? (fm.fname == NULL ? NULL : fm.fname) : buf ? buf->b_ffname : NULL);
-    if (fname == NULL) {
+      (fm.fmark.fnum == 0 ? (fm.fname == nullptr ? nullptr : fm.fname) : buf ? buf->b_ffname : nullptr);
+    if (fname == nullptr) {
       continue;
     }
     jumps[jumps_size++] = (ShadaEntry) {
@@ -3595,7 +3595,7 @@ static inline size_t shada_init_jumps(ShadaEntry *jumps, Set(ptr_t) *const remov
       },
       .additional_data = fm.fmark.additional_data,
     };
-  } while (jump_iter != NULL);
+  } while (jump_iter != nullptr);
   return jumps_size;
 }
 
@@ -3664,14 +3664,14 @@ String shada_encode_gvars(void)
   FUNC_ATTR_NONNULL_ALL
 {
   PackerBuffer packer = packer_string_buffer();
-  const void *var_iter = NULL;
+  const void *var_iter = nullptr;
   const Timestamp cur_timestamp = os_time();
   do {
     typval_T vartv;
-    const char *name = NULL;
+    const char *name = nullptr;
     var_iter = var_shada_iter(var_iter, &name, &vartv,
                               VAR_FLAVOUR_DEFAULT | VAR_FLAVOUR_SESSION | VAR_FLAVOUR_SHADA);
-    if (name == NULL) {
+    if (name == nullptr) {
       break;
     }
     if (vartv.v_type != VAR_FUNC && vartv.v_type != VAR_PARTIAL) {
@@ -3686,7 +3686,7 @@ String shada_encode_gvars(void)
             .value = tgttv,
           }
         },
-        .additional_data = NULL,
+        .additional_data = nullptr,
       }, 0);
       if (kSDWriteFailed == r) {
         abort();
@@ -3694,7 +3694,7 @@ String shada_encode_gvars(void)
       tv_clear(&tgttv);
     }
     tv_clear(&vartv);
-  } while (var_iter != NULL);
+  } while (var_iter != nullptr);
   return packer_take_string(&packer);
 }
 
@@ -3722,7 +3722,7 @@ void shada_read_string(String string, const int flags)
 int get_shada_parameter(int type)
 {
   char *p = find_shada_parameter(type);
-  if (p != NULL && ascii_isdigit(*p)) {
+  if (p != nullptr && ascii_isdigit(*p)) {
     return atoi(p);
   }
   return -1;
@@ -3730,7 +3730,7 @@ int get_shada_parameter(int type)
 
 /// Find the parameter represented by the given character (eg ''', ':', '"', or
 /// '/') in the 'shada' option and return a pointer to the string after it.
-/// Return NULL if the parameter is not specified in the string.
+/// Return nullptr if the parameter is not specified in the string.
 char *find_shada_parameter(int type)
 {
   for (char *p = p_shada; *p; p++) {
@@ -3741,11 +3741,11 @@ char *find_shada_parameter(int type)
       break;
     }
     p = vim_strchr(p, ',');         // skip until next ','
-    if (p == NULL) {                // hit the end without finding parameter
+    if (p == nullptr) {                // hit the end without finding parameter
       break;
     }
   }
-  return NULL;
+  return nullptr;
 }
 
 /// Read marks for the current buffer from the ShaDa file, when we support
@@ -3753,7 +3753,7 @@ char *find_shada_parameter(int type)
 void check_marks_read(void)
 {
   if (!curbuf->b_marks_read && get_shada_parameter('\'') > 0
-      && curbuf->b_ffname != NULL) {
+      && curbuf->b_ffname != nullptr) {
     shada_read_marks();
   }
 

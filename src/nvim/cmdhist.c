@@ -32,7 +32,7 @@
 
 #include "cmdhist.c.generated.h"
 
-static histentry_T *(history[HIST_COUNT]) = { NULL, NULL, NULL, NULL, NULL };
+static histentry_T *(history[HIST_COUNT]) = { nullptr, nullptr, nullptr, nullptr, nullptr };
 static int hisidx[HIST_COUNT] = { -1, -1, -1, -1, -1 };  ///< lastused entry
 /// identifying (unique) number of newest history entry
 static int hisnum[HIST_COUNT] = { 0, 0, 0, 0, 0 };
@@ -98,7 +98,7 @@ static char *(history_names[]) = {
   "expr",
   "input",
   "debug",
-  NULL
+  nullptr
 };
 
 /// Function given to ExpandGeneric() to obtain the possible first
@@ -120,7 +120,7 @@ char *get_history_arg(expand_T *xp, int idx)
   if (idx == short_names_count + history_name_count) {
     return "all";
   }
-  return NULL;
+  return nullptr;
 }
 
 /// Initialize command line history.
@@ -141,7 +141,7 @@ void init_history(void)
   for (int type = 0; type < HIST_COUNT; type++) {
     histentry_T *temp = (newlen > 0
                          ? xmalloc((size_t)newlen * sizeof(*temp))
-                         : NULL);
+                         : nullptr);
 
     int j = hisidx[type];
     if (j >= 0) {
@@ -212,7 +212,7 @@ static int in_history(int type, const char *str, int move_to_front, int sep)
   }
   int i = hisidx[type];
   do {
-    if (history[type][i].hisstr == NULL) {
+    if (history[type][i].hisstr == nullptr) {
       return false;
     }
 
@@ -251,7 +251,7 @@ static int in_history(int type, const char *str, int move_to_front, int sep)
   history[type][i].hisstr = save_hisstr;
   history[type][i].hisstrlen = save_hisstrlen;
   history[type][i].timestamp = os_time();
-  history[type][i].additional_data = NULL;
+  history[type][i].additional_data = nullptr;
   return true;
 }
 
@@ -275,13 +275,13 @@ static HistoryType get_histtype(const char *const name, const size_t len, const 
     return return_default ? HIST_DEFAULT : hist_char2type(get_cmdline_firstc());
   }
 
-  for (HistoryType i = 0; history_names[i] != NULL; i++) {
+  for (HistoryType i = 0; history_names[i] != nullptr; i++) {
     if (STRNICMP(name, history_names[i], len) == 0) {
       return i;
     }
   }
 
-  if (vim_strchr(":=@>?/", (uint8_t)name[0]) != NULL && len == 1) {
+  if (vim_strchr(":=@>?/", (uint8_t)name[0]) != nullptr && len == 1) {
     return hist_char2type(name[0]);
   }
 
@@ -338,7 +338,7 @@ void add_to_history(int histype, const char *new_entry, size_t new_entrylen, boo
   // Store the separator after the NUL of the string.
   hisptr->hisstr = xstrnsave(new_entry, new_entrylen + 2);
   hisptr->timestamp = os_time();
-  hisptr->additional_data = NULL;
+  hisptr->additional_data = nullptr;
   hisptr->hisstr[new_entrylen + 1] = (char)sep;
   hisptr->hisstrlen = new_entrylen;
 
@@ -387,7 +387,7 @@ static int calc_hist_idx(int histype, int num)
         wrapped = true;
       }
     }
-    if (i >= 0 && hist[i].hisnum == num && hist[i].hisstr != NULL) {
+    if (i >= 0 && hist[i].hisnum == num && hist[i].hisstr != nullptr) {
       return i;
     }
   } else if (-num <= hislen) {
@@ -395,7 +395,7 @@ static int calc_hist_idx(int histype, int num)
     if (i < 0) {
       i += hislen;
     }
-    if (hist[i].hisstr != NULL) {
+    if (hist[i].hisstr != nullptr) {
       return i;
     }
   }
@@ -435,7 +435,7 @@ static int del_history_entry(int histype, char *str)
   const int idx = hisidx[histype];
   regmatch_T regmatch;
   regmatch.regprog = vim_regcomp(str, RE_MAGIC + RE_STRING);
-  if (regmatch.regprog == NULL) {
+  if (regmatch.regprog == nullptr) {
     return false;
   }
 
@@ -446,7 +446,7 @@ static int del_history_entry(int histype, char *str)
   int last = idx;
   do {
     histentry_T *hisptr = &history[histype][i];
-    if (hisptr->hisstr == NULL) {
+    if (hisptr->hisstr == nullptr) {
       break;
     }
     if (vim_regexec(&regmatch, hisptr->hisstr, 0)) {
@@ -466,7 +466,7 @@ static int del_history_entry(int histype, char *str)
     }
   } while (i != idx);
 
-  if (history[histype][idx].hisstr == NULL) {
+  if (history[histype][idx].hisstr == nullptr) {
     hisidx[histype] = -1;
   }
 
@@ -512,8 +512,8 @@ void f_histadd(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
   if (check_secure()) {
     return;
   }
-  const char *str = tv_get_string_chk(&argvars[0]);  // NULL on type error
-  HistoryType histype = str != NULL ? get_histtype(str, strlen(str), false) : HIST_INVALID;
+  const char *str = tv_get_string_chk(&argvars[0]);  // nullptr on type error
+  HistoryType histype = str != nullptr ? get_histtype(str, strlen(str), false) : HIST_INVALID;
   if (histype == HIST_INVALID) {
     return;
   }
@@ -533,8 +533,8 @@ void f_histadd(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
 void f_histdel(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
 {
   int n;
-  const char *const str = tv_get_string_chk(&argvars[0]);  // NULL on type error
-  if (str == NULL) {
+  const char *const str = tv_get_string_chk(&argvars[0]);  // nullptr on type error
+  if (str == nullptr) {
     n = 0;
   } else if (argvars[1].v_type == VAR_UNKNOWN) {
     // only one argument: clear entire history
@@ -555,16 +555,16 @@ void f_histdel(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
 /// "histget()" function
 void f_histget(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
 {
-  const char *const str = tv_get_string_chk(&argvars[0]);  // NULL on type error
-  if (str == NULL) {
-    rettv->vval.v_string = NULL;
+  const char *const str = tv_get_string_chk(&argvars[0]);  // nullptr on type error
+  if (str == nullptr) {
+    rettv->vval.v_string = nullptr;
   } else {
     int idx;
     HistoryType type = get_histtype(str, strlen(str), false);
     if (argvars[1].v_type == VAR_UNKNOWN) {
       idx = get_history_idx(type);
     } else {
-      idx = (int)tv_get_number_chk(&argvars[1], NULL);  // -1 on type error
+      idx = (int)tv_get_number_chk(&argvars[1], nullptr);  // -1 on type error
     }
     idx = calc_hist_idx(type, idx);
     if (idx < 0) {
@@ -581,7 +581,7 @@ void f_histget(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
 void f_histnr(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
 {
   const char *const histname = tv_get_string_chk(&argvars[0]);
-  HistoryType i = histname == NULL
+  HistoryType i = histname == nullptr
                   ? HIST_INVALID
                   : get_histtype(histname, strlen(histname), false);
   if (i != HIST_INVALID) {
@@ -610,7 +610,7 @@ void ex_history(exarg_T *eap)
   if (!(ascii_isdigit(*arg) || *arg == '-' || *arg == ',')) {
     end = arg;
     while (ASCII_ISALPHA(*end)
-           || vim_strchr(":=@>/?", (uint8_t)(*end)) != NULL) {
+           || vim_strchr(":=@>/?", (uint8_t)(*end)) != nullptr) {
       end++;
     }
     histype1 = get_histtype(arg, (size_t)(end - arg), false);
@@ -638,7 +638,7 @@ void ex_history(exarg_T *eap)
   }
 
   for (; !got_int && histype1 <= histype2; histype1++) {
-    assert(history_names[histype1] != NULL);
+    assert(history_names[histype1] != nullptr);
     vim_snprintf(IObuff, IOSIZE, "\n      #  %s history", history_names[histype1]);
     msg_puts_title(IObuff);
     int idx = hisidx[histype1];
@@ -656,7 +656,7 @@ void ex_history(exarg_T *eap)
         if (i == hislen) {
           i = 0;
         }
-        if (hist[i].hisstr != NULL
+        if (hist[i].hisstr != nullptr
             && hist[i].hisnum >= j && hist[i].hisnum <= k
             && !message_filtered(hist[i].hisstr)) {
           msg_putchar('\n');
@@ -684,7 +684,7 @@ void ex_history(exarg_T *eap)
 ///
 /// @param[in]   iter          Pointer to the last history entry.
 /// @param[in]   history_type  Type of the history (HIST_*). Ignored if iter
-///                            parameter is not NULL.
+///                            parameter is not nullptr.
 /// @param[in]   zero          If true then zero (but not free) returned items.
 ///
 ///                            @warning When using this parameter user is
@@ -696,30 +696,30 @@ void ex_history(exarg_T *eap)
 ///                                     in this case.
 /// @param[out]  hist          Next history entry.
 ///
-/// @return Pointer used in next iteration or NULL to indicate that iteration
+/// @return Pointer used in next iteration or nullptr to indicate that iteration
 ///         was finished.
 const void *hist_iter(const void *const iter, const uint8_t history_type, const bool zero,
                       histentry_T *const hist)
   FUNC_ATTR_WARN_UNUSED_RESULT FUNC_ATTR_NONNULL_ARG(4)
 {
   *hist = (histentry_T) {
-    .hisstr = NULL
+    .hisstr = nullptr
   };
   if (hisidx[history_type] == -1) {
-    return NULL;
+    return nullptr;
   }
   histentry_T *const hstart = &(history[history_type][0]);
   histentry_T *const hlast = &(history[history_type][hisidx[history_type]]);
   const histentry_T *const hend = &(history[history_type][hislen - 1]);
   histentry_T *hiter;
-  if (iter == NULL) {
+  if (iter == nullptr) {
     histentry_T *hfirst = hlast;
     do {
       hfirst++;
       if (hfirst > hend) {
         hfirst = hstart;
       }
-      if (hfirst->hisstr != NULL) {
+      if (hfirst->hisstr != nullptr) {
         break;
       }
     } while (hfirst != hlast);
@@ -727,15 +727,15 @@ const void *hist_iter(const void *const iter, const uint8_t history_type, const 
   } else {
     hiter = (histentry_T *)iter;
   }
-  if (hiter == NULL) {
-    return NULL;
+  if (hiter == nullptr) {
+    return nullptr;
   }
   *hist = *hiter;
   if (zero) {
     CLEAR_POINTER(hiter);
   }
   if (hiter == hlast) {
-    return NULL;
+    return nullptr;
   }
   hiter++;
   return (const void *)((hiter > hend) ? hstart : hiter);
@@ -749,7 +749,7 @@ const void *hist_iter(const void *const iter, const uint8_t history_type, const 
 /// @param[out]  new_hisnum    Location where last history number in the new
 ///                            history should be saved.
 ///
-/// @return Pointer to the array or NULL.
+/// @return Pointer to the array or nullptr.
 histentry_T *hist_get_array(const uint8_t history_type, int **const new_hisidx,
                             int **const new_hisnum)
   FUNC_ATTR_WARN_UNUSED_RESULT FUNC_ATTR_NONNULL_ALL

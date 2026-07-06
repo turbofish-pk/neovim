@@ -75,7 +75,7 @@ void hash_clear_all(hashtab_T *ht, unsigned off)
 
 /// Find item for given "key" in hashtable "ht".
 ///
-/// @param key The key of the looked-for item. Must not be NULL.
+/// @param key The key of the looked-for item. Must not be nullptr.
 ///
 /// @return Pointer to the hash item corresponding to the given key.
 ///         If not found, then return pointer to the empty item that would be
@@ -90,7 +90,7 @@ hashitem_T *hash_find(const hashtab_T *const ht, const char *const key)
 /// Like hash_find, but key is not NUL-terminated
 ///
 /// @param[in]  ht  Hashtab to look in.
-/// @param[in]  key  Key of the looked-for item. Must not be NULL.
+/// @param[in]  key  Key of the looked-for item. Must not be nullptr.
 /// @param[in]  len  Key length.
 ///
 /// @return Pointer to the hash item corresponding to the given key.
@@ -106,7 +106,7 @@ hashitem_T *hash_find_len(const hashtab_T *const ht, const char *const key, cons
 
 /// Like hash_find(), but caller computes "hash".
 ///
-/// @param[in]  key  The key of the looked-for item. Must not be NULL.
+/// @param[in]  key  The key of the looked-for item. Must not be nullptr.
 /// @param[in]  key_len  Key length.
 /// @param[in]  hash  The precomputed hash for the key.
 ///
@@ -129,11 +129,11 @@ hashitem_T *hash_lookup(const hashtab_T *const ht, const char *const key, const 
   hash_T idx = hash & ht->ht_mask;
   hashitem_T *hi = &ht->ht_array[idx];
 
-  if (hi->hi_key == NULL) {
+  if (hi->hi_key == nullptr) {
     return hi;
   }
 
-  hashitem_T *freeitem = NULL;
+  hashitem_T *freeitem = nullptr;
   if (hi->hi_key == HI_KEY_REMOVED) {
     freeitem = hi;
   } else if ((hi->hi_hash == hash)
@@ -146,7 +146,7 @@ hashitem_T *hash_lookup(const hashtab_T *const ht, const char *const key, const 
   // to step through the table starts with large steps, gradually becoming
   // smaller down to (1/4 table size + 1). This means it goes through all
   // table entries in the end.
-  // When we run into a NULL key it's clear that the key isn't there.
+  // When we run into a nullptr key it's clear that the key isn't there.
   // Return the first available slot found (can be a slot of a removed
   // item).
   for (hash_T perturb = hash;; perturb >>= PERTURB_SHIFT) {
@@ -157,8 +157,8 @@ hashitem_T *hash_lookup(const hashtab_T *const ht, const char *const key, const 
     idx = 5 * idx + perturb + 1;
     hi = &ht->ht_array[idx & ht->ht_mask];
 
-    if (hi->hi_key == NULL) {
-      return freeitem == NULL ? hi : freeitem;
+    if (hi->hi_key == nullptr) {
+      return freeitem == nullptr ? hi : freeitem;
     }
 
     if ((hi->hi_hash == hash)
@@ -168,7 +168,7 @@ hashitem_T *hash_lookup(const hashtab_T *const ht, const char *const key, const 
       return hi;
     }
 
-    if ((hi->hi_key == HI_KEY_REMOVED) && (freeitem == NULL)) {
+    if ((hi->hi_key == HI_KEY_REMOVED) && (freeitem == nullptr)) {
       freeitem = hi;
     }
   }
@@ -194,7 +194,7 @@ void hash_debug_results(void)
 /// Add (empty) item for key `key` to hashtable `ht`.
 ///
 /// @param key Pointer to the key for the new item. The key has to be contained
-///            in the new item (@see hashitem_T). Must not be NULL.
+///            in the new item (@see hashitem_T). Must not be nullptr.
 ///
 /// @return OK   if success.
 ///         FAIL if key already present
@@ -215,13 +215,13 @@ int hash_add(hashtab_T *ht, char *key)
 /// @param hi   The hash item to be used. Must have been obtained through
 ///             hash_lookup() and point to an empty item.
 /// @param key  Pointer to the key for the new item. The key has to be contained
-///             in the new item (@see hashitem_T). Must not be NULL.
+///             in the new item (@see hashitem_T). Must not be nullptr.
 /// @param hash The precomputed hash value for the key.
 void hash_add_item(hashtab_T *ht, hashitem_T *hi, char *key, hash_T hash)
 {
   ht->ht_used++;
   ht->ht_changed++;
-  if (hi->hi_key == NULL) {
+  if (hi->hi_key == nullptr) {
     ht->ht_filled++;
   }
   hi->hi_key = key;
@@ -291,7 +291,7 @@ static void hash_may_resize(hashtab_T *ht, size_t minitems)
   size_t minsize;
   const size_t oldsize = ht->ht_mask + 1;
   if (minitems == 0) {
-    // Return quickly for small tables with at least two NULL items.
+    // Return quickly for small tables with at least two nullptr items.
     // items are required for the lookup to decide a key isn't there.
     if ((ht->ht_filled < HT_INIT_SIZE - 1)
         && (ht->ht_array == ht->ht_smallarray)) {
@@ -365,14 +365,14 @@ static void hash_may_resize(hashtab_T *ht, size_t minitems)
     }
     // The algorithm to find the spot to add the item is identical to
     // the algorithm to find an item in hash_lookup(). But we only
-    // need to search for a NULL key, thus it's simpler.
+    // need to search for a nullptr key, thus it's simpler.
     hash_T newi = olditem->hi_hash & newmask;
     hashitem_T *newitem = &newarray[newi];
-    if (newitem->hi_key != NULL) {
+    if (newitem->hi_key != nullptr) {
       for (hash_T perturb = olditem->hi_hash;; perturb >>= PERTURB_SHIFT) {
         newi = 5 * newi + perturb + 1;
         newitem = &newarray[newi & newmask];
-        if (newitem->hi_key == NULL) {
+        if (newitem->hi_key == nullptr) {
           break;
         }
       }

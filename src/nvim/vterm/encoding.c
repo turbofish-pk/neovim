@@ -265,5 +265,5 @@ VTermEncoding *vterm_lookup_encoding(VTermEncodingType type, char designation)
       return encodings[i].enc;
     }
   }
-  return NULL;
+  return nullptr;
 }

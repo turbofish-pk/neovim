@@ -64,7 +64,7 @@ Integer nvim_create_namespace(String name)
   }
   id = next_namespace_id++;
   if (name.size > 0) {
-    String name_alloc = copy_string(name, NULL);
+    String name_alloc = copy_string(name, nullptr);
     map_put(String, int)(&namespace_ids, name_alloc, id);
   }
   return (Integer)id;
@@ -114,7 +114,7 @@ Array virt_text_to_array(VirtText vt, bool hl_name, Arena *arena)
   for (size_t i = 0; i < kv_size(vt); i++) {
     size_t j = i;
     for (; j < kv_size(vt); j++) {
-      if (kv_A(vt, j).text != NULL) {
+      if (kv_A(vt, j).text != nullptr) {
         break;
       }
     }
@@ -501,7 +501,7 @@ Integer nvim_buf_set_extmark(Buffer buf, Integer ns_id, Integer line, Integer co
   DecorSignHighlight sign = DECOR_SIGN_HIGHLIGHT_INIT;
   DecorVirtText virt_text = DECOR_VIRT_TEXT_INIT;
   DecorVirtText virt_lines = DECOR_VIRT_LINES_INIT;
-  char *url = NULL;
+  char *url = nullptr;
   bool has_hl = false;
   bool has_hl_multiple = false;
 
@@ -516,7 +516,7 @@ Integer nvim_buf_set_extmark(Buffer buf, Integer ns_id, Integer line, Integer co
 
   uint32_t id = 0;
   if (HAS_KEY(opts, set_extmark, id)) {
-    VALIDATE_EXP((opts->id > 0), "id", "positive Integer", NULL, {
+    VALIDATE_EXP((opts->id > 0), "id", "positive Integer", nullptr, {
       goto error;
     });
 
@@ -731,7 +731,7 @@ Integer nvim_buf_set_extmark(Buffer buf, Integer ns_id, Integer line, Integer co
 
   if (HAS_KEY(opts, set_extmark, sign_text)) {
     sign.text[0] = 0;
-    VALIDATE_S(init_sign_text(NULL, sign.text, opts->sign_text.data), "sign_text", "", {
+    VALIDATE_S(init_sign_text(nullptr, sign.text, opts->sign_text.data), "sign_text", "", {
       goto error;
     });
     sign.flags |= kSHIsSign;
@@ -831,10 +831,10 @@ Integer nvim_buf_set_extmark(Buffer buf, Integer ns_id, Integer line, Integer co
     }
 
     if (kv_size(virt_text.data.virt_text)) {
-      decor_range_add_virt(&decor_state, r, c, line2, col2, decor_put_vt(virt_text, NULL), true);
+      decor_range_add_virt(&decor_state, r, c, line2, col2, decor_put_vt(virt_text, nullptr), true);
     }
     if (kv_size(virt_lines.data.virt_lines)) {
-      decor_range_add_virt(&decor_state, r, c, line2, col2, decor_put_vt(virt_lines, NULL), true);
+      decor_range_add_virt(&decor_state, r, c, line2, col2, decor_put_vt(virt_lines, nullptr), true);
     }
     if (has_hl) {
       DecorSignHighlight sh = decor_sh_from_inline(hl);
@@ -851,7 +851,7 @@ Integer nvim_buf_set_extmark(Buffer buf, Integer ns_id, Integer line, Integer co
 
     uint16_t decor_flags = 0;
 
-    DecorVirtText *decor_alloc = NULL;
+    DecorVirtText *decor_alloc = nullptr;
     if (kv_size(virt_text.data.virt_text)) {
       decor_alloc = decor_put_vt(virt_text, decor_alloc);
       if (virt_text.pos == kVPosInline) {
@@ -896,7 +896,7 @@ Integer nvim_buf_set_extmark(Buffer buf, Integer ns_id, Integer line, Integer co
     }
 
     DecorInline decor = DECOR_INLINE_INIT;
-    if (decor_alloc || decor_indexed != DECOR_ID_INVALID || url != NULL
+    if (decor_alloc || decor_indexed != DECOR_ID_INVALID || url != nullptr
         || schar_high(hl.conceal_char)) {
       if (has_hl) {
         DecorSignHighlight sh = decor_sh_from_inline(hl);
@@ -929,7 +929,7 @@ Integer nvim_buf_set_extmark(Buffer buf, Integer ns_id, Integer line, Integer co
 error:
   clear_virttext(&virt_text.data.virt_text);
   clear_virtlines(&virt_lines.data.virt_lines);
-  if (url != NULL) {
+  if (url != nullptr) {
     xfree(url);
   }
 
@@ -1063,7 +1063,7 @@ void nvim_set_decoration_provider(Integer ns_id, Dict(set_decoration_provider) *
   FUNC_API_SINCE(7) FUNC_API_LUA_ONLY
 {
   DecorProvider *p = get_decor_provider((NS)ns_id, true);
-  assert(p != NULL);
+  assert(p != nullptr);
   decor_provider_clear(p);
 
   // regardless of what happens, it seems good idea to redraw
@@ -1083,7 +1083,7 @@ void nvim_set_decoration_provider(Integer ns_id, Dict(set_decoration_provider) *
     { "_on_hl_def", &opts->_on_hl_def, &p->hl_def },
     { "_on_spell_nav", &opts->_on_spell_nav, &p->spell_nav },
     { "_on_conceal_line", &opts->_on_conceal_line, &p->conceal_line },
-    { NULL, NULL, NULL },
+    { nullptr, nullptr, nullptr },
   };
 
   for (size_t i = 0; cbs[i].source && cbs[i].dest && cbs[i].name; i++) {
@@ -1145,7 +1145,7 @@ static bool extmark_get_index_from_obj(buf_T *buf, Integer ns_id, Object obj, in
     VALIDATE_EXP((pos.size == 2
                   && pos.items[0].type == kObjectTypeInteger
                   && pos.items[1].type == kObjectTypeInteger),
-                 "mark position", "2 Integer items", NULL, {
+                 "mark position", "2 Integer items", nullptr, {
       return false;
     });
 
@@ -1155,7 +1155,7 @@ static bool extmark_get_index_from_obj(buf_T *buf, Integer ns_id, Object obj, in
     *col = (colnr_T)(pos_col >= 0 ? pos_col : MAXCOL);
     return true;
   } else {
-    VALIDATE_EXP(false, "mark position", "mark id Integer or 2-item Array", NULL, {
+    VALIDATE_EXP(false, "mark position", "mark id Integer or 2-item Array", nullptr, {
       return false;
     });
   }
@@ -1188,7 +1188,7 @@ VirtText parse_virt_text(Array chunks, Error *err, int *width, bool untab)
             goto free_exit;
           }
           if (j < arr.size - 1) {
-            kv_push(virt_text, ((VirtTextChunk){ .text = NULL, .hl_id = hl_id }));
+            kv_push(virt_text, ((VirtTextChunk){ .text = nullptr, .hl_id = hl_id }));
           }
         }
       } else {
@@ -1205,7 +1205,7 @@ VirtText parse_virt_text(Array chunks, Error *err, int *width, bool untab)
     kv_push(virt_text, ((VirtTextChunk){ .text = text, .hl_id = hl_id }));
   }
 
-  if (width != NULL) {
+  if (width != nullptr) {
     *width = w;
   }
   return virt_text;

@@ -80,17 +80,17 @@ int proc_spawn(Proc *proc, bool in, bool out, bool err)
 
   if (status) {
     if (in) {
-      uv_close((uv_handle_t *)&proc->in.uv.pipe, NULL);
+      uv_close((uv_handle_t *)&proc->in.uv.pipe, nullptr);
     }
     if (out) {
-      uv_close((uv_handle_t *)&proc->out.s.uv.pipe, NULL);
+      uv_close((uv_handle_t *)&proc->out.s.uv.pipe, nullptr);
     }
     if (err) {
-      uv_close((uv_handle_t *)&proc->err.s.uv.pipe, NULL);
+      uv_close((uv_handle_t *)&proc->err.s.uv.pipe, nullptr);
     }
 
     if (proc->type == kProcTypeUv) {
-      uv_close((uv_handle_t *)&(((LibuvProc *)proc)->uv), NULL);
+      uv_close((uv_handle_t *)&(((LibuvProc *)proc)->uv), nullptr);
     } else {
       proc_close(proc);
     }
@@ -100,21 +100,21 @@ int proc_spawn(Proc *proc, bool in, bool out, bool err)
   }
 
   if (in) {
-    stream_init(NULL, &proc->in, -1, (uv_stream_t *)&proc->in.uv.pipe);
+    stream_init(nullptr, &proc->in, -1, (uv_stream_t *)&proc->in.uv.pipe);
     proc->in.internal_data = proc;
     proc->in.internal_close_cb = on_proc_stream_close;
     proc->refcount++;
   }
 
   if (out) {
-    stream_init(NULL, &proc->out.s, -1, (uv_stream_t *)&proc->out.s.uv.pipe);
+    stream_init(nullptr, &proc->out.s, -1, (uv_stream_t *)&proc->out.s.uv.pipe);
     proc->out.s.internal_data = proc;
     proc->out.s.internal_close_cb = on_proc_stream_close;
     proc->refcount++;
   }
 
   if (err) {
-    stream_init(NULL, &proc->err.s, -1, (uv_stream_t *)&proc->err.s.uv.pipe);
+    stream_init(nullptr, &proc->err.s, -1, (uv_stream_t *)&proc->err.s.uv.pipe);
     proc->err.s.internal_data = proc;
     proc->err.s.internal_close_cb = on_proc_stream_close;
     proc->refcount++;
@@ -243,9 +243,9 @@ void proc_stop(Proc *proc) FUNC_ATTR_NONNULL_ALL
 /// Frees process-owned resources.
 void proc_free(Proc *proc) FUNC_ATTR_NONNULL_ALL
 {
-  if (proc->argv != NULL) {
+  if (proc->argv != nullptr) {
     shell_free_argv(proc->argv);
-    proc->argv = NULL;
+    proc->argv = nullptr;
   }
 }
 
@@ -429,7 +429,7 @@ static void exit_event(void **argv)
       os_exit(status);
     } else {
       assert(status == 0);  // Called from rpc_close(), which passes 0 as status.
-      preserve_exit(NULL);
+      preserve_exit(nullptr);
     }
   }
 }

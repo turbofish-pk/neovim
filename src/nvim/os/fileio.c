@@ -138,7 +138,7 @@ void file_open_buffer(FileDescriptor *ret_fp, char *data, size_t len)
   ret_fp->non_blocking = false;
   ret_fp->fd = -1;
   ret_fp->eof = true;
-  ret_fp->buffer = NULL;  // we don't take ownership
+  ret_fp->buffer = nullptr;  // we don't take ownership
   ret_fp->read_pos = data;
   ret_fp->write_pos = data + len;
   ret_fp->bytes_read = 0;
@@ -219,7 +219,7 @@ int file_flush(FileDescriptor *fp)
 /// Read from file
 ///
 /// @param[in,out]  fp  File to work with.
-/// @param[out]  ret_buf  Buffer to read to. Must not be NULL.
+/// @param[out]  ret_buf  Buffer to read to. Must not be nullptr.
 /// @param[in]  size  Number of bytes to read. Buffer must have at least ret_buf
 ///                   bytes.
 ///
@@ -306,7 +306,7 @@ ptrdiff_t file_read(FileDescriptor *const fp, char *const ret_buf, const size_t 
 
 /// try to read already buffered data in place
 ///
-/// @return NULL if enough data is not available
+/// @return nullptr if enough data is not available
 ///         valid pointer to chunk of "size". pointer becomes invalid in the next "file_read" call!
 char *file_try_read_buffered(FileDescriptor *const fp, const size_t size)
   FUNC_ATTR_NONNULL_ALL FUNC_ATTR_WARN_UNUSED_RESULT
@@ -317,13 +317,13 @@ char *file_try_read_buffered(FileDescriptor *const fp, const size_t size)
     fp->bytes_read += size;
     return ret;
   }
-  return NULL;
+  return nullptr;
 }
 
 /// Write to a file
 ///
 /// @param[in]  fd  File descriptor to write to.
-/// @param[in]  buf  Data to write. May be NULL if size is zero.
+/// @param[in]  buf  Data to write. May be nullptr if size is zero.
 /// @param[in]  size  Amount of bytes to write.
 ///
 /// @return Number of bytes written or libuv error code (< 0).

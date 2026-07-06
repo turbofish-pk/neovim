@@ -238,11 +238,11 @@ bool cause_errthrow(const char *mesg, bool multiline, bool concat, bool severe, 
     // Thus, the actual throw is made after the failing command has
     // returned.  -  Throw only the first of several errors in a row, except
     // a severe error is following.
-    if (msg_list != NULL) {
+    if (msg_list != nullptr) {
       msglist_T **plist = msg_list;
-      while (*plist != NULL) {
+      while (*plist != nullptr) {
         // Concatenate (a multihl message) instead.
-        if ((*plist)->next == NULL && concat) {
+        if ((*plist)->next == nullptr && concat) {
           (*plist)->msg = xrealloc((*plist)->msg, strlen((*plist)->msg) + strlen(mesg) + 1);
           (*plist)->throw_msg = strcat((*plist)->msg, mesg);
           return true;
@@ -253,8 +253,8 @@ bool cause_errthrow(const char *mesg, bool multiline, bool concat, bool severe, 
       elem = xmalloc(sizeof(msglist_T));
       elem->msg = xstrdup(mesg);
       elem->multiline = multiline;
-      elem->next = NULL;
-      elem->throw_msg = NULL;
+      elem->next = nullptr;
+      elem->throw_msg = nullptr;
       *plist = elem;
       if (plist == msg_list || severe) {
         // Skip the extra "Vim " prefix for message "E458".
@@ -284,7 +284,7 @@ bool cause_errthrow(const char *mesg, bool multiline, bool concat, bool severe, 
 static void free_msglist(msglist_T *l)
 {
   msglist_T *messages = l;
-  while (messages != NULL) {
+  while (messages != nullptr) {
     msglist_T *next = messages->next;
     xfree(messages->msg);
     xfree(messages->sfile);
@@ -294,15 +294,15 @@ static void free_msglist(msglist_T *l)
 }
 
 /// Free global "*msg_list" and the messages it contains, then set "*msg_list"
-/// to NULL.
+/// to nullptr.
 void free_global_msglist(void)
 {
   free_msglist(*msg_list);
-  *msg_list = NULL;
+  *msg_list = nullptr;
 }
 
 /// Throw the message specified in the call to cause_errthrow() above as an
-/// error exception.  If cstack is NULL, postpone the throw until do_cmdline()
+/// error exception.  If cstack is nullptr, postpone the throw until do_cmdline()
 /// has returned (see do_one_cmd()).
 void do_errthrow(cstack_T *cstack, char *cmdname)
 {
@@ -315,20 +315,20 @@ void do_errthrow(cstack_T *cstack, char *cmdname)
 
   // If no exception is to be thrown or the conversion should be done after
   // returning to a previous invocation of do_one_cmd(), do nothing.
-  if (msg_list == NULL || *msg_list == NULL) {
+  if (msg_list == nullptr || *msg_list == nullptr) {
     return;
   }
 
   if (throw_exception(*msg_list, ET_ERROR, cmdname) == FAIL) {
     free_msglist(*msg_list);
   } else {
-    if (cstack != NULL) {
+    if (cstack != nullptr) {
       do_throw(cstack);
     } else {
       need_rethrow = true;
     }
   }
-  *msg_list = NULL;
+  *msg_list = nullptr;
 }
 
 /// do_intthrow(): Replace the current exception by an interrupt or interrupt
@@ -368,7 +368,7 @@ bool do_intthrow(cstack_T *cstack)
     // An interrupt exception replaces any user or error exception.
     discard_current_exception();
   }
-  if (throw_exception("Vim:Interrupt", ET_INTERRUPT, NULL) != FAIL) {
+  if (throw_exception("Vim:Interrupt", ET_INTERRUPT, nullptr) != FAIL) {
     do_throw(cstack);
   }
 #ifdef THROW_TEST
@@ -389,7 +389,7 @@ char *get_exception_string(void *value, except_type_T type, char *cmdname, bool 
     char *val;
     *should_free = true;
     char *mesg = ((msglist_T *)value)->throw_msg;
-    if (cmdname != NULL && *cmdname != NUL) {
+    if (cmdname != nullptr && *cmdname != NUL) {
       size_t cmdlen = strlen(cmdname);
       ret = xstrnsave("Vim(", 4 + cmdlen + 2 + strlen(mesg));
       STRCPY(&ret[4], cmdname);
@@ -468,19 +468,19 @@ static int throw_exception(void *value, except_type_T type, char *cmdname)
 
   bool should_free;
   excp->value = get_exception_string(value, type, cmdname, &should_free);
-  if (excp->value == NULL && should_free) {
+  if (excp->value == nullptr && should_free) {
     goto nomem;
   }
 
   excp->type = type;
-  if (type == ET_ERROR && ((msglist_T *)value)->sfile != NULL) {
+  if (type == ET_ERROR && ((msglist_T *)value)->sfile != nullptr) {
     msglist_T *entry = (msglist_T *)value;
     excp->throw_name = entry->sfile;
-    entry->sfile = NULL;
+    entry->sfile = nullptr;
     excp->throw_lnum = entry->slnum;
   } else {
     excp->throw_name = estack_sfile(ESTACK_NONE);
-    if (excp->throw_name == NULL) {
+    if (excp->throw_name == nullptr) {
       excp->throw_name = xstrdup("");
     }
     excp->throw_lnum = SOURCING_LNUM;
@@ -523,7 +523,7 @@ nomem:
   suppress_errthrow = true;
   emsg(_(e_outofmem));
 fail:
-  current_exception = NULL;
+  current_exception = nullptr;
   return FAIL;
 }
 
@@ -532,9 +532,9 @@ fail:
 static void discard_exception(except_T *excp, bool was_finished)
 {
   if (current_exception == excp) {
-    current_exception = NULL;
+    current_exception = nullptr;
   }
-  if (excp == NULL) {
+  if (excp == nullptr) {
     internal_error("discard_exception()");
     return;
   }
@@ -580,7 +580,7 @@ static void discard_exception(except_T *excp, bool was_finished)
 /// Discard the exception currently being thrown.
 void discard_current_exception(void)
 {
-  if (current_exception != NULL) {
+  if (current_exception != nullptr) {
     discard_exception(current_exception, false);
   }
   // Note: all globals manipulated here should be saved/restored in
@@ -607,7 +607,7 @@ static void catch_exception(except_T *excp)
     set_vim_var_string(VV_THROWPOINT, IObuff, (ptrdiff_t)IObufflen);
   } else {
     // throw_name not set on an exception from a command that was typed.
-    set_vim_var_string(VV_THROWPOINT, NULL, -1);
+    set_vim_var_string(VV_THROWPOINT, nullptr, -1);
   }
 
   if (p_verbose >= 13 || debug_break_level > 0) {
@@ -644,7 +644,7 @@ static void finish_exception(except_T *excp)
     internal_error("finish_exception()");
   }
   caught_stack = caught_stack->caught;
-  if (caught_stack != NULL) {
+  if (caught_stack != nullptr) {
     set_vim_var_string(VV_EXCEPTION, caught_stack->value, -1);
     set_vim_var_list(VV_STACKTRACE, caught_stack->stacktrace);
     if (*caught_stack->throw_name != NUL) {
@@ -661,12 +661,12 @@ static void finish_exception(except_T *excp)
     } else {
       // throw_name not set on an exception from a command that was
       // typed.
-      set_vim_var_string(VV_THROWPOINT, NULL, -1);
+      set_vim_var_string(VV_THROWPOINT, nullptr, -1);
     }
   } else {
-    set_vim_var_string(VV_EXCEPTION, NULL, -1);
-    set_vim_var_string(VV_THROWPOINT, NULL, -1);
-    set_vim_var_list(VV_STACKTRACE, NULL);
+    set_vim_var_string(VV_EXCEPTION, nullptr, -1);
+    set_vim_var_string(VV_THROWPOINT, nullptr, -1);
+    set_vim_var_list(VV_STACKTRACE, nullptr);
   }
 
   // Discard the exception, but use the finish message for 'verbose'.
@@ -700,7 +700,7 @@ void exception_state_restore(exception_state_T *estate)
 /// Clear the current exception state
 void exception_state_clear(void)
 {
-  current_exception = NULL;
+  current_exception = nullptr;
   did_throw = false;
   need_rethrow = false;
   trylevel = 0;
@@ -930,7 +930,7 @@ void ex_else(exarg_T *eap)
 
   // if skipping or the ":if" was TRUE, reset ACTIVE, otherwise set it
   if (skip || cstack->cs_flags[cstack->cs_idx] & CSF_TRUE) {
-    if (eap->errmsg == NULL) {
+    if (eap->errmsg == nullptr) {
       cstack->cs_flags[cstack->cs_idx] = CSF_TRUE;
     }
     skip = true;        // don't evaluate an ":elseif"
@@ -974,7 +974,7 @@ void ex_else(exarg_T *eap)
       } else {
         cstack->cs_flags[cstack->cs_idx] = 0;
       }
-    } else if (eap->errmsg == NULL) {
+    } else if (eap->errmsg == nullptr) {
       // set TRUE, so this conditional will never get active
       cstack->cs_flags[cstack->cs_idx] = CSF_TRUE;
     }
@@ -1023,7 +1023,7 @@ void ex_while(exarg_T *eap)
       }
 
       // use the element at the start of the list and advance
-      if (!error && fi != NULL && !skip) {
+      if (!error && fi != nullptr && !skip) {
         result = next_for_item(fi, eap->arg);
       } else {
         result = false;
@@ -1031,7 +1031,7 @@ void ex_while(exarg_T *eap)
 
       if (!result) {
         free_for_info(fi);
-        cstack->cs_forinfo[cstack->cs_idx] = NULL;
+        cstack->cs_forinfo[cstack->cs_idx] = nullptr;
       }
       clear_evalarg(&evalarg, eap);
     }
@@ -1079,7 +1079,7 @@ void ex_continue(exarg_T *eap)
       // If a try conditional not in its finally clause is reached first,
       // make the ":continue" pending for execution at the ":endtry".
       cstack->cs_pending[idx] = CSTP_CONTINUE;
-      report_make_pending(CSTP_CONTINUE, NULL);
+      report_make_pending(CSTP_CONTINUE, nullptr);
     }
   }
 }
@@ -1099,7 +1099,7 @@ void ex_break(exarg_T *eap)
     int idx = cleanup_conditionals(cstack, CSF_WHILE | CSF_FOR, true);
     if (idx >= 0 && !(cstack->cs_flags[idx] & (CSF_WHILE | CSF_FOR))) {
       cstack->cs_pending[idx] = CSTP_BREAK;
-      report_make_pending(CSTP_BREAK, NULL);
+      report_make_pending(CSTP_BREAK, nullptr);
     }
   }
 }
@@ -1185,13 +1185,13 @@ void ex_throw(exarg_T *eap)
     value = eval_to_string_skip(arg, eap, eap->skip);
   } else {
     emsg(_(e_argreq));
-    value = NULL;
+    value = nullptr;
   }
 
   // On error or when an exception is thrown during argument evaluation, do
   // not throw.
-  if (!eap->skip && value != NULL) {
-    if (throw_exception(value, ET_USER, NULL) == FAIL) {
+  if (!eap->skip && value != nullptr) {
+    if (throw_exception(value, ET_USER, nullptr) == FAIL) {
       xfree(value);
     } else {
       do_throw(eap->cstack);
@@ -1343,12 +1343,12 @@ void ex_catch(exarg_T *eap)
 
   if (ends_excmd(*eap->arg)) {  // no argument, catch all errors
     pat = ".*";
-    end = NULL;
+    end = nullptr;
     eap->nextcmd = find_nextcmd(eap->arg);
   } else {
     pat = eap->arg + 1;
     end = skip_regexp_err(pat, *eap->arg, true);
-    if (end == NULL) {
+    if (end == nullptr) {
       give_up = true;
     }
   }
@@ -1367,7 +1367,7 @@ void ex_catch(exarg_T *eap)
     // exception is not checked (THROWN is not set then).
     if (!skip && (cstack->cs_flags[idx] & CSF_THROWN)
         && !(cstack->cs_flags[idx] & CSF_CAUGHT)) {
-      if (end != NULL && *end != NUL && !ends_excmd(*skipwhite(end + 1))) {
+      if (end != nullptr && *end != NUL && !ends_excmd(*skipwhite(end + 1))) {
         semsg(_(e_trailing_arg), end);
         return;
       }
@@ -1383,7 +1383,7 @@ void ex_catch(exarg_T *eap)
         char save_char = 0;
         // Terminate the pattern and avoid the 'l' flag in 'cpoptions'
         // while compiling it.
-        if (end != NULL) {
+        if (end != nullptr) {
           save_char = *end;
           *end = NUL;
         }
@@ -1395,11 +1395,11 @@ void ex_catch(exarg_T *eap)
         regmatch.regprog = vim_regcomp(pat, RE_MAGIC + RE_STRING);
         emsg_off--;
         regmatch.rm_ic = false;
-        if (end != NULL) {
+        if (end != nullptr) {
           *end = save_char;
         }
         p_cpo = save_cpo;
-        if (regmatch.regprog == NULL) {
+        if (regmatch.regprog == nullptr) {
           semsg(_(e_invarg2), pat);
         } else {
           // Save the value of got_int and reset it.  We don't want
@@ -1442,7 +1442,7 @@ void ex_catch(exarg_T *eap)
     }
   }
 
-  if (end != NULL) {
+  if (end != nullptr) {
     eap->nextcmd = find_nextcmd(end);
   }
 }
@@ -1564,7 +1564,7 @@ void ex_endtry(exarg_T *eap)
   int idx;
   bool rethrow = false;
   char pending = CSTP_NONE;
-  void *rettv = NULL;
+  void *rettv = nullptr;
   cstack_T *const cstack = eap->cstack;
 
   for (idx = cstack->cs_idx; idx >= 0; idx--) {
@@ -1681,7 +1681,7 @@ void ex_endtry(exarg_T *eap)
     report_resume_pending(pending,
                           (pending == CSTP_RETURN)
                           ? rettv
-                          : (pending & CSTP_THROW) ? (void *)current_exception : NULL);
+                          : (pending & CSTP_THROW) ? (void *)current_exception : nullptr);
     switch (pending) {
     case CSTP_NONE:
       break;
@@ -1770,9 +1770,9 @@ void enter_cleanup(cleanup_T *csp)
     // there is an extra instance for every call of do_cmdline(), anyway.
     if (did_throw || need_rethrow) {
       csp->exception = current_exception;
-      current_exception = NULL;
+      current_exception = nullptr;
     } else {
-      csp->exception = NULL;
+      csp->exception = nullptr;
       if (did_emsg) {
         force_abort |= cause_abort;
         cause_abort = false;
@@ -1784,7 +1784,7 @@ void enter_cleanup(cleanup_T *csp)
     report_make_pending(pending, csp->exception);
   } else {
     csp->pending = CSTP_NONE;
-    csp->exception = NULL;
+    csp->exception = nullptr;
   }
 }
 
@@ -1818,12 +1818,12 @@ void leave_cleanup(cleanup_T *csp)
       // Cancel the pending exception (includes report).
       discard_exception(csp->exception, false);
     } else {
-      report_discard_pending(pending, NULL);
+      report_discard_pending(pending, nullptr);
     }
 
     // If an error was about to be converted to an exception when
     // enter_cleanup() was called, free the message list.
-    if (msg_list != NULL) {
+    if (msg_list != nullptr) {
       free_global_msglist();
     }
   } else {
@@ -1856,7 +1856,7 @@ void leave_cleanup(cleanup_T *csp)
     }
 
     // Report if required by the 'verbose' option or when debugging.
-    report_resume_pending(pending, ((pending & CSTP_THROW) ? (void *)current_exception : NULL));
+    report_resume_pending(pending, ((pending & CSTP_THROW) ? (void *)current_exception : nullptr));
   }
 }
 
@@ -1898,7 +1898,7 @@ int cleanup_conditionals(cstack_T *cstack, int searched_cond, int inclusive)
         case CSTP_CONTINUE:
         case CSTP_BREAK:
         case CSTP_FINISH:
-          report_discard_pending(cstack->cs_pending[idx], NULL);
+          report_discard_pending(cstack->cs_pending[idx], nullptr);
           cstack->cs_pending[idx] = CSTP_NONE;
           break;
 
@@ -1911,13 +1911,13 @@ int cleanup_conditionals(cstack_T *cstack, int searched_cond, int inclusive)
 
         default:
           if (cstack->cs_flags[idx] & CSF_FINALLY) {
-            if ((cstack->cs_pending[idx] & CSTP_THROW) && cstack->cs_exception[idx] != NULL) {
+            if ((cstack->cs_pending[idx] & CSTP_THROW) && cstack->cs_exception[idx] != nullptr) {
               // Cancel the pending exception.  This is in the
               // finally clause, so that the stack of the
               // caught exceptions is not involved.
               discard_exception((except_T *)cstack->cs_exception[idx], false);
             } else {
-              report_discard_pending(cstack->cs_pending[idx], NULL);
+              report_discard_pending(cstack->cs_pending[idx], nullptr);
             }
             cstack->cs_pending[idx] = CSTP_NONE;
           }

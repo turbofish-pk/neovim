@@ -34,7 +34,7 @@ int stream_set_blocking(int fd, bool blocking)
   uv_pipe_init(&loop, &stream, 0);
   uv_pipe_open(&stream, fd);
   int retval = uv_stream_set_blocking((uv_stream_t *)&stream, blocking);
-  uv_close((uv_handle_t *)&stream, NULL);
+  uv_close((uv_handle_t *)&stream, nullptr);
   uv_run(&loop, UV_RUN_NOWAIT);  // not necessary, but couldn't hurt.
   uv_loop_close(&loop);
   return retval;
@@ -44,7 +44,7 @@ void stream_init(Loop *loop, Stream *stream, int fd, uv_stream_t *uvstream)
   FUNC_ATTR_NONNULL_ARG(2)
 {
   // The underlying stream is either a file or an existing uv stream.
-  assert(uvstream == NULL ? fd >= 0 && loop != NULL : fd < 0 && loop == NULL);
+  assert(uvstream == nullptr ? fd >= 0 && loop != nullptr : fd < 0 && loop == nullptr);
   stream->uvstream = uvstream;
 
   if (fd >= 0) {
@@ -81,15 +81,15 @@ void stream_init(Loop *loop, Stream *stream, int fd, uv_stream_t *uvstream)
   }
 
   stream->fpos = 0;
-  stream->internal_data = NULL;
+  stream->internal_data = nullptr;
   stream->curmem = 0;
   stream->maxmem = 0;
   stream->pending_reqs = 0;
-  stream->write_cb = NULL;
-  stream->close_cb = NULL;
-  stream->internal_close_cb = NULL;
+  stream->write_cb = nullptr;
+  stream->close_cb = nullptr;
+  stream->internal_close_cb = nullptr;
   stream->closed = false;
-  stream->events = NULL;
+  stream->events = nullptr;
 }
 
 void stream_may_close(Stream *stream)
@@ -116,7 +116,7 @@ void stream_may_close(Stream *stream)
 void stream_close_handle(Stream *stream)
   FUNC_ATTR_NONNULL_ALL
 {
-  uv_handle_t *handle = NULL;
+  uv_handle_t *handle = nullptr;
   if (stream->uvstream) {
     if (uv_stream_get_write_queue_size(stream->uvstream) > 0) {
       WLOG("closed Stream (%p) with %zu unwritten bytes",
@@ -128,7 +128,7 @@ void stream_close_handle(Stream *stream)
     handle = (uv_handle_t *)&stream->uv.idle;
   }
 
-  assert(handle != NULL);
+  assert(handle != nullptr);
 
   if (stream->before_close_cb) {
     stream->pending_reqs++;
@@ -143,7 +143,7 @@ void stream_close_handle(Stream *stream)
 static void close_cb(uv_handle_t *handle)
 {
   Stream *stream = handle->data;
-  // Check if handle->data is NULL here, in case this callback is called between
+  // Check if handle->data is nullptr here, in case this callback is called between
   // the handle's initialization and stream_init().
   if (stream && stream->close_cb) {
     stream->close_cb(stream, stream->close_cb_data);

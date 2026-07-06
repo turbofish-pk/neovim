@@ -52,7 +52,7 @@ void try_enter(TryState *const tstate)
   *tstate = (TryState) {
     .current_exception = current_exception,
     .msg_list = (const msglist_T *const *)msg_list,
-    .private_msg_list = NULL,
+    .private_msg_list = nullptr,
     .got_int = got_int,
     .did_throw = did_throw,
     .need_rethrow = need_rethrow,
@@ -61,7 +61,7 @@ void try_enter(TryState *const tstate)
   // `msg_list` controls the collection of abort-causing non-exception errors,
   // which would otherwise be ignored.  This pattern is from do_cmdline().
   msg_list = &tstate->private_msg_list;
-  current_exception = NULL;
+  current_exception = nullptr;
   got_int = false;
   did_throw = false;
   need_rethrow = false;
@@ -94,11 +94,11 @@ void try_leave(const TryState *const tstate, Error *const err)
 
     api_set_error(err, kErrorTypeException, "Keyboard interrupt");
     got_int = false;
-  } else if (msg_list != NULL && *msg_list != NULL) {
+  } else if (msg_list != nullptr && *msg_list != nullptr) {
     bool should_free;
     char *msg = get_exception_string(*msg_list,
                                      ET_ERROR,
-                                     NULL,
+                                     nullptr,
                                      &should_free);
     api_set_error(err, kErrorTypeException, "%s", msg);
     free_global_msglist();
@@ -140,7 +140,7 @@ Object dict_get_value(dict_T *dict, String key, Arena *arena, Error *err)
 {
   dictitem_T *const di = tv_dict_find(dict, key.data, (ptrdiff_t)key.size);
 
-  VALIDATE(di != NULL, "Key not found: %s", key.data, {
+  VALIDATE(di != nullptr, "Key not found: %s", key.data, {
     return (Object)OBJECT_INIT;
   });
 
@@ -151,7 +151,7 @@ dictitem_T *dict_check_writable(dict_T *dict, String key, bool del, Error *err)
 {
   dictitem_T *di = tv_dict_find(dict, key.data, (ptrdiff_t)key.size);
 
-  if (di != NULL) {
+  if (di != nullptr) {
     if (di->di_flags & DI_FLAGS_RO) {
       api_set_error(err, kErrorTypeException, "Key is read-only: %s", key.data);
     } else if (di->di_flags & DI_FLAGS_LOCK) {
@@ -195,13 +195,13 @@ Object dict_set_var(dict_T *dict, String key, Object value, bool del, bool retva
 
   if (del) {
     // Delete the key
-    if (di == NULL) {
+    if (di == nullptr) {
       // Doesn't exist, fail
       api_set_error(err, kErrorTypeValidation, "Key not found: %s", key.data);
     } else {
       // Notify watchers
       if (watched) {
-        tv_dict_watcher_notify(dict, key.data, NULL, &di->di_tv);
+        tv_dict_watcher_notify(dict, key.data, nullptr, &di->di_tv);
       }
       // Return the old value
       if (retval) {
@@ -219,7 +219,7 @@ Object dict_set_var(dict_T *dict, String key, Object value, bool del, bool retva
 
     typval_T oldtv = TV_INITIAL_VALUE;
 
-    if (di == NULL) {
+    if (di == nullptr) {
       // Need to create an entry
       di = tv_dict_item_alloc_len(key.data, key.size);
       tv_dict_add(dict, di);
@@ -269,7 +269,7 @@ buf_T *find_buffer_by_handle(Buffer buffer, Error *err)
   buf_T *rv = handle_get_buffer(buffer);
 
   VALIDATE_INT(rv, "buffer id", buffer, {
-    return NULL;
+    return nullptr;
   });
 
   return rv;
@@ -284,7 +284,7 @@ win_T *find_window_by_handle(Window window, Error *err)
   win_T *rv = handle_get_window(window);
 
   VALIDATE_INT(rv, "window id", window, {
-    return NULL;
+    return nullptr;
   });
 
   return rv;
@@ -299,7 +299,7 @@ tabpage_T *find_tab_by_handle(Tabpage tabpage, Error *err)
   tabpage_T *rv = handle_get_tabpage(tabpage);
 
   VALIDATE_INT(rv, "tabpage id", tabpage, {
-    return NULL;
+    return nullptr;
   });
 
   return rv;
@@ -326,11 +326,11 @@ String cchar_to_string(char c)
 /// with code using C strings.
 ///
 /// @param str the C string to copy
-/// @return the resulting String, if the input string was NULL, an
+/// @return the resulting String, if the input string was nullptr, an
 ///         empty String is returned
 String cstr_to_string(const char *str)
 {
-  if (str == NULL) {
+  if (str == nullptr) {
     return (String)STRING_INIT;
   }
 
@@ -357,7 +357,7 @@ char *string_to_cstr(String str)
 ///
 /// @param buf the buffer to copy
 /// @param size length of the buffer
-/// @return the resulting String, if the input string was NULL, an
+/// @return the resulting String, if the input string was nullptr, an
 ///         empty String is returned
 String cbuf_to_string(const char *buf, size_t size)
   FUNC_ATTR_NONNULL_ALL
@@ -385,10 +385,10 @@ String cstrn_as_string(char *str, size_t maxsize)
 ///
 /// @param str the C string to use
 /// @return The resulting String, or an empty String if
-///           str was NULL
+///           str was nullptr
 String cstr_as_string(const char *str) FUNC_ATTR_PURE
 {
-  if (str == NULL) {
+  if (str == nullptr) {
     return (String)STRING_INIT;
   }
   return (String){ .data = (char *)str, .size = strlen(str) };
@@ -400,7 +400,7 @@ String cstr_as_string(const char *str) FUNC_ATTR_PURE
 String ga_take_string(garray_T *ga)
 {
   String str = { .data = (char *)ga->ga_data, .size = (size_t)ga->ga_len };
-  ga->ga_data = NULL;
+  ga->ga_data = nullptr;
   ga->ga_len = 0;
   ga->ga_maxlen = 0;
   return str;
@@ -593,12 +593,12 @@ void api_clear_error(Error *value)
     return;
   }
   xfree(value->msg);
-  value->msg = NULL;
+  value->msg = nullptr;
   value->type = kErrorTypeNone;
 }
 
 // initialized once, never freed
-static ArenaMem mem_for_metadata = NULL;
+static ArenaMem mem_for_metadata = nullptr;
 
 /// @returns a shared value. caller must not modify it!
 Object api_metadata(void)
@@ -623,13 +623,13 @@ String api_metadata_raw(void)
   return cbuf_as_string((char *)packed_api_metadata, sizeof(packed_api_metadata));
 }
 
-// all the copy_[object] functions allow arena=NULL,
+// all the copy_[object] functions allow arena=nullptr,
 // then global allocations are used, and the resulting object
 // should be freed with an api_free_[object] function
 
 String copy_string(String str, Arena *arena)
 {
-  if (str.data != NULL) {
+  if (str.data != nullptr) {
     return (String){ .data = arena_memdupz(arena, str.data, str.size), .size = str.size };
   } else {
     return (String)STRING_INIT;
@@ -691,7 +691,7 @@ void api_set_error(Error *err, ErrorType errType, const char *format, ...)
   va_list args2;
   va_start(args1, format);
   va_copy(args2, args1);
-  int len = vsnprintf(NULL, 0, format, args1);
+  int len = vsnprintf(nullptr, 0, format, args1);
   va_end(args1);
   assert(len >= 0);
   // Limit error message to 1 MB.
@@ -718,7 +718,7 @@ bool api_object_to_bool(Object obj, const char *what, bool nil_value, Error *err
   } else if (obj.type == kObjectTypeNil) {
     return nil_value;  // caller decides what NIL (missing retval in Lua) means
   } else {
-    VALIDATE_EXP(false, what, "boolean", NULL, {});
+    VALIDATE_EXP(false, what, "boolean", nullptr, {});
     return false;
   }
 }
@@ -779,7 +779,7 @@ HlMessage parse_hl_msg(ArrayOf(Tuple(String, *HLGroupID)) chunks, bool is_err, E
       goto free_exit;
     });
 
-    String str = copy_string(chunk.items[0].data.string, NULL);
+    String str = copy_string(chunk.items[0].data.string, nullptr);
 
     int hl_id =
       chunk.size == 2 ? object_to_hl_id(chunk.items[1], "text highlight", err)
@@ -1000,7 +1000,7 @@ void api_luarefs_free_dict(Dict value)
 /// @return true if the mark was set, else false
 bool set_mark(buf_T *buf, String name, Integer line, Integer col, Error *err)
 {
-  buf = buf == NULL ? curbuf : buf;
+  buf = buf == nullptr ? curbuf : buf;
   // If line == 0 the marks is being deleted
   bool res = false;
   bool deleting = false;
@@ -1017,7 +1017,7 @@ bool set_mark(buf_T *buf, String name, Integer line, Integer col, Error *err)
   }
   assert(INT32_MIN <= line && line <= INT32_MAX);
   pos_T pos = { (linenr_T)line, (int)col, 0 };
-  res = setmark_pos(*name.data, &pos, buf->handle, NULL);
+  res = setmark_pos(*name.data, &pos, buf->handle, nullptr);
   if (!res) {
     if (deleting) {
       api_set_error(err, kErrorTypeException,
@@ -1033,7 +1033,7 @@ bool set_mark(buf_T *buf, String name, Integer line, Integer col, Error *err)
 /// Get default statusline highlight for window
 const char *get_default_stl_hl(win_T *wp, bool use_winbar, int stc_hl_id)
 {
-  if (wp == NULL) {
+  if (wp == nullptr) {
     return "TabLineFill";
   } else if (use_winbar) {
     return (wp == curwin) ? "WinBar" : "WinBarNC";

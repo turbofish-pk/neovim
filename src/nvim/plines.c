@@ -166,7 +166,7 @@ CharSize charsize_regular(CharsizeArg *csarg, char *const cur, colnr_T const vco
       } else if (mark.pos.col == col) {
         if (!mt_invalid(mark) && ns_in_win(mark.ns, wp)) {
           DecorInline decor = mt_decor(mark);
-          DecorVirtText *vt = decor.ext ? decor.data.ext.vt : NULL;
+          DecorVirtText *vt = decor.ext ? decor.data.ext.vt : nullptr;
           while (vt) {
             if (!(vt->flags & kVTIsLines) && vt->pos == kVPosInline) {
               if (mt_right(mark)) {
@@ -583,13 +583,13 @@ void getvcol(win_T *wp, pos_T *pos, colnr_T *start, colnr_T *cursor, colnr_T *en
   int head = char_size.head;
   int tail = char_size.tail;
 
-  if (start != NULL) {
+  if (start != nullptr) {
     *start = vcol + head;
   }
-  if (end != NULL) {
+  if (end != nullptr) {
     *end = vcol + incr - (flags & GETVCOL_END_EXCL_LBR ? tail : 0) - 1;
   }
-  if (cursor != NULL) {
+  if (cursor != nullptr) {
     if (ci.chr.value == TAB
         && (State & MODE_NORMAL)
         && !wp->w_p_list
@@ -616,9 +616,9 @@ colnr_T getvcol_nolist(pos_T *posp)
 
   curwin->w_p_list = false;
   if (posp->coladd) {
-    getvvcol(curwin, posp, NULL, &vcol, NULL, 0);
+    getvvcol(curwin, posp, nullptr, &vcol, nullptr, 0);
   } else {
-    getvcol(curwin, posp, NULL, &vcol, NULL, 0);
+    getvcol(curwin, posp, nullptr, &vcol, nullptr, 0);
   }
   curwin->w_p_list = list_save;
   return vcol;
@@ -638,7 +638,7 @@ void getvvcol(win_T *wp, pos_T *pos, colnr_T *start, colnr_T *cursor, colnr_T *e
 
   if (virtual_active(wp)) {
     // For virtual mode, only want one value
-    getvcol(wp, pos, &col, NULL, NULL, flags);
+    getvcol(wp, pos, &col, nullptr, nullptr, flags);
 
     colnr_T coladd = pos->coladd;
     colnr_T endadd = 0;
@@ -659,13 +659,13 @@ void getvvcol(win_T *wp, pos_T *pos, colnr_T *start, colnr_T *cursor, colnr_T *e
     }
     col += coladd;
 
-    if (start != NULL) {
+    if (start != nullptr) {
       *start = col;
     }
-    if (cursor != NULL) {
+    if (cursor != nullptr) {
       *cursor = col;
     }
-    if (end != NULL) {
+    if (end != nullptr) {
       *end = col + endadd;
     }
   } else {
@@ -690,11 +690,11 @@ void getvcols(win_T *wp, pos_T *pos1, pos_T *pos2, colnr_T *left, colnr_T *right
   colnr_T to2;
 
   if (lt(*pos1, *pos2)) {
-    getvvcol(wp, pos1, &from1, NULL, &to1, flags);
-    getvvcol(wp, pos2, &from2, NULL, &to2, flags);
+    getvvcol(wp, pos1, &from1, nullptr, &to1, flags);
+    getvvcol(wp, pos2, &from2, nullptr, &to2, flags);
   } else {
-    getvvcol(wp, pos2, &from1, NULL, &to1, flags);
-    getvvcol(wp, pos1, &from2, NULL, &to2, flags);
+    getvvcol(wp, pos2, &from1, nullptr, &to1, flags);
+    getvvcol(wp, pos1, &from2, nullptr, &to2, flags);
   }
 
   if (from2 < from1) {
@@ -732,7 +732,7 @@ bool win_may_fill(win_T *wp)
 /// @return Number of filler lines above lnum
 int win_get_fill(win_T *wp, linenr_T lnum)
 {
-  return decor_virt_lines(wp, lnum - 1, lnum, NULL, NULL, true) + diff_check_fill(wp, lnum);
+  return decor_virt_lines(wp, lnum - 1, lnum, nullptr, nullptr, true) + diff_check_fill(wp, lnum);
 }
 
 /// Return the number of window lines occupied by buffer line "lnum".
@@ -878,8 +878,8 @@ int plines_win_col(win_T *wp, linenr_T lnum, long column)
 ///
 /// @param[in]  wp               window the line is in
 /// @param[in]  lnum             line number
-/// @param[out] nextp            if not NULL, the last line of a fold
-/// @param[out] foldedp          if not NULL, whether lnum is on a fold
+/// @param[out] nextp            if not nullptr, the last line of a fold
+/// @param[out] foldedp          if not nullptr, whether lnum is on a fold
 /// @param[in]  cache            whether to use the window's cache for folds
 /// @param[in]  limit_winheight  when true limit to window height
 ///
@@ -887,8 +887,8 @@ int plines_win_col(win_T *wp, linenr_T lnum, long column)
 int plines_win_full(win_T *wp, linenr_T lnum, linenr_T *const nextp, bool *const foldedp,
                     const bool cache, const bool limit_winheight)
 {
-  bool folded = hasFoldingWin(wp, lnum, &lnum, nextp, cache, NULL);
-  if (foldedp != NULL) {
+  bool folded = hasFoldingWin(wp, lnum, &lnum, nextp, cache, nullptr);
+  if (foldedp != nullptr) {
     *foldedp = folded;
   }
 
@@ -917,7 +917,7 @@ int plines_m_win(win_T *wp, linenr_T first, linenr_T last, int max)
 
   while (first <= last && count < max) {
     linenr_T next = first;
-    count += plines_win_full(wp, first, &next, NULL, false, false);
+    count += plines_win_full(wp, first, &next, nullptr, false, false);
     first = next + 1;
   }
   if (first == wp->w_buffer->b_ml.ml_line_count + 1) {
@@ -933,7 +933,7 @@ int plines_m_win(win_T *wp, linenr_T first, linenr_T last, int max)
 /// Mainly used for calculating scrolling offsets.
 int plines_m_win_fill(win_T *wp, linenr_T first, linenr_T last)
 {
-  int count = last - first + 1 + decor_virt_lines(wp, first - 1, last, NULL, NULL, false);
+  int count = last - first + 1 + decor_virt_lines(wp, first - 1, last, nullptr, nullptr, false);
 
   if (diffopt_filler()) {
     for (int lnum = first; lnum <= last; lnum++) {
@@ -960,7 +960,7 @@ int plines_m_win_fill(win_T *wp, linenr_T first, linenr_T last)
 ///                          Set to the number of columns in "end_lnum" to reach "max".
 /// @param[in] max           Don't calculate the height for lines beyond the line where "max"
 ///                          height is reached.
-/// @param[out] fill         If not NULL, set to the number of filler lines in the range.
+/// @param[out] fill         If not nullptr, set to the number of filler lines in the range.
 int64_t win_text_height(win_T *const wp, const linenr_T start_lnum, const int64_t start_vcol,
                         linenr_T *const end_lnum, int64_t *const end_vcol, int64_t *const fill,
                         int64_t const max)
@@ -1024,7 +1024,7 @@ int64_t win_text_height(win_T *const wp, const linenr_T start_lnum, const int64_
 
   *end_lnum = cur_lnum;
   *end_vcol = vcol_end;
-  if (fill != NULL) {
+  if (fill != nullptr) {
     *fill = height_sum_fill;
   }
   return height_sum_fill + height_sum_nofill;

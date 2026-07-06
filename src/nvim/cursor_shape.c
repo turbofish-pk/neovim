@@ -97,10 +97,10 @@ Array mode_style_array(Arena *arena)
 ///
 /// @param what SHAPE_CURSOR or SHAPE_MOUSE ('mouseshape')
 ///
-/// @returns error message for an illegal option, NULL otherwise.
+/// @returns error message for an illegal option, nullptr otherwise.
 const char *parse_shape_opt(int what)
 {
-  char *p = NULL;
+  char *p = nullptr;
   int idx = 0;                          // init for GCC
   int len;
   bool found_ve = false;                 // found "ve" flag
@@ -113,16 +113,16 @@ const char *parse_shape_opt(int what)
       clear_shape_table();
       if (*p_guicursor == NUL) {
         ui_mode_info_set();
-        return NULL;
+        return nullptr;
       }
     }
     // Repeat for all comma separated parts.
     char *modep = p_guicursor;
-    while (modep != NULL && *modep != NUL) {
+    while (modep != nullptr && *modep != NUL) {
       char *colonp = vim_strchr(modep, ':');
       char *commap = vim_strchr(modep, ',');
 
-      if (colonp == NULL || (commap != NULL && commap < colonp)) {
+      if (colonp == nullptr || (commap != nullptr && commap < colonp)) {
         return N_("E545: Missing colon");
       }
       if (colonp == modep) {
@@ -215,15 +215,15 @@ const char *parse_shape_opt(int what)
               p += 5;
             } else {          // must be a highlight group name then
               char *endp = vim_strchr(p, '-');
-              if (commap == NULL) {                       // last part
-                if (endp == NULL) {
+              if (commap == nullptr) {                       // last part
+                if (endp == nullptr) {
                   endp = p + strlen(p);                  // find end of part
                 }
-              } else if (endp > commap || endp == NULL) {
+              } else if (endp > commap || endp == nullptr) {
                 endp = commap;
               }
               char *slashp = vim_strchr(p, '/');
-              if (slashp != NULL && slashp < endp) {
+              if (slashp != nullptr && slashp < endp) {
                 // "group/langmap_group"
                 i = syn_check_group(p, (size_t)(slashp - p));
                 p = slashp + 1;
@@ -231,7 +231,7 @@ const char *parse_shape_opt(int what)
               if (round == 2) {
                 shape_table[idx].id = syn_check_group(p, (size_t)(endp - p));
                 shape_table[idx].id_lm = shape_table[idx].id;
-                if (slashp != NULL && slashp < endp) {
+                if (slashp != nullptr && slashp < endp) {
                   shape_table[idx].id = i;
                 }
               }
@@ -245,7 +245,7 @@ const char *parse_shape_opt(int what)
         }
       }
       modep = p;
-      if (modep != NULL && *modep == ',') {
+      if (modep != nullptr && *modep == ',') {
         modep++;
       }
     }
@@ -268,7 +268,7 @@ const char *parse_shape_opt(int what)
     }
   }
   ui_mode_info_set();
-  return NULL;
+  return nullptr;
 }
 
 /// Returns true if the cursor is non-blinking "block" shape during

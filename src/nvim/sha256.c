@@ -255,11 +255,11 @@ void sha256_finish(context_sha256_T *ctx, uint8_t digest[SHA256_SUM_SIZE])
 /// @param salt_len
 ///
 /// @returns hex digest of "buf[buf_len]" in a static array.
-///          if "salt" is not NULL also do "salt[salt_len]".
+///          if "salt" is not nullptr also do "salt[salt_len]".
 const char *sha256_bytes(const uint8_t *restrict buf,  size_t buf_len, const uint8_t *restrict salt,
                          size_t salt_len)
 {
-  static char hexit[SHA256_BUFFER_SIZE + 1];  // buf size + NULL
+  static char hexit[SHA256_BUFFER_SIZE + 1];  // buf size + nullptr
 
   sha256_self_test();
 
@@ -267,7 +267,7 @@ const char *sha256_bytes(const uint8_t *restrict buf,  size_t buf_len, const uin
   sha256_start(&ctx);
   sha256_update(&ctx, buf, buf_len);
 
-  if (salt != NULL) {
+  if (salt != nullptr) {
     sha256_update(&ctx, salt, salt_len);
   }
   uint8_t sha256sum[SHA256_SUM_SIZE];
@@ -284,7 +284,7 @@ const char *sha256_bytes(const uint8_t *restrict buf,  size_t buf_len, const uin
 static char *sha_self_test_msg[] = {
   "abc",
   "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq",
-  NULL
+  nullptr
 };
 
 static char *sha_self_test_vector[] = {
@@ -301,7 +301,7 @@ static char *sha_self_test_vector[] = {
 /// @returns true if not failures generated.
 bool sha256_self_test(void)
 {
-  char output[SHA256_BUFFER_SIZE + 1];  // buf size + NULL
+  char output[SHA256_BUFFER_SIZE + 1];  // buf size + nullptr
   context_sha256_T ctx;
   uint8_t buf[1000];
   uint8_t sha256sum[SHA256_SUM_SIZE];
@@ -319,7 +319,7 @@ bool sha256_self_test(void)
     if (i < 2) {
       hexit = sha256_bytes((uint8_t *)sha_self_test_msg[i],
                            strlen(sha_self_test_msg[i]),
-                           NULL, 0);
+                           nullptr, 0);
       STRCPY(output, hexit);
     } else {
       sha256_start(&ctx);

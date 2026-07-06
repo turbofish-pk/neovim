@@ -130,10 +130,10 @@ Dict(cmd) nvim_parse_cmd(String str, Dict(empty) *opts, Arena *arena, Error *err
   exarg_T ea;
   CmdParseInfo cmdinfo;
   char *cmdline = arena_memdupz(arena, str.data, str.size);
-  const char *errormsg = NULL;
+  const char *errormsg = nullptr;
 
   if (!parse_cmdline(&cmdline, &ea, &cmdinfo, &errormsg)) {
-    if (errormsg != NULL) {
+    if (errormsg != nullptr) {
       api_set_error(err, kErrorTypeException, "Parsing command-line: %s", errormsg);
     } else {
       api_set_error(err, kErrorTypeException, "Parsing command-line");
@@ -174,7 +174,7 @@ Dict(cmd) nvim_parse_cmd(String str, Dict(empty) *opts, Arena *arena, Error *err
     }
   }
 
-  ucmd_T *cmd = NULL;
+  ucmd_T *cmd = nullptr;
   if (ea.cmdidx == CMD_USER) {
     cmd = USER_CMD(ea.useridx);
   } else if (ea.cmdidx == CMD_USER_BUF) {
@@ -183,7 +183,7 @@ Dict(cmd) nvim_parse_cmd(String str, Dict(empty) *opts, Arena *arena, Error *err
 
   // For range-only (:1) or modifier-only (:aboveleft) commands, cmd is empty string.
   char *name = ea.cmdidx == CMD_SIZE
-               ? "" : (cmd != NULL ? cmd->uc_name : get_command_name(NULL, ea.cmdidx));
+               ? "" : (cmd != nullptr ? cmd->uc_name : get_command_name(nullptr, ea.cmdidx));
 
   PUT_KEY(result, cmd, cmd, cstr_as_string(name));
 
@@ -197,11 +197,11 @@ Dict(cmd) nvim_parse_cmd(String str, Dict(empty) *opts, Arena *arena, Error *err
   }
 
   if (ea.argt & EX_COUNT) {
-    Integer count = ea.addr_count > 0 ? ea.line2 : (cmd != NULL ? cmd->uc_def : 0);
+    Integer count = ea.addr_count > 0 ? ea.line2 : (cmd != nullptr ? cmd->uc_def : 0);
     // For built-in commands, if count is not explicitly provided and the default value is 0,
     // do not include the count field in the result, so the command uses its built-in default
     // behavior.
-    if (ea.addr_count > 0 || (cmd != NULL && cmd->uc_def != 0) || count != 0) {
+    if (ea.addr_count > 0 || (cmd != nullptr && cmd->uc_def != 0) || count != 0) {
       PUT_KEY(result, cmd, count, count);
     }
   }
@@ -360,8 +360,8 @@ String nvim_cmd(uint64_t channel_id, Dict(cmd) *cmd, Dict(cmd_opts) *opts, Arena
   CmdParseInfo cmdinfo;
   CLEAR_FIELD(cmdinfo);
 
-  char *cmdline = NULL;
-  char *cmdname = NULL;
+  char *cmdline = nullptr;
+  char *cmdname = nullptr;
   ArrayOf(String) args = ARRAY_DICT_INIT;
 
   String retv = (String)STRING_INIT;
@@ -388,7 +388,7 @@ String nvim_cmd(uint64_t channel_id, Dict(cmd) *cmd, Dict(cmd_opts) *opts, Arena
 
   if (cmd->cmd.data[0] == NUL) {
     VALIDATE_EXP((HAS_KEY(cmd, cmd, range) && cmd->range.size > 0) || HAS_KEY(cmd, cmd, mods),
-                 "cmd", "non-empty String", NULL, {
+                 "cmd", "non-empty String", nullptr, {
       goto end;
     });
   }
@@ -396,17 +396,17 @@ String nvim_cmd(uint64_t channel_id, Dict(cmd) *cmd, Dict(cmd_opts) *opts, Arena
   cmdname = arena_string(arena, cmd->cmd).data;
   ea.cmd = cmdname;
 
-  char *p = find_ex_command(&ea, NULL);
+  char *p = find_ex_command(&ea, nullptr);
 
   // If this looks like an undefined user command and there are CmdUndefined
   // autocommands defined, trigger the matching autocommands.
-  if (p != NULL && ea.cmdidx == CMD_SIZE && ASCII_ISUPPER(*ea.cmd)
+  if (p != nullptr && ea.cmdidx == CMD_SIZE && ASCII_ISUPPER(*ea.cmd)
       && has_event(EVENT_CMDUNDEFINED)) {
     p = arena_string(arena, cmd->cmd).data;
-    int ret = apply_autocmds(EVENT_CMDUNDEFINED, p, p, true, NULL);
+    int ret = apply_autocmds(EVENT_CMDUNDEFINED, p, p, true, nullptr);
     // If the autocommands did something and didn't cause an error, try
     // finding the command again.
-    p = (ret && !aborting()) ? find_ex_command(&ea, NULL) : ea.cmd;
+    p = (ret && !aborting()) ? find_ex_command(&ea, nullptr) : ea.cmd;
   }
 
   // Commands such as ":1" are "range only" commands.
@@ -420,7 +420,7 @@ String nvim_cmd(uint64_t channel_id, Dict(cmd) *cmd, Dict(cmd_opts) *opts, Arena
     goto end;
   }
   // Allow CMD_SIZE only for range-only commands (empty cmd with range)
-  VALIDATE((p != NULL && ea.cmdidx != CMD_SIZE) || range_only,
+  VALIDATE((p != nullptr && ea.cmdidx != CMD_SIZE) || range_only,
            "Command not found: %s", cmdname, {
     goto end;
   });
@@ -432,7 +432,7 @@ String nvim_cmd(uint64_t channel_id, Dict(cmd) *cmd, Dict(cmd_opts) *opts, Arena
   if (!range_only) {
     const char *fullname = IS_USER_CMDIDX(ea.cmdidx)
                            ? get_user_command_name(ea.useridx, ea.cmdidx)
-                           : get_command_name(NULL, ea.cmdidx);
+                           : get_command_name(nullptr, ea.cmdidx);
     VALIDATE(strncmp(fullname, cmdname, strlen(cmdname)) == 0,
              "Invalid command: \"%s\"", cmdname, {
       goto end;
@@ -505,7 +505,7 @@ String nvim_cmd(uint64_t channel_id, Dict(cmd) *cmd, Dict(cmd_opts) *opts, Arena
           ADD_C(args, CSTR_AS_OBJ(data_str));
           break;
         case kObjectTypeString:
-          VALIDATE_EXP(!string_iswhite(elem.data.string), "command arg", "non-whitespace", NULL, {
+          VALIDATE_EXP(!string_iswhite(elem.data.string), "command arg", "non-whitespace", nullptr, {
             goto end;
           });
           ADD_C(args, elem);
@@ -548,12 +548,12 @@ String nvim_cmd(uint64_t channel_id, Dict(cmd) *cmd, Dict(cmd_opts) *opts, Arena
   if (!range_only) {
     // Simply pass the first argument (if it exists) as the arg pointer to `set_cmd_addr_type()`
     // since it only ever checks the first argument.
-    set_cmd_addr_type(&ea, args.size > 0 ? args.items[0].data.string.data : NULL);
+    set_cmd_addr_type(&ea, args.size > 0 ? args.items[0].data.string.data : nullptr);
   }
 
   if (HAS_KEY(cmd, cmd, range)) {
     VALIDATE_MOD((ea.argt & EX_RANGE), "range", cmd->cmd.data);
-    VALIDATE_EXP((cmd->range.size <= 2), "range", "<=2 elements", NULL, {
+    VALIDATE_EXP((cmd->range.size <= 2), "range", "<=2 elements", nullptr, {
       goto end;
     });
 
@@ -563,7 +563,7 @@ String nvim_cmd(uint64_t channel_id, Dict(cmd) *cmd, Dict(cmd_opts) *opts, Arena
     for (size_t i = 0; i < range.size; i++) {
       Object elem = range.items[i];
       VALIDATE_EXP((elem.type == kObjectTypeInteger && elem.data.integer >= 0),
-                   "range element", "non-negative Integer", NULL, {
+                   "range element", "non-negative Integer", nullptr, {
         goto end;
       });
     }
@@ -573,7 +573,7 @@ String nvim_cmd(uint64_t channel_id, Dict(cmd) *cmd, Dict(cmd_opts) *opts, Arena
       ea.line2 = (linenr_T)range.items[range.size - 1].data.integer;
     }
 
-    VALIDATE_S((invalid_range(&ea) == NULL), "range", "", {
+    VALIDATE_S((invalid_range(&ea) == nullptr), "range", "", {
       goto end;
     });
   }
@@ -595,7 +595,7 @@ String nvim_cmd(uint64_t channel_id, Dict(cmd) *cmd, Dict(cmd_opts) *opts, Arena
       goto end;
     });
     VALIDATE_MOD((ea.argt & EX_COUNT), "count", cmd->cmd.data);
-    VALIDATE_EXP((cmd->count >= 0), "count", "non-negative Integer", NULL, {
+    VALIDATE_EXP((cmd->count >= 0), "count", "non-negative Integer", nullptr, {
       goto end;
     });
     set_cmd_count(&ea, (linenr_T)cmd->count, true);
@@ -924,7 +924,7 @@ static void build_cmdline_str(char **cmdlinep, exarg_T *eap, CmdParseInfo *cmdin
   }
 
   eap->argc = argc;
-  eap->arglens = eap->argc > 0 ? xcalloc(argc, sizeof(size_t)) : NULL;
+  eap->arglens = eap->argc > 0 ? xcalloc(argc, sizeof(size_t)) : nullptr;
   size_t argstart_idx = cmdline.size;
   for (size_t i = 0; i < argc; i++) {
     String s = args.items[i].data.string;
@@ -939,7 +939,7 @@ static void build_cmdline_str(char **cmdlinep, exarg_T *eap, CmdParseInfo *cmdin
   // Now that all the arguments are appended, use the command index and argument indices to set the
   // values of eap->cmd, eap->arg and eap->args.
   eap->cmd = cmdline.items + cmdname_idx;
-  eap->args = eap->argc > 0 ? xcalloc(argc, sizeof(char *)) : NULL;
+  eap->args = eap->argc > 0 ? xcalloc(argc, sizeof(char *)) : nullptr;
   size_t offset = argstart_idx;
   for (size_t i = 0; i < argc; i++) {
     offset++;  // Account for space
@@ -1096,8 +1096,8 @@ void create_user_command(uint64_t channel_id, String name, Union(String, LuaRef)
   int64_t def = -1;
   cmd_addr_T addr_type_arg = ADDR_NONE;
   int context = EXPAND_NOTHING;
-  char *compl_arg = NULL;
-  const char *rep = NULL;
+  char *compl_arg = nullptr;
+  const char *rep = nullptr;
   LuaRef luaref = LUA_NOREF;
   LuaRef compl_luaref = LUA_NOREF;
   LuaRef preview_luaref = LUA_NOREF;
@@ -1249,7 +1249,7 @@ void create_user_command(uint64_t channel_id, String name, Union(String, LuaRef)
       goto err;
     });
   } else if (HAS_KEY(opts, user_command, complete)) {
-    VALIDATE_EXP(false, "complete", "Function or String", NULL, {
+    VALIDATE_EXP(false, "complete", "Function or String", nullptr, {
       goto err;
     });
   }
@@ -1264,7 +1264,7 @@ void create_user_command(uint64_t channel_id, String name, Union(String, LuaRef)
     opts->preview.data.luaref = LUA_NOREF;
   }
 
-  const char *desc = NULL;
+  const char *desc = nullptr;
   if (HAS_KEY(opts, user_command, desc)) {
     VALIDATE_T("desc", kObjectTypeString, opts->desc.type, {
       goto err;
@@ -1281,7 +1281,7 @@ void create_user_command(uint64_t channel_id, String name, Union(String, LuaRef)
     rep = cmd.data.string.data;
     break;
   default:
-    VALIDATE_EXP(false, "command", "Function or String", NULL, {
+    VALIDATE_EXP(false, "command", "Function or String", nullptr, {
       goto err;
     });
   }
@@ -1341,7 +1341,7 @@ DictAs(command_info) nvim_buf_get_commands(Buffer buf, Dict(get_commands) *opts,
       api_set_error(err, kErrorTypeValidation, "builtin=true not implemented");
       return (Dict)ARRAY_DICT_INIT;
     }
-    return commands_array(NULL, arena);
+    return commands_array(nullptr, arena);
   }
 
   buf_T *b = find_buffer_by_handle(buf, err);

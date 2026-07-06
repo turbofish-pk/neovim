@@ -329,14 +329,14 @@ static int toggle_Magic(int x)
 #define UCHARAT(p)      ((int)(*(uint8_t *)(p)))
 
 // Used for an error (down from) vim_regcomp(): give the error message, set
-// rc_did_emsg and return NULL
-#define EMSG_RET_NULL(m) return (emsg(m), rc_did_emsg = true, (void *)NULL)
-#define IEMSG_RET_NULL(m) return (iemsg(m), rc_did_emsg = true, (void *)NULL)
+// rc_did_emsg and return nullptr
+#define EMSG_RET_NULL(m) return (emsg(m), rc_did_emsg = true, (void *)nullptr)
+#define IEMSG_RET_NULL(m) return (iemsg(m), rc_did_emsg = true, (void *)nullptr)
 #define EMSG_RET_FAIL(m) return (emsg(m), rc_did_emsg = true, FAIL)
 #define EMSG2_RET_NULL(m, c) \
-  return (semsg((m), (c) ? "" : "\\"), rc_did_emsg = true, (void *)NULL)
+  return (semsg((m), (c) ? "" : "\\"), rc_did_emsg = true, (void *)nullptr)
 #define EMSG3_RET_NULL(m, c, a) \
-  return (semsg((m), (c) ? "" : "\\", (a)), rc_did_emsg = true, (void *)NULL)
+  return (semsg((m), (c) ? "" : "\\", (a)), rc_did_emsg = true, (void *)nullptr)
 #define EMSG2_RET_FAIL(m, c) \
   return (semsg((m), (c) ? "" : "\\"), rc_did_emsg = true, FAIL)
 #define EMSG_ONE_RET_NULL EMSG2_RET_NULL(_(e_invalid_item_in_str_brackets), reg_magic == MAGIC_ALL)
@@ -399,7 +399,7 @@ static int re_multi_type(int c)
   return NOT_MULTI;
 }
 
-static char *reg_prev_sub = NULL;
+static char *reg_prev_sub = nullptr;
 static size_t reg_prev_sublen = 0;
 
 // REGEXP_INRANGE contains all characters which are always special in a []
@@ -491,7 +491,7 @@ static int get_char_class(char **pp)
       && ASCII_ISLOWER((*pp)[3]) && ASCII_ISLOWER((*pp)[4])) {
     // this function can be called repeatedly with the same value for "pp"
     // so we cache the last found entry.
-    static keyvalue_T *last_entry = NULL;
+    static keyvalue_T *last_entry = nullptr;
 
     keyvalue_T target = {
       .key = 0,
@@ -500,14 +500,14 @@ static int get_char_class(char **pp)
     };
 
     keyvalue_T *entry;
-    if (last_entry != NULL && cmp_keyvalue_value_n(&target, last_entry) == 0) {
+    if (last_entry != nullptr && cmp_keyvalue_value_n(&target, last_entry) == 0) {
       entry = last_entry;
     } else {
       entry = (keyvalue_T *)bsearch(&target, &char_class_tab,
                                     ARRAY_SIZE(char_class_tab),
                                     sizeof(char_class_tab[0]), cmp_keyvalue_value_n);
     }
-    if (entry != NULL) {
+    if (entry != nullptr) {
       last_entry = entry;
       *pp += entry->length + 2;
       return entry->key;
@@ -703,7 +703,7 @@ static int reg_cpo_lit;  // 'cpoptions' contains 'l' flag
 
 static void get_cpo_flags(void)
 {
-  reg_cpo_lit = vim_strchr(p_cpo, CPO_LITERAL) != NULL;
+  reg_cpo_lit = vim_strchr(p_cpo, CPO_LITERAL) != nullptr;
 }
 
 /// Skip over a "[]" range.
@@ -728,9 +728,9 @@ static char *skip_anyof(char *p)
         MB_PTR_ADV(p);
       }
     } else if (*p == '\\'
-               && (vim_strchr(REGEXP_INRANGE, (uint8_t)p[1]) != NULL
+               && (vim_strchr(REGEXP_INRANGE, (uint8_t)p[1]) != nullptr
                    || (!reg_cpo_lit
-                       && vim_strchr(REGEXP_ABBR, (uint8_t)p[1]) != NULL))) {
+                       && vim_strchr(REGEXP_ABBR, (uint8_t)p[1]) != nullptr))) {
       p += 2;
     } else if (*p == '[') {
       if (get_char_class(&p) == CLASS_NONE
@@ -753,28 +753,28 @@ static char *skip_anyof(char *p)
 /// Skip strings inside [ and ].
 char *skip_regexp(char *startp, int delim, int magic)
 {
-  return skip_regexp_ex(startp, delim, magic, NULL, NULL, NULL);
+  return skip_regexp_ex(startp, delim, magic, nullptr, nullptr, nullptr);
 }
 
 /// Call skip_regexp() and when the delimiter does not match give an error and
-/// return NULL.
+/// return nullptr.
 char *skip_regexp_err(char *startp, int delim, int magic)
 {
   char *p = skip_regexp(startp, delim, magic);
 
   if (*p != delim) {
     semsg(_(e_missing_delimiter_after_search_pattern_str), startp);
-    return NULL;
+    return nullptr;
   }
   return p;
 }
 
 /// skip_regexp() with extra arguments:
-/// When "newp" is not NULL and "dirc" is '?', make an allocated copy of the
-/// expression and change "\?" to "?".  If "*newp" is not NULL the expression
+/// When "newp" is not nullptr and "dirc" is '?', make an allocated copy of the
+/// expression and change "\?" to "?".  If "*newp" is not nullptr the expression
 /// is changed in-place.
-/// If a "\?" is changed to "?" then "dropped" is incremented, unless NULL.
-/// If "magic_val" is not NULL, returns the effective magicness of the pattern
+/// If a "\?" is changed to "?" then "dropped" is incremented, unless nullptr.
+/// If "magic_val" is not nullptr, returns the effective magicness of the pattern
 char *skip_regexp_ex(char *startp, int dirc, int magic, char **newp, int *dropped,
                      magic_T *magic_val)
 {
@@ -800,17 +800,17 @@ char *skip_regexp_ex(char *startp, int dirc, int magic, char **newp, int *droppe
         break;
       }
     } else if (p[0] == '\\' && p[1] != NUL) {
-      if (dirc == '?' && newp != NULL && p[1] == '?') {
+      if (dirc == '?' && newp != nullptr && p[1] == '?') {
         // change "\?" to "?", make a copy first.
         if (startplen == 0) {
           startplen = strlen(startp);
         }
-        if (*newp == NULL) {
+        if (*newp == nullptr) {
           *newp = xstrnsave(startp, startplen);
           p = *newp + (p - startp);
           startp = *newp;
         }
-        if (dropped != NULL) {
+        if (dropped != nullptr) {
           (*dropped)++;
         }
         memmove(p, p + 1, startplen - (size_t)((p + 1) - startp) + 1);
@@ -824,7 +824,7 @@ char *skip_regexp_ex(char *startp, int dirc, int magic, char **newp, int *droppe
       }
     }
   }
-  if (magic_val != NULL) {
+  if (magic_val != nullptr) {
     *magic_val = mymagic;
   }
   return p;
@@ -1215,20 +1215,20 @@ static int read_limits(int *minval, int *maxval)
 // Sometimes need to save a copy of a line.  Since alloc()/free() is very
 // slow, we keep one allocated piece of memory and only re-allocate it when
 // it's too small.  It's freed in bt_regexec_both() when finished.
-static uint8_t *reg_tofree = NULL;
+static uint8_t *reg_tofree = nullptr;
 static unsigned reg_tofreelen;
 
 // Structure used to store the execution state of the regex engine.
 // Which ones are set depends on whether a single-line or multi-line match is
 // done:
 //                      single-line             multi-line
-// reg_match            &regmatch_T             NULL
-// reg_mmatch           NULL                    &regmmatch_T
+// reg_match            &regmatch_T             nullptr
+// reg_mmatch           nullptr                    &regmmatch_T
 // reg_startp           reg_match->startp       <invalid>
 // reg_endp             reg_match->endp         <invalid>
 // reg_startpos         <invalid>               reg_mmatch->startpos
 // reg_endpos           <invalid>               reg_mmatch->endpos
-// reg_win              NULL                    window in which to search
+// reg_win              nullptr                    window in which to search
 // reg_buf              curbuf                  buffer in which to search
 // reg_firstlnum        <invalid>               first line in which to search
 // reg_maxline          0                       last line nr
@@ -1344,7 +1344,7 @@ static void reg_getline_common(linenr_T lnum, reg_getline_flags_T flags, char **
   // can't go before line 1.
   if (firstlnum < 1) {
     if (get_line) {
-      *line = NULL;
+      *line = nullptr;
     }
     if (get_length) {
       *length = 0;
@@ -1377,7 +1377,7 @@ static void reg_getline_common(linenr_T lnum, reg_getline_flags_T flags, char **
 static char *reg_getline(linenr_T lnum)
 {
   char *line;
-  reg_getline_common(lnum, RGLF_LINE, &line, NULL);
+  reg_getline_common(lnum, RGLF_LINE, &line, nullptr);
   return line;
 }
 
@@ -1385,7 +1385,7 @@ static char *reg_getline(linenr_T lnum)
 static colnr_T reg_getline_len(linenr_T lnum)
 {
   colnr_T length;
-  reg_getline_common(lnum, RGLF_LENGTH, NULL, &length);
+  reg_getline_common(lnum, RGLF_LENGTH, nullptr, &length);
   return length;
 }
 
@@ -1395,7 +1395,7 @@ static lpos_T reg_startzpos[NSUBEXP];   // idem, beginning pos
 static lpos_T reg_endzpos[NSUBEXP];     // idem, end pos
 
 // true if using multi-line regexp.
-#define REG_MULTI       (rex.reg_match == NULL)
+#define REG_MULTI       (rex.reg_match == nullptr)
 
 // Create a new extmatch and mark it as referenced once.
 static reg_extmatch_T *make_extmatch(void)
@@ -1409,7 +1409,7 @@ static reg_extmatch_T *make_extmatch(void)
 // Add a reference to an extmatch.
 reg_extmatch_T *ref_extmatch(reg_extmatch_T *em)
 {
-  if (em != NULL) {
+  if (em != nullptr) {
     em->refcnt++;
   }
   return em;
@@ -1421,7 +1421,7 @@ void unref_extmatch(reg_extmatch_T *em)
 {
   int i;
 
-  if (em != NULL && --em->refcnt <= 0) {
+  if (em != nullptr && --em->refcnt <= 0) {
     for (i = 0; i < NSUBEXP; i++) {
       xfree(em->matches[i]);
     }
@@ -1446,7 +1446,7 @@ static bool reg_match_visual(void)
   pos_T top, bot;
   linenr_T lnum;
   colnr_T col;
-  win_T *wp = rex.reg_win == NULL ? curwin : rex.reg_win;
+  win_T *wp = rex.reg_win == nullptr ? curwin : rex.reg_win;
   int mode;
   colnr_T start, end;
   colnr_T start2, end2;
@@ -1494,8 +1494,8 @@ static bool reg_match_visual(void)
       return false;
     }
   } else if (mode == Ctrl_V) {
-    getvvcol(wp, &top, &start, NULL, &end, 0);
-    getvvcol(wp, &bot, &start2, NULL, &end2, 0);
+    getvvcol(wp, &top, &start, nullptr, &end, 0);
+    getvvcol(wp, &bot, &start2, nullptr, &end2, 0);
     if (start2 < start) {
       start = start2;
     }
@@ -1584,7 +1584,7 @@ static void reg_nextline(void)
 
 // Check whether a backreference matches.
 // Returns RA_FAIL, RA_NOMATCH or RA_MATCH.
-// If "bytelen" is not NULL, it is set to the byte length of the match in the
+// If "bytelen" is not nullptr, it is set to the byte length of the match in the
 // last line.
 // Optional: ignore case if rex.reg_ic is set.
 static int match_with_backref(linenr_T start_lnum, colnr_T start_col, linenr_T end_lnum,
@@ -1595,7 +1595,7 @@ static int match_with_backref(linenr_T start_lnum, colnr_T start_col, linenr_T e
   int len;
   char *p;
 
-  if (bytelen != NULL) {
+  if (bytelen != nullptr) {
     *bytelen = 0;
   }
   while (true) {
@@ -1603,7 +1603,7 @@ static int match_with_backref(linenr_T start_lnum, colnr_T start_col, linenr_T e
     // Slow!
     if (rex.line != reg_tofree) {
       len = (int)strlen((char *)rex.line);
-      if (reg_tofree == NULL || len >= (int)reg_tofreelen) {
+      if (reg_tofree == nullptr || len >= (int)reg_tofreelen) {
         len += 50;              // get some extra
         xfree(reg_tofree);
         reg_tofree = xmalloc((size_t)len);
@@ -1628,7 +1628,7 @@ static int match_with_backref(linenr_T start_lnum, colnr_T start_col, linenr_T e
         || (rex.reg_ic && mb_strnicmp(p + ccol, (char *)rex.input, (size_t)len) != 0)) {
       return RA_NOMATCH;  // doesn't match
     }
-    if (bytelen != NULL) {
+    if (bytelen != nullptr) {
       *bytelen += len;
     }
     if (clnum == end_lnum) {
@@ -1640,7 +1640,7 @@ static int match_with_backref(linenr_T start_lnum, colnr_T start_col, linenr_T e
 
     // Advance to next line.
     reg_nextline();
-    if (bytelen != NULL) {
+    if (bytelen != nullptr) {
       *bytelen = 0;
     }
     clnum++;
@@ -1819,7 +1819,7 @@ static int cstrncmp(char *s1, char *s2, int *n)
 /// @param  s  string to search
 /// @param  c  character to find in @a s
 ///
-/// @return  NULL if no match, otherwise pointer to the position in @a s
+/// @return  nullptr if no match, otherwise pointer to the position in @a s
 static inline char *cstrchr(const char *const s, const int c)
   FUNC_ATTR_PURE FUNC_ATTR_WARN_UNUSED_RESULT FUNC_ATTR_NONNULL_ALL
   FUNC_ATTR_ALWAYS_INLINE
@@ -1855,7 +1855,7 @@ static inline char *cstrchr(const char *const s, const int c)
     }
   }
 
-  return NULL;
+  return nullptr;
 }
 
 ////////////////////////////////////////////////////////////////
@@ -1912,7 +1912,7 @@ char *regtilde(char *source, int magic, bool preview)
       postfixlen = newsublen - prefixlen;
       tmpsublen = prefixlen + reg_prev_sublen + postfixlen;
 
-      if (tmpsublen > 0 && reg_prev_sub != NULL) {
+      if (tmpsublen > 0 && reg_prev_sub != nullptr) {
         // Avoid making the text longer than MAXCOL, it will cause
         // trouble at some point.
         if (tmpsublen > MAXCOL) {
@@ -1991,8 +1991,8 @@ static int fill_submatch_list(int argc FUNC_ATTR_UNUSED, typval_T *argv, int arg
   listitem_T *li = tv_list_first(listarg->vval.v_list);
   for (int i = 0; i < 10; i++) {
     char *s = rsm.sm_match->startp[i];
-    if (s == NULL || rsm.sm_match->endp[i] == NULL) {
-      s = NULL;
+    if (s == nullptr || rsm.sm_match->endp[i] == nullptr) {
+      s = nullptr;
     } else {
       s = xstrnsave(s, (size_t)(rsm.sm_match->endp[i] - s));
     }
@@ -2039,7 +2039,7 @@ int vim_regsub(regmatch_T *rmp, char *source, typval_T *expr, char *dest, int de
   rex_in_use = true;
 
   rex.reg_match = rmp;
-  rex.reg_mmatch = NULL;
+  rex.reg_mmatch = nullptr;
   rex.reg_maxline = 0;
   rex.reg_buf = curbuf;
   rex.reg_line_lbr = true;
@@ -2065,13 +2065,13 @@ int vim_regsub_multi(regmmatch_T *rmp, linenr_T lnum, char *source, char *dest, 
   }
   rex_in_use = true;
 
-  rex.reg_match = NULL;
+  rex.reg_match = nullptr;
   rex.reg_mmatch = rmp;
   rex.reg_buf = curbuf;  // always works on the current buffer!
   rex.reg_firstlnum = lnum;
   rex.reg_maxline = curbuf->b_ml.ml_line_count - lnum;
   rex.reg_line_lbr = false;
-  int result = vim_regsub_both(source, NULL, dest, destlen, flags);
+  int result = vim_regsub_both(source, nullptr, dest, destlen, flags);
 
   rex_in_use = rex_in_use_save;
   if (rex_in_use) {
@@ -2083,7 +2083,7 @@ int vim_regsub_multi(regmmatch_T *rmp, linenr_T lnum, char *source, char *dest, 
 
 // When nesting more than a couple levels it's probably a mistake.
 #define MAX_REGSUB_NESTING 4
-static char *eval_result[MAX_REGSUB_NESTING] = { NULL, NULL, NULL, NULL };
+static char *eval_result[MAX_REGSUB_NESTING] = { nullptr, nullptr, nullptr, nullptr };
 
 #ifdef EXITFREE
 void free_resub_eval_result(void)
@@ -2102,15 +2102,15 @@ static int vim_regsub_both(char *source, typval_T *expr, char *dest, int destlen
   int c;
   int cc;
   int no = -1;
-  fptr_T func_all = (fptr_T)NULL;
-  fptr_T func_one = (fptr_T)NULL;
+  fptr_T func_all = (fptr_T)nullptr;
+  fptr_T func_one = (fptr_T)nullptr;
   linenr_T clnum = 0;           // init for GCC
   int len = 0;                  // init for GCC
   static int nesting = 0;
   bool copy = flags & REGSUB_COPY;
 
   // Be paranoid...
-  if ((source == NULL && expr == NULL) || dest == NULL) {
+  if ((source == nullptr && expr == nullptr) || dest == nullptr) {
     emsg(_(e_null));
     return 0;
   }
@@ -2126,14 +2126,14 @@ static int vim_regsub_both(char *source, typval_T *expr, char *dest, int destlen
   dst = dest;
 
   // When the substitute part starts with "\=" evaluate it as an expression.
-  if (expr != NULL || (source[0] == '\\' && source[1] == '=')) {
+  if (expr != nullptr || (source[0] == '\\' && source[1] == '=')) {
     // To make sure that the length doesn't change between checking the
     // length and copying the string, and to speed up things, the
     // resulting string is saved from the call with
     // "flags & REGSUB_COPY" == 0 to the call with
     // "flags & REGSUB_COPY" != 0.
     if (copy) {
-      if (eval_result[nested] != NULL) {
+      if (eval_result[nested] != nullptr) {
         size_t eval_len = strlen(eval_result[nested]);
         if (eval_len < (size_t)destlen) {
           STRCPY(dest, eval_result[nested]);
@@ -2165,12 +2165,12 @@ static int vim_regsub_both(char *source, typval_T *expr, char *dest, int destlen
       // an array of eval results.
       nesting++;
 
-      if (expr != NULL) {
+      if (expr != nullptr) {
         typval_T argv[2];
         typval_T rettv;
         staticList10_T matchList = TV_LIST_STATIC10_INIT;
         rettv.v_type = VAR_STRING;
-        rettv.vval.v_string = NULL;
+        rettv.vval.v_string = nullptr;
         argv[0].v_type = VAR_LIST;
         argv[0].vval.v_list = &matchList.sl_list;
         funcexe_T funcexe = FUNCEXE_INIT;
@@ -2192,11 +2192,11 @@ static int vim_regsub_both(char *source, typval_T *expr, char *dest, int destlen
         }
         if (rettv.v_type == VAR_UNKNOWN) {
           // something failed, no need to report another error
-          eval_result[nested] = NULL;
+          eval_result[nested] = nullptr;
         } else {
           char buf[NUMBUFLEN];
           eval_result[nested] = (char *)tv_get_string_buf_chk(&rettv, buf);
-          if (eval_result[nested] != NULL) {
+          if (eval_result[nested] != nullptr) {
             eval_result[nested] = xstrdup(eval_result[nested]);
           }
         }
@@ -2206,7 +2206,7 @@ static int vim_regsub_both(char *source, typval_T *expr, char *dest, int destlen
       }
       nesting--;
 
-      if (eval_result[nested] != NULL) {
+      if (eval_result[nested] != nullptr) {
         int had_backslash = false;
 
         for (s = eval_result[nested]; *s != NUL; MB_PTR_ADV(s)) {
@@ -2269,7 +2269,7 @@ static int vim_regsub_both(char *source, typval_T *expr, char *dest, int destlen
             continue;
           case 'e':
           case 'E':
-            func_one = func_all = (fptr_T)NULL;
+            func_one = func_all = (fptr_T)nullptr;
             continue;
           }
         }
@@ -2326,10 +2326,10 @@ static int vim_regsub_both(char *source, typval_T *expr, char *dest, int destlen
         }
 
         // Write to buffer, if copy is set.
-        if (func_one != NULL) {
+        if (func_one != nullptr) {
           func_one(&cc, c);
-          func_one = NULL;
-        } else if (func_all != NULL) {
+          func_one = nullptr;
+        } else if (func_all != nullptr) {
           func_all(&cc, c);
         } else {
           // just copy
@@ -2367,7 +2367,7 @@ static int vim_regsub_both(char *source, typval_T *expr, char *dest, int destlen
         if (REG_MULTI) {
           clnum = rex.reg_mmatch->startpos[no].lnum;
           if (clnum < 0 || rex.reg_mmatch->endpos[no].lnum < 0) {
-            s = NULL;
+            s = nullptr;
           } else {
             s = reg_getline(clnum) + rex.reg_mmatch->startpos[no].col;
             if (rex.reg_mmatch->endpos[no].lnum == clnum) {
@@ -2379,13 +2379,13 @@ static int vim_regsub_both(char *source, typval_T *expr, char *dest, int destlen
           }
         } else {
           s = rex.reg_match->startp[no];
-          if (rex.reg_match->endp[no] == NULL) {
-            s = NULL;
+          if (rex.reg_match->endp[no] == nullptr) {
+            s = nullptr;
           } else {
             len = (int)(rex.reg_match->endp[no] - s);
           }
         }
-        if (s != NULL) {
+        if (s != nullptr) {
           while (true) {
             if (len == 0) {
               if (REG_MULTI) {
@@ -2432,10 +2432,10 @@ static int vim_regsub_both(char *source, typval_T *expr, char *dest, int destlen
               } else {
                 c = utf_ptr2char(s);
 
-                if (func_one != (fptr_T)NULL) {
+                if (func_one != (fptr_T)nullptr) {
                   func_one(&cc, c);
-                  func_one = NULL;
-                } else if (func_all != (fptr_T)NULL) {
+                  func_one = nullptr;
+                } else if (func_all != (fptr_T)nullptr) {
                   func_all(&cc, c);
                 } else {  // just copy
                   cc = c;
@@ -2484,33 +2484,33 @@ exit:
 static char *reg_getline_submatch(linenr_T lnum)
 {
   char *line;
-  reg_getline_common(lnum, RGLF_LINE | RGLF_SUBMATCH, &line, NULL);
+  reg_getline_common(lnum, RGLF_LINE | RGLF_SUBMATCH, &line, nullptr);
   return line;
 }
 
 static colnr_T reg_getline_submatch_len(linenr_T lnum)
 {
   colnr_T length;
-  reg_getline_common(lnum, RGLF_LENGTH | RGLF_SUBMATCH, NULL, &length);
+  reg_getline_common(lnum, RGLF_LENGTH | RGLF_SUBMATCH, nullptr, &length);
   return length;
 }
 
 /// Used for the submatch() function: get the string from the n'th submatch in
 /// allocated memory.
 ///
-/// @return  NULL when not in a ":s" command and for a non-existing submatch.
+/// @return  nullptr when not in a ":s" command and for a non-existing submatch.
 char *reg_submatch(int no)
 {
-  char *retval = NULL;
+  char *retval = nullptr;
   char *s;
   int round;
   linenr_T lnum;
 
   if (!can_f_submatch || no < 0) {
-    return NULL;
+    return nullptr;
   }
 
-  if (rsm.sm_match == NULL) {
+  if (rsm.sm_match == nullptr) {
     ssize_t len;
 
     // First round: compute the length and allocate memory.
@@ -2518,11 +2518,11 @@ char *reg_submatch(int no)
     for (round = 1; round <= 2; round++) {
       lnum = rsm.sm_mmatch->startpos[no].lnum;
       if (lnum < 0 || rsm.sm_mmatch->endpos[no].lnum < 0) {
-        return NULL;
+        return nullptr;
       }
 
       s = reg_getline_submatch(lnum);
-      if (s == NULL) {  // anti-crash check, cannot happen?
+      if (s == nullptr) {  // anti-crash check, cannot happen?
         break;
       }
       s += rsm.sm_mmatch->startpos[no].col;
@@ -2567,14 +2567,14 @@ char *reg_submatch(int no)
         len++;
       }
 
-      if (retval == NULL) {
+      if (retval == nullptr) {
         retval = xmalloc((size_t)len);
       }
     }
   } else {
     s = rsm.sm_match->startp[no];
-    if (s == NULL || rsm.sm_match->endp[no] == NULL) {
-      retval = NULL;
+    if (s == nullptr || rsm.sm_match->endp[no] == nullptr) {
+      retval = nullptr;
     } else {
       retval = xstrnsave(s, (size_t)(rsm.sm_match->endp[no] - s));
     }
@@ -2586,12 +2586,12 @@ char *reg_submatch(int no)
 // Used for the submatch() function with the optional non-zero argument: get
 // the list of strings from the n'th submatch in allocated memory with NULs
 // represented in NLs.
-// Returns a list of allocated strings.  Returns NULL when not in a ":s"
+// Returns a list of allocated strings.  Returns nullptr when not in a ":s"
 // command, for a non-existing submatch and for any error.
 list_T *reg_submatch_list(int no)
 {
   if (!can_f_submatch || no < 0) {
-    return NULL;
+    return nullptr;
   }
 
   linenr_T slnum;
@@ -2599,11 +2599,11 @@ list_T *reg_submatch_list(int no)
   list_T *list;
   const char *s;
 
-  if (rsm.sm_match == NULL) {
+  if (rsm.sm_match == nullptr) {
     slnum = rsm.sm_mmatch->startpos[no].lnum;
     elnum = rsm.sm_mmatch->endpos[no].lnum;
     if (slnum < 0 || elnum < 0) {
-      return NULL;
+      return nullptr;
     }
 
     colnr_T scol = rsm.sm_mmatch->startpos[no].col;
@@ -2626,8 +2626,8 @@ list_T *reg_submatch_list(int no)
     }
   } else {
     s = rsm.sm_match->startp[no];
-    if (s == NULL || rsm.sm_match->endp[no] == NULL) {
-      return NULL;
+    if (s == nullptr || rsm.sm_match->endp[no] == nullptr) {
+      return nullptr;
     }
     list = tv_list_alloc(1);
     tv_list_append_string(list, s, rsm.sm_match->endp[no] - s);
@@ -2639,12 +2639,12 @@ list_T *reg_submatch_list(int no)
 
 /// Initialize the values used for matching against multiple lines
 ///
-/// @param win   window in which to search or NULL
+/// @param win   window in which to search or nullptr
 /// @param buf   buffer in which to search
 /// @param lnum  nr of line to start looking for match
 static void init_regexec_multi(regmmatch_T *rmp, win_T *win, buf_T *buf, linenr_T lnum)
 {
-  rex.reg_match = NULL;
+  rex.reg_match = nullptr;
   rex.reg_mmatch = rmp;
   rex.reg_buf = buf;
   rex.reg_win = win;
@@ -2703,7 +2703,7 @@ static void init_regexec_multi(regmmatch_T *rmp, win_T *win, buf_T *buf, linenr_
 // regstart     char that must begin a match; NUL if none obvious; Can be a
 //              multi-byte character.
 // reganch      is the match anchored (at beginning-of-line only)?
-// regmust      string (pointer into program) that match must include, or NULL
+// regmust      string (pointer into program) that match must include, or nullptr
 // regmlen      length of regmust string
 // regflags     RF_ values or'ed together
 //
@@ -4061,7 +4061,7 @@ static uint8_t *re_put_uint32(uint8_t *p, uint32_t val)
 }
 
 // regnext - dig the "next" pointer out of a node
-// Returns NULL when calculating size, when there is no next item and when
+// Returns nullptr when calculating size, when there is no next item and when
 // there is an error.
 static uint8_t *regnext(uint8_t *p)
   FUNC_ATTR_NONNULL_ALL
@@ -4069,12 +4069,12 @@ static uint8_t *regnext(uint8_t *p)
   int offset;
 
   if (p == JUST_CALC_SIZE || reg_toolong) {
-    return NULL;
+    return nullptr;
   }
 
   offset = NEXT(p);
   if (offset == 0) {
-    return NULL;
+    return nullptr;
   }
 
   if (OP(p) == BACK) {
@@ -4097,7 +4097,7 @@ static void regtail(uint8_t *p, const uint8_t *val)
   uint8_t *scan = p;
   while (true) {
     uint8_t *temp = regnext(scan);
-    if (temp == NULL) {
+    if (temp == nullptr) {
       break;
     }
     scan = temp;
@@ -4123,7 +4123,7 @@ static void regtail(uint8_t *p, const uint8_t *val)
 static void regoptail(uint8_t *p, uint8_t *val)
 {
   // When op is neither BRANCH nor BRACE_COMPLEX0-9, it is "operandless"
-  if (p == NULL || p == JUST_CALC_SIZE
+  if (p == nullptr || p == JUST_CALC_SIZE
       || (OP(p) != BRANCH
           && (OP(p) < BRACE_COMPLEX || OP(p) > BRACE_COMPLEX + 9))) {
     return;
@@ -4329,7 +4329,7 @@ static uint8_t *regatom(int *flagp)
   case Magic('u'):
   case Magic('U'):
     p = (uint8_t *)vim_strchr((char *)classchars, no_Magic(c));
-    if (p == NULL) {
+    if (p == nullptr) {
       EMSG_RET_NULL(_(e_invalid_use_of_underscore));
     }
     // When '.' is followed by a composing char ignore the dot, so that
@@ -4361,8 +4361,8 @@ static uint8_t *regatom(int *flagp)
       EMSG_ONE_RET_NULL;
     }
     ret = reg(REG_PAREN, &flags);
-    if (ret == NULL) {
-      return NULL;
+    if (ret == nullptr) {
+      return nullptr;
     }
     *flagp |= flags & (HASWIDTH | SPSTART | HASNL | HASLOOKBH);
     break;
@@ -4390,7 +4390,7 @@ static uint8_t *regatom(int *flagp)
   // NOTREACHED
 
   case Magic('~'):              // previous substitute pattern
-    if (reg_prev_sub != NULL) {
+    if (reg_prev_sub != nullptr) {
       uint8_t *lp;
 
       ret = regnode(EXACTLY);
@@ -4423,7 +4423,7 @@ static uint8_t *regatom(int *flagp)
 
     refnum = c - Magic('0');
     if (!seen_endbrace(refnum)) {
-      return NULL;
+      return nullptr;
     }
     ret = regnode(BACKREF + refnum);
   }
@@ -4440,8 +4440,8 @@ static uint8_t *regatom(int *flagp)
         EMSG_ONE_RET_NULL;
       }
       ret = reg(REG_ZPAREN, &flags);
-      if (ret == NULL) {
-        return NULL;
+      if (ret == nullptr) {
+        return nullptr;
       }
       *flagp |= flags & (HASWIDTH|SPSTART|HASNL|HASLOOKBH);
       re_has_z = REX_SET;
@@ -4466,14 +4466,14 @@ static uint8_t *regatom(int *flagp)
     case 's':
       ret = regnode(MOPEN + 0);
       if (!re_mult_next("\\zs")) {
-        return NULL;
+        return nullptr;
       }
       break;
 
     case 'e':
       ret = regnode(MCLOSE + 0);
       if (!re_mult_next("\\ze")) {
-        return NULL;
+        return nullptr;
       }
       break;
 
@@ -4491,8 +4491,8 @@ static uint8_t *regatom(int *flagp)
         EMSG_ONE_RET_NULL;
       }
       ret = reg(REG_NPAREN, &flags);
-      if (ret == NULL) {
-        return NULL;
+      if (ret == nullptr) {
+        return nullptr;
       }
       *flagp |= flags & (HASWIDTH | SPSTART | HASNL | HASLOOKBH);
       break;
@@ -4532,22 +4532,22 @@ static uint8_t *regatom(int *flagp)
       }
       {
         uint8_t *lastbranch;
-        uint8_t *lastnode = NULL;
+        uint8_t *lastnode = nullptr;
         uint8_t *br;
 
-        ret = NULL;
+        ret = nullptr;
         while ((c = getchr()) != ']') {
           if (c == NUL) {
             EMSG2_RET_NULL(_(e_missing_sb),
                            reg_magic == MAGIC_ALL);
           }
           br = regnode(BRANCH);
-          if (ret == NULL) {
+          if (ret == nullptr) {
             ret = br;
           } else {
             regtail(lastnode, br);
             if (reg_toolong) {
-              return NULL;
+              return nullptr;
             }
           }
 
@@ -4555,11 +4555,11 @@ static uint8_t *regatom(int *flagp)
           one_exactly = true;
           lastnode = regatom(flagp);
           one_exactly = false;
-          if (lastnode == NULL) {
-            return NULL;
+          if (lastnode == nullptr) {
+            return nullptr;
           }
         }
-        if (ret == NULL) {
+        if (ret == nullptr) {
           EMSG2_RET_NULL(_(e_empty_sb),
                          reg_magic == MAGIC_ALL);
         }
@@ -4574,7 +4574,7 @@ static uint8_t *regatom(int *flagp)
             if (OP(br) == BRANCH) {
               regtail(br, lastbranch);
               if (reg_toolong) {
-                return NULL;
+                return nullptr;
               }
               br = OPERAND(br);
             } else {
@@ -4663,7 +4663,7 @@ static uint8_t *regatom(int *flagp)
           if (cur && n) {
             semsg(_(e_regexp_number_after_dot_pos_search_chr), no_Magic(c));
             rc_did_emsg = true;
-            return NULL;
+            return nullptr;
           }
           if (c == 'l') {
             if (cur) {
@@ -4682,7 +4682,7 @@ static uint8_t *regatom(int *flagp)
           } else {
             if (cur) {
               colnr_T vcol = 0;
-              getvvcol(curwin, &curwin->w_cursor, NULL, NULL, &vcol, 0);
+              getvvcol(curwin, &curwin->w_cursor, nullptr, nullptr, &vcol, 0);
               n = (uint32_t)(++vcol);
             }
             ret = regnode(RE_VCOL);
@@ -4780,10 +4780,10 @@ collection:
           // accepts "\t", "\e", etc., but only when the 'l' flag in
           // 'cpoptions' is not included.
           else if (*regparse == '\\'
-                   && (vim_strchr(REGEXP_INRANGE, (uint8_t)regparse[1]) != NULL
+                   && (vim_strchr(REGEXP_INRANGE, (uint8_t)regparse[1]) != nullptr
                        || (!reg_cpo_lit
                            && vim_strchr(REGEXP_ABBR,
-                                         (uint8_t)regparse[1]) != NULL))) {
+                                         (uint8_t)regparse[1]) != nullptr))) {
             regparse++;
             if (*regparse == 'n') {
               // '\n' in range: also match NL
@@ -5059,8 +5059,8 @@ static uint8_t *regpiece(int *flagp)
   int maxval;
 
   ret = regatom(&flags);
-  if (ret == NULL) {
-    return NULL;
+  if (ret == nullptr) {
+    return nullptr;
   }
 
   op = peekchr();
@@ -5152,7 +5152,7 @@ static uint8_t *regpiece(int *flagp)
 
   case Magic('{'):
     if (!read_limits(&minval, &maxval)) {
-      return NULL;
+      return nullptr;
     }
     if (flags & SIMPLE) {
       reginsert(BRACE_SIMPLE, ret);
@@ -5188,8 +5188,8 @@ static uint8_t *regpiece(int *flagp)
 // Implements the concatenation operator.
 static uint8_t *regconcat(int *flagp)
 {
-  uint8_t *first = NULL;
-  uint8_t *chain = NULL;
+  uint8_t *first = nullptr;
+  uint8_t *chain = nullptr;
   uint8_t *latest;
   int flags;
   int cont = true;
@@ -5238,23 +5238,23 @@ static uint8_t *regconcat(int *flagp)
       break;
     default:
       latest = regpiece(&flags);
-      if (latest == NULL || reg_toolong) {
-        return NULL;
+      if (latest == nullptr || reg_toolong) {
+        return nullptr;
       }
       *flagp |= flags & (HASWIDTH | HASNL | HASLOOKBH);
-      if (chain == NULL) {                      // First piece.
+      if (chain == nullptr) {                      // First piece.
         *flagp |= flags & SPSTART;
       } else {
         regtail(chain, latest);
       }
       chain = latest;
-      if (first == NULL) {
+      if (first == nullptr) {
         first = latest;
       }
       break;
     }
   }
-  if (first == NULL) {          // Loop ran zero times.
+  if (first == nullptr) {          // Loop ran zero times.
     first = regnode(NOTHING);
   }
   return first;
@@ -5265,7 +5265,7 @@ static uint8_t *regconcat(int *flagp)
 static uint8_t *regbranch(int *flagp)
 {
   uint8_t *ret;
-  uint8_t *chain = NULL;
+  uint8_t *chain = nullptr;
   uint8_t *latest;
   int flags;
 
@@ -5274,8 +5274,8 @@ static uint8_t *regbranch(int *flagp)
   ret = regnode(BRANCH);
   while (true) {
     latest = regconcat(&flags);
-    if (latest == NULL) {
-      return NULL;
+    if (latest == nullptr) {
+      return nullptr;
     }
     // If one of the branches has width, the whole thing has.  If one of
     // the branches anchors at start-of-line, the whole thing does.
@@ -5284,7 +5284,7 @@ static uint8_t *regbranch(int *flagp)
     // If one of the branches doesn't match a line-break, the whole thing
     // doesn't.
     *flagp &= ~HASNL | (flags & HASNL);
-    if (chain != NULL) {
+    if (chain != nullptr) {
       regtail(chain, latest);
     }
     if (peekchr() != Magic('&')) {
@@ -5341,15 +5341,15 @@ static uint8_t *reg(int paren, int *flagp)
     // Make a NOPEN node.
     ret = regnode(NOPEN);
   } else {
-    ret = NULL;
+    ret = nullptr;
   }
 
   // Pick up the branches, linking them together.
   br = regbranch(&flags);
-  if (br == NULL) {
-    return NULL;
+  if (br == nullptr) {
+    return nullptr;
   }
-  if (ret != NULL) {
+  if (ret != nullptr) {
     regtail(ret, br);           // [MZ]OPEN -> first.
   } else {
     ret = br;
@@ -5364,8 +5364,8 @@ static uint8_t *reg(int paren, int *flagp)
   while (peekchr() == Magic('|')) {
     skipchr();
     br = regbranch(&flags);
-    if (br == NULL || reg_toolong) {
-      return NULL;
+    if (br == nullptr || reg_toolong) {
+      return nullptr;
     }
     regtail(ret, br);           // BRANCH -> BRANCH.
     if (!(flags & HASWIDTH)) {
@@ -5381,7 +5381,7 @@ static uint8_t *reg(int paren, int *flagp)
   regtail(ret, ender);
 
   // Hook the tails of the branches to the closing node.
-  for (br = ret; br != NULL; br = regnext(br)) {
+  for (br = ret; br != nullptr; br = regnext(br)) {
     regoptail(br, ender);
   }
 
@@ -5412,7 +5412,7 @@ static uint8_t *reg(int paren, int *flagp)
 
 // bt_regcomp() - compile a regular expression into internal code for the
 // traditional back track matcher.
-// Returns the program in allocated space.  Returns NULL for an error.
+// Returns the program in allocated space.  Returns nullptr for an error.
 //
 // We can't allocate space until we know how big the compiled form will be,
 // but we can't compile it (and thus know how big it is) until we've got a
@@ -5436,7 +5436,7 @@ static regprog_T *bt_regcomp(uint8_t *expr, int re_flags)
   int len;
   int flags;
 
-  if (expr == NULL) {
+  if (expr == nullptr) {
     IEMSG_RET_NULL(_(e_null));
   }
 
@@ -5446,8 +5446,8 @@ static regprog_T *bt_regcomp(uint8_t *expr, int re_flags)
   regcomp_start(expr, re_flags);
   regcode = JUST_CALC_SIZE;
   regc(REGMAGIC);
-  if (reg(REG_NOPAREN, &flags) == NULL) {
-    return NULL;
+  if (reg(REG_NOPAREN, &flags) == nullptr) {
+    return nullptr;
   }
 
   // Allocate space.
@@ -5461,18 +5461,18 @@ static regprog_T *bt_regcomp(uint8_t *expr, int re_flags)
   regcomp_start(expr, re_flags);
   regcode = r->program;
   regc(REGMAGIC);
-  if (reg(REG_NOPAREN, &flags) == NULL || reg_toolong) {
+  if (reg(REG_NOPAREN, &flags) == nullptr || reg_toolong) {
     xfree(r);
     if (reg_toolong) {
       EMSG_RET_NULL(_("E339: Pattern too long"));
     }
-    return NULL;
+    return nullptr;
   }
 
   // Dig out information for optimizations.
   r->regstart = NUL;            // Worst-case defaults.
   r->reganch = 0;
-  r->regmust = NULL;
+  r->regmust = nullptr;
   r->regmlen = 0;
   r->regflags = regflags;
   if (flags & HASNL) {
@@ -5517,9 +5517,9 @@ static regprog_T *bt_regcomp(uint8_t *expr, int re_flags)
     // first. Used a lot for "#" and "*" commands. (Added by mool).
     if ((flags & SPSTART || OP(scan) == BOW || OP(scan) == EOW)
         && !(flags & HASNL)) {
-      longest = NULL;
+      longest = nullptr;
       len = 0;
-      for (; scan != NULL; scan = regnext(scan)) {
+      for (; scan != nullptr; scan = regnext(scan)) {
         if (OP(scan) == EXACTLY) {
           size_t scanlen = strlen((char *)OPERAND(scan));
           if (scanlen >= (size_t)len) {
@@ -5983,12 +5983,12 @@ do_class:
       } else if (rex.reg_line_lbr && *scan == '\n' && WITH_NL(OP(p))) {
         scan++;
       } else if ((len = utfc_ptr2len((char *)scan)) > 1) {
-        if ((cstrchr((char *)opnd, utf_ptr2char((char *)scan)) == NULL) == testval) {
+        if ((cstrchr((char *)opnd, utf_ptr2char((char *)scan)) == nullptr) == testval) {
           break;
         }
         scan += len;
       } else {
-        if ((cstrchr((char *)opnd, *scan) == NULL) == testval) {
+        if ((cstrchr((char *)opnd, *scan) == nullptr) == testval) {
           break;
         }
         scan++;
@@ -6028,14 +6028,14 @@ do_class:
 }
 
 // Push an item onto the regstack.
-// Returns pointer to new item.  Returns NULL when out of memory.
+// Returns pointer to new item.  Returns nullptr when out of memory.
 static regitem_T *regstack_push(regstate_T state, uint8_t *scan)
 {
   regitem_T *rp;
 
   if ((int64_t)((unsigned)regstack.ga_len >> 10) >= p_mmp) {
     emsg(_(e_pattern_uses_more_memory_than_maxmempattern));
-    return NULL;
+    return nullptr;
   }
   ga_grow(&regstack, sizeof(regitem_T));
 
@@ -6111,8 +6111,8 @@ static void restore_subexpr(regbehind_T *bp)
 /// loop.
 ///
 /// @param scan       Current node.
-/// @param tm         timeout limit or NULL
-/// @param timed_out  flag set on timeout or NULL
+/// @param tm         timeout limit or nullptr
+/// @param timed_out  flag set on timeout or nullptr
 ///
 /// @return - true when there is a match.  Leaves rex.input and rex.lnum
 ///         just after the last matched character.
@@ -6140,7 +6140,7 @@ static bool regmatch(uint8_t *scan, const proftime_T *tm, int *timed_out)
     reg_breakcheck();
 
 #ifdef REGEXP_DEBUG
-    if (scan != NULL && regnarrate) {
+    if (scan != nullptr && regnarrate) {
       fprintf(stderr, "%s", (char *)regprop(scan));
       fprintf(stderr, "%s", "(\n");
     }
@@ -6149,15 +6149,15 @@ static bool regmatch(uint8_t *scan, const proftime_T *tm, int *timed_out)
     // Repeat for items that can be matched sequentially, without using the
     // regstack.
     while (true) {
-      if (got_int || scan == NULL) {
+      if (got_int || scan == nullptr) {
         status = RA_FAIL;
         break;
       }
       // Check for timeout once in a 100 times to avoid overhead.
-      if (tm != NULL && ++tm_count == 100) {
+      if (tm != nullptr && ++tm_count == 100) {
         tm_count = 0;
         if (profile_passed_limit(*tm)) {
-          if (timed_out != NULL) {
+          if (timed_out != nullptr) {
             *timed_out = true;
           }
           status = RA_FAIL;
@@ -6170,13 +6170,13 @@ static bool regmatch(uint8_t *scan, const proftime_T *tm, int *timed_out)
       if (regnarrate) {
         fprintf(stderr, "%s", (char *)regprop(scan));
         fprintf(stderr, "%s", "...\n");
-        if (re_extmatch_in != NULL) {
+        if (re_extmatch_in != nullptr) {
           int i;
 
           fprintf(stderr, _("External submatches:\n"));
           for (i = 0; i < NSUBEXP; i++) {
             fprintf(stderr, "%s", "    \"");
-            if (re_extmatch_in->matches[i] != NULL) {
+            if (re_extmatch_in->matches[i] != nullptr) {
               fprintf(stderr, "%s", (char *)re_extmatch_in->matches[i]);
             }
             fprintf(stderr, "%s", "\"\n");
@@ -6230,7 +6230,7 @@ static bool regmatch(uint8_t *scan, const proftime_T *tm, int *timed_out)
         case CURSOR:
           // Check if the buffer is in a window and compare the
           // rex.reg_win->w_cursor position to the match position.
-          if (rex.reg_win == NULL
+          if (rex.reg_win == nullptr
               || (rex.lnum + rex.reg_firstlnum != rex.reg_win->w_cursor.lnum)
               || ((colnr_T)(rex.input - rex.line) !=
                   rex.reg_win->w_cursor.col)) {
@@ -6245,7 +6245,7 @@ static bool regmatch(uint8_t *scan, const proftime_T *tm, int *timed_out)
           int cmp = OPERAND(scan)[1];
           pos_T *pos;
           size_t col = REG_MULTI ? (size_t)(rex.input - rex.line) : 0;
-          fmark_T *fm = mark_get(rex.reg_buf, curwin, NULL, kMarkBufLocal, mark);
+          fmark_T *fm = mark_get(rex.reg_buf, curwin, nullptr, kMarkBufLocal, mark);
 
           // Line may have been freed, get it again.
           if (REG_MULTI) {
@@ -6253,7 +6253,7 @@ static bool regmatch(uint8_t *scan, const proftime_T *tm, int *timed_out)
             rex.input = rex.line + col;
           }
 
-          if (fm == NULL                    // mark doesn't exist
+          if (fm == nullptr                    // mark doesn't exist
               || fm->mark.lnum <= 0) {           // mark isn't set in reg_buf
             status = RA_NOMATCH;
           } else {
@@ -6302,7 +6302,7 @@ static bool regmatch(uint8_t *scan, const proftime_T *tm, int *timed_out)
           break;
 
         case RE_VCOL: {
-          win_T *wp = rex.reg_win == NULL ? curwin : rex.reg_win;
+          win_T *wp = rex.reg_win == nullptr ? curwin : rex.reg_win;
           linenr_T lnum = REG_MULTI ? rex.reg_firstlnum + rex.lnum : 1;
           if (REG_MULTI && (lnum <= 0 || lnum > wp->w_buffer->b_ml.ml_line_count)) {
             lnum = 1;
@@ -6590,7 +6590,7 @@ static bool regmatch(uint8_t *scan, const proftime_T *tm, int *timed_out)
             // Check for following composing character, unless %C
             // follows (skips over all composing chars).
             if (status != RA_NOMATCH
-                && utf_composinglike((char *)rex.input, (char *)rex.input + len, NULL)
+                && utf_composinglike((char *)rex.input, (char *)rex.input + len, nullptr)
                 && !rex.reg_icombine
                 && OP(next) != RE_COMPOSING) {
               // raaron: This code makes a composing character get
@@ -6611,7 +6611,7 @@ static bool regmatch(uint8_t *scan, const proftime_T *tm, int *timed_out)
 
           if (c == NUL) {
             status = RA_NOMATCH;
-          } else if ((cstrchr((char *)q, c) == NULL) == (op == ANYOF)) {
+          } else if ((cstrchr((char *)q, c) == nullptr) == (op == ANYOF)) {
             status = RA_NOMATCH;
           } else {  // Check following combining characters
             int len = utfc_ptr2len((char *)q) - utf_ptr2len((char *)q);
@@ -6726,7 +6726,7 @@ static bool regmatch(uint8_t *scan, const proftime_T *tm, int *timed_out)
           no = op - MOPEN;
           cleanup_subexpr();
           rp = regstack_push(RS_MOPEN, scan);
-          if (rp == NULL) {
+          if (rp == nullptr) {
             status = RA_FAIL;
           } else {
             rp->rs_no = (int16_t)no;
@@ -6738,7 +6738,7 @@ static bool regmatch(uint8_t *scan, const proftime_T *tm, int *timed_out)
 
         case NOPEN:         // \%(
         case NCLOSE:        // \) after \%(
-          if (regstack_push(RS_NOPEN, scan) == NULL) {
+          if (regstack_push(RS_NOPEN, scan) == nullptr) {
             status = RA_FAIL;
           }
           // We simply continue and handle the result when done.
@@ -6756,7 +6756,7 @@ static bool regmatch(uint8_t *scan, const proftime_T *tm, int *timed_out)
           no = op - ZOPEN;
           cleanup_zsubexpr();
           rp = regstack_push(RS_ZOPEN, scan);
-          if (rp == NULL) {
+          if (rp == nullptr) {
             status = RA_FAIL;
           } else {
             rp->rs_no = (int16_t)no;
@@ -6779,7 +6779,7 @@ static bool regmatch(uint8_t *scan, const proftime_T *tm, int *timed_out)
           no = op - MCLOSE;
           cleanup_subexpr();
           rp = regstack_push(RS_MCLOSE, scan);
-          if (rp == NULL) {
+          if (rp == nullptr) {
             status = RA_FAIL;
           } else {
             rp->rs_no = (int16_t)no;
@@ -6800,7 +6800,7 @@ static bool regmatch(uint8_t *scan, const proftime_T *tm, int *timed_out)
           no = op - ZCLOSE;
           cleanup_zsubexpr();
           rp = regstack_push(RS_ZCLOSE, scan);
-          if (rp == NULL) {
+          if (rp == nullptr) {
             status = RA_FAIL;
           } else {
             rp->rs_no = (int16_t)no;
@@ -6824,7 +6824,7 @@ static bool regmatch(uint8_t *scan, const proftime_T *tm, int *timed_out)
           no = op - BACKREF;
           cleanup_subexpr();
           if (!REG_MULTI) {  // Single-line regexp
-            if (rex.reg_startp[no] == NULL || rex.reg_endp[no] == NULL) {
+            if (rex.reg_startp[no] == nullptr || rex.reg_endp[no] == nullptr) {
               // Backref was not set: Match an empty string.
               len = 0;
             } else {
@@ -6877,8 +6877,8 @@ static bool regmatch(uint8_t *scan, const proftime_T *tm, int *timed_out)
         case ZREF + 9:
           cleanup_zsubexpr();
           no = op - ZREF;
-          if (re_extmatch_in != NULL
-              && re_extmatch_in->matches[no] != NULL) {
+          if (re_extmatch_in != nullptr
+              && re_extmatch_in->matches[no] != nullptr) {
             int len = (int)strlen((char *)re_extmatch_in->matches[no]);
             if (cstrncmp((char *)re_extmatch_in->matches[no], (char *)rex.input, &len) != 0) {
               status = RA_NOMATCH;
@@ -6895,7 +6895,7 @@ static bool regmatch(uint8_t *scan, const proftime_T *tm, int *timed_out)
             next = OPERAND(scan);               // Avoid recursion.
           } else {
             rp = regstack_push(RS_BRANCH, scan);
-            if (rp == NULL) {
+            if (rp == nullptr) {
               status = RA_FAIL;
             } else {
               status = RA_BREAK;                // rest is below
@@ -6936,7 +6936,7 @@ static bool regmatch(uint8_t *scan, const proftime_T *tm, int *timed_out)
           if (brace_count[no] <= (brace_min[no] <= brace_max[no]
                                   ? brace_min[no] : brace_max[no])) {
             rp = regstack_push(RS_BRCPLX_MORE, scan);
-            if (rp == NULL) {
+            if (rp == nullptr) {
               status = RA_FAIL;
             } else {
               rp->rs_no = (int16_t)no;
@@ -6952,7 +6952,7 @@ static bool regmatch(uint8_t *scan, const proftime_T *tm, int *timed_out)
             // Range is the normal way around, use longest match
             if (brace_count[no] <= brace_max[no]) {
               rp = regstack_push(RS_BRCPLX_LONG, scan);
-              if (rp == NULL) {
+              if (rp == nullptr) {
                 status = RA_FAIL;
               } else {
                 rp->rs_no = (int16_t)no;
@@ -6965,7 +6965,7 @@ static bool regmatch(uint8_t *scan, const proftime_T *tm, int *timed_out)
             // Range is backwards, use shortest match first
             if (brace_count[no] <= brace_min[no]) {
               rp = regstack_push(RS_BRCPLX_SHORT, scan);
-              if (rp == NULL) {
+              if (rp == nullptr) {
                 status = RA_FAIL;
               } else {
                 reg_save(&rp->rs_un.regsave, &backpos);
@@ -7026,7 +7026,7 @@ static bool regmatch(uint8_t *scan, const proftime_T *tm, int *timed_out)
               ga_grow(&regstack, sizeof(regstar_T));
               regstack.ga_len += (int)sizeof(regstar_T);
               rp = regstack_push(rst.minval <= rst.maxval ? RS_STAR_LONG : RS_STAR_SHORT, scan);
-              if (rp == NULL) {
+              if (rp == nullptr) {
                 status = RA_FAIL;
               } else {
                 *(((regstar_T *)rp) - 1) = rst;
@@ -7043,7 +7043,7 @@ static bool regmatch(uint8_t *scan, const proftime_T *tm, int *timed_out)
         case MATCH:
         case SUBPAT:
           rp = regstack_push(RS_NOMATCH, scan);
-          if (rp == NULL) {
+          if (rp == nullptr) {
             status = RA_FAIL;
           } else {
             rp->rs_no = (int16_t)op;
@@ -7063,7 +7063,7 @@ static bool regmatch(uint8_t *scan, const proftime_T *tm, int *timed_out)
             ga_grow(&regstack, sizeof(regbehind_T));
             regstack.ga_len += (int)sizeof(regbehind_T);
             rp = regstack_push(RS_BEHIND1, scan);
-            if (rp == NULL) {
+            if (rp == nullptr) {
               status = RA_FAIL;
             } else {
               // Need to save the subexpr to be able to restore them
@@ -7179,7 +7179,7 @@ static bool regmatch(uint8_t *scan, const proftime_T *tm, int *timed_out)
             reg_restore(&rp->rs_un.regsave, &backpos);
             scan = rp->rs_scan;
           }
-          if (scan == NULL || OP(scan) != BRANCH) {
+          if (scan == nullptr || OP(scan) != BRANCH) {
             // no more branches, didn't find a match
             status = RA_NOMATCH;
             regstack_pop(&scan);
@@ -7313,7 +7313,7 @@ static bool regmatch(uint8_t *scan, const proftime_T *tm, int *timed_out)
               if (rp->rs_un.regsave.rs_u.pos.lnum
                   < behind_pos.rs_u.pos.lnum
                   || reg_getline(--rp->rs_un.regsave.rs_u.pos.lnum)
-                  == NULL) {
+                  == nullptr) {
                 no = FAIL;
               } else {
                 reg_restore(&rp->rs_un.regsave, &backpos);
@@ -7406,7 +7406,7 @@ static bool regmatch(uint8_t *scan, const proftime_T *tm, int *timed_out)
                 rex.lnum--;
                 rex.line = (uint8_t *)reg_getline(rex.lnum);
                 // Just in case regrepeat() didn't count right.
-                if (rex.line == NULL) {
+                if (rex.line == nullptr) {
                   break;
                 }
                 rex.input = rex.line + reg_getline_len(rex.lnum);
@@ -7466,7 +7466,7 @@ static bool regmatch(uint8_t *scan, const proftime_T *tm, int *timed_out)
 
     // If the regstack is empty or something failed we are done.
     if (GA_EMPTY(&regstack) || status == RA_FAIL) {
-      if (scan == NULL) {
+      if (scan == nullptr) {
         // We get here only if there's trouble -- normally "case END" is
         // the terminating point.
         iemsg(_(e_re_corr));
@@ -7483,8 +7483,8 @@ static bool regmatch(uint8_t *scan, const proftime_T *tm, int *timed_out)
 
 /// Try match of "prog" with at rex.line["col"].
 ///
-/// @param tm         timeout limit or NULL
-/// @param timed_out  flag set on timeout or NULL
+/// @param tm         timeout limit or nullptr
+/// @param timed_out  flag set on timeout or nullptr
 ///
 /// @return  0 for failure, or number of lines contained in the match.
 static int regtry(bt_regprog_T *prog, colnr_T col, proftime_T *tm, int *timed_out)
@@ -7512,16 +7512,16 @@ static int regtry(bt_regprog_T *prog, colnr_T col, proftime_T *tm, int *timed_ou
       rex.lnum = rex.reg_endpos[0].lnum;
     }
   } else {
-    if (rex.reg_startp[0] == NULL) {
+    if (rex.reg_startp[0] == nullptr) {
       rex.reg_startp[0] = rex.line + col;
     }
-    if (rex.reg_endp[0] == NULL) {
+    if (rex.reg_endp[0] == nullptr) {
       rex.reg_endp[0] = rex.input;
     }
   }
   // Package any found \z(...\) matches for export. Default is none.
   unref_extmatch(re_extmatch_out);
-  re_extmatch_out = NULL;
+  re_extmatch_out = nullptr;
 
   if (prog->reghasz == REX_SET) {
     int i;
@@ -7539,7 +7539,7 @@ static int regtry(bt_regprog_T *prog, colnr_T col, proftime_T *tm, int *timed_ou
                                  (size_t)(reg_endzpos[i].col - reg_startzpos[i].col));
         }
       } else {
-        if (reg_startzp[i] != NULL && reg_endzp[i] != NULL) {
+        if (reg_startzp[i] != nullptr && reg_endzp[i] != nullptr) {
           re_extmatch_out->matches[i] =
             (uint8_t *)xstrnsave((char *)reg_startzp[i], (size_t)(reg_endzp[i] - reg_startzp[i]));
         }
@@ -7550,11 +7550,11 @@ static int regtry(bt_regprog_T *prog, colnr_T col, proftime_T *tm, int *timed_ou
 }
 
 /// Match a regexp against a string ("line" points to the string) or multiple
-/// lines (if "line" is NULL, use reg_getline()).
+/// lines (if "line" is nullptr, use reg_getline()).
 ///
 /// @param startcol   column to start looking for match
-/// @param tm         timeout limit or NULL
-/// @param timed_out  flag set on timeout or NULL
+/// @param tm         timeout limit or nullptr
+/// @param timed_out  flag set on timeout or nullptr
 ///
 /// @return  0 for failure, or number of lines contained in the match.
 static int bt_regexec_both(uint8_t *line, colnr_T startcol, proftime_T *tm, int *timed_out)
@@ -7568,7 +7568,7 @@ static int bt_regexec_both(uint8_t *line, colnr_T startcol, proftime_T *tm, int 
   // We allocate *_INITIAL amount of bytes first and then set the grow size
   // to much bigger value to avoid many malloc calls in case of deep regular
   // expressions.
-  if (regstack.ga_data == NULL) {
+  if (regstack.ga_data == nullptr) {
     // Use an item size of 1 byte, since we push different things
     // onto the regstack.
     ga_init(&regstack, 1, REGSTACK_INITIAL);
@@ -7576,7 +7576,7 @@ static int bt_regexec_both(uint8_t *line, colnr_T startcol, proftime_T *tm, int 
     ga_set_growsize(&regstack, REGSTACK_INITIAL * 8);
   }
 
-  if (backpos.ga_data == NULL) {
+  if (backpos.ga_data == nullptr) {
     ga_init(&backpos, sizeof(backpos_T), BACKPOS_INITIAL);
     ga_grow(&backpos, BACKPOS_INITIAL);
     ga_set_growsize(&backpos, BACKPOS_INITIAL * 8);
@@ -7594,7 +7594,7 @@ static int bt_regexec_both(uint8_t *line, colnr_T startcol, proftime_T *tm, int 
   }
 
   // Be paranoid...
-  if (prog == NULL || line == NULL) {
+  if (prog == nullptr || line == nullptr) {
     iemsg(_(e_null));
     goto theend;
   }
@@ -7622,28 +7622,28 @@ static int bt_regexec_both(uint8_t *line, colnr_T startcol, proftime_T *tm, int 
   }
 
   // If there is a "must appear" string, look for it.
-  if (prog->regmust != NULL) {
+  if (prog->regmust != nullptr) {
     int c = utf_ptr2char((char *)prog->regmust);
     s = line + col;
 
     // This is used very often, esp. for ":global".  Use two versions of
     // the loop to avoid overhead of conditions.
     if (!rex.reg_ic) {
-      while ((s = (uint8_t *)vim_strchr((char *)s, c)) != NULL) {
+      while ((s = (uint8_t *)vim_strchr((char *)s, c)) != nullptr) {
         if (cstrncmp((char *)s, (char *)prog->regmust, &prog->regmlen) == 0) {
           break;  // Found it.
         }
         MB_PTR_ADV(s);
       }
     } else {
-      while ((s = (uint8_t *)cstrchr((char *)s, c)) != NULL) {
+      while ((s = (uint8_t *)cstrchr((char *)s, c)) != nullptr) {
         if (cstrncmp((char *)s, (char *)prog->regmust, &prog->regmlen) == 0) {
           break;  // Found it.
         }
         MB_PTR_ADV(s);
       }
     }
-    if (s == NULL) {  // Not present.
+    if (s == nullptr) {  // Not present.
       goto theend;
     }
   }
@@ -7672,7 +7672,7 @@ static int bt_regexec_both(uint8_t *line, colnr_T startcol, proftime_T *tm, int 
       if (prog->regstart != NUL) {
         // Skip until the char we know it must start with.
         s = (uint8_t *)cstrchr((char *)rex.line + col, prog->regstart);
-        if (s == NULL) {
+        if (s == nullptr) {
           retval = 0;
           break;
         }
@@ -7700,10 +7700,10 @@ static int bt_regexec_both(uint8_t *line, colnr_T startcol, proftime_T *tm, int 
       }
       col += utfc_ptr2len((char *)rex.line + col);
       // Check for timeout once in a twenty times to avoid overhead.
-      if (tm != NULL && ++tm_count == 20) {
+      if (tm != nullptr && ++tm_count == 20) {
         tm_count = 0;
         if (profile_passed_limit(*tm)) {
-          if (timed_out != NULL) {
+          if (timed_out != nullptr) {
             *timed_out = true;
           }
           break;
@@ -7766,17 +7766,17 @@ theend:
 static int bt_regexec_nl(regmatch_T *rmp, uint8_t *line, colnr_T col, bool line_lbr)
 {
   rex.reg_match = rmp;
-  rex.reg_mmatch = NULL;
+  rex.reg_mmatch = nullptr;
   rex.reg_maxline = 0;
   rex.reg_line_lbr = line_lbr;
   rex.reg_buf = curbuf;
-  rex.reg_win = NULL;
+  rex.reg_win = nullptr;
   rex.reg_ic = rmp->rm_ic;
   rex.reg_icombine = false;
   rex.reg_nobreak = rmp->regprog->re_flags & RE_NOBREAK;
   rex.reg_maxcol = 0;
 
-  int64_t r = bt_regexec_both(line, col, NULL, NULL);
+  int64_t r = bt_regexec_both(line, col, nullptr, nullptr);
   assert(r <= INT_MAX);
   return (int)r;
 }
@@ -7785,11 +7785,11 @@ static int bt_regexec_nl(regmatch_T *rmp, uint8_t *line, colnr_T col, bool line_
 /// "rmp->regprog" is a compiled regexp as returned by vim_regcomp().
 /// Uses curbuf for line count and 'iskeyword'.
 ///
-/// @param win Window in which to search or NULL
+/// @param win Window in which to search or nullptr
 /// @param buf Buffer in which to search
 /// @param lnum Number of line to start looking for match
 /// @param col Column to start looking for match
-/// @param tm Timeout limit or NULL
+/// @param tm Timeout limit or nullptr
 ///
 /// @return zero if there is no match and number of lines contained in the match
 ///         otherwise.
@@ -7797,7 +7797,7 @@ static int bt_regexec_multi(regmmatch_T *rmp, win_T *win, buf_T *buf, linenr_T l
                             proftime_T *tm, int *timed_out)
 {
   init_regexec_multi(rmp, win, buf, lnum);
-  return bt_regexec_both(NULL, col, tm, timed_out);
+  return bt_regexec_both(nullptr, col, tm, timed_out);
 }
 
 // Compare a number with the operand of RE_LNUM, RE_COL or RE_VCOL.
@@ -7822,7 +7822,7 @@ static void regdump(uint8_t *pattern, bt_regprog_T *r)
   uint8_t *s;
   int op = EXACTLY;             // Arbitrary non-END op.
   uint8_t *next;
-  uint8_t *end = NULL;
+  uint8_t *end = nullptr;
   FILE *f;
 
 # ifdef BT_REGEXP_LOG
@@ -7830,7 +7830,7 @@ static void regdump(uint8_t *pattern, bt_regprog_T *r)
 # else
   f = stdout;
 # endif
-  if (f == NULL) {
+  if (f == nullptr) {
     return;
   }
   fprintf(f, "-------------------------------------\n\r\nregcomp(%s):\r\n",
@@ -7842,8 +7842,8 @@ static void regdump(uint8_t *pattern, bt_regprog_T *r)
   while ((op != END || s <= end) && s < r->program + r->regsz) {
     op = OP(s);
     fprintf(f, "%2d%s", (int)(s - r->program), regprop(s));     // Where, what.
-    next = (s + 3 <= r->program + r->regsz) ? regnext(s) : NULL;
-    if (next == NULL) {         // Next ptr.
+    next = (s + 3 <= r->program + r->regsz) ? regnext(s) : nullptr;
+    if (next == nullptr) {         // Next ptr.
       fprintf(f, "(0)");
     } else {
       fprintf(f, "(%d)", (int)((s - r->program) + (next - s)));
@@ -7894,7 +7894,7 @@ static void regdump(uint8_t *pattern, bt_regprog_T *r)
   if (r->reganch) {
     fprintf(f, "anchored; ");
   }
-  if (r->regmust != NULL) {
+  if (r->regmust != nullptr) {
     fprintf(f, "must have \"%s\"", r->regmust);
   }
   fprintf(f, "\r\n");
@@ -8157,7 +8157,7 @@ static uint8_t *regprop(uint8_t *op)
   case MOPEN + 9:
     buflen += (size_t)snprintf(buf + buflen, sizeof(buf) - buflen,
                                "MOPEN%d", OP(op) - MOPEN);
-    p = NULL;
+    p = nullptr;
     break;
   case MCLOSE + 0:
     p = "MATCH END";
@@ -8173,7 +8173,7 @@ static uint8_t *regprop(uint8_t *op)
   case MCLOSE + 9:
     buflen += (size_t)snprintf(buf + buflen, sizeof(buf) - buflen,
                                "MCLOSE%d", OP(op) - MCLOSE);
-    p = NULL;
+    p = nullptr;
     break;
   case BACKREF + 1:
   case BACKREF + 2:
@@ -8186,7 +8186,7 @@ static uint8_t *regprop(uint8_t *op)
   case BACKREF + 9:
     buflen += (size_t)snprintf(buf + buflen, sizeof(buf) - buflen,
                                "BACKREF%d", OP(op) - BACKREF);
-    p = NULL;
+    p = nullptr;
     break;
   case NOPEN:
     p = "NOPEN";
@@ -8205,7 +8205,7 @@ static uint8_t *regprop(uint8_t *op)
   case ZOPEN + 9:
     buflen += (size_t)snprintf(buf + buflen, sizeof(buf) - buflen,
                                "ZOPEN%d", OP(op) - ZOPEN);
-    p = NULL;
+    p = nullptr;
     break;
   case ZCLOSE + 1:
   case ZCLOSE + 2:
@@ -8218,7 +8218,7 @@ static uint8_t *regprop(uint8_t *op)
   case ZCLOSE + 9:
     buflen += (size_t)snprintf(buf + buflen, sizeof(buf) - buflen,
                                "ZCLOSE%d", OP(op) - ZCLOSE);
-    p = NULL;
+    p = nullptr;
     break;
   case ZREF + 1:
   case ZREF + 2:
@@ -8231,7 +8231,7 @@ static uint8_t *regprop(uint8_t *op)
   case ZREF + 9:
     buflen += (size_t)snprintf(buf + buflen, sizeof(buf) - buflen,
                                "ZREF%d", OP(op) - ZREF);
-    p = NULL;
+    p = nullptr;
     break;
   case STAR:
     p = "STAR";
@@ -8272,7 +8272,7 @@ static uint8_t *regprop(uint8_t *op)
   case BRACE_COMPLEX + 9:
     buflen += (size_t)snprintf(buf + buflen, sizeof(buf) - buflen,
                                "BRACE_COMPLEX%d", OP(op) - BRACE_COMPLEX);
-    p = NULL;
+    p = nullptr;
     break;
   case MULTIBYTECODE:
     p = "MULTIBYTECODE";
@@ -8283,10 +8283,10 @@ static uint8_t *regprop(uint8_t *op)
   default:
     buflen += (size_t)snprintf(buf + buflen, sizeof(buf) - buflen,
                                "corrupt %d", OP(op));
-    p = NULL;
+    p = nullptr;
     break;
   }
-  if (p != NULL) {
+  if (p != nullptr) {
     xstrlcpy(buf + buflen, p, sizeof(buf) - buflen);
   }
   return (uint8_t *)buf;
@@ -8547,8 +8547,8 @@ static bool wants_nfa;
 static int nstate;  ///< Number of states in the NFA. Also used when executing.
 static int istate;  ///< Index in the state vector, used in alloc_state()
 
-// If not NULL match must end at this position
-static save_se_T *nfa_endp = NULL;
+// If not nullptr match must end at this position
+static save_se_T *nfa_endp = nullptr;
 
 // 0 for first call to nfa_regmatch(), 1 for recursive call.
 static int nfa_ll_index = 0;
@@ -8603,7 +8603,7 @@ static int nfa_get_reganch(nfa_state_T *start, int depth)
     return 0;
   }
 
-  while (p != NULL) {
+  while (p != nullptr) {
     switch (p->c) {
     case NFA_BOL:
     case NFA_BOF:
@@ -8659,7 +8659,7 @@ static int nfa_get_regstart(nfa_state_T *start, int depth)
     return 0;
   }
 
-  while (p != NULL) {
+  while (p != nullptr) {
     switch (p->c) {
     // all kinds of zero-width matches
     case NFA_BOL:
@@ -8729,7 +8729,7 @@ static int nfa_get_regstart(nfa_state_T *start, int depth)
 
 // Figure out if the NFA state list contains just literal text and nothing
 // else.  If so return a string in allocated memory with what must match after
-// regstart.  Otherwise return NULL.
+// regstart.  Otherwise return nullptr.
 static uint8_t *nfa_get_match_text(nfa_state_T *start)
 {
   nfa_state_T *p = start;
@@ -8738,7 +8738,7 @@ static uint8_t *nfa_get_match_text(nfa_state_T *start)
   uint8_t *s;
 
   if (p->c != NFA_MOPEN) {
-    return NULL;     // just in case
+    return nullptr;     // just in case
   }
   p = p->out;
   while (p->c > 0) {
@@ -8746,7 +8746,7 @@ static uint8_t *nfa_get_match_text(nfa_state_T *start)
     p = p->out;
   }
   if (p->c != NFA_MCLOSE || p->out->c != NFA_MATCH) {
-    return NULL;
+    return nullptr;
   }
 
   ret = xmalloc((size_t)len);
@@ -10085,7 +10085,7 @@ static int nfa_regatom(void)
   case Magic('u'):
   case Magic('U'):
     p = (uint8_t *)vim_strchr((char *)classchars, no_Magic(c));
-    if (p == NULL) {
+    if (p == nullptr) {
       if (extra == NFA_ADD_NL) {
         semsg(_(e_ill_char_class), (int64_t)c);
         rc_did_emsg = true;
@@ -10147,7 +10147,7 @@ static int nfa_regatom(void)
 
     // Previous substitute pattern.
     // Generated as "\%(pattern\)".
-    if (reg_prev_sub == NULL) {
+    if (reg_prev_sub == nullptr) {
       emsg(_(e_nopresub));
       return FAIL;
     }
@@ -10390,7 +10390,7 @@ static int nfa_regatom(void)
         } else {
           if (cur) {
             colnr_T vcol = 0;
-            getvvcol(curwin, &curwin->w_cursor, NULL, NULL, &vcol, 0);
+            getvvcol(curwin, &curwin->w_cursor, nullptr, nullptr, &vcol, 0);
             n = ++vcol;
           }
           // \%{n}v  \%{n}<v  \%{n}>v
@@ -10575,10 +10575,10 @@ collection:
         // 'cpoptions' is not included.
         if (*regparse == '\\'
             && (uint8_t *)regparse + 1 <= endp
-            && (vim_strchr(REGEXP_INRANGE, (uint8_t)regparse[1]) != NULL
+            && (vim_strchr(REGEXP_INRANGE, (uint8_t)regparse[1]) != nullptr
                 || (!reg_cpo_lit
                     && vim_strchr(REGEXP_ABBR, (uint8_t)regparse[1])
-                    != NULL))) {
+                    != nullptr))) {
           MB_PTR_ADV(regparse);
 
           if (*regparse == 'n') {
@@ -11536,7 +11536,7 @@ static void nfa_postfix_dump(uint8_t *expr, int retval)
   FILE *f;
 
   f = fopen(NFA_REGEXP_DUMP_LOG, "a");
-  if (f == NULL) {
+  if (f == nullptr) {
     return;
   }
 
@@ -11574,7 +11574,7 @@ static void nfa_print_state2(FILE *debugf, nfa_state_T *state, garray_T *indent)
 {
   uint8_t *p;
 
-  if (state == NULL) {
+  if (state == nullptr) {
     return;
   }
 
@@ -11634,7 +11634,7 @@ static void nfa_dump(nfa_regprog_T *prog)
 {
   FILE *debugf = fopen(NFA_REGEXP_DUMP_LOG, "a");
 
-  if (debugf == NULL) {
+  if (debugf == nullptr) {
     return;
   }
 
@@ -11647,7 +11647,7 @@ static void nfa_dump(nfa_regprog_T *prog)
     fprintf(debugf, "regstart: %c (decimal: %d)\n",
             prog->regstart, prog->regstart);
   }
-  if (prog->match_text != NULL) {
+  if (prog->match_text != nullptr) {
     fprintf(debugf, "match_text: \"%s\"\n", prog->match_text);
   }
 
@@ -11656,11 +11656,11 @@ static void nfa_dump(nfa_regprog_T *prog)
 #endif  // REGEXP_DEBUG
 
 // Parse r.e. @expr and convert it into postfix form.
-// Return the postfix string on success, NULL otherwise.
+// Return the postfix string on success, nullptr otherwise.
 static int *re2post(void)
 {
   if (nfa_reg(REG_NOPAREN) == FAIL) {
-    return NULL;
+    return nullptr;
   }
   EMIT(NFA_MOPEN);
   return post_start;
@@ -11670,7 +11670,7 @@ static int *re2post(void)
 
 // Represents an NFA state plus zero or one or two arrows exiting.
 // if c == MATCH, no arrows out; matching state.
-// If c == SPLIT, unlabeled arrows to out and out1 (if != NULL).
+// If c == SPLIT, unlabeled arrows to out and out1 (if != nullptr).
 // If c < 256, labeled arrow with character c to out.
 
 static nfa_state_T *state_ptr;  // points to nfa_prog->state
@@ -11681,7 +11681,7 @@ static nfa_state_T *alloc_state(int c, nfa_state_T *out, nfa_state_T *out1)
   nfa_state_T *s;
 
   if (istate >= nstate) {
-    return NULL;
+    return nullptr;
   }
 
   s = &state_ptr[istate++];
@@ -11719,7 +11719,7 @@ static Ptrlist *list1(nfa_state_T **outp)
   Ptrlist *l;
 
   l = (Ptrlist *)outp;
-  l->next = NULL;
+  l->next = nullptr;
   return l;
 }
 
@@ -11828,7 +11828,7 @@ static int nfa_max_width(nfa_state_T *startstate, int depth)
     return -1;
   }
 
-  while (state != NULL) {
+  while (state != nullptr) {
     switch (state->c) {
     case NFA_END_INVISIBLE:
     case NFA_END_INVISIBLE_NEG:
@@ -11852,7 +11852,7 @@ static int nfa_max_width(nfa_state_T *startstate, int depth)
       if (state->c != NFA_ANY) {
         // Skip over the compiled collection.
         // malformed NFAs must not crash width estimation.
-        if (state->out1 == NULL || state->out1->out == NULL) {
+        if (state->out1 == nullptr || state->out1->out == nullptr) {
           return -1;
         }
         state = state->out1->out;
@@ -12024,25 +12024,25 @@ static int nfa_max_width(nfa_state_T *startstate, int depth)
 }
 
 // Convert a postfix form into its equivalent NFA.
-// Return the NFA start state on success, NULL otherwise.
+// Return the NFA start state on success, nullptr otherwise.
 static nfa_state_T *post2nfa(int *postfix, int *end, int nfa_calc_size)
 {
   int *p;
   int mopen;
   int mclose;
-  Frag_T *stack = NULL;
-  Frag_T *stackp = NULL;
-  Frag_T *stack_end = NULL;
+  Frag_T *stack = nullptr;
+  Frag_T *stackp = nullptr;
+  Frag_T *stack_end = nullptr;
   Frag_T e1;
   Frag_T e2;
   Frag_T e;
   nfa_state_T *s;
   nfa_state_T *s1;
   nfa_state_T *matchstate;
-  nfa_state_T *ret = NULL;
+  nfa_state_T *ret = nullptr;
 
-  if (postfix == NULL) {
-    return NULL;
+  if (postfix == nullptr) {
+    return nullptr;
   }
 
 #define PUSH(s)     st_push((s), &stackp, stack_end)
@@ -12050,7 +12050,7 @@ static nfa_state_T *post2nfa(int *postfix, int *end, int nfa_calc_size)
   if (stackp < stack) { \
     st_error(postfix, end, p); \
     xfree(stack); \
-    return NULL; \
+    return nullptr; \
   }
 
   if (nfa_calc_size == false) {
@@ -12086,7 +12086,7 @@ static nfa_state_T *post2nfa(int *postfix, int *end, int nfa_calc_size)
       e2 = POP();
       e1 = POP();
       s = alloc_state(NFA_SPLIT, e1.start, e2.start);
-      if (s == NULL) {
+      if (s == nullptr) {
         goto theend;
       }
       PUSH(frag(s, append(e1.out, e2.out)));
@@ -12099,8 +12099,8 @@ static nfa_state_T *post2nfa(int *postfix, int *end, int nfa_calc_size)
         break;
       }
       e = POP();
-      s = alloc_state(NFA_SPLIT, e.start, NULL);
-      if (s == NULL) {
+      s = alloc_state(NFA_SPLIT, e.start, nullptr);
+      if (s == nullptr) {
         goto theend;
       }
       patch(e.out, s);
@@ -12114,8 +12114,8 @@ static nfa_state_T *post2nfa(int *postfix, int *end, int nfa_calc_size)
         break;
       }
       e = POP();
-      s = alloc_state(NFA_SPLIT, NULL, e.start);
-      if (s == NULL) {
+      s = alloc_state(NFA_SPLIT, nullptr, e.start);
+      if (s == nullptr) {
         goto theend;
       }
       patch(e.out, s);
@@ -12129,8 +12129,8 @@ static nfa_state_T *post2nfa(int *postfix, int *end, int nfa_calc_size)
         break;
       }
       e = POP();
-      s = alloc_state(NFA_SPLIT, e.start, NULL);
-      if (s == NULL) {
+      s = alloc_state(NFA_SPLIT, e.start, nullptr);
+      if (s == nullptr) {
         goto theend;
       }
       PUSH(frag(s, append(e.out, list1(&s->out1))));
@@ -12143,8 +12143,8 @@ static nfa_state_T *post2nfa(int *postfix, int *end, int nfa_calc_size)
         break;
       }
       e = POP();
-      s = alloc_state(NFA_SPLIT, NULL, e.start);
-      if (s == NULL) {
+      s = alloc_state(NFA_SPLIT, nullptr, e.start);
+      if (s == nullptr) {
         goto theend;
       }
       PUSH(frag(s, append(e.out, list1(&s->out))));
@@ -12160,8 +12160,8 @@ static nfa_state_T *post2nfa(int *postfix, int *end, int nfa_calc_size)
         break;
       }
       e = POP();
-      s = alloc_state(NFA_END_COLL, NULL, NULL);
-      if (s == NULL) {
+      s = alloc_state(NFA_END_COLL, nullptr, nullptr);
+      if (s == nullptr) {
         goto theend;
       }
       patch(e.out, s);
@@ -12192,8 +12192,8 @@ static nfa_state_T *post2nfa(int *postfix, int *end, int nfa_calc_size)
         nstate++;
         break;
       }
-      s = alloc_state(NFA_EMPTY, NULL, NULL);
-      if (s == NULL) {
+      s = alloc_state(NFA_EMPTY, nullptr, nullptr);
+      if (s == nullptr) {
         goto theend;
       }
       PUSH(frag(s, list1(&s->out)));
@@ -12218,16 +12218,16 @@ static nfa_state_T *post2nfa(int *postfix, int *end, int nfa_calc_size)
         nstate += n;
         break;
       }
-      s = NULL;       // avoid compiler warning
-      e1.out = NULL;       // stores list with out1's
-      s1 = NULL;       // previous NFA_SPLIT to connect to
+      s = nullptr;       // avoid compiler warning
+      e1.out = nullptr;       // stores list with out1's
+      s1 = nullptr;       // previous NFA_SPLIT to connect to
       while (n-- > 0) {
         e = POP();         // get character
-        s = alloc_state(NFA_SPLIT, e.start, NULL);
-        if (s == NULL) {
+        s = alloc_state(NFA_SPLIT, e.start, nullptr);
+        if (s == nullptr) {
           goto theend;
         }
-        if (e1.out == NULL) {
+        if (e1.out == nullptr) {
           e1 = e;
         }
         patch(e.out, s1);
@@ -12290,23 +12290,23 @@ static nfa_state_T *post2nfa(int *postfix, int *end, int nfa_calc_size)
         break;
       }
       e = POP();
-      s1 = alloc_state(end_state, NULL, NULL);
-      if (s1 == NULL) {
+      s1 = alloc_state(end_state, nullptr, nullptr);
+      if (s1 == nullptr) {
         goto theend;
       }
 
       s = alloc_state(start_state, e.start, s1);
-      if (s == NULL) {
+      if (s == nullptr) {
         goto theend;
       }
       if (pattern) {
         // NFA_ZEND -> NFA_END_PATTERN -> NFA_SKIP -> what follows.
-        skip = alloc_state(NFA_SKIP, NULL, NULL);
-        if (skip == NULL) {
+        skip = alloc_state(NFA_SKIP, nullptr, nullptr);
+        if (skip == nullptr) {
           goto theend;
         }
-        zend = alloc_state(NFA_ZEND, s1, NULL);
-        if (zend == NULL) {
+        zend = alloc_state(NFA_ZEND, s1, nullptr);
+        if (zend == nullptr) {
           goto theend;
         }
         s1->out = skip;
@@ -12393,12 +12393,12 @@ static nfa_state_T *post2nfa(int *postfix, int *end, int nfa_calc_size)
       // NFA_MOPEN -> NFA_MCLOSE. Note that this also allows
       // empty groups of parenthesis, and empty mbyte chars
       if (stackp == stack) {
-        s = alloc_state(mopen, NULL, NULL);
-        if (s == NULL) {
+        s = alloc_state(mopen, nullptr, nullptr);
+        if (s == nullptr) {
           goto theend;
         }
-        s1 = alloc_state(mclose, NULL, NULL);
-        if (s1 == NULL) {
+        s1 = alloc_state(mclose, nullptr, nullptr);
+        if (s1 == nullptr) {
           goto theend;
         }
         patch(list1(&s->out), s1);
@@ -12409,13 +12409,13 @@ static nfa_state_T *post2nfa(int *postfix, int *end, int nfa_calc_size)
       // At least one node was emitted before NFA_MOPEN, so
       // at least one node will be between NFA_MOPEN and NFA_MCLOSE
       e = POP();
-      s = alloc_state(mopen, e.start, NULL);         // `('
-      if (s == NULL) {
+      s = alloc_state(mopen, e.start, nullptr);         // `('
+      if (s == nullptr) {
         goto theend;
       }
 
-      s1 = alloc_state(mclose, NULL, NULL);         // `)'
-      if (s1 == NULL) {
+      s1 = alloc_state(mclose, nullptr, nullptr);         // `)'
+      if (s1 == nullptr) {
         goto theend;
       }
       patch(e.out, s1);
@@ -12450,12 +12450,12 @@ static nfa_state_T *post2nfa(int *postfix, int *end, int nfa_calc_size)
         nstate += 2;
         break;
       }
-      s = alloc_state(*p, NULL, NULL);
-      if (s == NULL) {
+      s = alloc_state(*p, nullptr, nullptr);
+      if (s == nullptr) {
         goto theend;
       }
-      s1 = alloc_state(NFA_SKIP, NULL, NULL);
-      if (s1 == NULL) {
+      s1 = alloc_state(NFA_SKIP, nullptr, nullptr);
+      if (s1 == nullptr) {
         goto theend;
       }
       patch(list1(&s->out), s1);
@@ -12480,8 +12480,8 @@ static nfa_state_T *post2nfa(int *postfix, int *end, int nfa_calc_size)
         nstate += 1;
         break;
       }
-      s = alloc_state(p[-1], NULL, NULL);
-      if (s == NULL) {
+      s = alloc_state(p[-1], nullptr, nullptr);
+      if (s == nullptr) {
         goto theend;
       }
       s->val = n;
@@ -12497,8 +12497,8 @@ static nfa_state_T *post2nfa(int *postfix, int *end, int nfa_calc_size)
         nstate++;
         break;
       }
-      s = alloc_state(*p, NULL, NULL);
-      if (s == NULL) {
+      s = alloc_state(*p, nullptr, nullptr);
+      if (s == nullptr) {
         goto theend;
       }
       PUSH(frag(s, list1(&s->out)));
@@ -12526,7 +12526,7 @@ static nfa_state_T *post2nfa(int *postfix, int *end, int nfa_calc_size)
 
   matchstate = &state_ptr[istate++];   // the match state
   matchstate->c = NFA_MATCH;
-  matchstate->out = matchstate->out1 = NULL;
+  matchstate->out = matchstate->out1 = nullptr;
   matchstate->id = 0;
 
   patch(e.out, matchstate);
@@ -12630,8 +12630,8 @@ static void log_subexpr(regsub_T *sub)
 
       fprintf(log_fd, "*** group %d, start: \"%s\", end: \"%s\"\n",
               j,
-              s == NULL ? "NULL" : s,
-              e == NULL ? "NULL" : e);
+              s == nullptr ? "nullptr" : s,
+              e == nullptr ? "nullptr" : e);
     }
   }
 }
@@ -12640,7 +12640,7 @@ static char *pim_info(const nfa_pim_T *pim)
 {
   static char buf[30];
 
-  if (pim == NULL || pim->result == NFA_PIM_UNUSED) {
+  if (pim == nullptr || pim->result == NFA_PIM_UNUSED) {
     buf[0] = NUL;
   } else {
     snprintf(buf, sizeof(buf), " PIM col %d",
@@ -12734,7 +12734,7 @@ static void copy_ze_off(regsub_T *to, regsub_T *from)
       to->list.multi[0].end_col = from->list.multi[0].end_col;
     }
   } else {
-    if (from->list.line[0].end != NULL) {
+    if (from->list.line[0].end != nullptr) {
       to->list.line[0].end = from->list.line[0].end;
     }
   }
@@ -12796,12 +12796,12 @@ static bool sub_equal(regsub_T *sub1, regsub_T *sub2)
       if (i < sub1->in_use) {
         sp1 = sub1->list.line[i].start;
       } else {
-        sp1 = NULL;
+        sp1 = nullptr;
       }
       if (i < sub2->in_use) {
         sp2 = sub2->list.line[i].start;
       } else {
-        sp2 = NULL;
+        sp2 = nullptr;
       }
       if (sp1 != sp2) {
         return false;
@@ -12810,12 +12810,12 @@ static bool sub_equal(regsub_T *sub1, regsub_T *sub2)
         if (i < sub1->in_use) {
           sp1 = sub1->list.line[i].end;
         } else {
-          sp1 = NULL;
+          sp1 = nullptr;
         }
         if (i < sub2->in_use) {
           sp2 = sub2->list.line[i].end;
         } else {
-          sp2 = NULL;
+          sp2 = nullptr;
         }
         if (sp1 != sp2) {
           return false;
@@ -12831,7 +12831,7 @@ static bool sub_equal(regsub_T *sub1, regsub_T *sub2)
 static void open_debug_log(TriState result)
 {
   log_fd = fopen(NFA_REGEXP_RUN_LOG, "a");
-  if (log_fd == NULL) {
+  if (log_fd == nullptr) {
     emsg(_(e_log_open_failed));
     log_fd = stderr;
   }
@@ -12854,7 +12854,7 @@ static void report_state(char *action, regsub_T *sub, nfa_state_T *state, int li
     col = (int)(sub->list.line[0].start - rex.line);
   }
   nfa_set_code(state->c);
-  if (log_fd == NULL) {
+  if (log_fd == nullptr) {
     open_debug_log(kNone);
   }
   fprintf(log_fd, "> %s state %d to list %d. char %d: %s (start col %d)%s\n",
@@ -12867,7 +12867,7 @@ static void report_state(char *action, regsub_T *sub, nfa_state_T *state, int li
 /// @param l      runtime state list
 /// @param state  state to update
 /// @param subs   pointers to subexpressions
-/// @param pim    postponed match or NULL
+/// @param pim    postponed match or nullptr
 ///
 /// @return  true if the same state is already in list "l" with the same
 ///          positions as "subs".
@@ -12891,8 +12891,8 @@ static bool has_state_with_pos(nfa_list_T *l, nfa_state_T *state, regsubs_T *sub
 // set.
 static bool pim_equal(const nfa_pim_T *one, const nfa_pim_T *two)
 {
-  const bool one_unused = (one == NULL || one->result == NFA_PIM_UNUSED);
-  const bool two_unused = (two == NULL || two->result == NFA_PIM_UNUSED);
+  const bool one_unused = (one == nullptr || one->result == NFA_PIM_UNUSED);
+  const bool two_unused = (two == nullptr || two->result == NFA_PIM_UNUSED);
 
   if (one_unused) {
     // one is unused: equal when two is also unused
@@ -12924,7 +12924,7 @@ static bool match_follows(const nfa_state_T *startstate, int depth)
   if (depth > 10) {
     return false;
   }
-  while (state != NULL) {
+  while (state != nullptr) {
     switch (state->c) {
     case NFA_MATCH:
     case NFA_MCLOSE:
@@ -13011,7 +13011,7 @@ static bool state_in_list(nfa_list_T *l, nfa_state_T *state, regsubs_T *subs)
   FUNC_ATTR_NONNULL_ALL
 {
   if (state->lastlist[nfa_ll_index] == l->id) {
-    if (!rex.nfa_has_backref || has_state_with_pos(l, state, subs, NULL)) {
+    if (!rex.nfa_has_backref || has_state_with_pos(l, state, subs, nullptr)) {
       return true;
     }
   }
@@ -13030,7 +13030,7 @@ static bool state_in_list(nfa_list_T *l, nfa_state_T *state, regsubs_T *subs)
 /// @param off_arg   byte offset, when -1 go to next line
 ///
 /// @return  "subs_arg", possibly copied into temp_subs.
-///          NULL when recursiveness is too deep.
+///          nullptr when recursiveness is too deep.
 static regsubs_T *addstate(nfa_list_T *l, nfa_state_T *state, regsubs_T *subs_arg, nfa_pim_T *pim,
                            int off_arg)
   FUNC_ATTR_NONNULL_ARG(1, 2) FUNC_ATTR_WARN_UNUSED_RESULT
@@ -13056,9 +13056,9 @@ static regsubs_T *addstate(nfa_list_T *l, nfa_state_T *state, regsubs_T *subs_ar
 
   // This function is called recursively.  When the depth is too much we run
   // out of stack and crash, limit recursiveness here.
-  if (++depth >= 5000 || subs == NULL) {
+  if (++depth >= 5000 || subs == nullptr) {
     depth--;
-    return NULL;
+    return nullptr;
   }
 
   if (off_arg <= -ADDSTATE_HERE_OFFSET) {
@@ -13104,7 +13104,7 @@ static regsubs_T *addstate(nfa_list_T *l, nfa_state_T *state, regsubs_T *subs_ar
     // next line for a look-behind match.
     if (rex.input > rex.line
         && *rex.input != NUL
-        && (nfa_endp == NULL
+        && (nfa_endp == nullptr
             || !REG_MULTI
             || rex.lnum == nfa_endp->se_u.pos.lnum)) {
       goto skip_add;
@@ -13142,7 +13142,7 @@ static regsubs_T *addstate(nfa_list_T *l, nfa_state_T *state, regsubs_T *subs_ar
       // unless it is an MOPEN that is used for a backreference or
       // when there is a PIM. For NFA_MATCH check the position,
       // lower position is preferred.
-      if (!rex.nfa_has_backref && pim == NULL && !l->has_pim
+      if (!rex.nfa_has_backref && pim == nullptr && !l->has_pim
           && state->c != NFA_MATCH) {
         // When called from addstate_here() do insert before
         // existing states.
@@ -13162,7 +13162,7 @@ skip_add:
           fprintf(log_fd,
                   "> Not adding state %d to list %d. char %d: %s pim: %s has_pim: %d found: %d\n",
                   abs(state->id), l->id, state->c, code,
-                  pim == NULL ? "NULL" : "yes", l->has_pim, found);
+                  pim == nullptr ? "nullptr" : "yes", l->has_pim, found);
 #endif
           depth--;
           return subs;
@@ -13185,7 +13185,7 @@ skip_add:
       if ((int64_t)(newsize >> 10) >= p_mmp) {
         emsg(_(e_pattern_uses_more_memory_than_maxmempattern));
         depth--;
-        return NULL;
+        return nullptr;
       }
       if (subs != &temp_subs) {
         // "subs" may point into the current array, need to make a
@@ -13206,7 +13206,7 @@ skip_add:
     state->lastlist[nfa_ll_index] = l->id;
     thread = &l->t[l->n++];
     thread->state = state;
-    if (pim == NULL) {
+    if (pim == nullptr) {
       thread->pim.result = NFA_PIM_UNUSED;
     } else {
       copy_pim(&thread->pim, pim);
@@ -13276,7 +13276,7 @@ skip_add:
     }
 
     // avoid compiler warnings
-    save_ptr = NULL;
+    save_ptr = nullptr;
     CLEAR_FIELD(save_multipos);
 
     // Set the position (with "off" added) in the subexpression.  Save
@@ -13309,8 +13309,8 @@ skip_add:
       } else {
         save_in_use = sub->in_use;
         for (i = sub->in_use; i < subidx; i++) {
-          sub->list.line[i].start = NULL;
-          sub->list.line[i].end = NULL;
+          sub->list.line[i].start = nullptr;
+          sub->list.line[i].end = nullptr;
         }
         sub->in_use = subidx + 1;
       }
@@ -13318,7 +13318,7 @@ skip_add:
     }
 
     subs = addstate(l, state->out, subs, pim, off_arg);
-    if (subs == NULL) {
+    if (subs == nullptr) {
       break;
     }
     // "subs" may have changed, need to set "sub" again.
@@ -13343,7 +13343,7 @@ skip_add:
     if (rex.nfa_has_zend
         && (REG_MULTI
             ? subs->norm.list.multi[0].end_lnum >= 0
-            : subs->norm.list.line[0].end != NULL)) {
+            : subs->norm.list.line[0].end != nullptr)) {
       // Do not overwrite the position set by \ze.
       subs = addstate(l, state->out, subs, pim, off_arg);
       break;
@@ -13397,7 +13397,7 @@ skip_add:
           (colnr_T)(rex.input - rex.line + off);
       }
       // avoid compiler warnings
-      save_ptr = NULL;
+      save_ptr = nullptr;
     } else {
       save_ptr = sub->list.line[subidx].end;
       sub->list.line[subidx].end = rex.input + off;
@@ -13406,7 +13406,7 @@ skip_add:
     }
 
     subs = addstate(l, state->out, subs, pim, off_arg);
-    if (subs == NULL) {
+    if (subs == nullptr) {
       break;
     }
     // "subs" may have changed, need to set "sub" again.
@@ -13449,8 +13449,8 @@ static regsubs_T *addstate_here(nfa_list_T *l, nfa_state_T *state, regsubs_T *su
   // Pass the listidx as offset (avoids adding another argument to
   // addstate()).
   regsubs_T *r = addstate(l, state, subs, pim, -listidx - ADDSTATE_HERE_OFFSET);
-  if (r == NULL) {
-    return NULL;
+  if (r == nullptr) {
+    return nullptr;
   }
 
   // when "*ip" was at the end of the list, nothing to do
@@ -13475,7 +13475,7 @@ static regsubs_T *addstate_here(nfa_list_T *l, nfa_state_T *state, regsubs_T *su
 
       if ((int64_t)(newsize >> 10) >= p_mmp) {
         emsg(_(e_pattern_uses_more_memory_than_maxmempattern));
-        return NULL;
+        return nullptr;
       }
       nfa_thread_T *const newl = xmalloc(newsize);
       l->len = newlen;
@@ -13656,8 +13656,8 @@ retempty:
       }
     }
   } else {
-    if (sub->list.line[subidx].start == NULL
-        || sub->list.line[subidx].end == NULL) {
+    if (sub->list.line[subidx].start == nullptr
+        || sub->list.line[subidx].end == nullptr) {
       goto retempty;
     }
     len = (int)(sub->list.line[subidx].end - sub->list.line[subidx].start);
@@ -13679,7 +13679,7 @@ static int match_zref(int subidx, int *bytelen)
   int len;
 
   cleanup_zsubexpr();
-  if (re_extmatch_in == NULL || re_extmatch_in->matches[subidx] == NULL) {
+  if (re_extmatch_in == nullptr || re_extmatch_in->matches[subidx] == nullptr) {
     // backref was not set, match an empty string
     *bytelen = 0;
     return true;
@@ -13735,7 +13735,7 @@ static bool nfa_re_num_cmp(uintmax_t val, int op, uintmax_t pos)
 }
 
 // Recursively call nfa_regmatch()
-// "pim" is NULL or contains info about a Postponed Invisible Match (start
+// "pim" is nullptr or contains info about a Postponed Invisible Match (start
 // position).
 static int recursive_regmatch(nfa_state_T *state, nfa_pim_T *pim, nfa_regprog_T *prog,
                               regsubs_T *submatch, regsubs_T *m, int **listids, int *listids_len)
@@ -13747,10 +13747,10 @@ static int recursive_regmatch(nfa_state_T *state, nfa_pim_T *pim, nfa_regprog_T 
   const int save_nfa_listid = rex.nfa_listid;
   save_se_T *const save_nfa_endp = nfa_endp;
   save_se_T endpos;
-  save_se_T *endposp = NULL;
+  save_se_T *endposp = nullptr;
   int need_restore = false;
 
-  if (pim != NULL) {
+  if (pim != nullptr) {
     // start at the position where the postponed match was
     if (REG_MULTI) {
       rex.input = rex.line + pim->end.pos.col;
@@ -13764,17 +13764,17 @@ static int recursive_regmatch(nfa_state_T *state, nfa_pim_T *pim, nfa_regprog_T 
       || state->c == NFA_START_INVISIBLE_BEFORE_NEG
       || state->c == NFA_START_INVISIBLE_BEFORE_NEG_FIRST) {
     // The recursive match must end at the current position. When "pim" is
-    // not NULL it specifies the current position.
+    // not nullptr it specifies the current position.
     endposp = &endpos;
     if (REG_MULTI) {
-      if (pim == NULL) {
+      if (pim == nullptr) {
         endpos.se_u.pos.col = (int)(rex.input - rex.line);
         endpos.se_u.pos.lnum = rex.lnum;
       } else {
         endpos.se_u.pos = pim->end.pos;
       }
     } else {
-      if (pim == NULL) {
+      if (pim == nullptr) {
         endpos.se_u.ptr = rex.input;
       } else {
         endpos.se_u.ptr = pim->end.ptr;
@@ -13788,7 +13788,7 @@ static int recursive_regmatch(nfa_state_T *state, nfa_pim_T *pim, nfa_regprog_T 
     if (state->val <= 0) {
       if (REG_MULTI) {
         rex.line = (uint8_t *)reg_getline(--rex.lnum);
-        if (rex.line == NULL) {
+        if (rex.line == nullptr) {
           // can't go before the first line
           rex.line = (uint8_t *)reg_getline(++rex.lnum);
         }
@@ -13799,7 +13799,7 @@ static int recursive_regmatch(nfa_state_T *state, nfa_pim_T *pim, nfa_regprog_T 
         // Not enough bytes in this line, go to end of
         // previous line.
         rex.line = (uint8_t *)reg_getline(--rex.lnum);
-        if (rex.line == NULL) {
+        if (rex.line == nullptr) {
           // can't go before the first line
           rex.line = (uint8_t *)reg_getline(++rex.lnum);
           rex.input = rex.line;
@@ -13820,14 +13820,14 @@ static int recursive_regmatch(nfa_state_T *state, nfa_pim_T *pim, nfa_regprog_T 
   if (log_fd != stderr) {
     fclose(log_fd);
   }
-  log_fd = NULL;
+  log_fd = nullptr;
 #endif
   // Have to clear the lastlist field of the NFA nodes, so that
   // nfa_regmatch() and addstate() can run properly after recursion.
   if (nfa_ll_index == 1) {
     // Already calling nfa_regmatch() recursively.  Save the lastlist[1]
     // values and clear them.
-    if (*listids == NULL || *listids_len < prog->nstate) {
+    if (*listids == nullptr || *listids_len < prog->nstate) {
       xfree(*listids);
       *listids = xmalloc(sizeof(**listids) * (size_t)prog->nstate);
       *listids_len = prog->nstate;
@@ -14038,7 +14038,7 @@ static int failure_chance(nfa_state_T *state, int depth)
 static int skip_to_start(int c, colnr_T *colp)
 {
   const uint8_t *const s = (uint8_t *)cstrchr((char *)rex.line + *colp, c);
-  if (s == NULL) {
+  if (s == nullptr) {
     return FAIL;
   }
   *colp = (int)(s - rex.line);
@@ -14106,8 +14106,8 @@ static int find_match_text(colnr_T *startcol, int regstart, uint8_t *match_text)
 
 static int nfa_did_time_out(void)
 {
-  if (nfa_time_limit != NULL && profile_passed_limit(*nfa_time_limit)) {
-    if (nfa_timed_out != NULL) {
+  if (nfa_time_limit != nullptr && profile_passed_limit(*nfa_time_limit)) {
+    if (nfa_timed_out != nullptr) {
       *nfa_timed_out = true;
     }
     return true;
@@ -14119,13 +14119,13 @@ static int nfa_did_time_out(void)
 ///
 /// Run NFA to determine whether it matches rex.input.
 ///
-/// When "nfa_endp" is not NULL it is a required end-of-match position.
+/// When "nfa_endp" is not nullptr it is a required end-of-match position.
 ///
 /// Return true if there is a match, false if there is no match,
 /// NFA_TOO_EXPENSIVE if we end up with too many states.
 /// When there is a match "submatch" contains the positions.
 ///
-/// Note: Caller must ensure that: start != NULL.
+/// Note: Caller must ensure that: start != nullptr.
 static int nfa_regmatch(nfa_regprog_T *prog, nfa_state_T *start, regsubs_T *submatch, regsubs_T *m)
   FUNC_ATTR_NONNULL_ARG(1, 2, 4)
 {
@@ -14137,7 +14137,7 @@ static int nfa_regmatch(nfa_regprog_T *prog, nfa_state_T *start, regsubs_T *subm
   int listidx;
   nfa_list_T *thislist;
   nfa_list_T *nextlist;
-  int *listids = NULL;
+  int *listids = nullptr;
   int listids_len = 0;
   nfa_state_T *add_state;
   bool add_here;
@@ -14158,7 +14158,7 @@ static int nfa_regmatch(nfa_regprog_T *prog, nfa_state_T *start, regsubs_T *subm
 #ifdef NFA_REGEXP_DEBUG_LOG
   FILE *debug = fopen(NFA_REGEXP_DEBUG_LOG, "a");
 
-  if (debug == NULL) {
+  if (debug == nullptr) {
     semsg("(NFA) COULD NOT OPEN %s!", NFA_REGEXP_DEBUG_LOG);
     return false;
   }
@@ -14169,11 +14169,11 @@ static int nfa_regmatch(nfa_regprog_T *prog, nfa_state_T *start, regsubs_T *subm
   size_t size = (size_t)(prog->nstate + 1) * sizeof(nfa_thread_T);
   // Reuse cached list buffers from prog when available (top-level call).
   // Recursive calls must allocate their own buffers.
-  if (toplevel && prog->listbuf[0] != NULL) {
+  if (toplevel && prog->listbuf[0] != nullptr) {
     list[0].t = (nfa_thread_T *)prog->listbuf[0];
     list[1].t = (nfa_thread_T *)prog->listbuf[1];
-    prog->listbuf[0] = NULL;
-    prog->listbuf[1] = NULL;
+    prog->listbuf[0] = nullptr;
+    prog->listbuf[1] = nullptr;
   } else {
     list[0].t = xmalloc(size);
     list[1].t = xmalloc(size);
@@ -14183,7 +14183,7 @@ static int nfa_regmatch(nfa_regprog_T *prog, nfa_state_T *start, regsubs_T *subm
 
 #ifdef REGEXP_DEBUG
   log_fd = fopen(NFA_REGEXP_RUN_LOG, "a");
-  if (log_fd == NULL) {
+  if (log_fd == nullptr) {
     emsg(_(e_log_open_failed));
     log_fd = stderr;
   }
@@ -14216,11 +14216,11 @@ static int nfa_regmatch(nfa_regprog_T *prog, nfa_state_T *start, regsubs_T *subm
       m->norm.list.line[0].start = rex.input;
     }
     m->norm.in_use = 1;
-    r = addstate(thislist, start->out, m, NULL, 0);
+    r = addstate(thislist, start->out, m, nullptr, 0);
   } else {
-    r = addstate(thislist, start, m, NULL, 0);
+    r = addstate(thislist, start, m, nullptr, 0);
   }
-  if (r == NULL) {
+  if (r == nullptr) {
     nfa_match = NFA_TOO_EXPENSIVE;
     goto theend;
   }
@@ -14290,7 +14290,7 @@ static int nfa_regmatch(nfa_regprog_T *prog, nfa_state_T *start, regsubs_T *subm
       if (got_int) {
         break;
       }
-      if (nfa_time_limit != NULL && ++nfa_time_count == 20) {
+      if (nfa_time_limit != nullptr && ++nfa_time_count == 20) {
         nfa_time_count = 0;
         if (nfa_did_time_out()) {
           break;
@@ -14322,7 +14322,7 @@ static int nfa_regmatch(nfa_regprog_T *prog, nfa_state_T *start, regsubs_T *subm
 
       // Handle the possible codes of the current state.
       // The most important is NFA_MATCH.
-      add_state = NULL;
+      add_state = nullptr;
       add_here = false;
       add_count = 0;
       switch (t->state->c) {
@@ -14365,7 +14365,7 @@ static int nfa_regmatch(nfa_regprog_T *prog, nfa_state_T *start, regsubs_T *subm
         // in the position in "nfa_endp".
         // Submatches are stored in *m, and used in the parent call.
 #ifdef REGEXP_DEBUG
-        if (nfa_endp != NULL) {
+        if (nfa_endp != nullptr) {
           if (REG_MULTI) {
             fprintf(log_fd,
                     "Current lnum: %d, endp lnum: %d;"
@@ -14383,7 +14383,7 @@ static int nfa_regmatch(nfa_regprog_T *prog, nfa_state_T *start, regsubs_T *subm
 #endif
         // If "nfa_endp" is set it's only a match if it ends at
         // "nfa_endp"
-        if (nfa_endp != NULL
+        if (nfa_endp != nullptr
             && (REG_MULTI
                 ? (rex.lnum != nfa_endp->se_u.pos.lnum
                    || (int)(rex.input - rex.line) != nfa_endp->se_u.pos.col)
@@ -14438,7 +14438,7 @@ static int nfa_regmatch(nfa_regprog_T *prog, nfa_state_T *start, regsubs_T *subm
           }
           // First try matching the invisible match, then what
           // follows.
-          result = recursive_regmatch(t->state, NULL, prog, submatch, m,
+          result = recursive_regmatch(t->state, nullptr, prog, submatch, m,
                                       &listids, &listids_len);
           if (result == NFA_TOO_EXPENSIVE) {
             nfa_match = result;
@@ -14490,7 +14490,7 @@ static int nfa_regmatch(nfa_regprog_T *prog, nfa_state_T *start, regsubs_T *subm
           // node; Add its out to the current list (zero-width
           // match).
           if (addstate_here(thislist, t->state->out1->out, &t->subs,
-                            &pim, &listidx) == NULL) {
+                            &pim, &listidx) == nullptr) {
             nfa_match = NFA_TOO_EXPENSIVE;
             goto theend;
           }
@@ -14498,7 +14498,7 @@ static int nfa_regmatch(nfa_regprog_T *prog, nfa_state_T *start, regsubs_T *subm
         break;
 
       case NFA_START_PATTERN: {
-        nfa_state_T *skip = NULL;
+        nfa_state_T *skip = nullptr;
 #ifdef REGEXP_DEBUG
         int skip_lid = 0;
 #endif
@@ -14523,7 +14523,7 @@ static int nfa_regmatch(nfa_regprog_T *prog, nfa_state_T *start, regsubs_T *subm
           skip_lid = thislist->id;
 #endif
         }
-        if (skip != NULL) {
+        if (skip != nullptr) {
 #ifdef REGEXP_DEBUG
           nfa_set_code(skip->c);
           fprintf(log_fd,
@@ -14540,7 +14540,7 @@ static int nfa_regmatch(nfa_regprog_T *prog, nfa_state_T *start, regsubs_T *subm
         }
 
         // First try matching the pattern.
-        result = recursive_regmatch(t->state, NULL, prog, submatch, m,
+        result = recursive_regmatch(t->state, nullptr, prog, submatch, m,
                                     &listids, &listids_len);
         if (result == NFA_TOO_EXPENSIVE) {
           nfa_match = result;
@@ -14834,7 +14834,7 @@ static int nfa_regmatch(nfa_regprog_T *prog, nfa_state_T *start, regsubs_T *subm
               result = FAIL;
             }
 
-            if (t->state->out->out1 != NULL
+            if (t->state->out->out1 != nullptr
                 && t->state->out->out1->c == NFA_END_COMPOSING) {
               end = t->state->out->out1;
               ADD_STATE_IF_MATCH(end);
@@ -15177,7 +15177,7 @@ static int nfa_regmatch(nfa_regprog_T *prog, nfa_state_T *start, regsubs_T *subm
         }
 
         result = false;
-        win_T *wp = rex.reg_win == NULL ? curwin : rex.reg_win;
+        win_T *wp = rex.reg_win == nullptr ? curwin : rex.reg_win;
         if (op == 1 && col - 1 > t->state->val && col > 100) {
           int64_t ts = (int64_t)wp->w_buffer->b_p_ts;
 
@@ -15208,7 +15208,7 @@ static int nfa_regmatch(nfa_regprog_T *prog, nfa_state_T *start, regsubs_T *subm
       case NFA_MARK_GT:
       case NFA_MARK_LT: {
         size_t col = REG_MULTI ? (size_t)(rex.input - rex.line) : 0;
-        fmark_T *fm = mark_get(rex.reg_buf, curwin, NULL, kMarkBufLocal, t->state->val);
+        fmark_T *fm = mark_get(rex.reg_buf, curwin, nullptr, kMarkBufLocal, t->state->val);
 
         // Line may have been freed, get it again.
         if (REG_MULTI) {
@@ -15218,7 +15218,7 @@ static int nfa_regmatch(nfa_regprog_T *prog, nfa_state_T *start, regsubs_T *subm
 
         // Compare the mark position to the match position, if the mark
         // exists and mark is set in reg_buf.
-        if (fm != NULL && fm->mark.lnum > 0) {
+        if (fm != nullptr && fm->mark.lnum > 0) {
           pos_T *pos = &fm->mark;
           const colnr_T pos_col = pos->lnum == rex.lnum + rex.reg_firstlnum
                                   && pos->col == MAXCOL
@@ -15243,7 +15243,7 @@ static int nfa_regmatch(nfa_regprog_T *prog, nfa_state_T *start, regsubs_T *subm
       }
 
       case NFA_CURSOR:
-        result = rex.reg_win != NULL
+        result = rex.reg_win != nullptr
                  && (rex.lnum + rex.reg_firstlnum == rex.reg_win->w_cursor.lnum)
                  && ((colnr_T)(rex.input - rex.line) == rex.reg_win->w_cursor.col);
         if (result) {
@@ -15311,19 +15311,19 @@ static int nfa_regmatch(nfa_regprog_T *prog, nfa_state_T *start, regsubs_T *subm
       }
       }       // switch (t->state->c)
 
-      if (add_state != NULL) {
+      if (add_state != nullptr) {
         nfa_pim_T *pim;
         nfa_pim_T pim_copy;
 
         if (t->pim.result == NFA_PIM_UNUSED) {
-          pim = NULL;
+          pim = nullptr;
         } else {
           pim = &t->pim;
         }
 
         // Handle the postponed invisible match if the match might end
         // without advancing and before the end of the line.
-        if (pim != NULL && (clen == 0 || match_follows(add_state, 0))) {
+        if (pim != nullptr && (clen == 0 || match_follows(add_state, 0))) {
           if (pim->result == NFA_PIM_TODO) {
 #ifdef REGEXP_DEBUG
             fprintf(log_fd, "\n");
@@ -15379,7 +15379,7 @@ static int nfa_regmatch(nfa_regprog_T *prog, nfa_state_T *start, regsubs_T *subm
 
           // Postponed invisible match was handled, don't add it to
           // following states.
-          pim = NULL;
+          pim = nullptr;
         }
 
         // If "pim" points into l->t it will become invalid when
@@ -15398,7 +15398,7 @@ static int nfa_regmatch(nfa_regprog_T *prog, nfa_state_T *start, regsubs_T *subm
             nextlist->t[nextlist->n - 1].count = add_count;
           }
         }
-        if (r == NULL) {
+        if (r == nullptr) {
           nfa_match = NFA_TOO_EXPENSIVE;
           goto theend;
         }
@@ -15411,7 +15411,7 @@ static int nfa_regmatch(nfa_regprog_T *prog, nfa_state_T *start, regsubs_T *subm
     // matters!
     // Do not add the start state in recursive calls of nfa_regmatch(),
     // because recursive calls should only start in the first position.
-    // Unless "nfa_endp" is not NULL, then we match the end position.
+    // Unless "nfa_endp" is not nullptr, then we match the end position.
     // Also don't start a match past the first line.
     if (!nfa_match
         && ((toplevel
@@ -15419,7 +15419,7 @@ static int nfa_regmatch(nfa_regprog_T *prog, nfa_state_T *start, regsubs_T *subm
              && clen != 0
              && (rex.reg_maxcol == 0
                  || (colnr_T)(rex.input - rex.line) < rex.reg_maxcol))
-            || (nfa_endp != NULL
+            || (nfa_endp != nullptr
                 && (REG_MULTI
                     ? (rex.lnum < nfa_endp->se_u.pos.lnum
                        || (rex.lnum == nfa_endp->se_u.pos.lnum
@@ -15473,13 +15473,13 @@ static int nfa_regmatch(nfa_regprog_T *prog, nfa_state_T *start, regsubs_T *subm
           } else {
             m->norm.list.line[0].start = rex.input + clen;
           }
-          if (addstate(nextlist, start->out, m, NULL, clen) == NULL) {
+          if (addstate(nextlist, start->out, m, nullptr, clen) == nullptr) {
             nfa_match = NFA_TOO_EXPENSIVE;
             goto theend;
           }
         }
       } else {
-        if (addstate(nextlist, start, m, NULL, clen) == NULL) {
+        if (addstate(nextlist, start, m, nullptr, clen) == nullptr) {
           nfa_match = NFA_TOO_EXPENSIVE;
           goto theend;
         }
@@ -15503,7 +15503,7 @@ nextchar:
     // finish.
     if (clen != 0) {
       rex.input += clen;
-    } else if (go_to_nextline || (nfa_endp != NULL && REG_MULTI
+    } else if (go_to_nextline || (nfa_endp != nullptr && REG_MULTI
                                   && rex.lnum < nfa_endp->se_u.pos.lnum)) {
       reg_nextline();
     } else {
@@ -15516,7 +15516,7 @@ nextchar:
       break;
     }
     // Check for timeout once every twenty times to avoid overhead.
-    if (nfa_time_limit != NULL && ++nfa_time_count == 20) {
+    if (nfa_time_limit != nullptr && ++nfa_time_count == 20) {
       nfa_time_count = 0;
       if (nfa_did_time_out()) {
         break;
@@ -15528,14 +15528,14 @@ nextchar:
   if (log_fd != stderr) {
     fclose(log_fd);
   }
-  log_fd = NULL;
+  log_fd = nullptr;
 #endif
 
 theend:
   // Free memory
   // Cache list buffers in prog for reuse, or free if prog already has
   // cached buffers (recursive call case).
-  if (prog->listbuf[0] == NULL && list[0].t != NULL && list[1].t != NULL) {
+  if (prog->listbuf[0] == nullptr && list[0].t != nullptr && list[1].t != nullptr) {
     prog->listbuf[0] = list[0].t;
     prog->listbuf[1] = list[1].t;
   } else {
@@ -15553,8 +15553,8 @@ theend:
 
 /// Try match of "prog" with at rex.line["col"].
 ///
-/// @param tm         timeout limit or NULL
-/// @param timed_out  flag set on timeout or NULL
+/// @param tm         timeout limit or nullptr
+/// @param timed_out  flag set on timeout or nullptr
 ///
 /// @return  <= 0 for failure, number of lines contained in the match otherwise.
 static int nfa_regtry(nfa_regprog_T *prog, colnr_T col, proftime_T *tm, int *timed_out)
@@ -15573,7 +15573,7 @@ static int nfa_regtry(nfa_regprog_T *prog, colnr_T col, proftime_T *tm, int *tim
 
 #ifdef REGEXP_DEBUG
   f = fopen(NFA_REGEXP_RUN_LOG, "a");
-  if (f != NULL) {
+  if (f != nullptr) {
     fprintf(f,
             "\n\n\t=======================================================\n");
 # ifdef REGEXP_DEBUG
@@ -15610,7 +15610,7 @@ static int nfa_regtry(nfa_regprog_T *prog, colnr_T col, proftime_T *tm, int *tim
       rex.reg_endpos[i].lnum = subs.norm.list.multi[i].end_lnum;
       rex.reg_endpos[i].col = subs.norm.list.multi[i].end_col;
     }
-    if (rex.reg_mmatch != NULL) {
+    if (rex.reg_mmatch != nullptr) {
       rex.reg_mmatch->rmm_matchcol = subs.norm.orig_start_col;
     }
 
@@ -15632,17 +15632,17 @@ static int nfa_regtry(nfa_regprog_T *prog, colnr_T col, proftime_T *tm, int *tim
       rex.reg_endp[i] = subs.norm.list.line[i].end;
     }
 
-    if (rex.reg_startp[0] == NULL) {
+    if (rex.reg_startp[0] == nullptr) {
       rex.reg_startp[0] = rex.line + col;
     }
-    if (rex.reg_endp[0] == NULL) {
+    if (rex.reg_endp[0] == nullptr) {
       rex.reg_endp[0] = rex.input;
     }
   }
 
   // Package any found \z(...\) matches for export. Default is none.
   unref_extmatch(re_extmatch_out);
-  re_extmatch_out = NULL;
+  re_extmatch_out = nullptr;
 
   if (prog->reghasz == REX_SET) {
     cleanup_zsubexpr();
@@ -15663,7 +15663,7 @@ static int nfa_regtry(nfa_regprog_T *prog, colnr_T col, proftime_T *tm, int *tim
       } else {
         struct linepos *lpos = &subs.synt.list.line[i];
 
-        if (lpos->start != NULL && lpos->end != NULL) {
+        if (lpos->start != nullptr && lpos->end != nullptr) {
           re_extmatch_out->matches[i] =
             (uint8_t *)xstrnsave((char *)lpos->start, (size_t)(lpos->end - lpos->start));
         }
@@ -15675,12 +15675,12 @@ static int nfa_regtry(nfa_regprog_T *prog, colnr_T col, proftime_T *tm, int *tim
 }
 
 /// Match a regexp against a string ("line" points to the string) or multiple
-/// lines (if "line" is NULL, use reg_getline()).
+/// lines (if "line" is nullptr, use reg_getline()).
 ///
-/// @param line String in which to search or NULL
+/// @param line String in which to search or nullptr
 /// @param startcol Column to start looking for match
-/// @param tm Timeout limit or NULL
-/// @param timed_out Flag set on timeout or NULL
+/// @param tm Timeout limit or nullptr
+/// @param timed_out Flag set on timeout or nullptr
 ///
 /// @return <= 0 if there is no match and number of lines contained in the
 /// match otherwise.
@@ -15702,7 +15702,7 @@ static int nfa_regexec_both(uint8_t *line, colnr_T startcol, proftime_T *tm, int
   }
 
   // Be paranoid...
-  if (prog == NULL || line == NULL) {
+  if (prog == nullptr || line == nullptr) {
     iemsg(_(e_null));
     goto theend;
   }
@@ -15754,7 +15754,7 @@ static int nfa_regexec_both(uint8_t *line, colnr_T startcol, proftime_T *tm, int
 
     // If match_text is set it contains the full text that must match.
     // Nothing else to try. Doesn't handle combining chars well.
-    if (prog->match_text != NULL && *prog->match_text != NUL && !rex.reg_icombine) {
+    if (prog->match_text != nullptr && *prog->match_text != NUL && !rex.reg_icombine) {
       retval = find_match_text(&col, prog->regstart, prog->match_text);
       if (REG_MULTI) {
         rex.reg_mmatch->rmm_matchcol = col;
@@ -15782,7 +15782,7 @@ static int nfa_regexec_both(uint8_t *line, colnr_T startcol, proftime_T *tm, int
   retval = nfa_regtry(prog, col, tm, timed_out);
 
 #ifdef REGEXP_DEBUG
-  nfa_regengine.expr = NULL;
+  nfa_regengine.expr = nullptr;
 #endif
 
 theend:
@@ -15812,14 +15812,14 @@ theend:
 }
 
 // Compile a regular expression into internal code for the NFA matcher.
-// Returns the program in allocated space.  Returns NULL for an error.
+// Returns the program in allocated space.  Returns nullptr for an error.
 static regprog_T *nfa_regcomp(uint8_t *expr, int re_flags)
 {
-  nfa_regprog_T *prog = NULL;
+  nfa_regprog_T *prog = nullptr;
   int *postfix;
 
-  if (expr == NULL) {
-    return NULL;
+  if (expr == nullptr) {
+    return nullptr;
   }
 
 #ifdef REGEXP_DEBUG
@@ -15834,7 +15834,7 @@ static regprog_T *nfa_regcomp(uint8_t *expr, int re_flags)
   // Build postfix form of the regexp. Needed to build the NFA
   // (and count its size).
   postfix = re2post();
-  if (postfix == NULL) {
+  if (postfix == nullptr) {
     goto fail;              // Cascaded (syntax?) error
   }
 
@@ -15845,7 +15845,7 @@ static regprog_T *nfa_regcomp(uint8_t *expr, int re_flags)
   {
     FILE *f = fopen(NFA_REGEXP_RUN_LOG, "a");
 
-    if (f != NULL) {
+    if (f != nullptr) {
       fprintf(f,
               "\n*****************************\n\n\n\n\t"
               "Compiling regexp \"%s\"... hold on !\n",
@@ -15864,13 +15864,13 @@ static regprog_T *nfa_regcomp(uint8_t *expr, int re_flags)
   prog = xmalloc(prog_size);
   state_ptr = prog->state;
   prog->re_in_use = false;
-  prog->listbuf[0] = NULL;
-  prog->listbuf[1] = NULL;
+  prog->listbuf[0] = nullptr;
+  prog->listbuf[1] = nullptr;
 
   // PASS 2
   // Build the NFA
   prog->start = post2nfa(postfix, post_ptr, false);
-  if (prog->start == NULL) {
+  if (prog->start == nullptr) {
     goto fail;
   }
   prog->regflags = regflags;
@@ -15894,20 +15894,20 @@ static regprog_T *nfa_regcomp(uint8_t *expr, int re_flags)
   prog->reghasz = re_has_z;
   prog->pattern = xstrdup((char *)expr);
 #ifdef REGEXP_DEBUG
-  nfa_regengine.expr = NULL;
+  nfa_regengine.expr = nullptr;
 #endif
 
 out:
   xfree(post_start);
-  post_start = post_ptr = post_end = NULL;
-  state_ptr = NULL;
+  post_start = post_ptr = post_end = nullptr;
+  state_ptr = nullptr;
   return (regprog_T *)prog;
 
 fail:
   XFREE_CLEAR(prog);
 #ifdef REGEXP_DEBUG
   nfa_postfix_dump(expr, FAIL);
-  nfa_regengine.expr = NULL;
+  nfa_regengine.expr = nullptr;
 #endif
   goto out;
 }
@@ -15915,7 +15915,7 @@ fail:
 // Free a compiled regexp program, returned by nfa_regcomp().
 static void nfa_regfree(regprog_T *prog)
 {
-  if (prog == NULL) {
+  if (prog == nullptr) {
     return;
   }
 
@@ -15938,28 +15938,28 @@ static void nfa_regfree(regprog_T *prog)
 static int nfa_regexec_nl(regmatch_T *rmp, uint8_t *line, colnr_T col, bool line_lbr)
 {
   rex.reg_match = rmp;
-  rex.reg_mmatch = NULL;
+  rex.reg_mmatch = nullptr;
   rex.reg_maxline = 0;
   rex.reg_line_lbr = line_lbr;
   rex.reg_buf = curbuf;
-  rex.reg_win = NULL;
+  rex.reg_win = nullptr;
   rex.reg_ic = rmp->rm_ic;
   rex.reg_icombine = false;
   rex.reg_nobreak = rmp->regprog->re_flags & RE_NOBREAK;
   rex.reg_maxcol = 0;
-  return nfa_regexec_both(line, col, NULL, NULL);
+  return nfa_regexec_both(line, col, nullptr, nullptr);
 }
 
 /// Matches a regexp against multiple lines.
 /// "rmp->regprog" is a compiled regexp as returned by vim_regcomp().
 /// Uses curbuf for line count and 'iskeyword'.
 ///
-/// @param win Window in which to search or NULL
+/// @param win Window in which to search or nullptr
 /// @param buf Buffer in which to search
 /// @param lnum Number of line to start looking for match
 /// @param col Column to start looking for match
-/// @param tm Timeout limit or NULL
-/// @param timed_out Flag set on timeout or NULL
+/// @param tm Timeout limit or nullptr
+/// @param timed_out Flag set on timeout or nullptr
 ///
 /// @return <= 0 if there is no match and number of lines contained in the match
 /// otherwise.
@@ -15989,7 +15989,7 @@ static int nfa_regexec_multi(regmmatch_T *rmp, win_T *win, buf_T *buf, linenr_T 
                              proftime_T *tm, int *timed_out)
 {
   init_regexec_multi(rmp, win, buf, lnum);
-  return nfa_regexec_both(NULL, col, tm, timed_out);
+  return nfa_regexec_both(nullptr, col, tm, timed_out);
 }
 // }}}1
 
@@ -16028,10 +16028,10 @@ static const uint8_t regname[][30] = {
 // Compile a regular expression into internal code.
 // Returns the program in allocated memory.
 // Use vim_regfree() to free the memory.
-// Returns NULL for an error.
+// Returns nullptr for an error.
 regprog_T *vim_regcomp(const char *expr_arg, int re_flags)
 {
-  regprog_T *prog = NULL;
+  regprog_T *prog = nullptr;
   const char *expr = expr_arg;
 
   regexp_engine = (int)p_re;
@@ -16074,7 +16074,7 @@ regprog_T *vim_regcomp(const char *expr_arg, int re_flags)
   }
 
   // Check for error compiling regexp with initial engine.
-  if (prog == NULL) {
+  if (prog == nullptr) {
 #ifdef BT_REGEXP_DEBUG_LOG
     // Debugging log for BT engine.
     if (regexp_engine != BACKTRACKING_ENGINE) {
@@ -16099,7 +16099,7 @@ regprog_T *vim_regcomp(const char *expr_arg, int re_flags)
     }
   }
 
-  if (prog != NULL) {
+  if (prog != nullptr) {
     // Store the info needed to call regcomp() again when the engine turns out
     // to be very slow when executing it.
     prog->re_engine = (unsigned)regexp_engine;
@@ -16112,7 +16112,7 @@ regprog_T *vim_regcomp(const char *expr_arg, int re_flags)
 // Free a compiled regexp program, returned by vim_regcomp().
 void vim_regfree(regprog_T *prog)
 {
-  if (prog != NULL) {
+  if (prog != nullptr) {
     prog->engine->regfree(prog);
   }
 }
@@ -16168,10 +16168,10 @@ static bool vim_regexec_string(regmatch_T *rmp, const char *line, colnr_T col, b
   }
   rex_in_use = true;
 
-  rex.reg_startp = NULL;
-  rex.reg_endp = NULL;
-  rex.reg_startpos = NULL;
-  rex.reg_endpos = NULL;
+  rex.reg_startp = nullptr;
+  rex.reg_endp = nullptr;
+  rex.reg_startpos = nullptr;
+  rex.reg_endpos = nullptr;
 
   int result = rmp->regprog->engine->regexec_nl(rmp, (uint8_t *)line, col, nl);
   rmp->regprog->re_in_use = false;
@@ -16187,7 +16187,7 @@ static bool vim_regexec_string(regmatch_T *rmp, const char *line, colnr_T col, b
     vim_regfree(rmp->regprog);
     report_re_switch(pat);
     rmp->regprog = vim_regcomp(pat, re_flags);
-    if (rmp->regprog != NULL) {
+    if (rmp->regprog != nullptr) {
       rmp->regprog->re_in_use = true;
       result = rmp->regprog->engine->regexec_nl(rmp, (uint8_t *)line, col, nl);
       rmp->regprog->re_in_use = false;
@@ -16232,14 +16232,14 @@ bool vim_regexec_nl(regmatch_T *rmp, const char *line, colnr_T col)
 
 /// Match a regexp against multiple lines.
 /// "rmp->regprog" must be a compiled regexp as returned by vim_regcomp().
-/// Note: "rmp->regprog" may be freed and changed, even set to NULL.
+/// Note: "rmp->regprog" may be freed and changed, even set to nullptr.
 /// Uses curbuf for line count and 'iskeyword'.
 ///
-/// @param win        window in which to search or NULL
+/// @param win        window in which to search or nullptr
 /// @param buf        buffer in which to search
 /// @param lnum       nr of line to start looking for match
 /// @param col        column to start looking for match
-/// @param tm         timeout limit or NULL
+/// @param tm         timeout limit or nullptr
 /// @param timed_out  flag is set when timeout limit reached
 ///
 /// @return  zero if there is no match.  Return number of lines contained in the
@@ -16284,9 +16284,9 @@ int vim_regexec_multi(regmmatch_T *rmp, win_T *win, buf_T *buf, linenr_T lnum, c
     rmp->regprog = vim_regcomp(pat, re_flags);
     reg_do_extmatch = 0;
 
-    if (rmp->regprog == NULL) {
+    if (rmp->regprog == nullptr) {
       // Somehow compiling the pattern failed now, put back the
-      // previous one to avoid "regprog" becoming NULL.
+      // previous one to avoid "regprog" becoming nullptr.
       rmp->regprog = prev_prog;
     } else {
       vim_regfree(prev_prog);

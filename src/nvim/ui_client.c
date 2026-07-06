@@ -34,7 +34,7 @@
 # include "nvim/os/os_win_console.h"
 #endif
 
-static TUIData *tui = NULL;
+static TUIData *tui = nullptr;
 static int tui_width = 0;
 static int tui_height = 0;
 static char *tui_term = "";
@@ -54,7 +54,7 @@ uint64_t ui_client_start_server(const char *exepath, size_t argc, char **argv)
   for (size_t i = 1; i < argc; i++) {
     args[args_idx++] = xstrdup(argv[i]);
   }
-  args[args_idx++] = NULL;
+  args[args_idx++] = nullptr;
 
   CallbackReader on_err = CALLBACK_READER_INIT;
   on_err.fwd_err = true;
@@ -64,7 +64,7 @@ uint64_t ui_client_start_server(const char *exepath, size_t argc, char **argv)
   Channel *channel = channel_job_start(args, exepath,
                                        CALLBACK_READER_INIT, on_err, CALLBACK_NONE,
                                        false, true, true, detach, kChannelStdinPipe,
-                                       NULL, 0, 0, NULL, &exit_status);
+                                       nullptr, 0, 0, nullptr, &exit_status);
   if (!channel) {
     return 0;
   }
@@ -198,7 +198,7 @@ UIClientHandler ui_client_get_redraw_handler(const char *name, size_t name_len, 
 {
   int hash = ui_client_handler_hash(name, name_len);
   if (hash < 0) {
-    return (UIClientHandler){ NULL, NULL };
+    return (UIClientHandler){ nullptr, nullptr };
   }
   return event_handlers[hash];
 }
@@ -223,7 +223,7 @@ static HlAttrs ui_client_dict2hlattrs(Dict d, bool rgb)
     return HLATTRS_INIT;
   }
 
-  HlAttrs attrs = dict2hlattrs(&dict, rgb, NULL, NULL, &err);
+  HlAttrs attrs = dict2hlattrs(&dict, rgb, nullptr, nullptr, &err);
 
   if (HAS_KEY(&dict, highlight, url)) {
     attrs.url = tui_add_url(tui, dict.url.data);
@@ -295,7 +295,7 @@ static void channel_connect_event(void **argv)
   char *server_addr = argv[0];
 
   const char *err = "";
-  bool is_tcp = socket_address_tcp_host_end(server_addr) != NULL;
+  bool is_tcp = socket_address_tcp_host_end(server_addr) != nullptr;
   CallbackReader on_data = CALLBACK_READER_INIT;
   uint64_t chan = channel_connect(is_tcp, server_addr, true, on_data, 50, &err);
 
@@ -330,7 +330,7 @@ void ui_client_event_restart(Array args)
 
   // Save the arguments for ui_client_attach_to_restarted_server() later.
   api_free_array(restart_args);
-  restart_args = copy_array(args, NULL);
+  restart_args = copy_array(args, nullptr);
   restart_pending = true;
 }
 
@@ -338,7 +338,7 @@ void ui_client_event__set_restart_on_crash_exit(Array args)
 {
   // Save the arguments for ui_client_may_restart_server() later.
   api_free_array(restart_args_after_crash_exit);
-  restart_args_after_crash_exit = copy_array(args, NULL);
+  restart_args_after_crash_exit = copy_array(args, nullptr);
 }
 
 /// Called during "restart" when the old server just exited.
@@ -375,7 +375,7 @@ void ui_client_attach_to_restarted_server(bool error_restart)
       if (cmdargs.items[i].type == kObjectTypeString) {
         argv[i] = cmdargs.items[i].data.string.data;
       }
-      if (argv[i] == NULL) {
+      if (argv[i] == nullptr) {
         argv[i] = "";
       }
     }
@@ -383,10 +383,10 @@ void ui_client_attach_to_restarted_server(bool error_restart)
     xfree(argv);
     ui_client_error_exit = -1;
   } else {
-    bool is_tcp = socket_address_tcp_host_end(first_arg) != NULL;
-    const char *err = NULL;
+    bool is_tcp = socket_address_tcp_host_end(first_arg) != nullptr;
+    const char *err = nullptr;
     chan_id = channel_connect(is_tcp, first_arg, true, CALLBACK_READER_INIT, 50, &err);
-    if (err != NULL) {
+    if (err != nullptr) {
       ELOG("cannot connect to server %s: %s", first_arg, err);
       goto cleanup;
     }

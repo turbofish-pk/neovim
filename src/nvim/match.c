@@ -42,9 +42,9 @@
 #define SEARCH_HL_PRIORITY 0
 
 /// Add match to the match list of window "wp".
-/// If "pat" is not NULL the pattern will be highlighted with the group "grp"
+/// If "pat" is not nullptr the pattern will be highlighted with the group "grp"
 /// with priority "prio".
-/// If "pos_list" is not NULL the list of positions defines the highlights.
+/// If "pos_list" is not nullptr the list of positions defines the highlights.
 /// Optionally, a desired ID "id" can be specified (greater than or equal to 1).
 /// If no particular ID is desired, -1 must be specified for "id".
 ///
@@ -55,10 +55,10 @@ static int match_add(win_T *wp, const char *const grp, const char *const pat, in
   FUNC_ATTR_NONNULL_ARG(1, 2)
 {
   int hlg_id;
-  regprog_T *regprog = NULL;
+  regprog_T *regprog = nullptr;
   int rtype = UPD_SOME_VALID;
 
-  if (*grp == NUL || (pat != NULL && *pat == NUL)) {
+  if (*grp == NUL || (pat != nullptr && *pat == NUL)) {
     return -1;
   }
   if (id < -1 || id == 0) {
@@ -72,7 +72,7 @@ static int match_add(win_T *wp, const char *const grp, const char *const pat, in
     id = wp->w_next_match_id++;
   } else {
     // check the given ID is not already in use
-    for (matchitem_T *cur = wp->w_match_head; cur != NULL; cur = cur->mit_next) {
+    for (matchitem_T *cur = wp->w_match_head; cur != nullptr; cur = cur->mit_next) {
       if (cur->mit_id == id) {
         semsg(_("E801: ID already taken: %" PRId64), (int64_t)id);
         return -1;
@@ -90,7 +90,7 @@ static int match_add(win_T *wp, const char *const grp, const char *const pat, in
   if ((hlg_id = syn_check_group(grp, strlen(grp))) == 0) {
     return -1;
   }
-  if (pat != NULL && (regprog = vim_regcomp(pat, RE_MAGIC)) == NULL) {
+  if (pat != nullptr && (regprog = vim_regcomp(pat, RE_MAGIC)) == nullptr) {
     semsg(_(e_invarg2), pat);
     return -1;
   }
@@ -103,18 +103,18 @@ static int match_add(win_T *wp, const char *const grp, const char *const pat, in
   }
   m->mit_id = id;
   m->mit_priority = prio;
-  m->mit_pattern = pat == NULL ? NULL : xstrdup(pat);
+  m->mit_pattern = pat == nullptr ? nullptr : xstrdup(pat);
   m->mit_hlg_id = hlg_id;
   m->mit_match.regprog = regprog;
   m->mit_match.rmm_ic = false;
   m->mit_match.rmm_maxcol = 0;
   m->mit_conceal_char = 0;
-  if (conceal_char != NULL) {
+  if (conceal_char != nullptr) {
     m->mit_conceal_char = utf_ptr2char(conceal_char);
   }
 
   // Set up position matches
-  if (pos_list != NULL) {
+  if (pos_list != nullptr) {
     linenr_T toplnum = 0;
     linenr_T botlnum = 0;
 
@@ -128,7 +128,7 @@ static int match_add(win_T *wp, const char *const grp, const char *const pat, in
       if (TV_LIST_ITEM_TV(li)->v_type == VAR_LIST) {
         const list_T *const subl = TV_LIST_ITEM_TV(li)->vval.v_list;
         const listitem_T *subli = tv_list_first(subl);
-        if (subli == NULL) {
+        if (subli == nullptr) {
           semsg(_("E5030: Empty list at position %d"),
                 (int)tv_list_idx_of_item(pos_list, li));
           goto fail;
@@ -142,7 +142,7 @@ static int match_add(win_T *wp, const char *const grp, const char *const pat, in
         }
         m->mit_pos_array[i].lnum = lnum;
         subli = TV_LIST_ITEM_NEXT(subl, subli);
-        if (subli != NULL) {
+        if (subli != nullptr) {
           col = (colnr_T)tv_get_number_chk(TV_LIST_ITEM_TV(subli), &error);
           if (error) {
             goto fail;
@@ -151,7 +151,7 @@ static int match_add(win_T *wp, const char *const grp, const char *const pat, in
             continue;
           }
           subli = TV_LIST_ITEM_NEXT(subl, subli);
-          if (subli != NULL) {
+          if (subli != nullptr) {
             len = (colnr_T)tv_get_number_chk(TV_LIST_ITEM_TV(subli), &error);
             if (len < 0) {
               continue;
@@ -197,7 +197,7 @@ static int match_add(win_T *wp, const char *const grp, const char *const pat, in
   // the match priorities.
   matchitem_T *cur = wp->w_match_head;
   matchitem_T *prev = cur;
-  while (cur != NULL && prio >= cur->mit_priority) {
+  while (cur != nullptr && prio >= cur->mit_priority) {
     prev = cur;
     cur = cur->mit_next;
   }
@@ -235,11 +235,11 @@ static int match_delete(win_T *wp, int id, bool perr)
     }
     return -1;
   }
-  while (cur != NULL && cur->mit_id != id) {
+  while (cur != nullptr && cur->mit_id != id) {
     prev = cur;
     cur = cur->mit_next;
   }
-  if (cur == NULL) {
+  if (cur == nullptr) {
     if (perr) {
       semsg(_("E803: ID not found: %" PRId64), (int64_t)id);
     }
@@ -265,7 +265,7 @@ static int match_delete(win_T *wp, int id, bool perr)
 /// Delete all matches in the match list of window 'wp'.
 void clear_matches(win_T *wp)
 {
-  while (wp->w_match_head != NULL) {
+  while (wp->w_match_head != nullptr) {
     matchitem_T *m = wp->w_match_head->mit_next;
     vim_regfree(wp->w_match_head->mit_match.regprog);
     xfree(wp->w_match_head->mit_pattern);
@@ -277,12 +277,12 @@ void clear_matches(win_T *wp)
 }
 
 /// Get match from ID 'id' in window 'wp'.
-/// Return NULL if match not found.
+/// Return nullptr if match not found.
 static matchitem_T *get_match(win_T *wp, int id)
 {
   matchitem_T *cur = wp->w_match_head;
 
-  while (cur != NULL && cur->mit_id != id) {
+  while (cur != nullptr && cur->mit_id != id) {
     cur = cur->mit_next;
   }
   return cur;
@@ -295,7 +295,7 @@ void init_search_hl(win_T *wp, match_T *search_hl)
   // Setup for match and 'hlsearch' highlighting.  Disable any previous
   // match
   matchitem_T *cur = wp->w_match_head;
-  while (cur != NULL) {
+  while (cur != nullptr) {
     cur->mit_hl.rm = cur->mit_match;
     if (cur->mit_hlg_id == 0) {
       cur->mit_hl.attr = 0;
@@ -390,7 +390,7 @@ static void next_search_hl(win_T *win, match_T *search_hl, match_T *shl, linenr_
   const int called_emsg_before = called_emsg;
 
   // for :{range}s/pat only highlight inside the range
-  if ((lnum < search_first_line || lnum > search_last_line) && cur == NULL) {
+  if ((lnum < search_first_line || lnum > search_last_line) && cur == nullptr) {
     shl->lnum = 0;
     return;
   }
@@ -423,7 +423,7 @@ static void next_search_hl(win_T *win, match_T *search_hl, match_T *shl, linenr_
     // 3. Vi compatible searching: continue at end of previous match.
     if (shl->lnum == 0) {
       matchcol = 0;
-    } else if (vim_strchr(p_cpo, CPO_SEARCH) == NULL
+    } else if (vim_strchr(p_cpo, CPO_SEARCH) == nullptr
                || (shl->rm.endpos[0].lnum == 0
                    && shl->rm.endpos[0].col <= shl->rm.startpos[0].col)) {
       matchcol = shl->rm.startpos[0].col;
@@ -439,10 +439,10 @@ static void next_search_hl(win_T *win, match_T *search_hl, match_T *shl, linenr_
     }
 
     shl->lnum = lnum;
-    if (shl->rm.regprog != NULL) {
+    if (shl->rm.regprog != nullptr) {
       // Remember whether shl->rm is using a copy of the regprog in
       // cur->mit_match.
-      bool regprog_is_copy = (shl != search_hl && cur != NULL
+      bool regprog_is_copy = (shl != search_hl && cur != nullptr
                               && shl == &cur->mit_hl
                               && cur->mit_match.regprog == cur->mit_hl.rm.regprog);
       int timed_out = false;
@@ -460,12 +460,12 @@ static void next_search_hl(win_T *win, match_T *search_hl, match_T *shl, linenr_
           vim_regfree(shl->rm.regprog);
           set_no_hlsearch(true);
         }
-        shl->rm.regprog = NULL;
+        shl->rm.regprog = nullptr;
         shl->lnum = 0;
         got_int = false;  // avoid the "Type :quit to exit Vim" message
         break;
       }
-    } else if (cur != NULL) {
+    } else if (cur != nullptr) {
       nmatched = next_search_hl_pos(shl, lnum, cur, matchcol);
     }
     if (nmatched == 0) {
@@ -493,36 +493,36 @@ void prepare_search_hl(win_T *wp, match_T *search_hl, linenr_T lnum)
   // When using a multi-line pattern, start searching at the top
   // of the window or just after a closed fold.
   // Do this both for search_hl and the match list.
-  while (cur != NULL || shl_flag == false) {
+  while (cur != nullptr || shl_flag == false) {
     if (shl_flag == false) {
       shl = search_hl;
       shl_flag = true;
     } else {
       shl = &cur->mit_hl;
     }
-    if (shl->rm.regprog != NULL
+    if (shl->rm.regprog != nullptr
         && shl->lnum == 0
         && re_multiline(shl->rm.regprog)) {
       if (shl->first_lnum == 0) {
         for (shl->first_lnum = lnum;
              shl->first_lnum > wp->w_topline;
              shl->first_lnum--) {
-          if (hasFolding(wp, shl->first_lnum - 1, NULL, NULL)) {
+          if (hasFolding(wp, shl->first_lnum - 1, nullptr, nullptr)) {
             break;
           }
         }
       }
-      if (cur != NULL) {
+      if (cur != nullptr) {
         cur->mit_pos_cur = 0;
       }
       bool pos_inprogress = true;  // mark that a position match search is
                                    // in progress
       int n = 0;
-      while (shl->first_lnum < lnum && (shl->rm.regprog != NULL
-                                        || (cur != NULL && pos_inprogress))) {
+      while (shl->first_lnum < lnum && (shl->rm.regprog != nullptr
+                                        || (cur != nullptr && pos_inprogress))) {
         next_search_hl(wp, search_hl, shl, shl->first_lnum, (colnr_T)n,
-                       shl == search_hl ? NULL : cur);
-        pos_inprogress = !(cur == NULL || cur->mit_pos_cur == 0);
+                       shl == search_hl ? nullptr : cur);
+        pos_inprogress = !(cur == nullptr || cur->mit_pos_cur == 0);
         if (shl->lnum != 0) {
           shl->first_lnum = shl->lnum
                             + shl->rm.endpos[0].lnum
@@ -534,7 +534,7 @@ void prepare_search_hl(win_T *wp, match_T *search_hl, linenr_T lnum)
         }
       }
     }
-    if (shl != search_hl && cur != NULL) {
+    if (shl != search_hl && cur != nullptr) {
       cur = cur->mit_next;
     }
   }
@@ -571,7 +571,7 @@ bool prepare_search_hl_line(win_T *wp, linenr_T lnum, colnr_T mincol, char **lin
 
   // Handle highlighting the last used search pattern and matches.
   // Do this for both search_hl and the match list.
-  while (cur != NULL || !shl_flag) {
+  while (cur != nullptr || !shl_flag) {
     if (!shl_flag) {
       shl = search_hl;
       shl_flag = true;
@@ -583,11 +583,11 @@ bool prepare_search_hl_line(win_T *wp, linenr_T lnum, colnr_T mincol, char **lin
     shl->attr_cur = 0;
     shl->is_addpos = false;
     shl->has_cursor = false;
-    if (cur != NULL) {
+    if (cur != nullptr) {
       cur->mit_pos_cur = 0;
     }
     next_search_hl(wp, search_hl, shl, lnum, mincol,
-                   shl == search_hl ? NULL : cur);
+                   shl == search_hl ? nullptr : cur);
 
     // Need to get the line again, a multi-line regexp may have made it
     // invalid.
@@ -626,7 +626,7 @@ bool prepare_search_hl_line(win_T *wp, linenr_T lnum, colnr_T mincol, char **lin
       }
       area_highlighting = true;
     }
-    if (shl != search_hl && cur != NULL) {
+    if (shl != search_hl && cur != nullptr) {
       cur = cur->mit_next;
     }
   }
@@ -652,21 +652,21 @@ int update_search_hl(win_T *wp, linenr_T lnum, colnr_T col, char **line, match_T
   int search_attr = 0;
 
   // Do this for 'search_hl' and the match list (ordered by priority).
-  while (cur != NULL || !shl_flag) {
+  while (cur != nullptr || !shl_flag) {
     if (!shl_flag
-        && (cur == NULL || cur->mit_priority > SEARCH_HL_PRIORITY)) {
+        && (cur == nullptr || cur->mit_priority > SEARCH_HL_PRIORITY)) {
       shl = search_hl;
       shl_flag = true;
     } else {
       shl = &cur->mit_hl;
     }
-    if (cur != NULL) {
+    if (cur != nullptr) {
       cur->mit_pos_cur = 0;
     }
     bool pos_inprogress = true;  // mark that a position match search is
                                  // in progress
-    while (shl->rm.regprog != NULL
-           || (cur != NULL && pos_inprogress)) {
+    while (shl->rm.regprog != nullptr
+           || (cur != nullptr && pos_inprogress)) {
       if (shl->startcol != MAXCOL
           && col >= shl->startcol
           && col < shl->endcol) {
@@ -687,7 +687,7 @@ int update_search_hl(win_T *wp, linenr_T lnum, colnr_T col, char **line, match_T
         }
         // Match with the "Conceal" group results in hiding
         // the match.
-        if (cur != NULL
+        if (cur != nullptr
             && shl != search_hl
             && syn_name2id("Conceal") == cur->mit_hlg_id) {
           *has_match_conc = col == shl->startcol ? 2 : 1;
@@ -699,8 +699,8 @@ int update_search_hl(win_T *wp, linenr_T lnum, colnr_T col, char **line, match_T
         shl->attr_cur = 0;
 
         next_search_hl(wp, search_hl, shl, lnum, col,
-                       shl == search_hl ? NULL : cur);
-        pos_inprogress = !(cur == NULL || cur->mit_pos_cur == 0);
+                       shl == search_hl ? nullptr : cur);
+        pos_inprogress = !(cur == nullptr || cur->mit_pos_cur == 0);
 
         // Need to get the line again, a multi-line regexp
         // may have made it invalid.
@@ -737,7 +737,7 @@ int update_search_hl(win_T *wp, linenr_T lnum, colnr_T col, char **line, match_T
       }
       break;
     }
-    if (shl != search_hl && cur != NULL) {
+    if (shl != search_hl && cur != nullptr) {
       cur = cur->mit_next;
     }
   }
@@ -748,9 +748,9 @@ int update_search_hl(win_T *wp, linenr_T lnum, colnr_T col, char **line, match_T
   search_attr = search_hl->attr_cur;
   cur = wp->w_match_head;
   shl_flag = false;
-  while (cur != NULL || !shl_flag) {
+  while (cur != nullptr || !shl_flag) {
     if (!shl_flag
-        && (cur == NULL || cur->mit_priority > SEARCH_HL_PRIORITY)) {
+        && (cur == nullptr || cur->mit_priority > SEARCH_HL_PRIORITY)) {
       shl = search_hl;
       shl_flag = true;
     } else {
@@ -761,7 +761,7 @@ int update_search_hl(win_T *wp, linenr_T lnum, colnr_T col, char **line, match_T
       *on_last_col = col + 1 >= shl->endcol;
       *search_attr_from_match = shl != search_hl;
     }
-    if (shl != search_hl && cur != NULL) {
+    if (shl != search_hl && cur != nullptr) {
       cur = cur->mit_next;
     }
   }
@@ -790,7 +790,7 @@ bool get_prevcol_hl_flag(win_T *wp, match_T *search_hl, colnr_T curcol)
     return true;
   }
   matchitem_T *cur = wp->w_match_head;  // points to the match list
-  while (cur != NULL) {
+  while (cur != nullptr) {
     if (!cur->mit_hl.is_addpos && (prevcol == cur->mit_hl.startcol
                                    || (prevcol > cur->mit_hl.startcol
                                        && cur->mit_hl.endcol == MAXCOL))) {
@@ -811,9 +811,9 @@ void get_search_match_hl(win_T *wp, match_T *search_hl, colnr_T col, int *char_a
   bool shl_flag = false;        // flag to indicate whether search_hl
                                 // has been processed or not
 
-  while (cur != NULL || !shl_flag) {
+  while (cur != nullptr || !shl_flag) {
     if (!shl_flag
-        && (cur == NULL || cur->mit_priority > SEARCH_HL_PRIORITY)) {
+        && (cur == nullptr || cur->mit_priority > SEARCH_HL_PRIORITY)) {
       shl = search_hl;
       shl_flag = true;
     } else {
@@ -823,7 +823,7 @@ void get_search_match_hl(win_T *wp, match_T *search_hl, colnr_T col, int *char_a
         && (shl == search_hl || !shl->is_addpos)) {
       *char_attr = shl->attr;
     }
-    if (shl != search_hl && cur != NULL) {
+    if (shl != search_hl && cur != nullptr) {
       cur = cur->mit_next;
     }
   }
@@ -838,16 +838,16 @@ static int matchadd_dict_arg(typval_T *tv, const char **conceal_char, win_T **wi
     return FAIL;
   }
 
-  if ((di = tv_dict_find(tv->vval.v_dict, S_LEN("conceal"))) != NULL) {
+  if ((di = tv_dict_find(tv->vval.v_dict, S_LEN("conceal"))) != nullptr) {
     *conceal_char = tv_get_string(&di->di_tv);
   }
 
-  if ((di = tv_dict_find(tv->vval.v_dict, S_LEN("window"))) == NULL) {
+  if ((di = tv_dict_find(tv->vval.v_dict, S_LEN("window"))) == nullptr) {
     return OK;
   }
 
   *win = find_win_by_nr_or_id(&di->di_tv);
-  if (*win == NULL) {
+  if (*win == nullptr) {
     emsg(_(e_invalwindow));
     return FAIL;
   }
@@ -860,7 +860,7 @@ void f_clearmatches(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
 {
   win_T *win = get_optional_window(argvars, 0);
 
-  if (win != NULL) {
+  if (win != nullptr) {
     clear_matches(win);
   }
 }
@@ -871,14 +871,14 @@ void f_getmatches(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
   win_T *win = get_optional_window(argvars, 0);
 
   tv_list_alloc_ret(rettv, kListLenMayKnow);
-  if (win == NULL) {
+  if (win == nullptr) {
     return;
   }
 
   matchitem_T *cur = win->w_match_head;
-  while (cur != NULL) {
+  while (cur != nullptr) {
     dict_T *dict = tv_dict_alloc();
-    if (cur->mit_match.regprog == NULL) {
+    if (cur->mit_match.regprog == nullptr) {
       // match added with matchaddpos()
       for (int i = 0; i < cur->mit_pos_count; i++) {
         llpos_T *llpos;
@@ -921,7 +921,7 @@ void f_getmatches(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
 void f_setmatches(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
 {
   dict_T *d;
-  list_T *s = NULL;
+  list_T *s = nullptr;
   win_T *win = get_optional_window(argvars, 1);
 
   rettv->vval.v_number = -1;
@@ -929,7 +929,7 @@ void f_setmatches(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
     emsg(_(e_listreq));
     return;
   }
-  if (win == NULL) {
+  if (win == nullptr) {
     return;
   }
 
@@ -939,16 +939,16 @@ void f_setmatches(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
   int li_idx = 0;
   TV_LIST_ITER_CONST(l, li, {
     if (TV_LIST_ITEM_TV(li)->v_type != VAR_DICT
-        || (d = TV_LIST_ITEM_TV(li)->vval.v_dict) == NULL) {
+        || (d = TV_LIST_ITEM_TV(li)->vval.v_dict) == nullptr) {
       semsg(_("E474: List item %d is either not a dictionary "
               "or an empty one"), li_idx);
       return;
     }
-    if (!(tv_dict_find(d, S_LEN("group")) != NULL
-          && (tv_dict_find(d, S_LEN("pattern")) != NULL
-              || tv_dict_find(d, S_LEN("pos1")) != NULL)
-          && tv_dict_find(d, S_LEN("priority")) != NULL
-          && tv_dict_find(d, S_LEN("id")) != NULL)) {
+    if (!(tv_dict_find(d, S_LEN("group")) != nullptr
+          && (tv_dict_find(d, S_LEN("pattern")) != nullptr
+              || tv_dict_find(d, S_LEN("pos1")) != nullptr)
+          && tv_dict_find(d, S_LEN("priority")) != nullptr
+          && tv_dict_find(d, S_LEN("id")) != nullptr)) {
       semsg(_("E474: List item %d is missing one of the required keys"),
             li_idx);
       return;
@@ -963,8 +963,8 @@ void f_setmatches(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
 
     d = TV_LIST_ITEM_TV(li)->vval.v_dict;
     dictitem_T *const di = tv_dict_find(d, S_LEN("pattern"));
-    if (di == NULL) {
-      if (s == NULL) {
+    if (di == nullptr) {
+      if (s == nullptr) {
         s = tv_list_alloc(9);
       }
 
@@ -973,7 +973,7 @@ void f_setmatches(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
         char buf[30];  // use 30 to avoid compiler warning
         snprintf(buf, sizeof(buf), "pos%d", i);
         dictitem_T *const pos_di = tv_dict_find(d, buf, -1);
-        if (pos_di != NULL) {
+        if (pos_di != nullptr) {
           if (pos_di->di_tv.v_type != VAR_LIST) {
             return;
           }
@@ -998,21 +998,21 @@ void f_setmatches(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
     const int priority = (int)tv_dict_get_number(d, "priority");
     const int id = (int)tv_dict_get_number(d, "id");
     dictitem_T *const conceal_di = tv_dict_find(d, S_LEN("conceal"));
-    const char *const conceal = (conceal_di != NULL
+    const char *const conceal = (conceal_di != nullptr
                                  ? tv_get_string(&conceal_di->di_tv)
-                                 : NULL);
+                                 : nullptr);
     if (i == 0) {
       if (match_add(win, group,
                     tv_dict_get_string(d, "pattern", false),
-                    priority, id, NULL, conceal) != id) {
+                    priority, id, nullptr, conceal) != id) {
         match_add_failed = true;
       }
     } else {
-      if (match_add(win, group, NULL, priority, id, s, conceal) != id) {
+      if (match_add(win, group, nullptr, priority, id, s, conceal) != id) {
         match_add_failed = true;
       }
       tv_list_unref(s);
-      s = NULL;
+      s = nullptr;
     }
   });
   if (!match_add_failed) {
@@ -1033,12 +1033,12 @@ void f_matchadd(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
   int prio = 10;
   int id = -1;
   bool error = false;
-  const char *conceal_char = NULL;
+  const char *conceal_char = nullptr;
   win_T *win = curwin;
 
   rettv->vval.v_number = -1;
 
-  if (grp == NULL || pat == NULL) {
+  if (grp == nullptr || pat == nullptr) {
     return;
   }
   if (argvars[2].v_type != VAR_UNKNOWN) {
@@ -1059,7 +1059,7 @@ void f_matchadd(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
     return;
   }
 
-  rettv->vval.v_number = match_add(win, grp, pat, prio, id, NULL, conceal_char);
+  rettv->vval.v_number = match_add(win, grp, pat, prio, id, nullptr, conceal_char);
 }
 
 /// "matchaddpo()" function
@@ -1069,7 +1069,7 @@ void f_matchaddpos(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
 
   char buf[NUMBUFLEN];
   const char *const group = tv_get_string_buf_chk(&argvars[0], buf);
-  if (group == NULL) {
+  if (group == nullptr) {
     return;
   }
 
@@ -1087,7 +1087,7 @@ void f_matchaddpos(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
   bool error = false;
   int prio = 10;
   int id = -1;
-  const char *conceal_char = NULL;
+  const char *conceal_char = nullptr;
   win_T *win = curwin;
 
   if (argvars[2].v_type != VAR_UNKNOWN) {
@@ -1110,7 +1110,7 @@ void f_matchaddpos(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
     return;
   }
 
-  rettv->vval.v_number = match_add(win, group, NULL, prio, id, l, conceal_char);
+  rettv->vval.v_number = match_add(win, group, nullptr, prio, id, l, conceal_char);
 }
 
 /// "matcharg()" function
@@ -1125,12 +1125,12 @@ void f_matcharg(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
   if (id >= 1 && id <= 3) {
     matchitem_T *const m = get_match(curwin, id);
 
-    if (m != NULL) {
+    if (m != nullptr) {
       tv_list_append_string(rettv->vval.v_list, syn_id2name(m->mit_hlg_id), -1);
       tv_list_append_string(rettv->vval.v_list, m->mit_pattern, -1);
     } else {
-      tv_list_append_string(rettv->vval.v_list, NULL, 0);
-      tv_list_append_string(rettv->vval.v_list, NULL, 0);
+      tv_list_append_string(rettv->vval.v_list, nullptr, 0);
+      tv_list_append_string(rettv->vval.v_list, nullptr, 0);
     }
   }
 }
@@ -1139,7 +1139,7 @@ void f_matcharg(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
 void f_matchdelete(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
 {
   win_T *win = get_optional_window(argvars, 1);
-  if (win == NULL) {
+  if (win == nullptr) {
     rettv->vval.v_number = -1;
   } else {
     rettv->vval.v_number = match_delete(win,
@@ -1152,7 +1152,7 @@ void f_matchdelete(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
 /// skipping commands to find the next command.
 void ex_match(exarg_T *eap)
 {
-  char *g = NULL;
+  char *g = nullptr;
   char *end;
   int id;
 
@@ -1200,7 +1200,7 @@ void ex_match(exarg_T *eap)
 
       int c = (uint8_t)(*end);
       *end = NUL;
-      match_add(curwin, g, p + 1, 10, id, NULL, NULL);
+      match_add(curwin, g, p + 1, 10, id, nullptr, nullptr);
       xfree(g);
       *end = (char)c;
     }

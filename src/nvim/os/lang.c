@@ -37,20 +37,20 @@
 static char *get_locale_val(int what)
 {
   // Obtain the locale value from the libraries.
-  char *loc = setlocale(what, NULL);
+  char *loc = setlocale(what, nullptr);
 
   return loc;
 }
 
 /// @return  true when "lang" starts with a valid language name.
-///          Rejects NULL, empty string, "C", "C.UTF-8" and others.
+///          Rejects nullptr, empty string, "C", "C.UTF-8" and others.
 static bool is_valid_mess_lang(const char *lang)
 {
-  return lang != NULL && ASCII_ISALPHA(lang[0]) && ASCII_ISALPHA(lang[1]);
+  return lang != nullptr && ASCII_ISALPHA(lang[0]) && ASCII_ISALPHA(lang[1]);
 }
 
 /// Obtain the current messages language.  Used to set the default for
-/// 'helplang'.  May return NULL or an empty string.
+/// 'helplang'.  May return nullptr or an empty string.
 char *get_mess_lang(void)
 {
   char *p;
@@ -64,7 +64,7 @@ char *get_mess_lang(void)
   // US.
   p = get_locale_val(LC_COLLATE);
 #endif
-  return is_valid_mess_lang(p) ? p : NULL;
+  return is_valid_mess_lang(p) ? p : nullptr;
 }
 
 /// Get the language used for messages from the environment.
@@ -79,20 +79,20 @@ static char *get_mess_env(void)
   return get_locale_val(LC_MESSAGES);
 #else
   char *p = os_getenv_noalloc("LC_ALL");
-  if (p != NULL) {
+  if (p != nullptr) {
     return p;
   }
 
   p = os_getenv_noalloc("LC_MESSAGES");
-  if (p != NULL) {
+  if (p != nullptr) {
     return p;
   }
 
   p = os_getenv_noalloc("LANG");
-  if (p != NULL && ascii_isdigit(*p)) {
-    p = NULL;  // ignore something like "1043"
+  if (p != nullptr && ascii_isdigit(*p)) {
+    p = nullptr;  // ignore something like "1043"
   }
-  if (p == NULL) {
+  if (p == nullptr) {
     p = get_locale_val(LC_CTYPE);
   }
   return p;
@@ -182,9 +182,9 @@ void ex_language(exarg_T *eap)
     if (what == VIM_LC_MESSAGES) {
       p = get_mess_env();
     } else {
-      p = setlocale(what, NULL);
+      p = setlocale(what, nullptr);
     }
-    if (p == NULL || *p == NUL) {
+    if (p == nullptr || *p == NUL) {
       p = "Unknown";
     }
     smsg(0, _("Current %slanguage: \"%s\""), whatstr, p);
@@ -202,7 +202,7 @@ void ex_language(exarg_T *eap)
 #ifndef LC_MESSAGES
   }
 #endif
-    if (loc == NULL) {
+    if (loc == nullptr) {
       semsg(_("E197: Cannot set language to \"%s\""), name);
     } else {
 #ifdef HAVE_NL_MSG_CAT_CNTR
@@ -237,24 +237,24 @@ void ex_language(exarg_T *eap)
   }
 }
 
-static char **locales = NULL;       // Array of all available locales
+static char **locales = nullptr;       // Array of all available locales
 
 #ifndef MSWIN
 static bool did_init_locales = false;
 
-/// @return  an array of strings for all available locales + NULL for the
+/// @return  an array of strings for all available locales + nullptr for the
 ///          last element or,
-///          NULL in case of error.
+///          nullptr in case of error.
 static char **find_locales(void)
 {
   garray_T locales_ga;
-  char *saveptr = NULL;
+  char *saveptr = nullptr;
 
   // Find all available locales by running command "locale -a".  If this
   // doesn't work we won't have completion.
-  char *locale_a = get_cmd_output("locale -a", NULL, kShellOptSilent, NULL);
-  if (locale_a == NULL) {
-    return NULL;
+  char *locale_a = get_cmd_output("locale -a", nullptr, kShellOptSilent, nullptr);
+  if (locale_a == nullptr) {
+    return nullptr;
   }
   ga_init(&locales_ga, sizeof(char *), 20);
 
@@ -262,15 +262,15 @@ static char **find_locales(void)
   // into an array of locale strings.
   char *loc = os_strtok(locale_a, "\n", &saveptr);
 
-  while (loc != NULL) {
+  while (loc != nullptr) {
     loc = xstrdup(loc);
     GA_APPEND(char *, &locales_ga, loc);
-    loc = os_strtok(NULL, "\n", &saveptr);
+    loc = os_strtok(nullptr, "\n", &saveptr);
   }
   xfree(locale_a);
-  // Guarantee that .ga_data is NULL terminated
+  // Guarantee that .ga_data is nullptr terminated
   ga_grow(&locales_ga, 1);
-  ((char **)locales_ga.ga_data)[locales_ga.ga_len] = NULL;
+  ((char **)locales_ga.ga_data)[locales_ga.ga_len] = nullptr;
   return locales_ga.ga_data;
 }
 #endif
@@ -291,11 +291,11 @@ static void init_locales(void)
 #ifdef EXITFREE
 void free_locales(void)
 {
-  if (locales == NULL) {
+  if (locales == nullptr) {
     return;
   }
 
-  for (int i = 0; locales[i] != NULL; i++) {
+  for (int i = 0; locales[i] != nullptr; i++) {
     xfree(locales[i]);
   }
   XFREE_CLEAR(locales);
@@ -320,8 +320,8 @@ char *get_lang_arg(expand_T *xp, int idx)
   }
 
   init_locales();
-  if (locales == NULL) {
-    return NULL;
+  if (locales == nullptr) {
+    return nullptr;
   }
   return locales[idx - 4];
 }
@@ -330,8 +330,8 @@ char *get_lang_arg(expand_T *xp, int idx)
 char *get_locales(expand_T *xp, int idx)
 {
   init_locales();
-  if (locales == NULL) {
-    return NULL;
+  if (locales == nullptr) {
+    return nullptr;
   }
   return locales[idx];
 }
@@ -351,11 +351,11 @@ void lang_init(void)
 
     // $LANG is not set, either because it was unset or Nvim was started
     // from the Dock. Query the system locale.
-    if (LocaleRefGetPartString(NULL,
+    if (LocaleRefGetPartString(nullptr,
                                kLocaleLanguageMask | kLocaleLanguageVariantMask |
                                kLocaleRegionMask | kLocaleRegionVariantMask,
                                sizeof(buf) - 10, buf) == noErr && *buf) {
-      if (strcasestr(buf, "utf-8") == NULL) {
+      if (strcasestr(buf, "utf-8") == nullptr) {
         xstrlcat(buf, ".UTF-8", sizeof(buf));
       }
       os_setenv("LANG", buf, true);

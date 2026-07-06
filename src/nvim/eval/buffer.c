@@ -46,17 +46,17 @@ typedef struct {
 /// Find a buffer by number or exact name.
 buf_T *find_buffer(typval_T *avar)
 {
-  buf_T *buf = NULL;
+  buf_T *buf = nullptr;
 
   if (avar->v_type == VAR_NUMBER) {
     buf = buflist_findnr((int)avar->vval.v_number);
-  } else if (avar->v_type == VAR_STRING && avar->vval.v_string != NULL) {
+  } else if (avar->v_type == VAR_STRING && avar->vval.v_string != nullptr) {
     buf = buflist_findname_exp(avar->vval.v_string);
-    if (buf == NULL) {
+    if (buf == nullptr) {
       // No full path name match, try a match with a URL or a "nofile"
       // buffer, these don't use the full path.
       FOR_ALL_BUFFERS(bp) {
-        if (bp->b_fname != NULL
+        if (bp->b_fname != nullptr
             && (path_with_url(bp->b_fname) || bt_nofilename(bp))
             && strcmp(bp->b_fname, avar->vval.v_string) == 0) {
           buf = bp;
@@ -76,7 +76,7 @@ static void find_win_for_curbuf(void)
   // Do check the buffer is still there.
   for (size_t i = 0; i < kv_size(curbuf->b_wininfo); i++) {
     WinInfo *wip = kv_A(curbuf->b_wininfo, i);
-    if (wip->wi_win != NULL && wip->wi_win->w_buffer == curbuf) {
+    if (wip->wi_win != nullptr && wip->wi_win->w_buffer == curbuf) {
       curwin = wip->wi_win;
       break;
     }
@@ -134,7 +134,7 @@ static void set_buffer_lines(buf_T *buf, linenr_T lnum_arg, bool append, typval_
   // setline() is used on startup.  For other buffers the buffer must be
   // loaded.
   const bool is_curbuf = buf == curbuf;
-  if (buf == NULL || (!is_curbuf && buf->b_ml.ml_mfp == NULL) || lnum < 1) {
+  if (buf == nullptr || (!is_curbuf && buf->b_ml.ml_mfp == nullptr) || lnum < 1) {
     rettv->vval.v_number = 1;  // FAIL
     return;
   }
@@ -156,12 +156,12 @@ static void set_buffer_lines(buf_T *buf, linenr_T lnum_arg, bool append, typval_
     append_lnum = curbuf->b_ml.ml_line_count;
   }
 
-  list_T *l = NULL;
-  listitem_T *li = NULL;
-  char *line = NULL;
+  list_T *l = nullptr;
+  listitem_T *li = nullptr;
+  char *line = nullptr;
   if (lines->v_type == VAR_LIST) {
     l = lines->vval.v_list;
-    if (l == NULL || tv_list_len(l) == 0) {
+    if (l == nullptr || tv_list_len(l) == 0) {
       // not appending anything always succeeds
       goto cleanup;
     }
@@ -174,7 +174,7 @@ static void set_buffer_lines(buf_T *buf, linenr_T lnum_arg, bool append, typval_
   while (true) {
     if (lines->v_type == VAR_LIST) {
       // List argument, get next string.
-      if (li == NULL) {
+      if (li == nullptr) {
         break;
       }
       xfree(line);
@@ -183,7 +183,7 @@ static void set_buffer_lines(buf_T *buf, linenr_T lnum_arg, bool append, typval_
     }
 
     rettv->vval.v_number = 1;  // FAIL
-    if (line == NULL || lnum > curbuf->b_ml.ml_line_count + 1) {
+    if (line == nullptr || lnum > curbuf->b_ml.ml_line_count + 1) {
       break;
     }
 
@@ -213,7 +213,7 @@ static void set_buffer_lines(buf_T *buf, linenr_T lnum_arg, bool append, typval_
       }
     }
 
-    if (l == NULL) {  // only one string argument
+    if (l == nullptr) {  // only one string argument
       break;
     }
     lnum++;
@@ -258,7 +258,7 @@ static void buf_set_append_line(typval_T *argvars, typval_T *rettv, bool append)
 {
   const int did_emsg_before = did_emsg;
   buf_T *const buf = tv_get_buf(&argvars[0], false);
-  if (buf == NULL) {
+  if (buf == nullptr) {
     rettv->vval.v_number = 1;  // FAIL
   } else {
     const linenr_T lnum = tv_get_lnum_buf(&argvars[1], buf);
@@ -285,7 +285,7 @@ void f_prompt_appendbuf(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
   rettv->vval.v_number = 1;
 
   buf_T *const buf = tv_get_buf_from_arg(&argvars[0]);
-  if (buf == NULL || !bt_prompt(buf)) {
+  if (buf == nullptr || !bt_prompt(buf)) {
     return;
   }
 
@@ -298,7 +298,7 @@ void f_prompt_appendbuf(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
     const char *text = (lnum > 0) ? (const char *)ml_get_buf(buf, lnum) : "";
     if (lines->v_type == VAR_LIST) {
       list_T *l = lines->vval.v_list;
-      if (l != NULL && tv_list_len(l) > 0) {
+      if (l != nullptr && tv_list_len(l) > 0) {
         listitem_T *li = tv_list_first(l);
         const char *str = tv_get_string(&li->li_tv);
         char *new_str = concat_str(text, str);
@@ -339,7 +339,7 @@ void f_prompt_appendbuf(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
     buf->b_prompt_append_new_line = false;
     if (lines->v_type == VAR_LIST) {
       list_T *l = lines->vval.v_list;
-      if (l != NULL && tv_list_len(l) > 0) {
+      if (l != nullptr && tv_list_len(l) > 0) {
         listitem_T *li = tv_list_last(l);
         const char *str = tv_get_string(&li->li_tv);
         size_t len = strlen(str);
@@ -365,13 +365,13 @@ void f_bufadd(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
 {
   char *name = (char *)tv_get_string(&argvars[0]);
 
-  rettv->vval.v_number = buflist_add(*name == NUL ? NULL : name, 0);
+  rettv->vval.v_number = buflist_add(*name == NUL ? nullptr : name, 0);
 }
 
 /// "bufexists(expr)" function
 void f_bufexists(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
 {
-  rettv->vval.v_number = (find_buffer(&argvars[0]) != NULL);
+  rettv->vval.v_number = (find_buffer(&argvars[0]) != nullptr);
 }
 
 /// "buflisted(expr)" function
@@ -380,7 +380,7 @@ void f_buflisted(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
   buf_T *buf;
 
   buf = find_buffer(&argvars[0]);
-  rettv->vval.v_number = (buf != NULL && buf->b_p_bl);
+  rettv->vval.v_number = (buf != nullptr && buf->b_p_bl);
 }
 
 /// "bufload(expr)" function
@@ -388,7 +388,7 @@ void f_bufload(typval_T *argvars, typval_T *unused, EvalFuncData fptr)
 {
   buf_T *buf = get_buf_arg(&argvars[0]);
 
-  if (buf != NULL) {
+  if (buf != nullptr) {
     if (swap_exists_action != SEA_READONLY) {
       swap_exists_action = SEA_NONE;
     }
@@ -402,7 +402,7 @@ void f_bufloaded(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
   buf_T *buf;
 
   buf = find_buffer(&argvars[0]);
-  rettv->vval.v_number = (buf != NULL && buf->b_ml.ml_mfp != NULL);
+  rettv->vval.v_number = (buf != nullptr && buf->b_ml.ml_mfp != nullptr);
 }
 
 /// "bufname(expr)" function
@@ -410,13 +410,13 @@ void f_bufname(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
 {
   const buf_T *buf;
   rettv->v_type = VAR_STRING;
-  rettv->vval.v_string = NULL;
+  rettv->vval.v_string = nullptr;
   if (argvars[0].v_type == VAR_UNKNOWN) {
     buf = curbuf;
   } else {
     buf = tv_get_buf_from_arg(&argvars[0]);
   }
-  if (buf != NULL && buf->b_fname != NULL) {
+  if (buf != nullptr && buf->b_fname != nullptr) {
     rettv->vval.v_string = xstrdup(buf->b_fname);
   }
 }
@@ -446,15 +446,15 @@ void f_bufnr(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
   // If the buffer isn't found and the second argument is not zero create a
   // new buffer.
   const char *name;
-  if (buf == NULL
+  if (buf == nullptr
       && argvars[1].v_type != VAR_UNKNOWN
       && tv_get_number_chk(&argvars[1], &error) != 0
       && !error
-      && (name = tv_get_string_chk(&argvars[0])) != NULL) {
-    buf = buflist_new((char *)name, NULL, 1, 0);
+      && (name = tv_get_string_chk(&argvars[0])) != nullptr) {
+    buf = buflist_new((char *)name, nullptr, 1, 0);
   }
 
-  if (buf != NULL) {
+  if (buf != nullptr) {
     rettv->vval.v_number = buf->b_fnum;
   }
 }
@@ -462,7 +462,7 @@ void f_bufnr(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
 static void buf_win_common(typval_T *argvars, typval_T *rettv, bool get_nr)
 {
   const buf_T *const buf = tv_get_buf_from_arg(&argvars[0]);
-  if (buf == NULL) {  // no need to search if invalid arg or buffer not found
+  if (buf == nullptr) {  // no need to search if invalid arg or buffer not found
     rettv->vval.v_number = -1;
     return;
   }
@@ -499,7 +499,7 @@ void f_deletebufline(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
   const int did_emsg_before = did_emsg;
   rettv->vval.v_number = 1;   // FAIL by default
   buf_T *const buf = tv_get_buf(&argvars[0], false);
-  if (buf == NULL) {
+  if (buf == nullptr) {
     return;
   }
 
@@ -514,7 +514,7 @@ void f_deletebufline(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
     last = first;
   }
 
-  if (buf->b_ml.ml_mfp == NULL || first < 1
+  if (buf->b_ml.ml_mfp == nullptr || first < 1
       || first > buf->b_ml.ml_line_count || last < first) {
     return;
   }
@@ -575,15 +575,15 @@ static dict_T *get_buffer_info(buf_T *buf)
   dict_T *const dict = tv_dict_alloc();
 
   tv_dict_add_nr(dict, S_LEN("bufnr"), buf->b_fnum);
-  tv_dict_add_str(dict, S_LEN("name"), buf->b_ffname != NULL ? buf->b_ffname : "");
+  tv_dict_add_str(dict, S_LEN("name"), buf->b_ffname != nullptr ? buf->b_ffname : "");
   tv_dict_add_nr(dict, S_LEN("lnum"),
                  buf == curbuf ? curwin->w_cursor.lnum : buflist_findlnum(buf));
   tv_dict_add_nr(dict, S_LEN("linecount"), buf->b_ml.ml_line_count);
-  tv_dict_add_nr(dict, S_LEN("loaded"), buf->b_ml.ml_mfp != NULL);
+  tv_dict_add_nr(dict, S_LEN("loaded"), buf->b_ml.ml_mfp != nullptr);
   tv_dict_add_nr(dict, S_LEN("listed"), buf->b_p_bl);
   tv_dict_add_nr(dict, S_LEN("changed"), bufIsChanged(buf));
   tv_dict_add_nr(dict, S_LEN("changedtick"), buf_get_changedtick(buf));
-  tv_dict_add_nr(dict, S_LEN("hidden"), buf->b_ml.ml_mfp != NULL && buf->b_nwindows == 0);
+  tv_dict_add_nr(dict, S_LEN("hidden"), buf->b_ml.ml_mfp != nullptr && buf->b_nwindows == 0);
   tv_dict_add_nr(dict, S_LEN("command"), bt_cmdwin(buf));
 
   // Get a reference to buffer variables
@@ -611,7 +611,7 @@ static dict_T *get_buffer_info(buf_T *buf)
 /// "getbufinfo()" function
 void f_getbufinfo(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
 {
-  buf_T *argbuf = NULL;
+  buf_T *argbuf = nullptr;
   bool filtered = false;
   bool sel_buflisted = false;
   bool sel_bufloaded = false;
@@ -623,39 +623,39 @@ void f_getbufinfo(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
   if (argvars[0].v_type == VAR_DICT) {
     dict_T *sel_d = argvars[0].vval.v_dict;
 
-    if (sel_d != NULL) {
+    if (sel_d != nullptr) {
       dictitem_T *di;
 
       filtered = true;
 
       di = tv_dict_find(sel_d, S_LEN("buflisted"));
-      if (di != NULL && tv_get_number(&di->di_tv)) {
+      if (di != nullptr && tv_get_number(&di->di_tv)) {
         sel_buflisted = true;
       }
 
       di = tv_dict_find(sel_d, S_LEN("bufloaded"));
-      if (di != NULL && tv_get_number(&di->di_tv)) {
+      if (di != nullptr && tv_get_number(&di->di_tv)) {
         sel_bufloaded = true;
       }
       di = tv_dict_find(sel_d, S_LEN("bufmodified"));
-      if (di != NULL && tv_get_number(&di->di_tv)) {
+      if (di != nullptr && tv_get_number(&di->di_tv)) {
         sel_bufmodified = true;
       }
     }
   } else if (argvars[0].v_type != VAR_UNKNOWN) {
     // Information about one buffer.  Argument specifies the buffer
     argbuf = tv_get_buf_from_arg(&argvars[0]);
-    if (argbuf == NULL) {
+    if (argbuf == nullptr) {
       return;
     }
   }
 
   // Return information about all the buffers or a specified buffer
   FOR_ALL_BUFFERS(buf) {
-    if (argbuf != NULL && argbuf != buf) {
+    if (argbuf != nullptr && argbuf != buf) {
       continue;
     }
-    if (filtered && ((sel_bufloaded && buf->b_ml.ml_mfp == NULL)
+    if (filtered && ((sel_bufloaded && buf->b_ml.ml_mfp == nullptr)
                      || (sel_buflisted && !buf->b_p_bl)
                      || (sel_bufmodified && !buf->b_changed))) {
       continue;
@@ -663,7 +663,7 @@ void f_getbufinfo(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
 
     dict_T *const d = get_buffer_info(buf);
     tv_list_append_dict(rettv->vval.v_list, d);
-    if (argbuf != NULL) {
+    if (argbuf != nullptr) {
       return;
     }
   }
@@ -679,9 +679,9 @@ static void get_buffer_lines(buf_T *buf, linenr_T start, linenr_T end, bool retl
                              typval_T *rettv)
 {
   rettv->v_type = (retlist ? VAR_LIST : VAR_STRING);
-  rettv->vval.v_string = NULL;
+  rettv->vval.v_string = nullptr;
 
-  if (buf == NULL || buf->b_ml.ml_mfp == NULL || start < 0 || end < start) {
+  if (buf == nullptr || buf->b_ml.ml_mfp == nullptr || start < 0 || end < start) {
     if (retlist) {
       tv_list_alloc_ret(rettv, 0);
     }
@@ -706,7 +706,7 @@ static void get_buffer_lines(buf_T *buf, linenr_T start, linenr_T end, bool retl
     rettv->vval.v_string =
       start >= 1 && start <= buf->b_ml.ml_line_count
       ? xstrnsave(ml_get_buf(buf, start), (size_t)ml_get_buf_len(buf, start))
-      : NULL;
+      : nullptr;
   }
 }
 
@@ -718,7 +718,7 @@ static void getbufline(typval_T *argvars, typval_T *rettv, bool retlist)
   linenr_T end = 1;
   const int did_emsg_before = did_emsg;
   buf_T *const buf = tv_get_buf_from_arg(&argvars[0]);
-  if (buf != NULL) {
+  if (buf != nullptr) {
     lnum = tv_get_lnum_buf(&argvars[1], buf);
     if (did_emsg > did_emsg_before) {
       return;
@@ -813,7 +813,7 @@ void f_prompt_setcallback(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
     return;
   }
   buf_T *buf = tv_get_buf(&argvars[0], false);
-  if (buf == NULL) {
+  if (buf == nullptr) {
     return;
   }
 
@@ -834,7 +834,7 @@ void f_prompt_setinterrupt(typval_T *argvars, typval_T *rettv, EvalFuncData fptr
     return;
   }
   buf_T *buf = tv_get_buf(&argvars[0], false);
-  if (buf == NULL) {
+  if (buf == nullptr) {
     return;
   }
 
@@ -853,7 +853,7 @@ void f_prompt_setprompt(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
     return;
   }
   buf_T *buf = tv_get_buf(&argvars[0], false);
-  if (buf == NULL) {
+  if (buf == nullptr) {
     return;
   }
 
@@ -862,7 +862,7 @@ void f_prompt_setprompt(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
 
   // Update the prompt-text and prompt-marks if a plugin calls prompt_setprompt()
   // even while user is editing their input.
-  if (bt_prompt(buf) && buf->b_ml.ml_mfp != NULL) {
+  if (bt_prompt(buf) && buf->b_ml.ml_mfp != nullptr) {
     // In case the mark is set to a nonexistent line.
     if (buf->b_prompt_start.mark.lnum < 1
         || buf->b_prompt_start.mark.lnum > curbuf->b_ml.ml_line_count) {

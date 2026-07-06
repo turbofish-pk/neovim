@@ -110,7 +110,7 @@ int autowrite(buf_T *buf, bool forceit)
   if (!(p_aw || p_awa) || !p_write
       // never autowrite a "nofile" or "nowrite" buffer
       || bt_dontwrite(buf)
-      || (!forceit && buf->b_p_ro) || buf->b_ffname == NULL) {
+      || (!forceit && buf->b_p_ro) || buf->b_ffname == nullptr) {
     return FAIL;
   }
   set_bufref(&bufref, buf);
@@ -161,7 +161,7 @@ bool check_changed(buf_T *buf, int flags)
 
       if (flags & CCGD_ALLBUF) {
         FOR_ALL_BUFFERS(buf2) {
-          if (bufIsChanged(buf2) && (buf2->b_ffname != NULL)) {
+          if (bufIsChanged(buf2) && (buf2->b_ffname != nullptr)) {
             count++;
           }
         }
@@ -206,13 +206,13 @@ void dialog_changed(buf_T *buf, bool checkall)
   const char *fname = buf->b_fname ? buf->b_fname : _("Untitled");
   snprintf(buff, sizeof buff, _("Save changes to \"%s\"?"), fname);
   if (checkall) {
-    ret = vim_dialog_yesnoallcancel(VIM_QUESTION, NULL, buff, 1);
+    ret = vim_dialog_yesnoallcancel(VIM_QUESTION, nullptr, buff, 1);
   } else {
-    ret = vim_dialog_yesnocancel(VIM_QUESTION, NULL, buff, 1);
+    ret = vim_dialog_yesnocancel(VIM_QUESTION, nullptr, buff, 1);
   }
 
   if (ret == VIM_YES) {
-    bool empty_bufname = buf->b_fname == NULL;
+    bool empty_bufname = buf->b_fname == nullptr;
     if (empty_bufname) {
       buf_set_name(buf->b_fnum, "Untitled");
     }
@@ -226,7 +226,7 @@ void dialog_changed(buf_T *buf, bool checkall)
 
     // restore to empty when write failed or was cancelled
     if (empty_bufname) {
-      buf->b_fname = NULL;
+      buf->b_fname = nullptr;
       XFREE_CLEAR(buf->b_ffname);
       XFREE_CLEAR(buf->b_sfname);
     }
@@ -237,11 +237,11 @@ void dialog_changed(buf_T *buf, bool checkall)
     // Skip readonly buffers, these need to be confirmed
     // individually.
     FOR_ALL_BUFFERS(buf2) {
-      if (bufIsChanged(buf2) && (buf2->b_ffname != NULL) && !buf2->b_p_ro) {
+      if (bufIsChanged(buf2) && (buf2->b_ffname != nullptr) && !buf2->b_p_ro) {
         bufref_T bufref;
         set_bufref(&bufref, buf2);
 
-        if (buf2->b_fname != NULL
+        if (buf2->b_fname != nullptr
             && check_overwrite(&ea, buf2, buf2->b_fname, buf2->b_ffname, false) == OK) {
           // didn't hit Cancel
           buf_write_all(buf2, false);
@@ -269,9 +269,9 @@ bool dialog_close_terminal(buf_T *buf)
   char buff[DIALOG_MSG_SIZE];
 
   snprintf(buff, sizeof buff, _("Close \"%s\"?"),
-           (buf->b_fname != NULL) ? buf->b_fname : "?");
+           (buf->b_fname != nullptr) ? buf->b_fname : "?");
 
-  int ret = vim_dialog_yesnocancel(VIM_QUESTION, NULL, buff, 1);
+  int ret = vim_dialog_yesnocancel(VIM_QUESTION, nullptr, buff, 1);
 
   return ret == VIM_YES;
 }
@@ -350,10 +350,10 @@ bool check_changed_any(bool hidden, bool unload)
     add_bufnum(bufnrs, &bufnum, buf->b_fnum);
   }
 
-  buf_T *buf = NULL;
+  buf_T *buf = nullptr;
   for (i = 0; i < bufnum; i++) {
     buf = buflist_findnr(bufnrs[i]);
-    if (buf == NULL) {
+    if (buf == nullptr) {
       continue;
     }
     if ((!hidden || buf->b_nwindows == 0) && bufIsChanged(buf)) {
@@ -391,7 +391,7 @@ bool check_changed_any(bool hidden, bool unload)
     if (((buf->terminal && channel_job_running((uint64_t)buf->b_p_channel))
          ? semsg(_("E947: Job still running in buffer \"%s\""), buf->b_fname)
          : semsg(_("E162: No write since last change for buffer \"%s\""),
-                 buf_spname(buf) != NULL ? buf_spname(buf) : buf->b_fname))
+                 buf_spname(buf) != nullptr ? buf_spname(buf) : buf->b_fname))
         // Only makes sense if error is shown, which cause_errthrow() may prevent.
         && msg_didany) {
       int save = no_wait_return;
@@ -432,7 +432,7 @@ theend:
 ///          Give error message for FAIL.
 int check_fname(void)
 {
-  if (curbuf->b_ffname == NULL) {
+  if (curbuf->b_ffname == nullptr) {
     emsg(_(e_noname));
     return FAIL;
   }
@@ -447,7 +447,7 @@ int buf_write_all(buf_T *buf, bool forceit)
   buf_T *old_curbuf = curbuf;
 
   int retval = (buf_write(buf, buf->b_ffname, buf->b_fname,
-                          1, buf->b_ml.ml_line_count, NULL,
+                          1, buf->b_ml.ml_line_count, nullptr,
                           false, forceit, true, false));
   if (curbuf != old_curbuf) {
     msg_source(HLF_W);
@@ -486,7 +486,7 @@ void ex_listdo(exarg_T *eap)
     }
   }
 
-  char *save_ei = NULL;
+  char *save_ei = nullptr;
 
   // Temporarily override SHM_OVER and SHM_OVERALL to avoid that file
   // message overwrites output from the command.
@@ -515,12 +515,12 @@ void ex_listdo(exarg_T *eap)
     tabpage_T *tp = first_tabpage;
     switch (eap->cmdidx) {
     case CMD_windo:
-      for (; wp != NULL && i + 1 < eap->line1; wp = wp->w_next) {
+      for (; wp != nullptr && i + 1 < eap->line1; wp = wp->w_next) {
         i++;
       }
       break;
     case CMD_tabdo:
-      for (; tp != NULL && i + 1 < eap->line1; tp = tp->tp_next) {
+      for (; tp != nullptr && i + 1 < eap->line1; tp = tp->tp_next) {
         i++;
       }
       break;
@@ -538,14 +538,14 @@ void ex_listdo(exarg_T *eap)
     if (eap->cmdidx == CMD_bufdo) {
       // Advance to the first listed buffer after "eap->line1".
       for (buf = firstbuf;
-           buf != NULL && (buf->b_fnum < eap->line1 || !buf->b_p_bl);
+           buf != nullptr && (buf->b_fnum < eap->line1 || !buf->b_p_bl);
            buf = buf->b_next) {
         if (buf->b_fnum > eap->line2) {
-          buf = NULL;
+          buf = nullptr;
           break;
         }
       }
-      if (buf != NULL) {
+      if (buf != nullptr) {
         goto_buffer(eap, DOBUF_FIRST, FORWARD, buf->b_fnum);
       }
     } else if (eap->cmdidx == CMD_cdo || eap->cmdidx == CMD_ldo
@@ -553,7 +553,7 @@ void ex_listdo(exarg_T *eap)
       qf_size = qf_get_valid_size(eap);
       assert(eap->line1 >= 0);
       if (qf_size == 0 || (size_t)eap->line1 > qf_size) {
-        buf = NULL;
+        buf = nullptr;
       } else {
         ex_cc(eap);
 
@@ -570,7 +570,7 @@ void ex_listdo(exarg_T *eap)
     }
     listcmd_busy = true;            // avoids setting pcmark below
 
-    while (!got_int && buf != NULL) {
+    while (!got_int && buf != nullptr) {
       bool execute = true;
       if (eap->cmdidx == CMD_argdo) {
         // go to argument "i"
@@ -613,7 +613,7 @@ void ex_listdo(exarg_T *eap)
         // Remember the number of the next listed buffer, in case
         // ":bwipe" is used or autocommands do something strange.
         next_fnum = -1;
-        for (buf_T *bp = curbuf->b_next; bp != NULL; bp = bp->b_next) {
+        for (buf_T *bp = curbuf->b_next; bp != nullptr; bp = bp->b_next) {
           if (bp->b_p_bl) {
             next_fnum = bp->b_fnum;
             break;
@@ -691,13 +691,13 @@ void ex_listdo(exarg_T *eap)
   }
 
   msg_listdo_overwrite--;
-  if (save_ei != NULL) {
+  if (save_ei != nullptr) {
     buf_T *bnext;
     aco_save_T aco = { 0 };
 
     au_event_restore(save_ei);
 
-    for (buf_T *buf = firstbuf; buf != NULL; buf = bnext) {
+    for (buf_T *buf = firstbuf; buf != nullptr; buf = bnext) {
       bnext = buf->b_next;
       if (buf->b_nwindows > 0 && (buf->b_flags & BF_SYN_SET)) {
         buf->b_flags &= ~BF_SYN_SET;
@@ -723,7 +723,7 @@ void ex_listdo(exarg_T *eap)
 /// ":compiler[!] {name}"
 void ex_compiler(exarg_T *eap)
 {
-  char *old_cur_comp = NULL;
+  char *old_cur_comp = nullptr;
 
   if (*eap->arg == NUL) {
     // List all compiler scripts.
@@ -746,7 +746,7 @@ void ex_compiler(exarg_T *eap)
     // "b:current_compiler" and restore "current_compiler".
     // Explicitly prepend "g:" to make it work in a function.
     old_cur_comp = get_var_value("g:current_compiler");
-    if (old_cur_comp != NULL) {
+    if (old_cur_comp != nullptr) {
       old_cur_comp = xstrdup(old_cur_comp);
     }
     do_cmdline_cmd("command -nargs=* -keepscript CompilerSet setlocal <args>");
@@ -764,13 +764,13 @@ void ex_compiler(exarg_T *eap)
 
   // Set "b:current_compiler" from "current_compiler".
   char *p = get_var_value("g:current_compiler");
-  if (p != NULL) {
+  if (p != nullptr) {
     set_internal_string_var("b:current_compiler", p);
   }
 
   // Restore "current_compiler" for ":compiler {name}".
   if (!eap->forceit) {
-    if (old_cur_comp != NULL) {
+    if (old_cur_comp != nullptr) {
       set_internal_string_var("g:current_compiler", old_cur_comp);
       xfree(old_cur_comp);
     } else {
@@ -789,7 +789,7 @@ void ex_checktime(exarg_T *eap)
     check_timestamps(false);
   } else {
     buf_T *buf = buflist_findnr((int)eap->line2);
-    if (buf != NULL) {           // cannot happen?
+    if (buf != nullptr) {           // cannot happen?
       buf_check_timestamp(buf);
     }
   }
@@ -801,7 +801,7 @@ static void script_host_execute(char *name, exarg_T *eap)
   size_t len;
   char *const script = script_get(eap, &len);
 
-  if (script != NULL) {
+  if (script != nullptr) {
     list_T *const args = tv_list_alloc(3);
     // script
     tv_list_append_allocated_string(args, script);
@@ -895,9 +895,9 @@ void ex_drop(exarg_T *eap)
       // execute [+cmd]
       if (eap->do_ecmd_cmd) {
         bool did_set_swapcommand = set_swapcommand(eap->do_ecmd_cmd, 0);
-        do_cmdline(eap->do_ecmd_cmd, NULL, NULL, DOCMD_VERBOSE);
+        do_cmdline(eap->do_ecmd_cmd, nullptr, nullptr, DOCMD_VERBOSE);
         if (did_set_swapcommand) {
-          set_vim_var_string(VV_SWAPCOMMAND, NULL, -1);
+          set_vim_var_string(VV_SWAPCOMMAND, nullptr, -1);
         }
       }
 

@@ -50,7 +50,7 @@
 #ifdef MSWIN
 static bool os_proc_tree_kill_rec(void *proc, int sig)
 {
-  if (proc == NULL) {
+  if (proc == nullptr) {
     return false;
   }
   PROCESSENTRY32 pe;
@@ -66,7 +66,7 @@ static bool os_proc_tree_kill_rec(void *proc, int sig)
       do {
         if (pe.th32ParentProcessID == pid) {
           HANDLE ph = OpenProcess(PROCESS_ALL_ACCESS, false, pe.th32ProcessID);
-          if (ph != NULL) {
+          if (ph != nullptr) {
             os_proc_tree_kill_rec(ph, sig);
             CloseHandle(ph);
           }
@@ -120,8 +120,8 @@ int os_proc_children(int ppid, int **proc_list, size_t *proc_count)
     return 2;
   }
 
-  int *temp = NULL;
-  *proc_list = NULL;
+  int *temp = nullptr;
+  *proc_list = nullptr;
   *proc_count = 0;
 
 #ifdef MSWIN
@@ -170,7 +170,7 @@ int os_proc_children(int ppid, int **proc_list, size_t *proc_count)
 
   // Get total process count.
   size_t len = 0;
-  int rv = sysctl(name, ARRAY_SIZE(name) - 1, NULL, &len, NULL, 0);
+  int rv = sysctl(name, ARRAY_SIZE(name) - 1, nullptr, &len, nullptr, 0);
   if (rv) {
     return 2;
   }
@@ -181,7 +181,7 @@ int os_proc_children(int ppid, int **proc_list, size_t *proc_count)
 # else
   struct kinfo_proc *p_list = xmalloc(len);
 # endif
-  rv = sysctl(name, ARRAY_SIZE(name) - 1, p_list, &len, NULL, 0);
+  rv = sysctl(name, ARRAY_SIZE(name) - 1, p_list, &len, nullptr, 0);
   if (rv) {
     xfree(p_list);
     return 2;
@@ -209,7 +209,7 @@ int os_proc_children(int ppid, int **proc_list, size_t *proc_count)
   // Rationale: children are defined in thread with same ID of process.
   snprintf(proc_p, sizeof(proc_p), "/proc/%d/task/%d/children", ppid, ppid);
   FILE *fp = fopen(proc_p, "r");
-  if (fp == NULL) {
+  if (fp == nullptr) {
     return 2;  // Process not found, or /proc/…/children not supported.
   }
   int match_pid;

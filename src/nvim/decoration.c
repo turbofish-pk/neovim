@@ -37,7 +37,7 @@ static uint32_t decor_freelist = UINT32_MAX;
 // Decorations might be requested to be deleted in a callback in the middle of redrawing.
 // In this case, there might still be live references to the memory allocated for the decoration.
 // Keep a "to free" list which can be safely processed when redrawing is done.
-static DecorVirtText *to_free_virt = NULL;
+static DecorVirtText *to_free_virt = nullptr;
 static uint32_t to_free_sh = UINT32_MAX;
 
 /// Add highlighting to a buffer, bounded by two cursor positions,
@@ -85,9 +85,9 @@ void bufhl_add_hl_pos_offset(buf_T *buf, int src_id, int hl_id, lpos_T pos_start
       hl_end = pos_end.col + offset;
     }
 
-    extmark_set(buf, (uint32_t)src_id, NULL,
+    extmark_set(buf, (uint32_t)src_id, nullptr,
                 (int)lnum - 1, hl_start, (int)lnum - 1 + end_off, hl_end,
-                decor, MT_FLAG_DECOR_HL, true, false, true, false, NULL);
+                decor, MT_FLAG_DECOR_HL, true, false, true, false, nullptr);
   }
 }
 
@@ -120,7 +120,7 @@ void decor_redraw(buf_T *buf, int row1, int row2, int col1, DecorInline decor)
 
 void decor_redraw_sh(buf_T *buf, int row1, int row2, DecorSignHighlight sh)
 {
-  if (sh.hl_id || (sh.url != NULL)
+  if (sh.hl_id || (sh.url != nullptr)
       || (sh.flags & (kSHIsSign | kSHSpellOn | kSHSpellOff | kSHConceal | kSHConcealOff))) {
     if (row2 >= row1) {
       redraw_buf_range_later(buf, row1 + 1, row2 + 1);
@@ -262,7 +262,7 @@ void decor_free(DecorInline decor)
 
   if (decor_state.running_decor_provider) {
     while (vt) {
-      if (vt->next == NULL) {
+      if (vt->next == nullptr) {
         vt->next = to_free_virt;
         to_free_virt = decor.data.ext.vt;
         break;
@@ -304,7 +304,7 @@ static void decor_free_inner(DecorVirtText *vt, uint32_t first_idx)
       XFREE_CLEAR(sh->sign_name);
     }
     sh->flags = 0;
-    if (sh->url != NULL) {
+    if (sh->url != nullptr) {
       XFREE_CLEAR(sh->url);
     }
     if (sh->next == DECOR_ID_INVALID) {
@@ -331,9 +331,9 @@ void decor_check_to_be_deleted(void)
 {
   assert(!decor_state.running_decor_provider);
   decor_free_inner(to_free_virt, to_free_sh);
-  to_free_virt = NULL;
+  to_free_virt = nullptr;
   to_free_sh = DECOR_ID_INVALID;
-  decor_state.win = NULL;
+  decor_state.win = nullptr;
 }
 
 void decor_state_free(DecorState *state)
@@ -379,11 +379,11 @@ void decor_check_invalid_glyphs(void)
 /// @param[in,out] pos   Position in the virtual text item
 /// @param[in,out] attr  Highlight attribute
 ///
-/// @return  The text of the chunk, or NULL if there are no more chunks
+/// @return  The text of the chunk, or nullptr if there are no more chunks
 char *next_virt_text_chunk(VirtText vt, size_t *pos, int *attr)
 {
-  char *text = NULL;
-  for (; text == NULL && *pos < kv_size(vt); (*pos)++) {
+  char *text = nullptr;
+  for (; text == nullptr && *pos < kv_size(vt); (*pos)++) {
     text = kv_A(vt, *pos).text;
     int hl_id = kv_A(vt, *pos).hl_id;
     if (hl_id >= 0) {
@@ -417,7 +417,7 @@ DecorVirtText *decor_find_virttext(buf_T *buf, int row, uint64_t ns_id)
 next_mark:
     marktree_itr_next(buf->b_marktree, itr);
   }
-  return NULL;
+  return nullptr;
 }
 
 bool decor_redraw_reset(win_T *wp, DecorState *state)
@@ -645,7 +645,7 @@ void decor_range_add_sh(DecorState *state, int start_row, int start_col, int end
     .draw_col = -10,
   };
 
-  if (sh->hl_id || (sh->url != NULL)
+  if (sh->hl_id || (sh->url != nullptr)
       || (sh->flags & (kSHConcealOff | kSHConceal | kSHSpellOn | kSHSpellOff))) {
     if (sh->hl_id) {
       range.attr_id = syn_id2attr(sh->hl_id);
@@ -665,7 +665,7 @@ void decor_range_add_sh(DecorState *state, int start_row, int start_col, int end
 /// Initialize the draw_col of a newly-added virtual text item.
 void decor_init_draw_col(int win_col, bool hidden, DecorRange *item)
 {
-  DecorVirtText *vt = item->kind == kDecorKindVirtText ? item->data.vt : NULL;
+  DecorVirtText *vt = item->kind == kDecorKindVirtText ? item->data.vt : nullptr;
   VirtTextPos pos = decor_virt_pos_kind(item);
   if (win_col < 0 && pos != kVPosInline) {
     item->draw_col = win_col;
@@ -712,7 +712,7 @@ int decor_redraw_col_impl(win_T *wp, int col, int win_col, bool hidden, DecorSta
       goto next_mark;
     }
 
-    MTPos endpos = marktree_get_altpos(buf->b_marktree, mark, NULL);
+    MTPos endpos = marktree_get_altpos(buf->b_marktree, mark, nullptr);
     decor_range_add_from_inline(state, mark.pos.row, mark.pos.col, endpos.row, endpos.col,
                                 mt_decor(mark), false, mark.ns, mark.id);
 
@@ -812,7 +812,7 @@ next_mark:
         } else if (r->data.sh.flags & kSHSpellOff) {
           spell = kFalse;
         }
-        if (r->data.sh.url != NULL) {
+        if (r->data.sh.url != nullptr) {
           attr = hl_add_url(attr, r->data.sh.url);
         }
       }
@@ -993,13 +993,13 @@ void decor_redraw_signs(win_T *wp, buf_T *buf, int row, SignTextAttrs sattrs[], 
         memcpy(sattrs[idx].text, sh->text, SIGN_WIDTH * sizeof(sattr_T));
         sattrs[idx++].hl_id = sh->hl_id;
       }
-      if (num_id != NULL && *num_id <= 0) {
+      if (num_id != nullptr && *num_id <= 0) {
         *num_id = sh->number_hl_id;
       }
-      if (line_id != NULL && *line_id <= 0) {
+      if (line_id != nullptr && *line_id <= 0) {
         *line_id = sh->line_hl_id;
       }
-      if (cul_id != NULL && *cul_id <= 0) {
+      if (cul_id != nullptr && *cul_id <= 0) {
         *cul_id = sh->cursorline_hl_id;
       }
     }
@@ -1010,12 +1010,12 @@ void decor_redraw_signs(win_T *wp, buf_T *buf, int row, SignTextAttrs sattrs[], 
 DecorSignHighlight *decor_find_sign(DecorInline decor)
 {
   if (!decor.ext) {
-    return NULL;
+    return nullptr;
   }
   uint32_t decor_id = decor.data.ext.sh_idx;
   while (true) {
     if (decor_id == DECOR_ID_INVALID) {
-      return NULL;
+      return nullptr;
     }
     DecorSignHighlight *sh = &kv_A(decor_items, decor_id);
     if (sh->flags & kSHIsSign) {
@@ -1063,7 +1063,7 @@ void buf_signcols_count_range(buf_T *buf, int row1, int row2, int add, TriState 
     }
     if ((mark.flags & MT_FLAG_DECOR_SIGNTEXT) && !mt_invalid(mark) && !mt_end(mark)) {
       // Increment count array for the range of a paired sign mark.
-      MTPos end = marktree_get_altpos(buf->b_marktree, mark, NULL);
+      MTPos end = marktree_get_altpos(buf->b_marktree, mark, nullptr);
       for (int i = mark.pos.row; i <= MIN(row2, end.row); i++) {
         count[i - row1]++;
       }
@@ -1098,7 +1098,7 @@ void buf_signcols_count_range(buf_T *buf, int row1, int row2, int add, TriState 
 
 void decor_redraw_end(DecorState *state)
 {
-  state->win = NULL;
+  state->win = nullptr;
 }
 
 bool decor_redraw_eol(win_T *wp, DecorState *state, int *eol_attr, int eol_col)
@@ -1129,16 +1129,16 @@ static inline bool decor_virt_line_wrap(win_T *wp, VirtLineOverflow overflow)
   return overflow == kVLOverflowWrap || (overflow == kVLOverflowAuto && wp->w_p_wrap);
 }
 
-/// Counts the number of rows occupied by a virtual line. When skip_cells is non-NULL, sets it to
+/// Counts the number of rows occupied by a virtual line. When skip_cells is non-nullptr, sets it to
 /// the cell offset where target_row begins.
 ///
 /// @param target_row Row relative to the virtual line that skip_cells is computed for.
-/// @param skip_cells Cell offset for the target_row. Pass NULL when only the row count is needed.
+/// @param skip_cells Cell offset for the target_row. Pass nullptr when only the row count is needed.
 ///
 /// @return Number of rows occupied by the virtual line.
 int decor_virt_line_rows(win_T *wp, const struct virt_line *vl, int target_row, int *skip_cells)
 {
-  if (skip_cells != NULL) {
+  if (skip_cells != nullptr) {
     *skip_cells = 0;
   }
   if (!decor_virt_line_wrap(wp, vl->overflow)) {
@@ -1155,7 +1155,7 @@ int decor_virt_line_rows(win_T *wp, const struct virt_line *vl, int target_row, 
   int row = 0;
   for (int i = 0; i < (int)kv_size(vt); i++) {
     const char *virt_str = kv_A(vt, i).text;
-    if (virt_str == NULL) {
+    if (virt_str == nullptr) {
       continue;
     }
     while (*virt_str != NUL) {
@@ -1169,7 +1169,7 @@ int decor_virt_line_rows(win_T *wp, const struct virt_line *vl, int target_row, 
       // to protect against double width cell chars being split at the boundary
       if (row_cells + cells > row_width) {
         row++;
-        if (skip_cells != NULL && row == target_row) {
+        if (skip_cells != nullptr && row == target_row) {
           *skip_cells = vcol;
         }
         row_cells = 0;
@@ -1214,14 +1214,14 @@ int decor_virt_lines(win_T *wp, int start_row, int end_row, int *num_below, Virt
           int mrow = mark.pos.row;
           int draw_row = mrow + (above ? 0 : 1);
           if (draw_row >= start_row && draw_row < end_row
-              && (!apply_folds || !(hasFolding(wp, mrow + 1, NULL, NULL)
+              && (!apply_folds || !(hasFolding(wp, mrow + 1, nullptr, nullptr)
                                     || decor_conceal_line(wp, mrow, false)))) {
             // All virtual lines from the same extmark have the same overflow flag.
             if (decor_virt_line_wrap(wp, kv_A(virt_lines, 0).overflow)) {
               // Iterates over each virtual line summing number of rows.
               // Rows belonging to previous line are accumulated in num_below.
               for (int i = 0; i < (int)kv_size(virt_lines); i++) {
-                int rows = decor_virt_line_rows(wp, &kv_A(virt_lines, i), 0, NULL);
+                int rows = decor_virt_line_rows(wp, &kv_A(virt_lines, i), 0, nullptr);
                 n_virt_lines += rows;
                 if (num_below && !above) {
                   (*num_below) += rows;
@@ -1258,8 +1258,8 @@ void decor_to_dict_legacy(Dict *dict, DecorInline decor, bool hl_name, Arena *ar
 {
   DecorSignHighlight sh_hl = DECOR_SIGN_HIGHLIGHT_INIT;
   DecorSignHighlight sh_sign = DECOR_SIGN_HIGHLIGHT_INIT;
-  DecorVirtText *virt_text = NULL;
-  DecorVirtText *virt_lines = NULL;
+  DecorVirtText *virt_text = nullptr;
+  DecorVirtText *virt_lines = nullptr;
   int32_t priority = -1;  // sentinel value which cannot actually be set
 
   if (decor.ext) {
@@ -1315,7 +1315,7 @@ void decor_to_dict_legacy(Dict *dict, DecorInline decor, bool hl_name, Arena *ar
     PUT_C(*dict, "ui_watched", BOOLEAN_OBJ(true));
   }
 
-  if (sh_hl.url != NULL) {
+  if (sh_hl.url != nullptr) {
     PUT_C(*dict, "url", STRING_OBJ(cstr_as_string(sh_hl.url)));
   }
 
@@ -1380,7 +1380,7 @@ void decor_to_dict_legacy(Dict *dict, DecorInline decor, bool hl_name, Arena *ar
       { "number_hl_group"    , sh_sign.number_hl_id     },
       { "line_hl_group"      , sh_sign.line_hl_id       },
       { "cursorline_hl_group", sh_sign.cursorline_hl_id },
-      { NULL, 0 },
+      { nullptr, 0 },
     };
 
     // uncrustify:on

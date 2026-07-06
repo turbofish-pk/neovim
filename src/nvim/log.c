@@ -45,11 +45,11 @@ static uv_mutex_t mutex;
 
 static bool log_try_create(char *fname)
 {
-  if (fname == NULL || fname[0] == NUL) {
+  if (fname == nullptr || fname[0] == NUL) {
     return false;
   }
   FILE *log_file = fopen(fname, "a");
-  if (log_file == NULL) {
+  if (log_file == nullptr) {
     return false;
   }
   fclose(log_file);
@@ -77,10 +77,10 @@ static void log_path_init(void)
     }
     // Make $XDG_STATE_HOME/logs if it does not exist.
     char *loghome = concat_fnames_realloc(get_xdg_home(kXDGStateHome), "logs", true);
-    char *failed_dir = NULL;
+    char *failed_dir = nullptr;
     int log_dir_failure = 0;
     if (!os_isdir(loghome)) {
-      log_dir_failure = os_mkdir_recurse(loghome, 0700, &failed_dir, NULL);
+      log_dir_failure = os_mkdir_recurse(loghome, 0700, &failed_dir, nullptr);
     }
     XFREE_CLEAR(loghome);
     // Invalid $NVIM_LOG_FILE or failed to expand; fall back to default.
@@ -131,7 +131,7 @@ void log_unlock(void)
 ///
 /// @param log_level  Log level (see log.h)
 /// @param context    Description of a shared context or subsystem
-/// @param func_name  Function name, or NULL
+/// @param func_name  Function name, or nullptr
 /// @param line_num   Source line number, or -1
 /// @param eol        Append linefeed "\n"
 /// @param fmt        printf-style format string
@@ -221,7 +221,7 @@ FILE *open_log_file(void)
   errno = 0;
   if (log_file_path[0]) {
     FILE *f = fopen(log_file_path, "a");
-    if (f != NULL) {
+    if (f != nullptr) {
       return f;
     }
   }
@@ -231,7 +231,7 @@ FILE *open_log_file(void)
   //  - LOG() is called before log_init()
   //  - Directory does not exist
   //  - File is not writable
-  do_log_to_file(stderr, LOGLVL_ERR, NULL, __func__, __LINE__, true,
+  do_log_to_file(stderr, LOGLVL_ERR, nullptr, __func__, __LINE__, true,
                  "failed to open $" ENV_LOGFILE " (%s): %s",
                  strerror(errno), log_file_path);
   return stderr;
@@ -260,11 +260,11 @@ void log_callstack_to_file(FILE *log_file, const char *const func_name, const in
   // Now we have a command string like:
   //    addr2line -e /path/to/exe -f -p 0x123 0x456 ...
 
-  do_log_to_file(log_file, LOGLVL_DBG, NULL, func_name, line_num, true, "trace:");
+  do_log_to_file(log_file, LOGLVL_DBG, nullptr, func_name, line_num, true, "trace:");
   FILE *fp = popen(cmdbuf, "r");
   assert(fp);
   char linebuf[IOSIZE];
-  while (fgets(linebuf, sizeof(linebuf) - 1, fp) != NULL) {
+  while (fgets(linebuf, sizeof(linebuf) - 1, fp) != nullptr) {
     fprintf(log_file, "  %s", linebuf);
   }
   pclose(fp);
@@ -314,7 +314,7 @@ static bool v_do_log_to_file(FILE *log_file, int log_level, const char *context,
 
   // Format the timestamp.
   struct tm local_time;
-  if (os_localtime(&local_time) == NULL) {
+  if (os_localtime(&local_time) == nullptr) {
     return false;
   }
   char date_time[20];
@@ -355,13 +355,13 @@ static bool v_do_log_to_file(FILE *log_file, int log_level, const char *context,
   }
 
   // Print the log message.
-  int rv = (line_num == -1 || func_name == NULL)
+  int rv = (line_num == -1 || func_name == nullptr)
            ? fprintf(log_file, "%s %s.%03d %-10s %s",
                      log_levels[log_level], date_time, millis, name,
-                     (context == NULL ? "?:" : context))
+                     (context == nullptr ? "?:" : context))
            : fprintf(log_file, "%s %s.%03d %-10s %s%s:%d: ",
                      log_levels[log_level], date_time, millis, name,
-                     (context == NULL ? "" : context),
+                     (context == nullptr ? "" : context),
                      func_name, line_num);
 
   if (rv < 0) {

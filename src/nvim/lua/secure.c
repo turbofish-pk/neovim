@@ -26,13 +26,13 @@ char *nlua_read_secure(const char *path)
   if (nlua_pcall(lstate, 1, 1)) {
     nlua_error(lstate, _("vim.secure.read: %.*s"));
     lua_settop(lstate, top);
-    return NULL;
+    return nullptr;
   }
 
   size_t len = 0;
   const char *contents = lua_tolstring(lstate, -1, &len);
-  char *buf = NULL;
-  if (contents != NULL) {
+  char *buf = nullptr;
+  if (contents != nullptr) {
     // Add one to include trailing null byte
     buf = xcalloc(len + 1, sizeof(char));
     memcpy(buf, contents, len + 1);
@@ -55,7 +55,7 @@ static bool nlua_trust(const char *action, const char *path)
   lua_pushstring(lstate, "action");
   lua_pushstring(lstate, action);
   lua_settable(lstate, -3);
-  if (path == NULL) {
+  if (path == nullptr) {
     lua_pushstring(lstate, "bufnr");
     lua_pushnumber(lstate, 0);
     lua_settable(lstate, -3);
@@ -73,7 +73,7 @@ static bool nlua_trust(const char *action, const char *path)
 
   bool success = lua_toboolean(lstate, -2);
   const char *msg = lua_tostring(lstate, -1);
-  if (msg != NULL) {
+  if (msg != nullptr) {
     if (success) {
       if (strcmp(action, "allow") == 0) {
         smsg(0, "Allowed in trust database: \"%s\"", msg);
@@ -108,7 +108,7 @@ void ex_trust(exarg_T *eap)
   }
 
   if (path[0] == NUL) {
-    path = NULL;
+    path = nullptr;
   }
 
   nlua_trust(action, path);

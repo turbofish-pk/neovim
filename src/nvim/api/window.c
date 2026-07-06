@@ -107,7 +107,7 @@ void nvim_win_set_cursor(Window win, ArrayOf(Integer, 2) pos, Error *err)
   }
 
   VALIDATE_EXP(!(pos.size != 2 || pos.items[0].type != kObjectTypeInteger
-                 || pos.items[1].type != kObjectTypeInteger), "pos", "[row, col] array", NULL, {
+                 || pos.items[1].type != kObjectTypeInteger), "pos", "[row, col] array", nullptr, {
     return;
   });
 
@@ -134,7 +134,7 @@ void nvim_win_set_cursor(Window win, ArrayOf(Integer, 2) pos, Error *err)
   // make sure cursor is in visible range and
   // cursorcolumn and cursorline are updated even if w != curwin
   switchwin_T switchwin;
-  switch_win(&switchwin, w, NULL, true);
+  switch_win(&switchwin, w, nullptr, true);
   update_topline(curwin);
   validate_cursor(curwin);
   restore_win(&switchwin, true);
@@ -210,7 +210,7 @@ void nvim_win_set_var(Window win, String name, Object value, Error *err)
     return;
   }
 
-  dict_set_var(w->w_vars, name, value, false, false, NULL, err);
+  dict_set_var(w->w_vars, name, value, false, false, nullptr, err);
 }
 
 /// Removes a window-scoped (w:) variable
@@ -227,7 +227,7 @@ void nvim_win_del_var(Window win, String name, Error *err)
     return;
   }
 
-  dict_set_var(w->w_vars, name, NIL, true, false, NULL, err);
+  dict_set_var(w->w_vars, name, NIL, true, false, nullptr, err);
 }
 
 /// Gets the window position in display cells. First position is zero.
@@ -297,7 +297,7 @@ Boolean nvim_win_is_valid(Window win)
   FUNC_API_SINCE(1)
 {
   Error stub = ERROR_INIT;
-  Boolean ret = find_window_by_handle(win, &stub) != NULL;
+  Boolean ret = find_window_by_handle(win, &stub) != nullptr;
   api_clear_error(&stub);
   return ret;
 }
@@ -349,7 +349,7 @@ void nvim_win_close(Window win, Boolean force, Error *err)
 
   tabpage_T *tabpage = win_find_tabpage(w);
   TRY_WRAP(err, {
-    ex_win_close(force, w, tabpage == curtab ? NULL : tabpage);
+    ex_win_close(force, w, tabpage == curtab ? nullptr : tabpage);
   });
 }
 
@@ -377,7 +377,7 @@ Object nvim_win_call(Window win, LuaRef fn, lua_State *lstate, Error *err)
     win_execute_T win_execute_args;
     if (win_execute_before(&win_execute_args, w, tabpage)) {
       Array args = ARRAY_DICT_INIT;
-      nlua_call_ref(fn, NULL, args, kRetMultiStack, NULL, err);
+      nlua_call_ref(fn, nullptr, args, kRetMultiStack, nullptr, err);
     }
     win_execute_after(&win_execute_args);
   });
@@ -561,10 +561,10 @@ void nvim_win_resize(Window win, Integer width, Integer height, Dict(win_resize)
     return;
   }
 
-  VALIDATE_EXP((height >= 0 || height == -1), "height", "non-negative number or -1", NULL, {
+  VALIDATE_EXP((height >= 0 || height == -1), "height", "non-negative number or -1", nullptr, {
     return;
   });
-  VALIDATE_EXP((width >= 0 || width == -1), "width", "non-negative number or -1", NULL, {
+  VALIDATE_EXP((width >= 0 || width == -1), "width", "non-negative number or -1", nullptr, {
     return;
   });
 

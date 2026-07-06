@@ -28,11 +28,11 @@ bool viml_parser_get_remaining_line(ParserState *const pstate, ParserLine *const
     *ret_pline = kv_last(pstate->reader.lines);
   }
   assert(pstate->pos.line == kv_size(pstate->reader.lines) - 1);
-  if (ret_pline->data != NULL) {
+  if (ret_pline->data != nullptr) {
     ret_pline->data += pstate->pos.col;
     ret_pline->size -= pstate->pos.col;
   }
-  return ret_pline->data != NULL;
+  return ret_pline->data != nullptr;
 }
 
 /// Get one line from ParserInputReader

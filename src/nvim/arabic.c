@@ -161,7 +161,7 @@ static struct achar {
 #include "arabic.c.generated.h"
 
 /// Find the struct achar pointer to the given Arabic char.
-/// Returns NULL if not found.
+/// Returns nullptr if not found.
 static struct achar *find_achar(int c)
 {
   // using binary search to find c
@@ -178,7 +178,7 @@ static struct achar *find_achar(int c)
       l = m + 1;
     }
   }
-  return NULL;
+  return nullptr;
 }
 
 /// Change shape - from Combination (2 char) to an Isolated
@@ -273,7 +273,7 @@ bool arabic_combine(int one, int two)
 ///          (alphabet/number/punctuation)
 static bool A_is_iso(int c)
 {
-  return find_achar(c) != NULL;
+  return find_achar(c) != nullptr;
 }
 
 /// @return  true if 'c' is an Arabic 10646 (8859-6 or Form-B)

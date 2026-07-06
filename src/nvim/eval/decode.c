@@ -31,7 +31,7 @@ typedef struct {
   size_t stack_index;   ///< Index of current container in stack.
   list_T *special_val;  ///< _VAL key contents for special maps.
                         ///< When container is not a special dictionary it is
-                        ///< NULL.
+                        ///< nullptr.
   const char *s;        ///< Location where container starts.
   typval_T container;   ///< Container. Either VAR_LIST, VAR_DICT or VAR_LIST
                         ///< which is _VAL from special dictionary.
@@ -130,7 +130,7 @@ static inline int json_decoder_pop(ValuesStackItem obj, ValuesStack *const stack
       tv_clear(&obj.val);
       return FAIL;
     }
-    assert(last_container.special_val == NULL);
+    assert(last_container.special_val == nullptr);
     tv_list_append_owned_tv(last_container.container.vval.v_list, obj.val);
   } else if (last_container.stack_index == kv_size(*stack) - 2) {
     if (!obj.didcolon) {
@@ -140,9 +140,9 @@ static inline int json_decoder_pop(ValuesStackItem obj, ValuesStack *const stack
       return FAIL;
     }
     ValuesStackItem key = kv_pop(*stack);
-    if (last_container.special_val == NULL) {
+    if (last_container.special_val == nullptr) {
       // These cases should have already been handled.
-      assert(!(key.is_special_string || key.val.vval.v_string == NULL));
+      assert(!(key.is_special_string || key.val.vval.v_string == nullptr));
       dictitem_T *const obj_di = tv_dict_item_alloc(key.val.vval.v_string);
       tv_clear(&key.val);
       if (tv_dict_add(last_container.container.vval.v_dict, obj_di)
@@ -163,16 +163,16 @@ static inline int json_decoder_pop(ValuesStackItem obj, ValuesStack *const stack
       tv_clear(&obj.val);
       return FAIL;
     } else if (!obj.didcomma
-               && (last_container.special_val == NULL
+               && (last_container.special_val == nullptr
                    && (DICT_LEN(last_container.container.vval.v_dict) != 0))) {
       semsg(_("E474: Expected comma before dictionary key: %s"), val_location);
       tv_clear(&obj.val);
       return FAIL;
     }
     // Handle special dictionaries
-    if (last_container.special_val == NULL
+    if (last_container.special_val == nullptr
         && (obj.is_special_string
-            || obj.val.vval.v_string == NULL
+            || obj.val.vval.v_string == nullptr
             || tv_dict_find(last_container.container.vval.v_dict, obj.val.vval.v_string, -1))) {
       tv_clear(&obj.val);
 
@@ -258,8 +258,8 @@ typval_T decode_string(const char *const s, const size_t len, bool force_blob,
                        const bool s_allocated)
   FUNC_ATTR_WARN_UNUSED_RESULT
 {
-  assert(s != NULL || len == 0);
-  const bool use_blob = force_blob || ((s != NULL) && (memchr(s, NUL, len) != NULL));
+  assert(s != nullptr || len == 0);
+  const bool use_blob = force_blob || ((s != nullptr) && (memchr(s, NUL, len) != nullptr));
   if (use_blob) {
     typval_T tv;
     tv.v_lock = VAR_UNLOCKED;
@@ -276,7 +276,7 @@ typval_T decode_string(const char *const s, const size_t len, bool force_blob,
   return (typval_T) {
     .v_type = VAR_STRING,
     .v_lock = VAR_UNLOCKED,
-    .vval = { .v_string = ((s == NULL || s_allocated) ? (char *)s : xmemdupz(s, len)) },
+    .vval = { .v_string = ((s == nullptr || s_allocated) ? (char *)s : xmemdupz(s, len)) },
   };
 }
 
@@ -407,8 +407,8 @@ static inline int parse_json_string(const char *const buf, const size_t buf_len,
         const char ubuf[] = { t[1], t[2], t[3], t[4] };
         t += 4;
         uvarnumber_T ch;
-        vim_str2nr(ubuf, NULL, NULL,
-                   STR2NR_HEX | STR2NR_FORCE, NULL, &ch, 4, true, NULL);
+        vim_str2nr(ubuf, nullptr, nullptr,
+                   STR2NR_HEX | STR2NR_FORCE, nullptr, &ch, 4, true, nullptr);
         if (SURROGATE_HI_START <= ch && ch <= SURROGATE_HI_END) {
           PUT_FST_IN_PAIR(fst_in_pair, str_end);
           fst_in_pair = (int)ch;
@@ -500,10 +500,10 @@ static inline int parse_json_number(const char *const buf, const size_t buf_len,
   const char *p = *pp;
   int ret = OK;
   const char *const s = p;
-  const char *ints = NULL;
-  const char *fracs = NULL;
-  const char *exps = NULL;
-  const char *exps_s = NULL;
+  const char *ints = nullptr;
+  const char *fracs = nullptr;
+  const char *exps = nullptr;
+  const char *exps_s = nullptr;
   if (*p == '-') {
     p++;
   }
@@ -546,7 +546,7 @@ parse_json_number_check:
   if (p == ints) {
     semsg(_("E474: Missing number after minus sign: %.*s"), LENP(s, e));
     goto parse_json_number_fail;
-  } else if (p == fracs || (fracs != NULL && exps_s == fracs + 1)) {
+  } else if (p == fracs || (fracs != nullptr && exps_s == fracs + 1)) {
     semsg(_("E474: Missing number after decimal dot: %.*s"), LENP(s, e));
     goto parse_json_number_fail;
   } else if (p == exps) {
@@ -571,7 +571,7 @@ parse_json_number_check:
     // Convert integer
     varnumber_T nr;
     int num_len;
-    vim_str2nr(s, NULL, &num_len, 0, &nr, NULL, (int)(p - s), true, NULL);
+    vim_str2nr(s, nullptr, &num_len, 0, &nr, nullptr, (int)(p - s), true, nullptr);
     if ((int)exp_num_len != num_len) {
       semsg(_("E685: internal error: while converting number \"%.*s\" "
               "to integer vim_str2nr consumed %i bytes in place of %zu"),
@@ -694,7 +694,7 @@ json_decode_string_cycle_start:
                  && last_container.stack_index != kv_size(stack) - 1) {
         semsg(_("E474: Using comma in place of colon: %.*s"), LENP(p, e));
         goto json_decode_string_fail;
-      } else if (last_container.special_val == NULL
+      } else if (last_container.special_val == nullptr
                  ? (last_container.container.v_type == VAR_DICT
                     ? (DICT_LEN(last_container.container.vval.v_dict) == 0)
                     : (tv_list_len(last_container.container.vval.v_list)
@@ -812,13 +812,13 @@ json_decode_string_cycle_start:
       kv_push(container_stack, ((ContainerStackItem) { .stack_index = kv_size(stack),
                                                        .s = p,
                                                        .container = tv,
-                                                       .special_val = NULL }));
+                                                       .special_val = nullptr }));
       kv_push(stack, OBJ(tv, false, didcomma, didcolon));
       break;
     }
     case '{': {
       typval_T tv;
-      list_T *val_list = NULL;
+      list_T *val_list = nullptr;
       if (next_map_special) {
         next_map_special = false;
         val_list = decode_create_map_special_dict(&tv, kListLenMayKnow);
@@ -910,7 +910,7 @@ static void positive_integer_to_special_typval(typval_T *rettv, uint64_t val)
 
 static void typval_parse_enter(mpack_parser_t *parser, mpack_node_t *node)
 {
-  typval_T *result = NULL;
+  typval_T *result = nullptr;
 
   mpack_node_t *parent = MPACK_PARENT_NODE(node);
   if (parent) {
@@ -941,7 +941,7 @@ static void typval_parse_enter(mpack_parser_t *parser, mpack_node_t *node)
 
   // for types that are completed in typval_parse_exit
   node->data[0].p = result;
-  node->data[1].p = NULL;  // free on error if non-NULL
+  node->data[1].p = nullptr;  // free on error if non-nullptr
 
   switch (node->tok.type) {
   case MPACK_TOKEN_NIL:
@@ -1037,7 +1037,7 @@ static void typval_parse_exit(mpack_parser_t *parser, mpack_node_t *node)
   case MPACK_TOKEN_BIN:
   case MPACK_TOKEN_STR:
     *result = decode_string(node->data[1].p, node->tok.length, false, true);
-    node->data[1].p = NULL;
+    node->data[1].p = nullptr;
     break;
 
   case MPACK_TOKEN_EXT: {
@@ -1060,7 +1060,7 @@ static void typval_parse_exit(mpack_parser_t *parser, mpack_node_t *node)
     for (size_t i = 0; i < node->tok.length; i++) {
       typval_T *key = &items[i][0];
       if (key->v_type != VAR_STRING
-          || key->vval.v_string == NULL
+          || key->vval.v_string == nullptr
           || key->vval.v_string[0] == NUL) {
         goto msgpack_to_vim_generic_map;
       }

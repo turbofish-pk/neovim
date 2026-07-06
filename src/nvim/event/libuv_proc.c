@@ -116,7 +116,7 @@ int libuv_proc_spawn(LibuvProc *uvproc)
   if (proc->env) {
     uvproc->uvopts.env = tv_dict_to_env(proc->env);
   } else {
-    uvproc->uvopts.env = NULL;
+    uvproc->uvopts.env = nullptr;
   }
 
   int to_close[3] = { -1, -1, -1 };

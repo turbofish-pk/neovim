@@ -72,7 +72,7 @@ static void get_linematch_results(lua_State *lstate, mmfile_t *ma, mmfile_t *mb,
   const mmfile_t *diff_begin[2] = { &ma0, &mb0 };
   int diff_length[2] = { count_a, count_b };
 
-  int *decisions = NULL;
+  int *decisions = nullptr;
   size_t decisions_length = linematch_nbuffers(diff_begin, diff_length, 2, &decisions, iwhite);
 
   int lnuma = start_a;
@@ -195,9 +195,9 @@ static NluaXdiffMode process_xdl_diff_opts(lua_State *lstate, xdemitconf_t *cfg,
                                            int64_t *linematch, Error *err)
 {
   Dict(xdl_diff) opts = KEYDICT_INIT;
-  char *err_param = NULL;
+  char *err_param = nullptr;
   KeySetLink *KeyDict_xdl_diff_get_field(const char *str, size_t len);
-  nlua_pop_keydict(lstate, &opts, KeyDict_xdl_diff_get_field, &err_param, NULL, err);
+  nlua_pop_keydict(lstate, &opts, KeyDict_xdl_diff_get_field, &err_param, nullptr, err);
 
   NluaXdiffMode mode = kNluaXdiffModeUnified;
 

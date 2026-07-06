@@ -45,7 +45,7 @@ int ask_yesno(const char *const str)
   int r = ' ';
   while (r != 'y' && r != 'n') {
     // same highlighting as for wait_return()
-    r = prompt_for_input(prompt, HLF_R, true, NULL);
+    r = prompt_for_input(prompt, HLF_R, true, nullptr);
     if (r == Ctrl_C || r == ESC) {
       r = 'n';
       if (!ui_has(kUIMessages)) {
@@ -72,7 +72,7 @@ int ask_yesno(const char *const str)
 /// Translates the interrupt character for unix to ESC.
 int get_keystroke(MultiQueue *events)
 {
-  uint8_t *buf = NULL;
+  uint8_t *buf = nullptr;
   int buflen = 150;
   int len = 0;
   int n;
@@ -87,7 +87,7 @@ int get_keystroke(MultiQueue *events)
     // 5 chars plus NUL).  And fix_input_buffer() can triple the number of
     // bytes.
     int maxlen = (buflen - 6 - len) / 3;
-    if (buf == NULL) {
+    if (buf == nullptr) {
       buf = xmalloc((size_t)buflen);
     } else if (maxlen < 10) {
       // Need some more space. This might happen when receiving a long
@@ -148,14 +148,14 @@ int get_keystroke(MultiQueue *events)
 /// Ask the user for input through a cmdline prompt.
 ///
 /// @param one_key Return from cmdline after one key press.
-/// @param mouse_used When not NULL, allow using the mouse to press a number.
+/// @param mouse_used When not nullptr, allow using the mouse to press a number.
 int prompt_for_input(char *prompt, int hl_id, bool one_key, bool *mouse_used)
 {
   int ret = one_key ? ESC : 0;
-  char *kmsg = keep_msg ? xstrdup(keep_msg) : NULL;
+  char *kmsg = keep_msg ? xstrdup(keep_msg) : nullptr;
 
-  if (prompt == NULL) {
-    if (mouse_used != NULL) {
+  if (prompt == nullptr) {
+    if (mouse_used != nullptr) {
       prompt = _("Type number and <Enter> or click with the mouse (q or empty cancels): ");
     } else {
       prompt = _("Type number and <Enter> (q or empty cancels): ");
@@ -167,7 +167,7 @@ int prompt_for_input(char *prompt, int hl_id, bool one_key, bool *mouse_used)
 
   no_mapping++;  // don't map prompt input
   allow_keys++;  // allow special keys
-  char *resp = getcmdline_prompt(-1, prompt, hl_id, EXPAND_NOTHING, NULL,
+  char *resp = getcmdline_prompt(-1, prompt, hl_id, EXPAND_NOTHING, nullptr,
                                  CALLBACK_NONE, one_key, mouse_used);
   allow_keys--;
   no_mapping--;
@@ -177,7 +177,7 @@ int prompt_for_input(char *prompt, int hl_id, bool one_key, bool *mouse_used)
     xfree(resp);
   }
 
-  if (kmsg != NULL) {
+  if (kmsg != nullptr) {
     set_keep_msg(kmsg, keep_msg_hl_id);
     xfree(kmsg);
   }

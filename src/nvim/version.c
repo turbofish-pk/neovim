@@ -4153,7 +4153,7 @@ static void version_msg(char *s)
 }
 
 /// List string items nicely aligned in columns.
-/// When "size" is < 0 then the last entry is marked with NULL.
+/// When "size" is < 0 then the last entry is marked with nullptr.
 /// The entry with index "current" is inclosed in [].
 void list_in_columns(char **items, int size, int current)
 {
@@ -4161,7 +4161,7 @@ void list_in_columns(char **items, int size, int current)
   int width = 0;
 
   // Find the length of the longest item, use that + 1 as the column width.
-  for (int i = 0; size < 0 ? items[i] != NULL : i < size; i++) {
+  for (int i = 0; size < 0 ? items[i] != nullptr : i < size; i++) {
     int l = vim_strsize(items[i]) + (i == current ? 2 : 0);
 
     if (l > width) {
@@ -4226,7 +4226,7 @@ void list_lua_version(void)
 {
   Error err = ERROR_INIT;
   Object ret = NLUA_EXEC_STATIC("return ((jit and jit.version) and jit.version or _VERSION)",
-                                (Array)ARRAY_DICT_INIT, kRetObject, NULL, &err);
+                                (Array)ARRAY_DICT_INIT, kRetObject, nullptr, &err);
   assert(!ERROR_SET(&err));
   assert(ret.type == kObjectTypeString);
   msg_puts(ret.data.string.data);
@@ -4289,11 +4289,11 @@ void list_version(void)
 bool may_show_intro(void)
 {
   return (buf_is_empty(curbuf)
-          && (curbuf->b_fname == NULL)
+          && (curbuf->b_fname == nullptr)
           && (curbuf->handle == 1)
           && (curwin->handle == LOWEST_WIN_ID)
-          && one_window(curwin, NULL)
-          && (vim_strchr(p_shm, SHM_INTRO) == NULL));
+          && one_window(curwin, nullptr)
+          && (vim_strchr(p_shm, SHM_INTRO) == nullptr));
 }
 
 /// Give an introductory message about Vim.
@@ -4345,12 +4345,12 @@ void intro_message(bool colon)
   if (((row >= 2) && (Columns >= 50)) || colon) {
     for (int i = 0; i < (int)ARRAY_SIZE(lines); i++) {
       char *p = lines[i];
-      char *mesg = NULL;
+      char *mesg = nullptr;
       int mesg_size = 0;
 
-      if (strstr(p, "news") != NULL) {
+      if (strstr(p, "news") != nullptr) {
         p = _(p);
-        mesg_size = snprintf(NULL, 0, p,
+        mesg_size = snprintf(nullptr, 0, p,
                              STR(NVIM_VERSION_MAJOR), STR(NVIM_VERSION_MINOR));
         assert(mesg_size > 0);
         mesg = xmallocz((size_t)mesg_size);
@@ -4358,7 +4358,7 @@ void intro_message(bool colon)
                  STR(NVIM_VERSION_MAJOR), STR(NVIM_VERSION_MINOR));
       }
 
-      if (mesg == NULL) {
+      if (mesg == nullptr) {
         if (*p != NUL) {
           mesg = _(p);
         } else {
@@ -4449,7 +4449,7 @@ static void do_intro_line(int row, char *mesg, bool colon, bool is_logo)
     } else {
       // Check for ":command" pattern before a <key> segment.
       char *colon_pos = memchr(p, ':', (size_t)l);
-      if (colon_pos != NULL && p[l] == '<') {
+      if (colon_pos != nullptr && p[l] == '<') {
         // No highlight for "type  ".
         int prefix_len = (int)(colon_pos - p);
         col += grid_line_puts(col, p, prefix_len, 0);

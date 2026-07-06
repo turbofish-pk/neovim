@@ -9,7 +9,7 @@
 
 void ugrid_init(UGrid *grid)
 {
-  grid->cells = NULL;
+  grid->cells = nullptr;
 }
 
 void ugrid_free(UGrid *grid)

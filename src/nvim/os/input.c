@@ -59,7 +59,7 @@ void input_start(void)
 
   used_stdin = true;
   rstream_init_fd(&main_loop, &read_stream, STDIN_FILENO);
-  rstream_start(&read_stream, input_read_cb, NULL);
+  rstream_start(&read_stream, input_read_cb, nullptr);
 }
 
 void input_stop(void)
@@ -75,7 +75,7 @@ void input_stop(void)
 static void cursorhold_event(void **argv)
 {
   event_T event = State & MODE_INSERT ? EVENT_CURSORHOLDI : EVENT_CURSORHOLD;
-  apply_autocmds(event, NULL, NULL, false, curbuf);
+  apply_autocmds(event, nullptr, nullptr, false, curbuf);
   did_cursorhold = true;
 }
 
@@ -86,7 +86,7 @@ static void create_cursorhold_event(bool events_enabled)
   // TODO(tarruda): Cursorhold should be implemented as a timer set during the
   // `state_check` callback for the states where it can be triggered.
   assert(!events_enabled || multiqueue_empty(main_loop.events));
-  multiqueue_put(main_loop.events, cursorhold_event, NULL);
+  multiqueue_put(main_loop.events, cursorhold_event, nullptr);
 }
 
 static void reset_cursorhold_wait(int tb_change_cnt)
@@ -112,7 +112,7 @@ static void reset_cursorhold_wait(int tb_change_cnt)
 /// @return Bytes read into buf, or 0 if no input was read
 int input_get(uint8_t *buf, int maxlen, int ms, int tb_change_cnt, MultiQueue *events)
 {
-  assert((maxlen > 0 && buf != NULL) || maxlen == 0);
+  assert((maxlen > 0 && buf != nullptr) || maxlen == 0);
   // This check is needed so that feeding typeahead from RPC can prevent CursorHold.
   if (tb_change_cnt != cursorhold_tb_change_cnt) {
     reset_cursorhold_wait(tb_change_cnt);
@@ -171,8 +171,8 @@ int input_get(uint8_t *buf, int maxlen, int ms, int tb_change_cnt, MultiQueue *e
       // The 'autocompletedelay' expired: trigger the popup.  When
       // 'updatetime' is shorter, fall through to CursorHold instead.
       if (delay_pending && ins_compl_autocomplete_elapsed() >= p_acl
-          && (buf == NULL || maxlen >= 3) && !typebuf_changed(tb_change_cnt)) {
-        if (buf == NULL) {
+          && (buf == nullptr || maxlen >= 3) && !typebuf_changed(tb_change_cnt)) {
+        if (buf == nullptr) {
           uint8_t ibuf[3];
           ibuf[0] = K_SPECIAL;
           ibuf[1] = KS_EXTRA;
@@ -223,7 +223,7 @@ int input_get(uint8_t *buf, int maxlen, int ms, int tb_change_cnt, MultiQueue *e
 // Check if a character is available for reading
 bool os_char_avail(void)
 {
-  return inbuf_poll(0, NULL) == kTrue;
+  return inbuf_poll(0, nullptr) == kTrue;
 }
 
 /// Poll for fast events. `got_int` will be set to `true` if CTRL-C was typed.
@@ -331,7 +331,7 @@ size_t input_enqueue(uint64_t chan_id, String keys)
     uint8_t buf[19] = { 0 };
     // Do not simplify the keys here. Simplification will be done later.
     unsigned new_size
-      = trans_special(&ptr, (size_t)(end - ptr), (char *)buf, FSK_KEYCODE, true, NULL);
+      = trans_special(&ptr, (size_t)(end - ptr), (char *)buf, FSK_KEYCODE, true, nullptr);
 
     if (new_size > 0) {
       if ((new_size = handle_mouse_event(&ptr, buf, new_size)) > 0) {
@@ -555,7 +555,7 @@ static TriState inbuf_poll(int ms, MultiQueue *events)
     multiqueue_process_events(ch_before_blocking_events);
   }
   DLOG("blocking... events=%s", !!events ? "true" : "false");
-  LOOP_PROCESS_EVENTS_UNTIL(&main_loop, NULL, ms, os_input_ready(events) || input_eof);
+  LOOP_PROCESS_EVENTS_UNTIL(&main_loop, nullptr, ms, os_input_ready(events) || input_eof);
   blocking = false;
 
   if (do_profiling == PROF_YES && ms) {

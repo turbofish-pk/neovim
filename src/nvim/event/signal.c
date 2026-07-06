@@ -15,7 +15,7 @@ void signal_watcher_init(Loop *loop, SignalWatcher *watcher, void *data)
   uv_signal_init(&loop->uv, &watcher->uv);
   watcher->uv.data = watcher;
   watcher->data = data;
-  watcher->cb = NULL;
+  watcher->cb = nullptr;
   watcher->events = loop->fast_events;
 }
 

@@ -150,7 +150,7 @@ int buf_init_chartab(buf_T *buf, bool global)
 /// Returns FAIL if has an error, OK otherwise.
 int check_isopt(char *var)
 {
-  return parse_isopt(var, NULL, true);
+  return parse_isopt(var, nullptr, true);
 }
 
 /// @param only_check  if false: refill g_chartab[]
@@ -433,7 +433,7 @@ size_t kv_transstr(StringBuilder *str, const char *const s, bool untab)
 /// Convert the string "str[orglen]" to do ignore-case comparing.
 /// Use the current locale.
 ///
-/// When "buf" is NULL, return an allocated string.
+/// When "buf" is nullptr, return an allocated string.
 /// Otherwise, put the result in buf, limited by buflen, and return buf.
 char *str_foldcase(char *str, int orglen, char *buf, int buflen)
   FUNC_ATTR_NONNULL_RET
@@ -443,11 +443,11 @@ char *str_foldcase(char *str, int orglen, char *buf, int buflen)
 
 #define GA_CHAR(i) ((char *)ga.ga_data)[i]
 #define GA_PTR(i) ((char *)ga.ga_data + (i))
-#define STR_CHAR(i) (buf == NULL ? GA_CHAR(i) : buf[i])
-#define STR_PTR(i) (buf == NULL ? GA_PTR(i) : buf + (i))
+#define STR_CHAR(i) (buf == nullptr ? GA_CHAR(i) : buf[i])
+#define STR_PTR(i) (buf == nullptr ? GA_PTR(i) : buf + (i))
 
   // Copy "str" into "buf" or allocated memory, unmodified.
-  if (buf == NULL) {
+  if (buf == nullptr) {
     ga_init(&ga, 1, 10);
 
     ga_grow(&ga, len + 1);
@@ -461,7 +461,7 @@ char *str_foldcase(char *str, int orglen, char *buf, int buflen)
     memmove(buf, str, (size_t)len);
   }
 
-  if (buf == NULL) {
+  if (buf == nullptr) {
     GA_CHAR(len) = NUL;
   } else {
     buf[len] = NUL;
@@ -484,7 +484,7 @@ char *str_foldcase(char *str, int orglen, char *buf, int buflen)
       // characters forward or backward.
       if (olen != nlen) {
         if (nlen > olen) {
-          if (buf == NULL) {
+          if (buf == nullptr) {
             ga_grow(&ga, nlen - olen + 1);
           } else {
             if (len + nlen - olen >= buflen) {
@@ -496,7 +496,7 @@ char *str_foldcase(char *str, int orglen, char *buf, int buflen)
         }
 
         if (olen != nlen) {
-          if (buf == NULL) {
+          if (buf == nullptr) {
             STRMOVE(GA_PTR(i) + nlen, GA_PTR(i) + olen);
             ga.ga_len += nlen - olen;
           } else {
@@ -512,7 +512,7 @@ char *str_foldcase(char *str, int orglen, char *buf, int buflen)
     i += utfc_ptr2len(STR_PTR(i));
   }
 
-  if (buf == NULL) {
+  if (buf == nullptr) {
     return ga.ga_data;
   }
   return buf;
@@ -577,7 +577,7 @@ char *transchar_byte(const int c)
 
 /// Like transchar_buf(), but called with a byte instead of a character.
 ///
-/// Checks for an illegal UTF-8 byte.  Uses 'fileformat' of "buf", unless it is NULL.
+/// Checks for an illegal UTF-8 byte.  Uses 'fileformat' of "buf", unless it is nullptr.
 ///
 /// @param[in]  c  Byte to translate.
 ///
@@ -606,7 +606,7 @@ void transchar_nonprint(const buf_T *buf, char *charbuf, int c)
   if (c == NL) {
     // we use newline in place of a NUL
     c = NUL;
-  } else if (buf != NULL && c == CAR && get_fileformat(buf) == EOL_MAC) {
+  } else if (buf != nullptr && c == CAR && get_fileformat(buf) == EOL_MAC) {
     // we use CR in place of  NL in this case
     c = NL;
   }
@@ -763,7 +763,7 @@ int vim_strsize(const char *s)
 /// @return Number of character cells.
 int vim_strnsize(const char *s, int len)
 {
-  assert(s != NULL);
+  assert(s != nullptr);
   int size = 0;
   while (*s != NUL && --len >= 0) {
     int l = utfc_ptr2len(s);
@@ -1183,7 +1183,7 @@ bool vim_isblankline(char *lbuf)
 
 /// Convert a string into a long and/or unsigned long, taking care of
 /// hexadecimal, octal and binary numbers.  Accepts a '-' sign.
-/// If "prep" is not NULL, returns a flag to indicate the type of the number:
+/// If "prep" is not nullptr, returns a flag to indicate the type of the number:
 ///   0      decimal
 ///   '0'    octal
 ///   'O'    octal
@@ -1192,9 +1192,9 @@ bool vim_isblankline(char *lbuf)
 ///   'b'    bin
 ///   'X'    hex
 ///   'x'    hex
-/// If "len" is not NULL, the length of the number in characters is returned.
-/// If "nptr" is not NULL, the signed result is returned in it.
-/// If "unptr" is not NULL, the unsigned result is returned in it.
+/// If "len" is not nullptr, the length of the number in characters is returned.
+/// If "nptr" is not nullptr, the signed result is returned in it.
+/// If "unptr" is not nullptr, the unsigned result is returned in it.
 /// If "what" contains STR2NR_BIN recognize binary numbers.
 /// If "what" contains STR2NR_OCT recognize octal numbers.
 /// If "what" contains STR2NR_HEX recognize hex numbers.
@@ -1215,7 +1215,7 @@ bool vim_isblankline(char *lbuf)
 /// @param strict If true, fail if the number has unexpected trailing
 ///               alphanumeric chars: *len is set to 0 and nothing else is
 ///               returned.
-/// @param overflow When not NULL, set to true for overflow.
+/// @param overflow When not nullptr, set to true for overflow.
 void vim_str2nr(const char *const start, int *const prep, int *const len, const int what,
                 varnumber_T *const nptr, uvarnumber_T *const unptr, const int maxlen,
                 const bool strict, bool *const overflow)
@@ -1228,7 +1228,7 @@ void vim_str2nr(const char *const start, int *const prep, int *const len, const 
   const bool negative = (ptr[0] == '-');
   uvarnumber_T un = 0;
 
-  if (len != NULL) {
+  if (len != nullptr) {
     *len = 0;
   }
 
@@ -1341,7 +1341,7 @@ void vim_str2nr(const char *const start, int *const prep, int *const len, const 
         un = (base) * un + digit; \
       } else { \
         un = UVARNUMBER_MAX; \
-        if (overflow != NULL) { \
+        if (overflow != nullptr) { \
           *overflow = true; \
         } \
       } \
@@ -1369,20 +1369,20 @@ vim_str2nr_proceed:
     return;
   }
 
-  if (prep != NULL) {
+  if (prep != nullptr) {
     *prep = pre;
   }
 
-  if (len != NULL) {
+  if (len != nullptr) {
     *len = (int)(ptr - start);
   }
 
-  if (nptr != NULL) {
+  if (nptr != nullptr) {
     if (negative) {  // account for leading '-' for decimal numbers
       // avoid ubsan error for overflow
       if (un > VARNUMBER_MAX) {
         *nptr = VARNUMBER_MIN;
-        if (overflow != NULL) {
+        if (overflow != nullptr) {
           *overflow = true;
         }
       } else {
@@ -1391,7 +1391,7 @@ vim_str2nr_proceed:
     } else {
       if (un > VARNUMBER_MAX) {
         un = VARNUMBER_MAX;
-        if (overflow != NULL) {
+        if (overflow != nullptr) {
           *overflow = true;
         }
       }
@@ -1399,7 +1399,7 @@ vim_str2nr_proceed:
     }
   }
 
-  if (unptr != NULL) {
+  if (unptr != nullptr) {
     *unptr = un;
   }
 #undef STRING_ENDED

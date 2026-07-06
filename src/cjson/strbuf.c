@@ -52,7 +52,7 @@ void strbuf_init(strbuf_t *s, size_t len)
         size = len + 1;         /* \0 terminator */
     if (size < len)
         die("Overflow, len: %zu", len);
-    s->buf = NULL;
+    s->buf = nullptr;
     s->size = size;
     s->length = 0;
     s->dynamic = 0;
@@ -98,7 +98,7 @@ void strbuf_free(strbuf_t *s)
 
     if (s->buf) {
         free(s->buf);
-        s->buf = NULL;
+        s->buf = nullptr;
     }
     if (s->dynamic)
         free(s);
@@ -129,7 +129,7 @@ static size_t calculate_new_size(strbuf_t *s, size_t len)
     if (len <= 0)
         die("BUG: Invalid strbuf length requested");
 
-    /* Ensure there is room for optional NULL termination */
+    /* Ensure there is room for optional nullptr termination */
     reqsize = len + 1;
     if (reqsize < len)
         die("Overflow, len: %zu", len);
@@ -155,7 +155,7 @@ static size_t calculate_new_size(strbuf_t *s, size_t len)
 }
 
 
-/* Ensure strbuf can handle a string length bytes long (ignoring NULL
+/* Ensure strbuf can handle a string length bytes long (ignoring nullptr
  * optional termination). */
 void strbuf_resize(strbuf_t *s, size_t len)
 {

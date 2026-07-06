@@ -129,12 +129,12 @@ typedef struct {
   int skipped_cells;         ///< nr of skipped cells for virtual text
                              ///< to be added to wlv.vcol later
 
-  int *color_cols;           ///< if not NULL, highlight colorcolumn using according columns array
+  int *color_cols;           ///< if not nullptr, highlight colorcolumn using according columns array
 } winlinevars_T;
 
 #include "drawline.c.generated.h"
 
-static char *extra_buf = NULL;
+static char *extra_buf = nullptr;
 static size_t extra_buf_size = 0;
 
 static char *get_extra_buf(size_t size)
@@ -170,7 +170,7 @@ static schar_T get_lcs_ext(win_T *wp)
   return wp->w_p_list ? wp->w_p_lcs_chars.ext : NUL;
 }
 
-/// Advance wlv->color_cols if not NULL
+/// Advance wlv->color_cols if not nullptr
 static void advance_color_col(winlinevars_T *wlv, int vcol)
 {
   if (wlv->color_cols) {
@@ -178,7 +178,7 @@ static void advance_color_col(winlinevars_T *wlv, int vcol)
       wlv->color_cols++;
     }
     if (*wlv->color_cols < 0) {
-      wlv->color_cols = NULL;
+      wlv->color_cols = nullptr;
     }
   }
 }
@@ -290,7 +290,7 @@ static void draw_virt_text(win_T *wp, buf_T *buf, int col_off, int *end_col, int
       continue;
     }
 
-    DecorVirtText *vt = NULL;
+    DecorVirtText *vt = nullptr;
     if (item->kind == kDecorKindVirtText) {
       assert(item->data.vt);
       vt = item->data.vt;
@@ -314,7 +314,7 @@ static void draw_virt_text(win_T *wp, buf_T *buf, int col_off, int *end_col, int
             }
 
             /// The Virtual Text of the decor item we're looking ahead to
-            DecorVirtText *lookaheadVt = NULL;
+            DecorVirtText *lookaheadVt = nullptr;
             if (lookaheadItem->kind == kDecorKindVirtText) {
               assert(lookaheadItem->data.vt);
               lookaheadVt = lookaheadItem->data.vt;
@@ -387,7 +387,7 @@ static int draw_virt_text_item(buf_T *buf, int col, VirtText vt, HlMode hl_mode,
       }
       virt_attr = 0;
       virt_str = next_virt_text_chunk(vt, &virt_pos, &virt_attr);
-      if (virt_str == NULL) {
+      if (virt_str == nullptr) {
         break;
       }
     }
@@ -489,7 +489,7 @@ static void draw_foldcolumn(win_T *wp, winlinevars_T *wlv)
   if (fdc > 0) {
     int attr = win_hl_attr(wp, use_cursor_line_highlight(wp, wlv->lnum) ? HLF_CLF : HLF_FC);
     bool is_virt = wlv->filler_todo > 0;
-    fill_foldcolumn(wp, wlv->foldinfo, wlv->lnum, attr, fdc, is_virt, &wlv->off, NULL, NULL);
+    fill_foldcolumn(wp, wlv->foldinfo, wlv->lnum, attr, fdc, is_virt, &wlv->off, nullptr, nullptr);
   }
 }
 
@@ -636,7 +636,7 @@ static int get_line_number_attr(win_T *wp, winlinevars_T *wlv)
   // Get previous sign numhl for virt_lines belonging to the previous line.
   if ((wlv->n_virt_lines - wlv->filler_todo) < wlv->n_virt_below) {
     if (wlv->prev_num_attr == -1) {
-      decor_redraw_signs(wp, wp->w_buffer, wlv->lnum - 2, NULL, NULL, NULL, &wlv->prev_num_attr);
+      decor_redraw_signs(wp, wp->w_buffer, wlv->lnum - 2, nullptr, nullptr, nullptr, &wlv->prev_num_attr);
       if (wlv->prev_num_attr > 0) {
         wlv->prev_num_attr = syn_id2attr(wlv->prev_num_attr);
       }
@@ -668,7 +668,7 @@ static int get_line_number_attr(win_T *wp, winlinevars_T *wlv)
 /// blanks when the 'n' flag isn't in 'cpo'.
 static void draw_lnum_col(win_T *wp, winlinevars_T *wlv)
 {
-  bool has_cpo_n = vim_strchr(p_cpo, CPO_NUMCOL) != NULL;
+  bool has_cpo_n = vim_strchr(p_cpo, CPO_NUMCOL) != nullptr;
 
   if ((wp->w_p_nu || wp->w_p_rnu)
       && (wlv->row == wlv->startrow + wlv->filler_lines || !has_cpo_n)
@@ -697,7 +697,7 @@ static void draw_lnum_col(win_T *wp, winlinevars_T *wlv)
           char *num = skipwhite(buf);
           rl_mirror_ascii(num, skiptowhite(num));
         }
-        draw_col_buf(wp, wlv, buf, (size_t)width, attr, NULL, false);
+        draw_col_buf(wp, wlv, buf, (size_t)width, attr, nullptr, false);
       } else {
         draw_col_fill(wlv, schar_from_ascii(' '), width, attr);
       }
@@ -709,7 +709,7 @@ static void draw_lnum_col(win_T *wp, winlinevars_T *wlv)
 static void draw_statuscol(win_T *wp, winlinevars_T *wlv, int col_rows, statuscol_T *stcp)
 {
   static int prev_virtnum = 0;
-  static win_T *prev_wp = NULL;
+  static win_T *prev_wp = nullptr;
   static linenr_T prev_lnum = 0;
   static disptick_T prev_tick = 0;
 
@@ -723,7 +723,7 @@ static void draw_statuscol(win_T *wp, winlinevars_T *wlv, int col_rows, statusco
   int reset_virt = lnum == wlv->lnum ? wlv->filler_lines_skip : wlv->virt_below_skip;
   if (reset && lnum < wp->w_topline) {
     int virt_below_prev = 0;
-    int virt_lines_prev = decor_virt_lines(wp, lnum - 1, lnum, &virt_below_prev, NULL, true);
+    int virt_lines_prev = decor_virt_lines(wp, lnum - 1, lnum, &virt_below_prev, nullptr, true);
     int diff_fill_prev = diff_check_fill(wp, lnum - 1);
     reset_virt += virt_lines_prev + diff_fill_prev - virt_below_prev;
   }
@@ -778,21 +778,21 @@ static void draw_statuscol(win_T *wp, winlinevars_T *wlv, int col_rows, statusco
 
   char *p = buf;
   char transbuf[MAXPATHL];
-  colnr_T *fold_vcol = NULL;
+  colnr_T *fold_vcol = nullptr;
   size_t len = strlen(buf);
   int scl_attr = win_hl_attr(wp, use_cursor_line_highlight(wp, wlv->lnum) ? HLF_CLS : HLF_SC);
   int num_attr = get_line_number_attr(wp, wlv);
   int cur_attr = num_attr;
 
   // Draw each segment with the specified highlighting.
-  for (stl_hlrec_t *sp = stcp->hlrec; sp->start != NULL; sp++) {
+  for (stl_hlrec_t *sp = stcp->hlrec; sp->start != nullptr; sp++) {
     ptrdiff_t textlen = sp->start - p;
     // Make all characters printable.
     size_t translen = transstr_buf(p, textlen, transbuf, MAXPATHL, true);
     draw_col_buf(wp, wlv, transbuf, translen, cur_attr, fold_vcol, false);
     int attr = sp->item == STL_SIGNCOL ? scl_attr : sp->item == STL_FOLDCOL ? 0 : num_attr;
     cur_attr = hl_combine_attr(attr, sp->userhl < 0 ? syn_id2attr(-sp->userhl) : 0);
-    fold_vcol = sp->item == STL_FOLDCOL ? stcp->fold_vcol : NULL;
+    fold_vcol = sp->item == STL_FOLDCOL ? stcp->fold_vcol : nullptr;
     p = sp->start;
   }
   size_t translen = transstr_buf(p, buf + len - p, transbuf, MAXPATHL, true);
@@ -869,7 +869,7 @@ static void handle_showbreak_and_filler(win_T *wp, winlinevars_T *wlv)
     // Combine 'showbreak' with 'cursorline', prioritizing 'showbreak'.
     int attr = hl_combine_attr(wlv->cul_attr, win_hl_attr(wp, HLF_AT));
     colnr_T vcol_before = wlv->vcol;
-    draw_col_buf(wp, wlv, sbr, strlen(sbr), attr, NULL, true);
+    draw_col_buf(wp, wlv, sbr, strlen(sbr), attr, nullptr, true);
     wlv->vcol_sbr = wlv->vcol;
 
     // Correct start of highlighted area for 'showbreak'.
@@ -993,7 +993,7 @@ static void handle_inline_virtual_text(win_T *wp, winlinevars_T *wlv, ptrdiff_t 
       // already inside existing inline virtual text with multiple chunks
       int attr = 0;
       char *text = next_virt_text_chunk(wlv->virt_inline, &wlv->virt_inline_i, &attr);
-      if (text == NULL) {
+      if (text == nullptr) {
         continue;
       }
       wlv->p_extra = text;
@@ -1170,7 +1170,7 @@ int win_line(win_T *wp, linenr_T lnum, int startrow, int endrow, int col_rows, b
 
   char buf_fold[FOLD_TEXT_LEN];         // Hold value returned by get_foldtext
   VirtText fold_vt = VIRTTEXT_EMPTY;
-  char *foldtext_free = NULL;
+  char *foldtext_free = nullptr;
 
   // 'cursorlineopt' has "screenline" and cursor is in this line
   bool cul_screenline = false;
@@ -1235,7 +1235,7 @@ int win_line(win_T *wp, linenr_T lnum, int startrow, int endrow, int col_rows, b
     check_decor_providers = true;
 
     // Check for columns to display for 'colorcolumn'.
-    wlv.color_cols = wp->w_buffer->terminal ? NULL : wp->w_p_cc_cols;
+    wlv.color_cols = wp->w_buffer->terminal ? nullptr : wp->w_p_cc_cols;
     advance_color_col(&wlv, vcol_hlc(wlv));
 
     // handle Visual active in this window
@@ -1266,7 +1266,7 @@ int win_line(win_T *wp, linenr_T lnum, int startrow, int endrow, int col_rows, b
           if (VIsual_mode == 'V') {       // linewise
             wlv.fromcol = 0;
           } else {
-            getvvcol(wp, top, &wlv.fromcol, NULL, NULL, 0);
+            getvvcol(wp, top, &wlv.fromcol, nullptr, nullptr, 0);
             if (gchar_pos(top) == NUL) {
               wlv.tocol = wlv.fromcol + 1;
             }
@@ -1282,9 +1282,9 @@ int win_line(win_T *wp, linenr_T lnum, int startrow, int endrow, int col_rows, b
           } else {
             pos_T pos = *bot;
             if (*p_sel == 'e') {
-              getvvcol(wp, &pos, &wlv.tocol, NULL, NULL, 0);
+              getvvcol(wp, &pos, &wlv.tocol, nullptr, nullptr, 0);
             } else {
-              getvvcol(wp, &pos, NULL, NULL, &wlv.tocol, 0);
+              getvvcol(wp, &pos, nullptr, nullptr, &wlv.tocol, 0);
               wlv.tocol++;
             }
           }
@@ -1309,7 +1309,7 @@ int win_line(win_T *wp, linenr_T lnum, int startrow, int endrow, int col_rows, b
                && lnum >= curwin->w_cursor.lnum
                && lnum <= curwin->w_cursor.lnum + search_match_lines) {
       if (lnum == curwin->w_cursor.lnum) {
-        getvcol(curwin, &(curwin->w_cursor), &wlv.fromcol, NULL, NULL, 0);
+        getvcol(curwin, &(curwin->w_cursor), &wlv.fromcol, nullptr, nullptr, 0);
       } else {
         wlv.fromcol = 0;
       }
@@ -1318,7 +1318,7 @@ int win_line(win_T *wp, linenr_T lnum, int startrow, int endrow, int col_rows, b
           .lnum = lnum,
           .col = search_match_endcol,
         };
-        getvcol(curwin, &pos, &wlv.tocol, NULL, NULL, 0);
+        getvcol(curwin, &pos, &wlv.tocol, nullptr, nullptr, 0);
       }
       // do at least one character; happens when past end of line
       if (wlv.fromcol == wlv.tocol && search_match_endcol) {
@@ -1500,8 +1500,8 @@ int win_line(win_T *wp, linenr_T lnum, int startrow, int endrow, int col_rows, b
 
   if (wp->w_p_list && !has_foldtext && draw_text) {
     if (wp->w_p_lcs_chars.space
-        || wp->w_p_lcs_chars.multispace != NULL
-        || wp->w_p_lcs_chars.leadmultispace != NULL
+        || wp->w_p_lcs_chars.multispace != nullptr
+        || wp->w_p_lcs_chars.leadmultispace != nullptr
         || wp->w_p_lcs_chars.trail
         || wp->w_p_lcs_chars.lead
         || wp->w_p_lcs_chars.nbsp) {
@@ -1516,7 +1516,7 @@ int win_line(win_T *wp, linenr_T lnum, int startrow, int endrow, int col_rows, b
       trailcol += (colnr_T)(ptr - line);
     }
     // find end of leading whitespace
-    if (wp->w_p_lcs_chars.lead || wp->w_p_lcs_chars.leadmultispace != NULL
+    if (wp->w_p_lcs_chars.lead || wp->w_p_lcs_chars.leadmultispace != nullptr
         || wp->w_p_lcs_chars.leadtab1 != NUL) {
       leadcol = 0;
       while (ascii_iswhite(ptr[leadcol])) {
@@ -1563,13 +1563,13 @@ int win_line(win_T *wp, linenr_T lnum, int startrow, int endrow, int col_rows, b
         if (!in_multispace) {
           multispace_pos = 0;
         } else if (ci.ptr >= line + leadcol
-                   && wp->w_p_lcs_chars.multispace != NULL) {
+                   && wp->w_p_lcs_chars.multispace != nullptr) {
           multispace_pos++;
           if (wp->w_p_lcs_chars.multispace[multispace_pos] == NUL) {
             multispace_pos = 0;
           }
         } else if (ci.ptr < line + leadcol
-                   && wp->w_p_lcs_chars.leadmultispace != NULL) {
+                   && wp->w_p_lcs_chars.leadmultispace != nullptr) {
           multispace_pos++;
           if (wp->w_p_lcs_chars.leadmultispace[multispace_pos] == NUL) {
             multispace_pos = 0;
@@ -1767,7 +1767,7 @@ int win_line(win_T *wp, linenr_T lnum, int startrow, int endrow, int col_rows, b
           // Find the virtual line containing the target row.
           // Set skip cells with the same row-counting function so offset calculation stays in sync
           for (; virt_line_index < (int)kv_size(virt_lines); virt_line_index++) {
-            int line_rows = decor_virt_line_rows(wp, &kv_A(virt_lines, virt_line_index), 0, NULL);
+            int line_rows = decor_virt_line_rows(wp, &kv_A(virt_lines, virt_line_index), 0, nullptr);
             if (target_row < virt_line_start_row + line_rows) {
               has_virt_line = true;
               virt_line_flags = kv_A(virt_lines, virt_line_index).flags;
@@ -1950,7 +1950,7 @@ int win_line(win_T *wp, linenr_T lnum, int startrow, int endrow, int col_rows, b
       if (wlv.vcol == wlv.fromcol
           || (wlv.vcol + 1 == wlv.fromcol
               && ((wlv.n_extra == 0 && utf_ptr2cells(ptr) > 1)
-                  || (wlv.n_extra > 0 && wlv.p_extra != NULL
+                  || (wlv.n_extra > 0 && wlv.p_extra != nullptr
                       && utf_ptr2cells(wlv.p_extra) > 1)))
           || (vcol_prev == fromcol_prev
               && vcol_prev < wlv.vcol               // not at margin
@@ -2051,7 +2051,7 @@ int win_line(win_T *wp, linenr_T lnum, int startrow, int endrow, int col_rows, b
       wlv.n_extra = (int)strlen(wlv.p_extra);
 
       if (wlv.p_extra != buf_fold) {
-        assert(foldtext_free == NULL);
+        assert(foldtext_free == nullptr);
         foldtext_free = wlv.p_extra;
       }
       wlv.sc_extra = NUL;
@@ -2094,7 +2094,7 @@ int win_line(win_T *wp, linenr_T lnum, int startrow, int endrow, int col_rows, b
         mb_c = schar_get_first_codepoint(mb_schar);
         wlv.n_extra--;
       } else {
-        assert(wlv.p_extra != NULL);
+        assert(wlv.p_extra != nullptr);
         mb_l = utfc_ptr2len(wlv.p_extra);
         mb_schar = utfc_ptr2schar(wlv.p_extra, &mb_c);
         // mb_l=0 at the end-of-line NUL
@@ -2161,7 +2161,7 @@ int win_line(win_T *wp, linenr_T lnum, int startrow, int endrow, int col_rows, b
           wlv.extra_for_extmark = false;
         } else {
           assert(wlv.sc_extra != NUL || wlv.sc_final != NUL);
-          assert(wlv.p_extra != NULL);
+          assert(wlv.p_extra != nullptr);
           wlv.sc_extra = NUL;
           wlv.sc_final = NUL;
           wlv.n_extra = n_extra_next;
@@ -2207,7 +2207,7 @@ int win_line(win_T *wp, linenr_T lnum, int startrow, int endrow, int col_rows, b
         // Non-printable character : display as ? or fullwidth ?.
         transchar_hex(wlv.extra, mb_c);
         if (wp->w_p_rl) {  // reverse
-          rl_mirror_ascii(wlv.extra, NULL);
+          rl_mirror_ascii(wlv.extra, nullptr);
         }
 
         wlv.p_extra = wlv.extra;
@@ -2272,7 +2272,7 @@ int win_line(win_T *wp, linenr_T lnum, int startrow, int endrow, int col_rows, b
           int save_did_emsg = did_emsg;
           did_emsg = false;
 
-          decor_attr = get_syntax_attr(v - 1, spv->spv_has_spell ? &can_spell : NULL, false);
+          decor_attr = get_syntax_attr(v - 1, spv->spv_has_spell ? &can_spell : nullptr, false);
 
           if (did_emsg) {
             wp->w_s->b_syn_error = true;
@@ -2444,10 +2444,10 @@ int win_line(win_T *wp, linenr_T lnum, int startrow, int endrow, int col_rows, b
                 || (mb_c == ' '
                     && mb_l == 1
                     && (wp->w_p_lcs_chars.space
-                        || (in_multispace && wp->w_p_lcs_chars.multispace != NULL))
+                        || (in_multispace && wp->w_p_lcs_chars.multispace != nullptr))
                     && ptr - line >= leadcol
                     && ptr - line <= trailcol))) {
-          if (in_multispace && wp->w_p_lcs_chars.multispace != NULL) {
+          if (in_multispace && wp->w_p_lcs_chars.multispace != nullptr) {
             mb_schar = wp->w_p_lcs_chars.multispace[multispace_pos++];
             if (wp->w_p_lcs_chars.multispace[multispace_pos] == NUL) {
               multispace_pos = 0;
@@ -2464,7 +2464,7 @@ int win_line(win_T *wp, linenr_T lnum, int startrow, int endrow, int col_rows, b
         if (mb_c == ' ' && mb_l == 1 && ((trailcol != MAXCOL && ptr > line + trailcol)
                                          || (leadcol != 0 && ptr < line + leadcol))) {
           if (leadcol != 0 && in_multispace && ptr < line + leadcol
-              && wp->w_p_lcs_chars.leadmultispace != NULL) {
+              && wp->w_p_lcs_chars.leadmultispace != nullptr) {
             mb_schar = wp->w_p_lcs_chars.leadmultispace[multispace_pos++];
             if (wp->w_p_lcs_chars.leadmultispace[multispace_pos] == NUL) {
               multispace_pos = 0;
@@ -2590,7 +2590,7 @@ int win_line(win_T *wp, linenr_T lnum, int startrow, int endrow, int col_rows, b
 
           if (wp->w_p_list) {
             mb_schar = (wlv.n_extra == 0 && lcs_tab3) ? lcs_tab3 : lcs_tab1;
-            if (wp->w_p_lbr && wlv.p_extra != NULL && *wlv.p_extra != NUL) {
+            if (wp->w_p_lbr && wlv.p_extra != nullptr && *wlv.p_extra != NUL) {
               wlv.sc_extra = NUL;  // using p_extra from above
             } else {
               wlv.sc_extra = lcs_tab2;
@@ -2644,7 +2644,7 @@ int win_line(win_T *wp, linenr_T lnum, int startrow, int endrow, int col_rows, b
             wlv.n_extra = byte2cells(mb_c) - 1;
           }
           if ((dy_flags & kOptDyFlagUhex) && wp->w_p_rl) {
-            rl_mirror_ascii(wlv.p_extra, NULL);   // reverse "<12>"
+            rl_mirror_ascii(wlv.p_extra, nullptr);   // reverse "<12>"
           }
           wlv.sc_extra = NUL;
           wlv.sc_final = NUL;
@@ -2678,7 +2678,7 @@ int win_line(win_T *wp, linenr_T lnum, int startrow, int endrow, int col_rows, b
       if (wp->w_p_cole > 0
           && (wp != curwin || lnum != wp->w_cursor.lnum || conceal_cursor_line(wp))
           && ((syntax_flags & HL_CONCEAL) != 0 || has_match_conc > 0 || decor_conceal > 0)
-          && !(lnum_in_visual_area && vim_strchr(wp->w_p_cocu, 'v') == NULL)) {
+          && !(lnum_in_visual_area && vim_strchr(wp->w_p_cocu, 'v') == nullptr)) {
         bool syntax_conceal = (syntax_flags & HL_CONCEAL) != 0;
         wlv.char_attr = conceal_attr;
         if (((prev_syntax_id != syntax_seqnr && syntax_conceal)
@@ -2793,7 +2793,7 @@ int win_line(win_T *wp, linenr_T lnum, int startrow, int endrow, int col_rows, b
         wlv.sc_extra = schar_from_ascii(MB_FILLER_CHAR);
         wlv.sc_final = NUL;
         if (wlv.n_extra > 0) {
-          assert(wlv.p_extra != NULL);
+          assert(wlv.p_extra != nullptr);
           n_extra_next = wlv.n_extra;
           extra_attr_next = wlv.extra_attr;
           wlv.n_attr = MAX(wlv.n_attr + 1, 2);

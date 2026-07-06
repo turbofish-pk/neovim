@@ -66,7 +66,7 @@ void ex_help(exarg_T *eap)
   int alt_fnum = 0;
   const bool old_KeyTyped = KeyTyped;
 
-  if (eap != NULL) {
+  if (eap != nullptr) {
     // A ":help" command ends at the first LF, or at a '|' that is
     // followed by some text.  Set nextcmd to the following command.
     for (arg = eap->arg; *arg; arg++) {
@@ -96,7 +96,7 @@ void ex_help(exarg_T *eap)
   char *lang = check_help_lang(arg);
 
   // ":help!" (bang, no args).
-  bool helpbang = (eap != NULL && eap->forceit && *arg == NUL);
+  bool helpbang = (eap != nullptr && eap->forceit && *arg == NUL);
 
   // When no argument given go to the index.
   if (*arg == NUL && !helpbang) {
@@ -104,12 +104,12 @@ void ex_help(exarg_T *eap)
   }
 
   // ":help!" (bang, no args): DWIM help, resolve best tag at cursor via Lua.
-  char *allocated_arg = NULL;
+  char *allocated_arg = nullptr;
   if (helpbang) {
     typval_T no_args[] = { { .v_type = VAR_UNKNOWN } };
     typval_T rettv;
     nlua_call_vimfn("vim._core.help", "resolve_tag", no_args, &rettv);
-    if (rettv.v_type == VAR_STRING && rettv.vval.v_string != NULL && *rettv.vval.v_string != NUL) {
+    if (rettv.v_type == VAR_STRING && rettv.vval.v_string != nullptr && *rettv.vval.v_string != NUL) {
       allocated_arg = rettv.vval.v_string;  // takes ownership
       arg = allocated_arg;
     } else {
@@ -120,10 +120,10 @@ void ex_help(exarg_T *eap)
   }
 
   // Check if there is a match for the argument.
-  int n = find_help_tags(arg, &num_matches, &matches, eap != NULL && eap->forceit);
+  int n = find_help_tags(arg, &num_matches, &matches, eap != nullptr && eap->forceit);
 
   int i = 0;
-  if (n != FAIL && lang != NULL) {
+  if (n != FAIL && lang != nullptr) {
     // Find first item with the requested language.
     for (i = 0; i < num_matches; i++) {
       int len = (int)strlen(matches[i]);
@@ -134,7 +134,7 @@ void ex_help(exarg_T *eap)
     }
   }
   if (i >= num_matches || n == FAIL) {
-    if (lang != NULL) {
+    if (lang != nullptr) {
       semsg(_("E661: No '%s' help for %s"), lang, arg);
     } else {
       semsg(_("E149: No help for %s"), arg);
@@ -154,9 +154,9 @@ void ex_help(exarg_T *eap)
   // Always open a new one for ":tab help".
   if (!bt_help(curwin->w_buffer) || cmdmod.cmod_tab != 0) {
     if (cmdmod.cmod_tab != 0) {
-      wp = NULL;
+      wp = nullptr;
     } else {
-      wp = NULL;
+      wp = nullptr;
       FOR_ALL_WINDOWS_IN_TAB(wp2, curtab) {
         if (bt_help(wp2->w_buffer) && !wp2->w_config.hide && wp2->w_config.focusable) {
           wp = wp2;
@@ -164,12 +164,12 @@ void ex_help(exarg_T *eap)
         }
       }
     }
-    if (wp != NULL && wp->w_buffer->b_nwindows > 0) {
+    if (wp != nullptr && wp->w_buffer->b_nwindows > 0) {
       win_enter(wp, true);
     } else {
       // There is no help window yet.
       // Try to open the file specified by the "helpfile" option.
-      if ((helpfd = os_fopen(p_hf, READBIN)) == NULL) {
+      if ((helpfd = os_fopen(p_hf, READBIN)) == nullptr) {
         smsg(0, _("Help file \"%s\" not found"), p_hf);
         goto erret;
       }
@@ -195,9 +195,9 @@ void ex_help(exarg_T *eap)
       // set b_p_ro flag).
       // Set the alternate file to the previously edited file.
       alt_fnum = curbuf->b_fnum;
-      do_ecmd(0, NULL, NULL, NULL, ECMD_LASTL,
+      do_ecmd(0, nullptr, nullptr, nullptr, ECMD_LASTL,
               ECMD_HIDE + ECMD_SET_HELP,
-              NULL);  // buffer is still open, don't store info
+              nullptr);  // buffer is still open, don't store info
 
       if ((cmdmod.cmod_flags & CMOD_KEEPALT) == 0) {
         curwin->w_alt_fnum = alt_fnum;
@@ -212,14 +212,14 @@ void ex_help(exarg_T *eap)
   // It is needed for do_tag top open folds under the cursor.
   KeyTyped = old_KeyTyped;
 
-  do_tag(NULL, tag, DT_HELP, 1, false, true);
+  do_tag(nullptr, tag, DT_HELP, 1, false, true);
 
   // Delete the empty buffer if we're not using it.  Careful: autocommands
   // may have jumped to another window, check that the buffer is not in a
   // window.
   if (empty_fnum != 0 && curbuf->b_fnum != empty_fnum) {
     buf_T *buf = buflist_findnr(empty_fnum);
-    if (buf != NULL && buf->b_nwindows == 0) {
+    if (buf != nullptr && buf->b_nwindows == 0) {
       wipe_buffer(buf, true);
     }
   }
@@ -249,7 +249,7 @@ void ex_helpclose(exarg_T *eap)
 /// In an argument search for a language specifiers in the form "@xx".
 /// Changes the "@" to NUL if found, and returns a pointer to "xx".
 ///
-/// @return  NULL if not found.
+/// @return  nullptr if not found.
 char *check_help_lang(char *arg)
 {
   int len = (int)strlen(arg);
@@ -259,7 +259,7 @@ char *check_help_lang(char *arg)
     arg[len - 3] = NUL;                 // remove the '@'
     return arg + len - 2;
   }
-  return NULL;
+  return nullptr;
 }
 
 /// Return a heuristic indicating how well the given string matches.  The
@@ -340,20 +340,20 @@ int find_help_tags(const char *arg, int *num_matches, char ***matches, bool keep
   };
   typval_T rettv;
   nlua_call_vimfn("vim._core.help", "escape_subject", tv_args, &rettv);
-  if (rettv.v_type != VAR_STRING || rettv.vval.v_string == NULL) {
+  if (rettv.v_type != VAR_STRING || rettv.vval.v_string == nullptr) {
     tv_clear(&rettv);
     return FAIL;
   }
   xstrlcpy(IObuff, rettv.vval.v_string, sizeof(IObuff));
   tv_clear(&rettv);
 
-  *matches = NULL;
+  *matches = nullptr;
   *num_matches = 0;
   int flags = TAG_HELP | TAG_REGEXP | TAG_NAMES | TAG_VERBOSE | TAG_NO_TAGFUNC;
   if (keep_lang) {
     flags |= TAG_KEEP_LANG;
   }
-  if (find_tags(IObuff, num_matches, matches, flags, MAXCOL, NULL) == OK
+  if (find_tags(IObuff, num_matches, matches, flags, MAXCOL, nullptr) == OK
       && *num_matches > 0) {
     // Sort the matches found on the heuristic number that is after the
     // tag name.
@@ -461,7 +461,7 @@ void prepare_help_buffer(void)
 void get_local_additions(void)
 {
   typval_T no_args[] = { { .v_type = VAR_UNKNOWN } };
-  nlua_call_vimfn("vim._core.help", "local_additions", no_args, NULL);
+  nlua_call_vimfn("vim._core.help", "local_additions", no_args, nullptr);
 }
 
 /// ":exusage"
@@ -527,7 +527,7 @@ static void helptags_one(char *dir, const char *ext, const char *tagfname, bool 
   }
 
   FILE *const fd_tags = os_fopen(NameBuff, "w");
-  if (fd_tags == NULL) {
+  if (fd_tags == nullptr) {
     if (!ignore_writeerr) {
       semsg(_("E152: Cannot open %s for writing"), NameBuff);
     }
@@ -549,7 +549,7 @@ static void helptags_one(char *dir, const char *ext, const char *tagfname, bool 
   // Go over all the files and extract the tags.
   for (int fi = 0; fi < filecount && !got_int; fi++) {
     FILE *const fd = os_fopen(files[fi], "r");
-    if (fd == NULL) {
+    if (fd == nullptr) {
       semsg(_("E153: Unable to open %s for reading"), files[fi]);
       continue;
     }
@@ -565,9 +565,9 @@ static void helptags_one(char *dir, const char *ext, const char *tagfname, bool 
         in_example = false;
       }
       char *p1 = vim_strchr(IObuff, '*');       // find first '*'
-      while (p1 != NULL) {
+      while (p1 != nullptr) {
         char *p2 = strchr(p1 + 1, '*');  // Find second '*'.
-        if (p2 != NULL && p2 > p1 + 1) {         // Skip "*" and "**".
+        if (p2 != nullptr && p2 > p1 + 1) {         // Skip "*" and "**".
           for (s = p1 + 1; s < p2; s++) {
             if (*s == ' ' || *s == '\t' || *s == '|') {
               break;
@@ -579,7 +579,7 @@ static void helptags_one(char *dir, const char *ext, const char *tagfname, bool 
           // followed by a white character or end-of-line.
           if (s == p2
               && (p1 == IObuff || p1[-1] == ' ' || p1[-1] == '\t')
-              && (vim_strchr(" \t\n\r", (uint8_t)s[1]) != NULL
+              && (vim_strchr(" \t\n\r", (uint8_t)s[1]) != nullptr
                   || s[1] == NUL)) {
             *p2 = NUL;
             p1++;
@@ -612,7 +612,7 @@ static void helptags_one(char *dir, const char *ext, const char *tagfname, bool 
 
   FreeWild(filecount, files);
 
-  if (!got_int && ga.ga_data != NULL) {
+  if (!got_int && ga.ga_data != nullptr) {
     // Sort the tags.
     sort_strings(ga.ga_data, ga.ga_len);
 
@@ -780,8 +780,8 @@ void ex_helptags(exarg_T *eap)
     ExpandInit(&xpc);
     xpc.xp_context = EXPAND_DIRECTORIES;
     char *dirname =
-      ExpandOne(&xpc, eap->arg, NULL, WILD_LIST_NOTFOUND|WILD_SILENT, WILD_EXPAND_FREE);
-    if (dirname == NULL || !os_isdir(dirname)) {
+      ExpandOne(&xpc, eap->arg, nullptr, WILD_LIST_NOTFOUND|WILD_SILENT, WILD_EXPAND_FREE);
+    if (dirname == nullptr || !os_isdir(dirname)) {
       semsg(_("E150: Not a directory: %s"), eap->arg);
     } else {
       do_helptags(dirname, add_help_tags, false);

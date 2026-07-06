@@ -43,25 +43,25 @@ void signal_init(void)
   // blocked, libuv may hang after spawning a subprocess on Linux. #5230
   sigset_t mask;
   sigemptyset(&mask);
-  if (pthread_sigmask(SIG_SETMASK, &mask, NULL) != 0) {
+  if (pthread_sigmask(SIG_SETMASK, &mask, nullptr) != 0) {
     ELOG("Could not unblock signals, nvim might behave strangely.");
   }
 #endif
 
-  signal_watcher_init(&main_loop, &spipe, NULL);
-  signal_watcher_init(&main_loop, &shup, NULL);
-  signal_watcher_init(&main_loop, &sint, NULL);
-  signal_watcher_init(&main_loop, &squit, NULL);
-  signal_watcher_init(&main_loop, &sterm, NULL);
-  signal_watcher_init(&main_loop, &ststp, NULL);
+  signal_watcher_init(&main_loop, &spipe, nullptr);
+  signal_watcher_init(&main_loop, &shup, nullptr);
+  signal_watcher_init(&main_loop, &sint, nullptr);
+  signal_watcher_init(&main_loop, &squit, nullptr);
+  signal_watcher_init(&main_loop, &sterm, nullptr);
+  signal_watcher_init(&main_loop, &ststp, nullptr);
 #ifdef SIGPWR
-  signal_watcher_init(&main_loop, &spwr, NULL);
+  signal_watcher_init(&main_loop, &spwr, nullptr);
 #endif
 #ifdef SIGUSR1
-  signal_watcher_init(&main_loop, &susr1, NULL);
+  signal_watcher_init(&main_loop, &susr1, nullptr);
 #endif
 #ifdef SIGWINCH
-  signal_watcher_init(&main_loop, &swinch, NULL);
+  signal_watcher_init(&main_loop, &swinch, nullptr);
 #endif
   signal_start();
 }
@@ -69,20 +69,20 @@ void signal_init(void)
 void signal_teardown(void)
 {
   signal_stop();
-  signal_watcher_close(&spipe, NULL);
-  signal_watcher_close(&shup, NULL);
-  signal_watcher_close(&sint, NULL);
-  signal_watcher_close(&squit, NULL);
-  signal_watcher_close(&sterm, NULL);
-  signal_watcher_close(&ststp, NULL);
+  signal_watcher_close(&spipe, nullptr);
+  signal_watcher_close(&shup, nullptr);
+  signal_watcher_close(&sint, nullptr);
+  signal_watcher_close(&squit, nullptr);
+  signal_watcher_close(&sterm, nullptr);
+  signal_watcher_close(&ststp, nullptr);
 #ifdef SIGPWR
-  signal_watcher_close(&spwr, NULL);
+  signal_watcher_close(&spwr, nullptr);
 #endif
 #ifdef SIGUSR1
-  signal_watcher_close(&susr1, NULL);
+  signal_watcher_close(&susr1, nullptr);
 #endif
 #ifdef SIGWINCH
-  signal_watcher_close(&swinch, NULL);
+  signal_watcher_close(&swinch, nullptr);
 #endif
 }
 

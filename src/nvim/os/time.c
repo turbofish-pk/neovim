@@ -77,8 +77,8 @@ void os_delay(uint64_t ms, bool ignoreinput)
   if (ms > INT_MAX) {
     ms = INT_MAX;
   }
-  LOOP_PROCESS_EVENTS_UNTIL(&main_loop, NULL, (int)ms,
-                            ignoreinput ? got_int : os_input_ready(NULL));
+  LOOP_PROCESS_EVENTS_UNTIL(&main_loop, nullptr, (int)ms,
+                            ignoreinput ? got_int : os_input_ready(nullptr));
 }
 
 /// Sleeps for `ms` milliseconds without checking for events or interrupts.
@@ -104,7 +104,7 @@ static char tz_cache[64];
 
 /// Portable version of POSIX localtime_r()
 ///
-/// @return NULL in case of error
+/// @return nullptr in case of error
 struct tm *os_localtime_r(const time_t *restrict clock,
                           struct tm *restrict result) FUNC_ATTR_NONNULL_ALL
 {
@@ -129,7 +129,7 @@ struct tm *os_localtime_r(const time_t *restrict clock,
   // See http://msdn.microsoft.com/en-us/library/bf12f0hc%28VS.80%29.aspx
   struct tm *local_time = localtime(clock);  // NOLINT(runtime/threadsafe_fn)
   if (!local_time) {
-    return NULL;
+    return nullptr;
   }
   *result = *local_time;
   return result;
@@ -140,10 +140,10 @@ struct tm *os_localtime_r(const time_t *restrict clock,
 ///
 /// @param result Pointer to a 'struct tm' where the result should be placed
 /// @return A pointer to a 'struct tm' in the current time zone (the 'result'
-///         argument) or NULL in case of error
+///         argument) or nullptr in case of error
 struct tm *os_localtime(struct tm *result) FUNC_ATTR_NONNULL_ALL
 {
-  time_t rawtime = time(NULL);
+  time_t rawtime = time(nullptr);
   return os_localtime_r(&rawtime, result);
 }
 
@@ -159,8 +159,8 @@ char *os_ctime_r(const time_t *restrict clock, char *restrict result, size_t res
 {
   struct tm clock_local;
   struct tm *clock_local_ptr = os_localtime_r(clock, &clock_local);
-  // MSVC returns NULL for an invalid value of seconds.
-  if (clock_local_ptr == NULL) {
+  // MSVC returns nullptr for an invalid value of seconds.
+  if (clock_local_ptr == nullptr) {
     xstrlcpy(result, _("(Invalid)"), result_len - 1);
   } else {
     // xgettext:no-c-format
@@ -186,7 +186,7 @@ char *os_ctime_r(const time_t *restrict clock, char *restrict result, size_t res
 char *os_ctime(char *result, size_t result_len, bool add_newline)
   FUNC_ATTR_NONNULL_ALL FUNC_ATTR_NONNULL_RET
 {
-  time_t rawtime = time(NULL);
+  time_t rawtime = time(nullptr);
   return os_ctime_r(&rawtime, result, result_len, add_newline);
 }
 
@@ -195,14 +195,14 @@ char *os_ctime(char *result, size_t result_len, bool add_newline)
 /// @param str[in]  string to convert
 /// @param format[in]  format to parse "str"
 /// @param tm[out]  time representation of "str"
-/// @return Pointer to first unprocessed character or NULL
+/// @return Pointer to first unprocessed character or nullptr
 char *os_strptime(const char *str, const char *format, struct tm *tm)
   FUNC_ATTR_NONNULL_ALL
 {
 #ifdef HAVE_STRPTIME
   return strptime(str, format, tm);
 #else
-  return NULL;
+  return nullptr;
 #endif
 }
 
@@ -212,5 +212,5 @@ char *os_strptime(const char *str, const char *format, struct tm *tm)
 Timestamp os_time(void)
   FUNC_ATTR_WARN_UNUSED_RESULT
 {
-  return (Timestamp)time(NULL);
+  return (Timestamp)time(nullptr);
 }

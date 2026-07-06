@@ -45,8 +45,8 @@ Object unpack(const char *data, size_t size, Arena *arena, Error *err)
 static void api_parse_enter(mpack_parser_t *parser, mpack_node_t *node)
 {
   Unpacker *p = parser->data.p;
-  Object *result = NULL;
-  String *key_location = NULL;
+  Object *result = nullptr;
+  String *key_location = nullptr;
 
   mpack_node_t *parent = MPACK_PARENT_NODE(node);
   if (parent) {
@@ -252,7 +252,7 @@ bool unpacker_parse_header(Unpacker *p)
       result = MPACK_EOF;
       goto error;
     }
-    // if this fails, p->handler.fn will be NULL
+    // if this fails, p->handler.fn will be nullptr
     p->handler = msgpack_rpc_get_handler_for(tok.length ? tok.data.chunk_ptr : "",
                                              tok.length, &p->unpack_error);
   }
@@ -416,7 +416,7 @@ bool unpacker_parse_redraw(Unpacker *p)
       return false;
     }
 
-    p->ui_handler = ui_client_get_redraw_handler(data, tok.length, NULL);
+    p->ui_handler = ui_client_get_redraw_handler(data, tok.length, nullptr);
     data += tok.length;
     size -= tok.length;
 
@@ -529,7 +529,7 @@ bool unpacker_parse_redraw(Unpacker *p)
 ///
 /// Data and size are preserved in cause of failure.
 ///
-/// @return "data" is NULL only when failure (non-null data and size=0 for
+/// @return "data" is nullptr only when failure (non-null data and size=0 for
 /// valid empty string)
 String unpack_string(const char **data, size_t *size)
 {
@@ -630,10 +630,10 @@ bool unpack_keydict(void *retval, FieldHashfn hashy, AdditionalDataBuilder *ad, 
     // TODO(bfredl): we could specialize a hot path for FIXSTR here
     String key = unpack_string(data, size);
     if (!key.data) {
-      *error = arena_printf(NULL, "has key value which is not a string").data;
+      *error = arena_printf(nullptr, "has key value which is not a string").data;
       return false;
     } else if (key.size == 0) {
-      *error = arena_printf(NULL, "has empty key").data;
+      *error = arena_printf(nullptr, "has empty key").data;
       return false;
     }
     KeySetLink *field = hashy(key.data, key.size);
@@ -662,7 +662,7 @@ bool unpack_keydict(void *retval, FieldHashfn hashy, AdditionalDataBuilder *ad, 
     switch (field->type) {
     case kObjectTypeBoolean:
       if (*size == 0 || (**data & 0xfe) != 0xc2) {
-        *error = arena_printf(NULL, "has %.*s key value which is not a boolean", (int)key.size,
+        *error = arena_printf(nullptr, "has %.*s key value which is not a boolean", (int)key.size,
                               key.data).data;
         return false;
       }
@@ -672,7 +672,7 @@ bool unpack_keydict(void *retval, FieldHashfn hashy, AdditionalDataBuilder *ad, 
 
     case kObjectTypeInteger:
       if (!unpack_integer(data, size, (Integer *)mem)) {
-        *error = arena_printf(NULL, "has %.*s key value which is not an integer", (int)key.size,
+        *error = arena_printf(nullptr, "has %.*s key value which is not an integer", (int)key.size,
                               key.data).data;
         return false;
       }
@@ -681,7 +681,7 @@ bool unpack_keydict(void *retval, FieldHashfn hashy, AdditionalDataBuilder *ad, 
     case kObjectTypeString: {
       String val = unpack_string(data, size);
       if (!val.data) {
-        *error = arena_printf(NULL, "has %.*s key value which is not a binary", (int)key.size,
+        *error = arena_printf(nullptr, "has %.*s key value which is not a binary", (int)key.size,
                               key.data).data;
         return false;
       }
@@ -692,7 +692,7 @@ bool unpack_keydict(void *retval, FieldHashfn hashy, AdditionalDataBuilder *ad, 
     case kUnpackTypeStringArray: {
       ssize_t len = unpack_array(data, size);
       if (len < 0) {
-        *error = arena_printf(NULL, "has %.*s key with non-array value", (int)key.size,
+        *error = arena_printf(nullptr, "has %.*s key with non-array value", (int)key.size,
                               key.data).data;
         return false;
       }
@@ -701,7 +701,7 @@ bool unpack_keydict(void *retval, FieldHashfn hashy, AdditionalDataBuilder *ad, 
       for (size_t j = 0; j < (size_t)len; j++) {
         String item = unpack_string(data, size);
         if (!item.data) {
-          *error = arena_printf(NULL, "has %.*s array with non-binary value", (int)key.size,
+          *error = arena_printf(nullptr, "has %.*s array with non-binary value", (int)key.size,
                                 key.data).data;
           return false;
         }

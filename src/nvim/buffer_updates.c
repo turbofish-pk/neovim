@@ -29,7 +29,7 @@
 bool buf_updates_register(buf_T *buf, uint64_t channel_id, BufUpdateCallbacks cb, bool send_buffer)
 {
   // must fail if the buffer isn't loaded
-  if (buf->b_ml.ml_mfp == NULL) {
+  if (buf->b_ml.ml_mfp == nullptr) {
     return false;
   }
 
@@ -73,7 +73,7 @@ bool buf_updates_register(buf_T *buf, uint64_t channel_id, BufUpdateCallbacks cb
     Arena arena = ARENA_EMPTY;
     if (line_count > 0) {
       linedata = arena_array(&arena, line_count);
-      buf_collect_lines(buf, line_count, 1, 0, true, &linedata, NULL, &arena);
+      buf_collect_lines(buf, line_count, 1, 0, true, &linedata, nullptr, &arena);
     }
 
     ADD_C(args, ARRAY_OBJ(linedata));
@@ -178,7 +178,7 @@ void buf_updates_unload(buf_T *buf, bool can_reload)
       ADD_C(args, BUFFER_OBJ(buf->handle));
 
       TEXTLOCK_WRAP({
-        nlua_call_ref(thecb, keep ? "reload" : "detach", args, false, NULL, NULL);
+        nlua_call_ref(thecb, keep ? "reload" : "detach", args, false, nullptr, nullptr);
       });
     }
 
@@ -218,7 +218,7 @@ void buf_updates_send_changes(buf_T *buf, linenr_T firstline, int64_t num_added,
     STATIC_ASSERT(SIZE_MAX >= MAXLNUM, "size_t smaller than MAXLNUM");
     linedata = arena_array(&arena, (size_t)num_added);
     buf_collect_lines(buf, (size_t)num_added, firstline, 0, true, &linedata,
-                      NULL, &arena);
+                      nullptr, &arena);
   }
 
   // notify each of the active channels
@@ -294,7 +294,7 @@ void buf_updates_send_changes(buf_T *buf, linenr_T firstline, int64_t num_added,
 
       Object res;
       TEXTLOCK_WRAP({
-        res = nlua_call_ref(cb.on_lines, "lines", args, kRetNilBool, NULL, NULL);
+        res = nlua_call_ref(cb.on_lines, "lines", args, kRetNilBool, nullptr, nullptr);
       });
 
       if (LUARET_TRUTHY(res)) {
@@ -344,7 +344,7 @@ void buf_updates_send_splice(buf_T *buf, int start_row, colnr_T start_col, bcoun
 
       Object res;
       TEXTLOCK_WRAP({
-        res = nlua_call_ref(cb.on_bytes, "bytes", args, kRetNilBool, NULL, NULL);
+        res = nlua_call_ref(cb.on_bytes, "bytes", args, kRetNilBool, nullptr, nullptr);
       });
 
       if (LUARET_TRUTHY(res)) {
@@ -380,7 +380,7 @@ void buf_updates_changedtick(buf_T *buf)
 
       Object res;
       TEXTLOCK_WRAP({
-        res = nlua_call_ref(cb.on_changedtick, "changedtick", args, kRetNilBool, NULL, NULL);
+        res = nlua_call_ref(cb.on_changedtick, "changedtick", args, kRetNilBool, nullptr, nullptr);
       });
 
       if (LUARET_TRUTHY(res)) {

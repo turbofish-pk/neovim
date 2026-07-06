@@ -75,7 +75,7 @@ static struct {
   { KDEF(suspend),   TERMKEY_TYPE_KEYSYM, TERMKEY_SYM_SUSPEND,   0 },
   { KDEF(undo),      TERMKEY_TYPE_KEYSYM, TERMKEY_SYM_UNDO,      0 },
   // { KDEF(up),        TERMKEY_TYPE_KEYSYM, TERMKEY_SYM_UP,        0 }, // redundant, driver-csi
-  { 0, NULL,         0,                   0,                     0 },
+  { 0, nullptr,         0,                   0,                     0 },
 };
 
 // To be efficient at lookups, we store the byte sequence => keyinfo mapping
@@ -128,7 +128,7 @@ static struct trie_node *new_node_arr(unsigned char min, unsigned char max)
 
   int i;
   for (i = min; i <= max; i++) {
-    n->arr[i - min] = NULL;
+    n->arr[i - min] = nullptr;
   }
 
   return (struct trie_node *)n;
@@ -143,13 +143,13 @@ static struct trie_node *lookup_next(struct trie_node *n, unsigned char b)
   case TYPE_ARR: {
     struct trie_node_arr *nar = (struct trie_node_arr *)n;
     if (b < nar->min || b > nar->max) {
-      return NULL;
+      return nullptr;
     }
     return nar->arr[b - nar->min];
   }
   }
 
-  return NULL;  // Never reached but keeps compiler happy
+  return nullptr;  // Never reached but keeps compiler happy
 }
 
 static void free_trie(struct trie_node *n)
@@ -175,7 +175,7 @@ static void free_trie(struct trie_node *n)
 static struct trie_node *compress_trie(struct trie_node *n)
 {
   if (!n) {
-    return NULL;
+    return nullptr;
   }
 
   switch (n->type) {
@@ -211,7 +211,7 @@ static struct trie_node *compress_trie(struct trie_node *n)
 static bool try_load_terminfo_key(TermKeyTI *ti, bool fn_nr, int key, bool shift, const char *name,
                                   struct keyinfo *info)
 {
-  const char *value = NULL;
+  const char *value = nullptr;
 
   if (ti->ti) {
     if (!fn_nr) {
@@ -287,7 +287,7 @@ static int load_terminfo(TermKeyTI *ti)
   // Finally mouse mode
   // This is overridden in nvim: we only want driver-csi mouse support
   if (false) {
-    const char *value = NULL;
+    const char *value = nullptr;
 
     if (ti->ti) {
       // value = ti->ti->keys[kTermKey_mouse][0];
@@ -310,22 +310,22 @@ static int load_terminfo(TermKeyTI *ti)
   // time we want to use it
   const char *keypad_xmit = ti->ti
                             ? ti->ti->defs[kTerm_keypad_xmit]
-                            : NULL;
+                            : nullptr;
 
   if (keypad_xmit) {
     ti->start_string = xstrdup(keypad_xmit);
   } else {
-    ti->start_string = NULL;
+    ti->start_string = nullptr;
   }
 
   const char *keypad_local = ti->ti
                              ? ti->ti->defs[kTerm_keypad_local]
-                             : NULL;
+                             : nullptr;
 
   if (keypad_local) {
     ti->stop_string = xstrdup(keypad_local);
   } else {
-    ti->stop_string = NULL;
+    ti->stop_string = nullptr;
   }
 
   ti->root = compress_trie(ti->root);
@@ -338,13 +338,13 @@ void *new_driver_ti(TermKey *tk, TerminfoEntry *term)
   TermKeyTI *ti = xmalloc(sizeof *ti);
 
   ti->tk = tk;
-  ti->root = NULL;
-  ti->start_string = NULL;
-  ti->stop_string = NULL;
+  ti->root = nullptr;
+  ti->start_string = nullptr;
+  ti->stop_string = nullptr;
 
   ti->ti = term;
 
-  // ti->ti may be NULL because reasons. That means the terminal wasn't
+  // ti->ti may be nullptr because reasons. That means the terminal wasn't
   // known. Lets keep going because if we get getstr hook that might invent
   // new strings for us
 
@@ -501,7 +501,7 @@ TermKeyResult peekkey_ti(TermKey *tk, void *info, TermKeyKey *key, int force, si
     return TERMKEY_RES_KEY;
   }
 
-  // If p is not NULL then we hadn't walked off the end yet, so we have a
+  // If p is not nullptr then we hadn't walked off the end yet, so we have a
   // partial match
   if (p && !force) {
     return TERMKEY_RES_AGAIN;

@@ -77,7 +77,7 @@ MPACK_API int mpack_rpc_receive_tok(mpack_rpc_session_t *session,
     return MPACK_RPC_EMSGID;
     
   msg->id = tok.data.value.lo;
-  msg->data.p = NULL;
+  msg->data.p = nullptr;
   type = (int)session->receive.toks[1].data.value.lo + MPACK_RPC_REQUEST;
 
   if (type == MPACK_RPC_RESPONSE && !mpack_rpc_pop(session, msg))
@@ -284,7 +284,7 @@ static mpack_rpc_header_t mpack_rpc_notify_hdr(void)
 
 static int mpack_rpc_put(mpack_rpc_session_t *session, mpack_rpc_message_t msg)
 {
-  struct mpack_rpc_slot_s *slot = NULL;
+  struct mpack_rpc_slot_s *slot = nullptr;
   mpack_uint32_t i;
   mpack_uint32_t hash = msg.id % session->capacity;
 
@@ -305,7 +305,7 @@ static int mpack_rpc_put(mpack_rpc_session_t *session, mpack_rpc_message_t msg)
 
 static int mpack_rpc_pop(mpack_rpc_session_t *session, mpack_rpc_message_t *msg)
 {
-  struct mpack_rpc_slot_s *slot = NULL;
+  struct mpack_rpc_slot_s *slot = nullptr;
   mpack_uint32_t i;
   mpack_uint32_t hash = msg->id % session->capacity;
 

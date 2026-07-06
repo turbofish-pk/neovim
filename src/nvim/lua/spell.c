@@ -28,7 +28,7 @@ int nlua_spell_check(lua_State *lstate)
     luaL_argerror(lstate, 1, "expected string");
   }
 
-  const char *str = lua_tolstring(lstate, 1, NULL);
+  const char *str = lua_tolstring(lstate, 1, nullptr);
 
   // spell.c requires that 'spell' is enabled, so we need to temporarily enable
   // it before we can call spell functions.
@@ -69,9 +69,9 @@ int nlua_spell_check(lua_State *lstate)
                ? "bad" : (attr == HLF_SPR
                           ? "rare" : (attr == HLF_SPL
                                       ? "local" : (attr == HLF_SPC
-                                                   ? "caps" : NULL)));
+                                                   ? "caps" : nullptr)));
 
-      assert(result != NULL);
+      assert(result != nullptr);
 
       lua_pushstring(lstate, result);
       lua_rawseti(lstate, -2, 2);
@@ -95,13 +95,13 @@ int nlua_spell_check(lua_State *lstate)
 
 static const luaL_Reg spell_functions[] = {
   { "check", nlua_spell_check },
-  { NULL, NULL }
+  { nullptr, nullptr }
 };
 
 int luaopen_spell(lua_State *L)
   FUNC_ATTR_NONNULL_ALL
 {
   lua_newtable(L);
-  luaL_register(L, NULL, spell_functions);
+  luaL_register(L, nullptr, spell_functions);
   return 1;
 }

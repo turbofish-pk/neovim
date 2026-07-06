@@ -87,28 +87,28 @@ static char SHM_ALL[] = { SHM_RO, SHM_MOD, SHM_LINES,
 /// option values.
 void didset_string_options(void)
 {
-  check_str_opt(kOptCasemap, NULL);
-  check_str_opt(kOptBackupcopy, NULL);
-  check_str_opt(kOptBelloff, NULL);
-  check_str_opt(kOptCompleteopt, NULL);
-  check_str_opt(kOptSessionoptions, NULL);
-  check_str_opt(kOptViewoptions, NULL);
-  check_str_opt(kOptFoldopen, NULL);
-  check_str_opt(kOptDisplay, NULL);
-  check_str_opt(kOptJumpoptions, NULL);
-  check_str_opt(kOptRedrawdebug, NULL);
-  check_str_opt(kOptTagcase, NULL);
-  check_str_opt(kOptTermpastefilter, NULL);
-  check_str_opt(kOptVirtualedit, NULL);
-  check_str_opt(kOptSwitchbuf, NULL);
-  check_str_opt(kOptTabclose, NULL);
-  check_str_opt(kOptWildoptions, NULL);
-  check_str_opt(kOptClipboard, NULL);
+  check_str_opt(kOptCasemap, nullptr);
+  check_str_opt(kOptBackupcopy, nullptr);
+  check_str_opt(kOptBelloff, nullptr);
+  check_str_opt(kOptCompleteopt, nullptr);
+  check_str_opt(kOptSessionoptions, nullptr);
+  check_str_opt(kOptViewoptions, nullptr);
+  check_str_opt(kOptFoldopen, nullptr);
+  check_str_opt(kOptDisplay, nullptr);
+  check_str_opt(kOptJumpoptions, nullptr);
+  check_str_opt(kOptRedrawdebug, nullptr);
+  check_str_opt(kOptTagcase, nullptr);
+  check_str_opt(kOptTermpastefilter, nullptr);
+  check_str_opt(kOptVirtualedit, nullptr);
+  check_str_opt(kOptSwitchbuf, nullptr);
+  check_str_opt(kOptTabclose, nullptr);
+  check_str_opt(kOptWildoptions, nullptr);
+  check_str_opt(kOptClipboard, nullptr);
 }
 
 char *illegal_char(char *errbuf, size_t errbuflen, int c)
 {
-  if (errbuf == NULL) {
+  if (errbuf == nullptr) {
     return "";
   }
   vim_snprintf(errbuf, errbuflen, _("E539: Illegal character <%s>"),
@@ -118,14 +118,14 @@ char *illegal_char(char *errbuf, size_t errbuflen, int c)
 
 static char *illegal_char_after_chr(char *errbuf, size_t errbuflen, int c)
 {
-  if (errbuf == NULL) {
+  if (errbuf == nullptr) {
     return "";
   }
   vim_snprintf(errbuf, errbuflen, _(e_illegal_character_after_chr), c);
   return errbuf;
 }
 
-/// Check string options in a buffer for NULL value.
+/// Check string options in a buffer for nullptr value.
 void check_buf_options(buf_T *buf)
 {
   check_string_option(&buf->b_p_bh);
@@ -190,7 +190,7 @@ void check_buf_options(buf_T *buf)
 
 /// Free the string allocated for an option.
 /// Checks for the string being empty_string_option. This may happen if we're out of memory,
-/// xstrdup() returned NULL, which was replaced by empty_string_option by check_options().
+/// xstrdup() returned nullptr, which was replaced by empty_string_option by check_options().
 void free_string_option(char *p)
 {
   if (p != empty_string_option) {
@@ -208,7 +208,7 @@ void clear_string_option(char **pp)
 
 void check_string_option(char **pp)
 {
-  if (*pp == NULL) {
+  if (*pp == nullptr) {
     *pp = empty_string_option;
   }
 }
@@ -223,16 +223,16 @@ static bool valid_filetype(const char *val)
 
 /// Handle setting 'signcolumn' for value 'val'. Store minimum and maximum width.
 ///
-/// @param wcl  when NULL: use "wp->w_p_scl"
-/// @param wp   when NULL: only parse "scl"
+/// @param wcl  when nullptr: use "wp->w_p_scl"
+/// @param wp   when nullptr: only parse "scl"
 ///
 /// @return OK when the value is valid, FAIL otherwise
 int check_signcolumn(char *scl, win_T *wp)
 {
   char *val = empty_string_option;
-  if (scl != NULL) {
+  if (scl != nullptr) {
     val = scl;
-  } else if (wp != NULL) {
+  } else if (wp != nullptr) {
     val = wp->w_p_scl;
   }
 
@@ -240,8 +240,8 @@ int check_signcolumn(char *scl, win_T *wp)
     return FAIL;
   }
 
-  if (opt_strings_flags(val, opt_scl_values, NULL, false) == OK) {
-    if (wp == NULL) {
+  if (opt_strings_flags(val, opt_scl_values, nullptr, false) == OK) {
+    if (wp == nullptr) {
       return OK;
     }
     if (!strncmp(val, "no", 2)) {  // no
@@ -273,7 +273,7 @@ int check_signcolumn(char *scl, win_T *wp)
     if (min < 1 || max < 2 || min > 8 || min >= max) {
       return FAIL;
     }
-    if (wp == NULL) {
+    if (wp == nullptr) {
       return OK;
     }
     wp->w_minscwidth = min;
@@ -286,7 +286,7 @@ int check_signcolumn(char *scl, win_T *wp)
 }
 
 /// Check validity of options with the 'statusline' format.
-/// Return an untranslated error message or NULL.
+/// Return an untranslated error message or nullptr.
 const char *check_stl_option(char *s)
 {
   int groupdepth = 0;
@@ -331,7 +331,7 @@ const char *check_stl_option(char *s)
       groupdepth++;
       continue;
     }
-    if (vim_strchr(STL_ALL, (uint8_t)(*s)) == NULL) {
+    if (vim_strchr(STL_ALL, (uint8_t)(*s)) == nullptr) {
       return illegal_char(errbuf, sizeof(errbuf), (uint8_t)(*s));
     }
     if (*s == '{') {
@@ -352,7 +352,7 @@ const char *check_stl_option(char *s)
   if (groupdepth != 0) {
     return e_unbalanced_groups;
   }
-  return NULL;
+  return nullptr;
 }
 
 /// Check for a "normal" directory or file name in some options.  Disallow a
@@ -361,9 +361,9 @@ const char *check_stl_option(char *s)
 bool check_illegal_path_names(char *val, uint32_t flags)
 {
   return (((flags & kOptFlagNFname)
-           && strpbrk(val, (secure ? "/\\*?[|;&<>\r\n" : "/\\*?[<>\r\n")) != NULL)
+           && strpbrk(val, (secure ? "/\\*?[|;&<>\r\n" : "/\\*?[<>\r\n")) != nullptr)
           || ((flags & kOptFlagNDname)
-              && strpbrk(val, "*?[|;&<>\r\n") != NULL));
+              && strpbrk(val, "*?[|;&<>\r\n") != nullptr));
 }
 
 /// An option that accepts a list of flags is changed.
@@ -373,7 +373,7 @@ static const char *did_set_opt_flags(char *val, const char **values, unsigned *f
   if (opt_strings_flags(val, values, flagp, list) != OK) {
     return e_invarg;
   }
-  return NULL;
+  return nullptr;
 }
 
 static const char **opt_values(OptIndex idx, size_t *values_len)
@@ -383,7 +383,7 @@ static const char **opt_values(OptIndex idx, size_t *values_len)
                                                                   : idx;
 
   vimoption_T *opt = get_option(idx1);
-  if (values_len != NULL) {
+  if (values_len != nullptr) {
     *values_len = opt->values_len;
   }
   return opt->values;
@@ -392,11 +392,11 @@ static const char **opt_values(OptIndex idx, size_t *values_len)
 static int check_str_opt(OptIndex idx, char **varp)
 {
   vimoption_T *opt = get_option(idx);
-  if (varp == NULL) {
+  if (varp == nullptr) {
     varp = opt->var;
   }
   bool list = opt->flags & (kOptFlagComma | kOptFlagOneComma);
-  const char **values = opt_values(idx, NULL);
+  const char **values = opt_values(idx, nullptr);
   return opt_strings_flags(*varp, values, opt->flags_var, list);
 }
 
@@ -409,19 +409,19 @@ int expand_set_str_generic(optexpand_T *args, int *numMatches, char ***matches)
 
 const char *did_set_str_generic(optset_T *args)
 {
-  return check_str_opt(args->os_idx, args->os_varp) != OK ? e_invarg : NULL;
+  return check_str_opt(args->os_idx, args->os_varp) != OK ? e_invarg : nullptr;
 }
 
 /// An option which is a list of flags is set.  Valid values are in "flags".
 static const char *did_set_option_listflag(char *val, char *flags, char *errbuf, size_t errbuflen)
 {
   for (char *s = val; *s; s++) {
-    if (vim_strchr(flags, (uint8_t)(*s)) == NULL) {
+    if (vim_strchr(flags, (uint8_t)(*s)) == nullptr) {
       return illegal_char(errbuf, errbuflen, (uint8_t)(*s));
     }
   }
 
-  return NULL;
+  return nullptr;
 }
 
 /// Expand an option that accepts a list of string values.
@@ -442,7 +442,7 @@ static int expand_set_opt_string(optexpand_T *args, const char **values, size_t 
     (*matches)[count++] = xstrdup(option_val);
   }
 
-  for (const char **val = values; *val != NULL; val++) {
+  for (const char **val = values; *val != nullptr; val++) {
     if (**val == NUL) {
       continue;  // Ignore empty
     } else if (include_orig_val && *option_val != NUL) {
@@ -462,14 +462,14 @@ static int expand_set_opt_string(optexpand_T *args, const char **values, size_t 
   return OK;
 }
 
-static char *set_opt_callback_orig_option = NULL;
+static char *set_opt_callback_orig_option = nullptr;
 static char *((*set_opt_callback_func)(expand_T *, int));
 
 /// Callback used by expand_set_opt_generic to also include the original value.
 static char *expand_set_opt_callback(expand_T *xp, int idx)
 {
   if (idx == 0) {
-    if (set_opt_callback_orig_option != NULL) {
+    if (set_opt_callback_orig_option != nullptr) {
       return set_opt_callback_orig_option;
     } else {
       return "";  // empty strings are ignored
@@ -482,15 +482,15 @@ static char *expand_set_opt_callback(expand_T *xp, int idx)
 static int expand_set_opt_generic(optexpand_T *args, CompleteListItemGetter func, int *numMatches,
                                   char ***matches)
 {
-  set_opt_callback_orig_option = args->oe_include_orig_val ? args->oe_opt_value : NULL;
+  set_opt_callback_orig_option = args->oe_include_orig_val ? args->oe_opt_value : nullptr;
   set_opt_callback_func = func;
 
   // not using fuzzy as currently EXPAND_STRING_SETTING doesn't use it
   ExpandGeneric("", args->oe_xp, args->oe_regmatch, matches, numMatches,
                 expand_set_opt_callback, false);
 
-  set_opt_callback_orig_option = NULL;
-  set_opt_callback_func = NULL;
+  set_opt_callback_orig_option = nullptr;
+  set_opt_callback_func = nullptr;
   return OK;
 }
 
@@ -514,11 +514,11 @@ static int expand_set_opt_listflag(optexpand_T *args, char *flags, int *numMatch
   }
 
   for (char *flag = flags; *flag != NUL; flag++) {
-    if (append && vim_strchr(option_val, *flag) != NULL) {
+    if (append && vim_strchr(option_val, *flag) != nullptr) {
       continue;
     }
 
-    if (vim_strchr(cmdline_val, *flag) == NULL) {
+    if (vim_strchr(cmdline_val, *flag) == nullptr) {
       if (include_orig_val && option_val[1] == NUL && *flag == option_val[0]) {
         // This value is already used as the first choice as it's the
         // existing flag. Just skip it to avoid duplicate.
@@ -549,7 +549,7 @@ static bool completing_value_for_subopt(optexpand_T *args, const char *name_suff
 const char *did_set_ambiwidth(optset_T *args)
 {
   const char *errmsg = did_set_str_generic(args);
-  if (errmsg != NULL) {
+  if (errmsg != nullptr) {
     return errmsg;
   }
   return check_chars_options();
@@ -558,7 +558,7 @@ const char *did_set_ambiwidth(optset_T *args)
 /// The 'emoji' option is changed.
 const char *did_set_emoji(optset_T *args)
 {
-  if (check_str_opt(kOptAmbiwidth, NULL) != OK) {
+  if (check_str_opt(kOptAmbiwidth, nullptr) != OK) {
     return e_invarg;
   }
   return check_chars_options();
@@ -568,20 +568,20 @@ const char *did_set_emoji(optset_T *args)
 const char *did_set_background(optset_T *args)
 {
   const char *errmsg = did_set_str_generic(args);
-  if (errmsg != NULL) {
+  if (errmsg != nullptr) {
     return errmsg;
   }
 
   if (args->os_oldval.string.data[0] == *p_bg) {
     // Value was not changed
-    return NULL;
+    return nullptr;
   }
 
   int dark = (*p_bg == 'd');
 
   init_highlight(false, false);
 
-  if (dark != (*p_bg == 'd') && get_var_value("g:colors_name") != NULL) {
+  if (dark != (*p_bg == 'd') && get_var_value("g:colors_name") != nullptr) {
     // The color scheme must have set 'background' back to another
     // value, that's not what we want here.  Disable the color
     // scheme and set the colors again.
@@ -600,7 +600,7 @@ const char *did_set_background(optset_T *args)
     }
   }
 
-  return NULL;
+  return nullptr;
 }
 
 /// The 'backspace' option is changed.
@@ -610,7 +610,7 @@ const char *did_set_backspace(optset_T *args FUNC_ATTR_UNUSED)
     if (*p_bs != '2') {
       return e_invarg;
     }
-    return NULL;
+    return nullptr;
   }
   return did_set_str_generic(args);
 }
@@ -649,7 +649,7 @@ const char *did_set_backupcopy(optset_T *args)
     }
   }
 
-  return NULL;
+  return nullptr;
 }
 
 /// The 'backupext' or the 'patchmode' option is changed.
@@ -660,7 +660,7 @@ const char *did_set_backupext_or_patchmode(optset_T *args FUNC_ATTR_UNUSED)
     return e_backupext_and_patchmode_are_equal;
   }
 
-  return NULL;
+  return nullptr;
 }
 
 /// The 'breakat' option is changed.
@@ -670,13 +670,13 @@ const char *did_set_breakat(optset_T *args FUNC_ATTR_UNUSED)
     breakat_flags[i] = false;
   }
 
-  if (p_breakat != NULL) {
+  if (p_breakat != nullptr) {
     for (char *p = p_breakat; *p; p++) {
       breakat_flags[(uint8_t)(*p)] = true;
     }
   }
 
-  return NULL;
+  return nullptr;
 }
 
 /// The 'breakindentopt' option is changed.
@@ -685,7 +685,7 @@ const char *did_set_breakindentopt(optset_T *args)
   win_T *win = (win_T *)args->os_win;
   char **varp = (char **)args->os_varp;
 
-  if (briopt_check(*varp, varp == &win->w_p_briopt ? win : NULL) == FAIL) {
+  if (briopt_check(*varp, varp == &win->w_p_briopt ? win : nullptr) == FAIL) {
     return e_invarg;
   }
 
@@ -694,14 +694,14 @@ const char *did_set_breakindentopt(optset_T *args)
     redraw_all_later(UPD_NOT_VALID);
   }
 
-  return NULL;
+  return nullptr;
 }
 
 /// The 'bufhidden' option is changed.
 const char *did_set_bufhidden(optset_T *args)
 {
   buf_T *buf = (buf_T *)args->os_buf;
-  return did_set_opt_flags(buf->b_p_bh, opt_bh_values, NULL, false);
+  return did_set_opt_flags(buf->b_p_bh, opt_bh_values, nullptr, false);
 }
 
 /// The 'buftype' option is changed.
@@ -712,7 +712,7 @@ const char *did_set_buftype(optset_T *args)
   // When 'buftype' is set, check for valid value.
   if ((buf->terminal && buf->b_p_bt[0] != 't')
       || (!buf->terminal && buf->b_p_bt[0] == 't')
-      || opt_strings_flags(buf->b_p_bt, opt_bt_values, NULL, false) != OK) {
+      || opt_strings_flags(buf->b_p_bt, opt_bt_values, nullptr, false) != OK) {
     return e_invarg;
   }
   // buftype=prompt:
@@ -730,14 +730,14 @@ const char *did_set_buftype(optset_T *args)
   }
   buf->b_help = (buf->b_p_bt[0] == 'h');
   redraw_titles();
-  return NULL;
+  return nullptr;
 }
 
 /// The global 'listchars' or 'fillchars' option is changed.
 static const char *did_set_global_chars_option(win_T *win, char *val, CharsOption what,
                                                int opt_flags, char *errbuf, size_t errbuflen)
 {
-  const char *errmsg = NULL;
+  const char *errmsg = nullptr;
   char **local_ptr = (what == kListchars) ? &win->w_p_lcs : &win->w_p_fcs;
 
   // only apply the global value to "win" when it does not have a
@@ -745,7 +745,7 @@ static const char *did_set_global_chars_option(win_T *win, char *val, CharsOptio
   errmsg = set_chars_option(win, val, what,
                             **local_ptr == NUL || !(opt_flags & OPT_GLOBAL),
                             errbuf, errbuflen);
-  if (errmsg != NULL) {
+  if (errmsg != nullptr) {
     return errmsg;
   }
 
@@ -768,7 +768,7 @@ static const char *did_set_global_chars_option(win_T *win, char *val, CharsOptio
 
   redraw_all_later(UPD_NOT_VALID);
 
-  return NULL;
+  return nullptr;
 }
 
 /// The 'fillchars' option or the 'listchars' option is changed.
@@ -776,7 +776,7 @@ const char *did_set_chars_option(optset_T *args)
 {
   win_T *win = (win_T *)args->os_win;
   char **varp = (char **)args->os_varp;
-  const char *errmsg = NULL;
+  const char *errmsg = nullptr;
 
   if (varp == &p_lcs) {      // global 'listchars'
     errmsg = did_set_global_chars_option(win, *varp, kListchars, args->os_flags,
@@ -813,7 +813,7 @@ const char *did_set_cinoptions(optset_T *args)
   // TODO(vim): recognize errors
   parse_cino(buf);
 
-  return NULL;
+  return nullptr;
 }
 
 /// The 'colorcolumn' option is changed.
@@ -821,17 +821,17 @@ const char *did_set_colorcolumn(optset_T *args)
 {
   win_T *win = (win_T *)args->os_win;
   char **varp = (char **)args->os_varp;
-  return check_colorcolumn(*varp, varp == &win->w_p_cc ? win : NULL);
+  return check_colorcolumn(*varp, varp == &win->w_p_cc ? win : nullptr);
 }
 
 /// The 'comments' option is changed.
 const char *did_set_comments(optset_T *args)
 {
   char **varp = (char **)args->os_varp;
-  char *errmsg = NULL;
+  char *errmsg = nullptr;
   for (char *s = *varp; *s;) {
     while (*s && *s != ':') {
-      if (vim_strchr(COM_ALL, (uint8_t)(*s)) == NULL
+      if (vim_strchr(COM_ALL, (uint8_t)(*s)) == nullptr
           && !ascii_isdigit(*s) && *s != '-') {
         errmsg = illegal_char(args->os_errbuf, args->os_errbuflen, (uint8_t)(*s));
         break;
@@ -843,7 +843,7 @@ const char *did_set_comments(optset_T *args)
     } else if (*s == ',' || *s == NUL) {
       errmsg = N_("E525: Zero length string");
     }
-    if (errmsg != NULL) {
+    if (errmsg != nullptr) {
       break;
     }
     while (*s && *s != ',') {
@@ -862,10 +862,10 @@ const char *did_set_commentstring(optset_T *args)
 {
   char **varp = (char **)args->os_varp;
 
-  if (**varp != NUL && strstr(*varp, "%s") == NULL) {
+  if (**varp != NUL && strstr(*varp, "%s") == nullptr) {
     return N_("E537: 'commentstring' must be empty or contain %s");
   }
-  return NULL;
+  return nullptr;
 }
 
 /// Check if value for 'complete' is valid when 'complete' option is changed.
@@ -893,17 +893,17 @@ const char *did_set_complete(optset_T *args)
     }
     *buf_ptr = NUL;
 
-    if (vim_strchr(".wbuksid]tUfFo", (uint8_t)(*buffer)) == NULL) {
+    if (vim_strchr(".wbuksid]tUfFo", (uint8_t)(*buffer)) == nullptr) {
       return illegal_char(args->os_errbuf, args->os_errbuflen, (uint8_t)(*buffer));
     }
 
-    if (vim_strchr("ksF", (uint8_t)(*buffer)) == NULL && *(buffer + 1) != NUL
+    if (vim_strchr("ksF", (uint8_t)(*buffer)) == nullptr && *(buffer + 1) != NUL
         && *(buffer + 1) != '^') {
       char_before = (uint8_t)(*buffer);
     } else {
       char *t;
       // Test for a number after '^'
-      if ((t = vim_strchr(buffer, '^')) != NULL) {
+      if ((t = vim_strchr(buffer, '^')) != nullptr) {
         *t++ = NUL;
         if (!*t) {
           char_before = '^';
@@ -918,11 +918,11 @@ const char *did_set_complete(optset_T *args)
       }
     }
     if (char_before != NUL) {
-      if (args->os_errbuf != NULL) {
+      if (args->os_errbuf != nullptr) {
         return illegal_char_after_chr(args->os_errbuf, args->os_errbuflen,
                                       char_before);
       }
-      return NULL;
+      return nullptr;
     }
     // Skip comma and spaces
     while (*p == ',' || *p == ' ') {
@@ -933,7 +933,7 @@ const char *did_set_complete(optset_T *args)
   if (set_cpt_callbacks(args) != OK) {
     return illegal_char_after_chr(args->os_errbuf, args->os_errbuflen, 'F');
   }
-  return NULL;
+  return nullptr;
 }
 
 /// The 'completeitemalign' option is changed.
@@ -978,7 +978,7 @@ const char *did_set_completeitemalign(optset_T *args)
     return e_invarg;
   }
   cia_flags = new_cia_flags;
-  return NULL;
+  return nullptr;
 }
 
 /// The 'completeopt' option is changed.
@@ -1000,7 +1000,7 @@ const char *did_set_completeopt(optset_T *args FUNC_ATTR_UNUSED)
     return e_invarg;
   }
 
-  return NULL;
+  return nullptr;
 }
 
 #ifdef BACKSLASH_IN_FILENAME
@@ -1008,11 +1008,11 @@ const char *did_set_completeopt(optset_T *args FUNC_ATTR_UNUSED)
 const char *did_set_completeslash(optset_T *args)
 {
   buf_T *buf = (buf_T *)args->os_buf;
-  if (opt_strings_flags(p_csl, opt_csl_values, NULL, false) != OK
-      || opt_strings_flags(buf->b_p_csl, opt_csl_values, NULL, false) != OK) {
+  if (opt_strings_flags(p_csl, opt_csl_values, nullptr, false) != OK
+      || opt_strings_flags(buf->b_p_csl, opt_csl_values, nullptr, false) != OK) {
     return e_invarg;
   }
-  return NULL;
+  return nullptr;
 }
 #endif
 
@@ -1053,7 +1053,7 @@ const char *did_set_cursorlineopt(optset_T *args)
     return e_invarg;
   }
 
-  return NULL;
+  return nullptr;
 }
 
 /// The 'diffanchors' option is changed.
@@ -1063,13 +1063,13 @@ const char *did_set_diffanchors(optset_T *args)
     return e_invarg;
   }
 
-  return NULL;
+  return nullptr;
 }
 
 /// The 'diffopt' option is changed.
 const char *did_set_diffopt(optset_T *args FUNC_ATTR_UNUSED)
 {
-  return diffopt_changed() == FAIL ? e_invarg : NULL;
+  return diffopt_changed() == FAIL ? e_invarg : nullptr;
 }
 
 int expand_set_diffopt(optexpand_T *args, int *numMatches, char ***matches)
@@ -1101,12 +1101,12 @@ int expand_set_diffopt(optexpand_T *args, int *numMatches, char ***matches)
 const char *did_set_display(optset_T *args)
 {
   const char *errmsg = did_set_str_generic(args);
-  if (errmsg != NULL) {
+  if (errmsg != nullptr) {
     return errmsg;
   }
   init_chartab();
   msg_grid_validate();
-  return NULL;
+  return nullptr;
 }
 
 /// One of the 'encoding', 'fileencoding' or 'makeencoding'
@@ -1118,14 +1118,14 @@ const char *did_set_encoding(optset_T *args)
   int opt_flags = args->os_flags;
   // Get the global option to compare with, otherwise we would have to check
   // two values for all local options.
-  char **gvarp = (char **)get_option_varp_scope_from(args->os_idx, OPT_GLOBAL, buf, NULL);
+  char **gvarp = (char **)get_option_varp_scope_from(args->os_idx, OPT_GLOBAL, buf, nullptr);
 
   if (gvarp == &p_fenc) {
     if (!MODIFIABLE(buf) && opt_flags != OPT_GLOBAL) {
       return e_modifiable;
     }
 
-    if (vim_strchr(*varp, ',') != NULL) {
+    if (vim_strchr(*varp, ',') != nullptr) {
       // No comma allowed in 'fileencoding'; catches confusing it
       // with 'fileencodings'.
       return e_invarg;
@@ -1148,7 +1148,7 @@ const char *did_set_encoding(optset_T *args)
     }
     spell_reload();
   }
-  return NULL;
+  return nullptr;
 }
 
 int expand_set_encoding(optexpand_T *args, int *numMatches, char ***matches)
@@ -1164,7 +1164,7 @@ const char *did_set_eventignore(optset_T *args)
   if (check_ei(*varp) == FAIL) {
     return e_invarg;
   }
-  return NULL;
+  return nullptr;
 }
 
 static bool expand_eiw = false;
@@ -1179,8 +1179,8 @@ static char *get_eventignore_name(expand_T *xp, int idx)
   }
 
   char *name = get_event_name_no_group(xp, idx - 1 + subtract, expand_eiw);
-  if (name == NULL) {
-    return NULL;
+  if (name == nullptr) {
+    return nullptr;
   }
 
   snprintf(IObuff, IOSIZE, "%s%s", subtract ? "-" : "", name);
@@ -1204,7 +1204,7 @@ const char *did_set_fileformat(optset_T *args)
   }
 
   const char *errmsg = did_set_str_generic(args);
-  if (errmsg != NULL) {
+  if (errmsg != nullptr) {
     return errmsg;
   }
 
@@ -1216,7 +1216,7 @@ const char *did_set_fileformat(optset_T *args)
   if (get_fileformat(buf) == EOL_MAC || *oldval == 'm') {
     redraw_buf_later(buf, UPD_NOT_VALID);
   }
-  return NULL;
+  return nullptr;
 }
 
 /// Function given to ExpandGeneric() to obtain the possible arguments of the
@@ -1224,7 +1224,7 @@ const char *did_set_fileformat(optset_T *args)
 char *get_fileformat_name(expand_T *xp FUNC_ATTR_UNUSED, int idx)
 {
   if (idx >= (int)ARRAY_SIZE(opt_ff_values)) {
-    return NULL;
+    return nullptr;
   }
 
   return (char *)opt_ff_values[idx];
@@ -1245,7 +1245,7 @@ const char *did_set_filetype_or_syntax(optset_T *args)
   // even when the value comes from a modeline.
   args->os_value_checked = true;
 
-  return NULL;
+  return nullptr;
 }
 
 /// The 'foldexpr' option is changed.
@@ -1256,7 +1256,7 @@ const char *did_set_foldexpr(optset_T *args)
   if (foldmethodIsExpr(win)) {
     foldUpdateAll(win);
   }
-  return NULL;
+  return nullptr;
 }
 
 /// The 'foldignore' option is changed.
@@ -1266,7 +1266,7 @@ const char *did_set_foldignore(optset_T *args)
   if (foldmethodIsIndent(win)) {
     foldUpdateAll(win);
   }
-  return NULL;
+  return nullptr;
 }
 
 /// The 'foldmarker' option is changed.
@@ -1276,7 +1276,7 @@ const char *did_set_foldmarker(optset_T *args)
   char **varp = (char **)args->os_varp;
   char *p = vim_strchr(*varp, ',');
 
-  if (p == NULL) {
+  if (p == nullptr) {
     return e_comma_required;
   }
 
@@ -1288,14 +1288,14 @@ const char *did_set_foldmarker(optset_T *args)
     foldUpdateAll(win);
   }
 
-  return NULL;
+  return nullptr;
 }
 
 /// The 'foldmethod' option is changed.
 const char *did_set_foldmethod(optset_T *args)
 {
   const char *errmsg = did_set_str_generic(args);
-  if (errmsg != NULL) {
+  if (errmsg != nullptr) {
     return errmsg;
   }
   win_T *win = (win_T *)args->os_win;
@@ -1303,7 +1303,7 @@ const char *did_set_foldmethod(optset_T *args)
   if (foldmethodIsDiff(win)) {
     newFoldLevel();
   }
-  return NULL;
+  return nullptr;
 }
 
 /// The 'formatoptions' option is changed.
@@ -1323,14 +1323,14 @@ int expand_set_formatoptions(optexpand_T *args, int *numMatches, char ***matches
 const char *did_set_guicursor(optset_T *args FUNC_ATTR_UNUSED)
 {
   const char *errmsg = parse_shape_opt(SHAPE_CURSOR);
-  if (errmsg != NULL) {
+  if (errmsg != nullptr) {
     return errmsg;
   }
   if (VIsual_active) {
     // In Visual mode cursor may be drawn differently.
     redrawWinline(curwin, curwin->w_cursor.lnum);
   }
-  return NULL;
+  return nullptr;
 }
 
 /// The 'helpfile' option is changed.
@@ -1343,7 +1343,7 @@ const char *did_set_helpfile(optset_T *args FUNC_ATTR_UNUSED)
   if (didset_vimruntime) {
     vim_unsetenv_ext("VIMRUNTIME");
   }
-  return NULL;
+  return nullptr;
 }
 
 /// The 'helplang' option is changed.
@@ -1358,7 +1358,7 @@ const char *did_set_helplang(optset_T *args FUNC_ATTR_UNUSED)
       break;
     }
   }
-  return NULL;
+  return nullptr;
 }
 
 /// The 'highlight' option is changed.
@@ -1369,7 +1369,7 @@ const char *did_set_highlight(optset_T *args)
   if (strcmp(*varp, HIGHLIGHT_INIT) != 0) {
     return e_unsupportedoption;
   }
-  return NULL;
+  return nullptr;
 }
 
 /// The 'iconstring' option is changed.
@@ -1400,7 +1400,7 @@ const char *did_set_iskeyword(optset_T *args)
     return did_set_isopt(args);
   }
 
-  return NULL;
+  return nullptr;
 }
 
 /// The 'isident' or the 'iskeyword' or the 'isprint' or the 'isfname' option is
@@ -1415,7 +1415,7 @@ const char *did_set_isopt(optset_T *args)
     args->os_restore_chartab = true;  // need to restore it below
     return e_invarg;                  // error in value
   }
-  return NULL;
+  return nullptr;
 }
 
 /// The 'keymap' option has changed.
@@ -1444,7 +1444,7 @@ const char *did_set_keymap(optset_T *args)
   // even when the value comes from a modeline.
   args->os_value_checked = true;
 
-  if (errmsg == NULL) {
+  if (errmsg == nullptr) {
     if (*buf->b_p_keymap != NUL) {
       // Installed a new keymap, switch on using it.
       buf->b_p_iminsert = B_IMODE_LMAP;
@@ -1474,12 +1474,12 @@ const char *did_set_keymap(optset_T *args)
 const char *did_set_keymodel(optset_T *args FUNC_ATTR_UNUSED)
 {
   const char *errmsg = did_set_str_generic(args);
-  if (errmsg != NULL) {
+  if (errmsg != nullptr) {
     return errmsg;
   }
-  km_stopsel = (vim_strchr(p_km, 'o') != NULL);
-  km_startsel = (vim_strchr(p_km, 'a') != NULL);
-  return NULL;
+  km_stopsel = (vim_strchr(p_km, 'o') != nullptr);
+  km_startsel = (vim_strchr(p_km, 'a') != nullptr);
+  return nullptr;
 }
 
 /// The 'lispoptions' option is changed.
@@ -1490,7 +1490,7 @@ const char *did_set_lispoptions(optset_T *args)
   if (**varp != NUL && strcmp(*varp, "expr:0") != 0 && strcmp(*varp, "expr:1") != 0) {
     return e_invarg;
   }
-  return NULL;
+  return nullptr;
 }
 
 /// The 'matchpairs' option is changed.
@@ -1517,7 +1517,7 @@ const char *did_set_matchpairs(optset_T *args)
       break;
     }
   }
-  return NULL;
+  return nullptr;
 }
 
 /// Process the updated 'messagesopt' option value.
@@ -1526,7 +1526,7 @@ const char *did_set_messagesopt(optset_T *args FUNC_ATTR_UNUSED)
   if (messagesopt_changed() == FAIL) {
     return e_invarg;
   }
-  return NULL;
+  return nullptr;
 }
 
 /// The 'mkspellmem' option is changed.
@@ -1535,7 +1535,7 @@ const char *did_set_mkspellmem(optset_T *args FUNC_ATTR_UNUSED)
   if (spell_check_msm() != OK) {
     return e_invarg;
   }
-  return NULL;
+  return nullptr;
 }
 
 /// The 'mouse' option is changed.
@@ -1552,7 +1552,7 @@ int expand_set_mouse(optexpand_T *args, int *numMatches, char ***matches)
 }
 
 /// Handle setting 'mousescroll'.
-/// @return error message, NULL if it's OK.
+/// @return error message, nullptr if it's OK.
 const char *did_set_mousescroll(optset_T *args FUNC_ATTR_UNUSED)
 {
   OptInt vertical = -1;
@@ -1613,7 +1613,7 @@ const char *did_set_mousescroll(optset_T *args FUNC_ATTR_UNUSED)
   p_mousescroll_vert = (vertical == -1) ? MOUSESCROLL_VERT_DFLT : vertical;
   p_mousescroll_hor = (horizontal == -1) ? MOUSESCROLL_HOR_DFLT : horizontal;
 
-  return NULL;
+  return nullptr;
 }
 
 /// One of the '*expr' options is changed:, 'diffexpr', 'foldexpr', 'foldtext',
@@ -1625,11 +1625,11 @@ const char *did_set_optexpr(optset_T *args)
   // If the option value starts with <SID> or s:, then replace that with
   // the script identifier.
   char *name = get_scriptlocal_funcname(*varp);
-  if (name != NULL) {
+  if (name != nullptr) {
     free_string_option(*varp);
     *varp = name;
   }
-  return NULL;
+  return nullptr;
 }
 
 /// The 'rulerformat' option is changed.
@@ -1642,21 +1642,21 @@ const char *did_set_rulerformat(optset_T *args)
 const char *did_set_selection(optset_T *args FUNC_ATTR_UNUSED)
 {
   const char *errmsg = did_set_str_generic(args);
-  if (errmsg != NULL) {
+  if (errmsg != nullptr) {
     return errmsg;
   }
   if (VIsual_active) {
     // Visual selection may be drawn differently.
     redraw_curbuf_later(UPD_INVERTED);
   }
-  return NULL;
+  return nullptr;
 }
 
 /// The 'sessionoptions' option is changed.
 const char *did_set_sessionoptions(optset_T *args)
 {
   const char *errmsg = did_set_str_generic(args);
-  if (errmsg != NULL) {
+  if (errmsg != nullptr) {
     return errmsg;
   }
   if ((ssop_flags & kOptSsopFlagCurdir) && (ssop_flags & kOptSsopFlagSesdir)) {
@@ -1665,7 +1665,7 @@ const char *did_set_sessionoptions(optset_T *args)
     opt_strings_flags(oldval, opt_ssop_values, &ssop_flags, true);
     return e_invarg;
   }
-  return NULL;
+  return nullptr;
 }
 
 const char *did_set_shada(optset_T *args)
@@ -1675,7 +1675,7 @@ const char *did_set_shada(optset_T *args)
 
   for (char *s = p_shada; *s;) {
     // Check it's a valid character
-    if (vim_strchr("!\"%'/:<@cfhnrs", (uint8_t)(*s)) == NULL) {
+    if (vim_strchr("!\"%'/:<@cfhnrs", (uint8_t)(*s)) == nullptr) {
       return illegal_char(errbuf, errbuflen, (uint8_t)(*s));
     }
     if (*s == 'n') {          // name is always last one
@@ -1691,7 +1691,7 @@ const char *did_set_shada(optset_T *args)
       while (ascii_isdigit(*++s)) {}
 
       if (!ascii_isdigit(*(s - 1))) {
-        if (errbuf != NULL) {
+        if (errbuf != nullptr) {
           vim_snprintf(errbuf, errbuflen,
                        _("E526: Missing number after <%s>"),
                        transchar_byte((uint8_t)(*(s - 1))));
@@ -1704,7 +1704,7 @@ const char *did_set_shada(optset_T *args)
     if (*s == ',') {
       s++;
     } else if (*s) {
-      if (errbuf != NULL) {
+      if (errbuf != nullptr) {
         return N_("E527: Missing comma");
       } else {
         return "";
@@ -1714,7 +1714,7 @@ const char *did_set_shada(optset_T *args)
   if (*p_shada && get_shada_parameter('\'') < 0) {
     return N_("E528: Must specify a ' value");
   }
-  return NULL;
+  return nullptr;
 }
 
 /// Validate 'shellpipe'/'shellredir' option.
@@ -1744,7 +1744,7 @@ const char *did_set_shellpipe_redir(optset_T *args)
     }
     return e_invalid_format_string_single_percent_s;
   }
-  return NULL;
+  return nullptr;
 }
 
 /// The 'shortmess' option is changed.
@@ -1771,7 +1771,7 @@ const char *did_set_showbreak(optset_T *args)
     }
     MB_PTR_ADV(s);
   }
-  return NULL;
+  return nullptr;
 }
 
 /// The 'showcmdloc' option is changed.
@@ -1779,7 +1779,7 @@ const char *did_set_showcmdloc(optset_T *args FUNC_ATTR_UNUSED)
 {
   const char *errmsg = did_set_str_generic(args);
 
-  if (errmsg == NULL) {
+  if (errmsg == nullptr) {
     comp_col();
   }
 
@@ -1792,7 +1792,7 @@ const char *did_set_signcolumn(optset_T *args)
   win_T *win = (win_T *)args->os_win;
   char **varp = (char **)args->os_varp;
   const char *oldval = args->os_oldval.string.data;
-  if (check_signcolumn(*varp, varp == &win->w_p_scl ? win : NULL) != OK) {
+  if (check_signcolumn(*varp, varp == &win->w_p_scl ? win : nullptr) != OK) {
     return e_invarg;
   }
   // When changing the 'signcolumn' to or from 'number', recompute the
@@ -1800,7 +1800,7 @@ const char *did_set_signcolumn(optset_T *args)
   if ((*oldval == 'n' && *(oldval + 1) == 'u') || win->w_minscwidth == SCL_NUM) {
     win->w_nrwidth_line_count = 0;
   }
-  return NULL;
+  return nullptr;
 }
 
 /// The 'spellcapcheck' option is changed.
@@ -1852,7 +1852,7 @@ const char *did_set_spelloptions(optset_T *args)
       && opt_strings_flags(val, opt_spo_values, &win->w_s->b_p_spo_flags, true) != OK) {
     return e_invarg;
   }
-  return NULL;
+  return nullptr;
 }
 
 /// The 'spellsuggest' option is changed.
@@ -1861,7 +1861,7 @@ const char *did_set_spellsuggest(optset_T *args FUNC_ATTR_UNUSED)
   if (spell_check_sps() != OK) {
     return e_invarg;
   }
-  return NULL;
+  return nullptr;
 }
 
 const char *did_set_splitkeep(optset_T *args FUNC_ATTR_UNUSED)
@@ -1899,7 +1899,7 @@ static const char *did_set_statustabline_rulerformat(optset_T *args, bool rulerf
     // reset 'statuscolumn' width
     win->w_nrwidth_line_count = 0;
   }
-  const char *errmsg = NULL;
+  const char *errmsg = nullptr;
   char *s = *varp;
   bool is_stl = args->os_idx == kOptStatusline;
 
@@ -1923,7 +1923,7 @@ static const char *did_set_statustabline_rulerformat(optset_T *args, bool rulerf
       s++;
     }
     int wid = getdigits_int(&s, true, 0);
-    if (wid && *s == '(' && (errmsg = check_stl_option(p_ruf)) == NULL) {
+    if (wid && *s == '(' && (errmsg = check_stl_option(p_ruf)) == nullptr) {
       ru_wid = wid;
     } else {
       // Validate the flags in 'rulerformat' only if it doesn't point to
@@ -1937,7 +1937,7 @@ static const char *did_set_statustabline_rulerformat(optset_T *args, bool rulerf
     // only if it doesn't start with "%!"
     errmsg = check_stl_option(s);
   }
-  if (rulerformat && errmsg == NULL) {
+  if (rulerformat && errmsg == nullptr) {
     comp_col();
   }
   return errmsg;
@@ -1972,7 +1972,7 @@ const char *did_set_tagcase(optset_T *args)
   } else if (opt_strings_flags(p, opt_tc_values, flags, false) != OK) {
     return e_invarg;
   }
-  return NULL;
+  return nullptr;
 }
 
 /// The 'titlestring' or the 'iconstring' option is changed.
@@ -1980,15 +1980,15 @@ static const char *did_set_titleiconstring(optset_T *args, int flagval)
 {
   char **varp = (char **)args->os_varp;
 
-  // NULL => statusline syntax
-  if (vim_strchr(*varp, '%') && check_stl_option(*varp) == NULL) {
+  // nullptr => statusline syntax
+  if (vim_strchr(*varp, '%') && check_stl_option(*varp) == nullptr) {
     stl_syntax |= flagval;
   } else {
     stl_syntax &= ~flagval;
   }
   did_set_title();
 
-  return NULL;
+  return nullptr;
 }
 
 /// The 'titlestring' option is changed.
@@ -2005,7 +2005,7 @@ const char *did_set_varsofttabstop(optset_T *args)
 
   if (!(*varp)[0] || ((*varp)[0] == '0' && !(*varp)[1])) {
     XFREE_CLEAR(buf->b_p_vsts_array);
-    return NULL;
+    return nullptr;
   }
 
   for (char *cp = *varp; *cp; cp++) {
@@ -2024,7 +2024,7 @@ const char *did_set_varsofttabstop(optset_T *args)
   } else {
     return e_invarg;
   }
-  return NULL;
+  return nullptr;
 }
 
 /// The 'varstabstop' option is changed.
@@ -2036,7 +2036,7 @@ const char *did_set_vartabstop(optset_T *args)
 
   if (!(*varp)[0] || ((*varp)[0] == '0' && !(*varp)[1])) {
     XFREE_CLEAR(buf->b_p_vts_array);
-    return NULL;
+    return nullptr;
   }
 
   for (char *cp = *varp; *cp; cp++) {
@@ -2058,7 +2058,7 @@ const char *did_set_vartabstop(optset_T *args)
   } else {
     return e_invarg;
   }
-  return NULL;
+  return nullptr;
 }
 
 /// The 'verbosefile' option is changed.
@@ -2068,7 +2068,7 @@ const char *did_set_verbosefile(optset_T *args)
   if (*p_vfile != NUL && verbose_open() == FAIL) {
     return (char *)e_invarg;
   }
-  return NULL;
+  return nullptr;
 }
 
 /// The 'virtualedit' option is changed.
@@ -2097,7 +2097,7 @@ const char *did_set_virtualedit(optset_T *args)
       coladvance(win, win->w_virtcol);
     }
   }
-  return NULL;
+  return nullptr;
 }
 
 /// The 'whichwrap' option is changed.
@@ -2121,7 +2121,7 @@ const char *did_set_wildmode(optset_T *args FUNC_ATTR_UNUSED)
   if (check_opt_wim() == FAIL) {
     return e_invarg;
   }
-  return NULL;
+  return nullptr;
 }
 
 /// The 'winbar' option is changed.
@@ -2148,7 +2148,7 @@ const char *did_set_winborder(optset_T *args)
   if (!parse_border_opt(p_winborder)) {
     return e_invarg;
   }
-  return NULL;
+  return nullptr;
 }
 
 const char *did_set_pumborder(optset_T *args)
@@ -2156,7 +2156,7 @@ const char *did_set_pumborder(optset_T *args)
   if (!parse_border_opt(p_pumborder)) {
     return e_invarg;
   }
-  return NULL;
+  return nullptr;
 }
 
 /// The 'winhighlight' option is changed.
@@ -2164,10 +2164,10 @@ const char *did_set_winhighlight(optset_T *args)
 {
   win_T *win = (win_T *)args->os_win;
   char **varp = (char **)args->os_varp;
-  if (!parse_winhl_opt(*varp, varp == &win->w_p_winhl ? win : NULL)) {
+  if (!parse_winhl_opt(*varp, varp == &win->w_p_winhl ? win : nullptr)) {
     return e_invarg;
   }
-  return NULL;
+  return nullptr;
 }
 
 int expand_set_winhighlight(optexpand_T *args, int *numMatches, char ***matches)
@@ -2192,7 +2192,7 @@ static int opt_strings_flags(const char *val, const char **values, unsigned *fla
 
   while (*val || iter_one) {
     for (unsigned i = 0;; i++) {
-      if (values[i] == NULL) {          // val not found in values[]
+      if (values[i] == nullptr) {          // val not found in values[]
         return FAIL;
       }
 
@@ -2209,7 +2209,7 @@ static int opt_strings_flags(const char *val, const char **values, unsigned *fla
       break;
     }
   }
-  if (flagp != NULL) {
+  if (flagp != nullptr) {
     *flagp = new_flags;
   }
 
@@ -2219,7 +2219,7 @@ static int opt_strings_flags(const char *val, const char **values, unsigned *fla
 /// @return  OK if "p" is a valid fileformat name, FAIL otherwise.
 int check_ff_value(char *p)
 {
-  return opt_strings_flags(p, opt_ff_values, NULL, false);
+  return opt_strings_flags(p, opt_ff_values, nullptr, false);
 }
 
 static const char e_conflicts_with_value_of_listchars[]
@@ -2268,9 +2268,9 @@ struct chars_tab {
 
 static fcs_chars_T fcs_chars;
 static const struct chars_tab fcs_tab[] = {
-  CHARSTAB_ENTRY(&fcs_chars.stl,        "stl",       " ",  NULL),
-  CHARSTAB_ENTRY(&fcs_chars.stlnc,      "stlnc",     " ",  NULL),
-  CHARSTAB_ENTRY(&fcs_chars.wbr,        "wbr",       " ",  NULL),
+  CHARSTAB_ENTRY(&fcs_chars.stl,        "stl",       " ",  nullptr),
+  CHARSTAB_ENTRY(&fcs_chars.stlnc,      "stlnc",     " ",  nullptr),
+  CHARSTAB_ENTRY(&fcs_chars.wbr,        "wbr",       " ",  nullptr),
   CHARSTAB_ENTRY(&fcs_chars.horiz,      "horiz",     "─",  "-"),
   CHARSTAB_ENTRY(&fcs_chars.horizup,    "horizup",   "┴",  "-"),
   CHARSTAB_ENTRY(&fcs_chars.horizdown,  "horizdown", "┬",  "-"),
@@ -2279,39 +2279,39 @@ static const struct chars_tab fcs_tab[] = {
   CHARSTAB_ENTRY(&fcs_chars.vertright,  "vertright", "├",  "|"),
   CHARSTAB_ENTRY(&fcs_chars.verthoriz,  "verthoriz", "┼",  "+"),
   CHARSTAB_ENTRY(&fcs_chars.fold,       "fold",      "·",  "-"),
-  CHARSTAB_ENTRY(&fcs_chars.foldopen,   "foldopen",  "-",  NULL),
-  CHARSTAB_ENTRY(&fcs_chars.foldclosed, "foldclose", "+",  NULL),
+  CHARSTAB_ENTRY(&fcs_chars.foldopen,   "foldopen",  "-",  nullptr),
+  CHARSTAB_ENTRY(&fcs_chars.foldclosed, "foldclose", "+",  nullptr),
   CHARSTAB_ENTRY(&fcs_chars.foldsep,    "foldsep",   "│",  "|"),
-  CHARSTAB_ENTRY(&fcs_chars.foldinner,  "foldinner", NULL, NULL),
-  CHARSTAB_ENTRY(&fcs_chars.diff,       "diff",      "-",  NULL),
-  CHARSTAB_ENTRY(&fcs_chars.msgsep,     "msgsep",    " ",  NULL),
-  CHARSTAB_ENTRY(&fcs_chars.eob,        "eob",       "~",  NULL),
-  CHARSTAB_ENTRY(&fcs_chars.lastline,   "lastline",  "@",  NULL),
-  CHARSTAB_ENTRY(&fcs_chars.trunc,      "trunc",     ">",  NULL),
-  CHARSTAB_ENTRY(&fcs_chars.truncrl,    "truncrl",   "<",  NULL),
+  CHARSTAB_ENTRY(&fcs_chars.foldinner,  "foldinner", nullptr, nullptr),
+  CHARSTAB_ENTRY(&fcs_chars.diff,       "diff",      "-",  nullptr),
+  CHARSTAB_ENTRY(&fcs_chars.msgsep,     "msgsep",    " ",  nullptr),
+  CHARSTAB_ENTRY(&fcs_chars.eob,        "eob",       "~",  nullptr),
+  CHARSTAB_ENTRY(&fcs_chars.lastline,   "lastline",  "@",  nullptr),
+  CHARSTAB_ENTRY(&fcs_chars.trunc,      "trunc",     ">",  nullptr),
+  CHARSTAB_ENTRY(&fcs_chars.truncrl,    "truncrl",   "<",  nullptr),
 };
 
 static lcs_chars_T lcs_chars;
 static const struct chars_tab lcs_tab[] = {
-  CHARSTAB_ENTRY(&lcs_chars.eol,      "eol",            NULL, NULL),
-  CHARSTAB_ENTRY(&lcs_chars.ext,      "extends",        NULL, NULL),
-  CHARSTAB_ENTRY(&lcs_chars.nbsp,     "nbsp",           NULL, NULL),
-  CHARSTAB_ENTRY(&lcs_chars.prec,     "precedes",       NULL, NULL),
-  CHARSTAB_ENTRY(&lcs_chars.space,    "space",          NULL, NULL),
-  CHARSTAB_ENTRY(&lcs_chars.tab2,     "tab",            NULL, NULL),
-  CHARSTAB_ENTRY(&lcs_chars.leadtab2, "leadtab",        NULL, NULL),
-  CHARSTAB_ENTRY(&lcs_chars.lead,     "lead",           NULL, NULL),
-  CHARSTAB_ENTRY(&lcs_chars.trail,    "trail",          NULL, NULL),
-  CHARSTAB_ENTRY(&lcs_chars.conceal,  "conceal",        NULL, NULL),
-  CHARSTAB_ENTRY(NULL,                "multispace",     NULL, NULL),
-  CHARSTAB_ENTRY(NULL,                "leadmultispace", NULL, NULL),
+  CHARSTAB_ENTRY(&lcs_chars.eol,      "eol",            nullptr, nullptr),
+  CHARSTAB_ENTRY(&lcs_chars.ext,      "extends",        nullptr, nullptr),
+  CHARSTAB_ENTRY(&lcs_chars.nbsp,     "nbsp",           nullptr, nullptr),
+  CHARSTAB_ENTRY(&lcs_chars.prec,     "precedes",       nullptr, nullptr),
+  CHARSTAB_ENTRY(&lcs_chars.space,    "space",          nullptr, nullptr),
+  CHARSTAB_ENTRY(&lcs_chars.tab2,     "tab",            nullptr, nullptr),
+  CHARSTAB_ENTRY(&lcs_chars.leadtab2, "leadtab",        nullptr, nullptr),
+  CHARSTAB_ENTRY(&lcs_chars.lead,     "lead",           nullptr, nullptr),
+  CHARSTAB_ENTRY(&lcs_chars.trail,    "trail",          nullptr, nullptr),
+  CHARSTAB_ENTRY(&lcs_chars.conceal,  "conceal",        nullptr, nullptr),
+  CHARSTAB_ENTRY(nullptr,                "multispace",     nullptr, nullptr),
+  CHARSTAB_ENTRY(nullptr,                "leadmultispace", nullptr, nullptr),
 };
 
 #undef CHARSTAB_ENTRY
 
 static char *field_value_err(char *errbuf, size_t errbuflen, const char *fmt, ...)
 {
-  if (errbuf == NULL) {
+  if (errbuf == nullptr) {
     return "";
   }
   va_list arglist;
@@ -2327,15 +2327,15 @@ static char *field_value_err(char *errbuf, size_t errbuflen, const char *fmt, ..
 /// @param value      points to either the global or the window-local value.
 /// @param what       kListchars or kFillchars
 /// @param apply      if false, do not store the flags, only check for errors.
-/// @param errbuf     buffer for error message, can be NULL if it won't be used.
+/// @param errbuf     buffer for error message, can be nullptr if it won't be used.
 /// @param errbuflen  size of error buffer.
 ///
-/// @return error message, NULL if it's OK.
+/// @return error message, nullptr if it's OK.
 const char *set_chars_option(win_T *wp, const char *value, CharsOption what, bool apply,
                              char *errbuf, size_t errbuflen)
 {
-  const char *last_multispace = NULL;   // Last occurrence of "multispace:"
-  const char *last_lmultispace = NULL;  // Last occurrence of "leadmultispace:"
+  const char *last_multispace = nullptr;   // Last occurrence of "multispace:"
+  const char *last_lmultispace = nullptr;  // Last occurrence of "leadmultispace:"
   int multispace_len = 0;           // Length of lcs-multispace string
   int lead_multispace_len = 0;      // Length of lcs-leadmultispace string
 
@@ -2362,7 +2362,7 @@ const char *set_chars_option(win_T *wp, const char *value, CharsOption what, boo
     if (round > 0) {
       // After checking that the value is valid: set defaults
       for (int i = 0; i < entries; i++) {
-        if (tab[i].cp != NULL) {
+        if (tab[i].cp != nullptr) {
           // XXX: Characters taking 2 columns is forbidden (TUI limitation?).
           // Set old defaults in this case.
           *(tab[i].cp) = schar_from_str((tab[i].def && ptr2cells(tab[i].def) == 1)
@@ -2380,14 +2380,14 @@ const char *set_chars_option(win_T *wp, const char *value, CharsOption what, boo
           lcs_chars.multispace = xmalloc(((size_t)multispace_len + 1) * sizeof(schar_T));
           lcs_chars.multispace[multispace_len] = NUL;
         } else {
-          lcs_chars.multispace = NULL;
+          lcs_chars.multispace = nullptr;
         }
 
         if (lead_multispace_len > 0) {
           lcs_chars.leadmultispace = xmalloc(((size_t)lead_multispace_len + 1) * sizeof(schar_T));
           lcs_chars.leadmultispace[lead_multispace_len] = NUL;
         } else {
-          lcs_chars.leadmultispace = NULL;
+          lcs_chars.leadmultispace = nullptr;
         }
       }
     }
@@ -2519,7 +2519,7 @@ const char *set_chars_option(win_T *wp, const char *value, CharsOption what, boo
               lcs_chars.leadtab1 = c1;
               lcs_chars.leadtab2 = c2;
               lcs_chars.leadtab3 = c3;
-            } else if (tab[i].cp != NULL) {
+            } else if (tab[i].cp != nullptr) {
               *(tab[i].cp) = c1;
             }
           }
@@ -2556,7 +2556,7 @@ const char *set_chars_option(win_T *wp, const char *value, CharsOption what, boo
     }
   }
 
-  return NULL;          // no error
+  return nullptr;          // no error
 }
 
 /// Function given to ExpandGeneric() to obtain possible arguments of the
@@ -2564,7 +2564,7 @@ const char *set_chars_option(win_T *wp, const char *value, CharsOption what, boo
 char *get_fillchars_name(expand_T *xp FUNC_ATTR_UNUSED, int idx)
 {
   if (idx < 0 || idx >= (int)ARRAY_SIZE(fcs_tab)) {
-    return NULL;
+    return nullptr;
   }
 
   return fcs_tab[idx].name.data;
@@ -2575,7 +2575,7 @@ char *get_fillchars_name(expand_T *xp FUNC_ATTR_UNUSED, int idx)
 char *get_listchars_name(expand_T *xp FUNC_ATTR_UNUSED, int idx)
 {
   if (idx < 0 || idx >= (int)ARRAY_SIZE(lcs_tab)) {
-    return NULL;
+    return nullptr;
   }
 
   return lcs_tab[idx].name.data;
@@ -2584,22 +2584,22 @@ char *get_listchars_name(expand_T *xp FUNC_ATTR_UNUSED, int idx)
 /// Check all global and local values of 'listchars' and 'fillchars'.
 /// May set different defaults in case character widths change.
 ///
-/// @return  an untranslated error message if any of them is invalid, NULL otherwise.
+/// @return  an untranslated error message if any of them is invalid, nullptr otherwise.
 const char *check_chars_options(void)
 {
-  if (set_chars_option(curwin, p_lcs, kListchars, false, NULL, 0) != NULL) {
+  if (set_chars_option(curwin, p_lcs, kListchars, false, nullptr, 0) != nullptr) {
     return e_conflicts_with_value_of_listchars;
   }
-  if (set_chars_option(curwin, p_fcs, kFillchars, false, NULL, 0) != NULL) {
+  if (set_chars_option(curwin, p_fcs, kFillchars, false, nullptr, 0) != nullptr) {
     return e_conflicts_with_value_of_fillchars;
   }
   FOR_ALL_TAB_WINDOWS(tp, wp) {
-    if (set_chars_option(wp, wp->w_p_lcs, kListchars, true, NULL, 0) != NULL) {
+    if (set_chars_option(wp, wp->w_p_lcs, kListchars, true, nullptr, 0) != nullptr) {
       return e_conflicts_with_value_of_listchars;
     }
-    if (set_chars_option(wp, wp->w_p_fcs, kFillchars, true, NULL, 0) != NULL) {
+    if (set_chars_option(wp, wp->w_p_fcs, kFillchars, true, nullptr, 0) != nullptr) {
       return e_conflicts_with_value_of_fillchars;
     }
   }
-  return NULL;
+  return nullptr;
 }

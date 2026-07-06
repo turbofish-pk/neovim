@@ -58,7 +58,7 @@ static int win_getid(typval_T *argvars)
     return 0;
   }
 
-  tabpage_T *tp = NULL;
+  tabpage_T *tp = nullptr;
   if (argvars[1].v_type == VAR_UNKNOWN) {
     tp = curtab;
     wp = firstwin;
@@ -70,7 +70,7 @@ static int win_getid(typval_T *argvars)
         break;
       }
     }
-    if (tp == NULL) {
+    if (tp == nullptr) {
       return -1;
     }
     if (tp == curtab) {
@@ -79,7 +79,7 @@ static int win_getid(typval_T *argvars)
       wp = tp->tp_firstwin;
     }
   }
-  for (; wp != NULL; wp = wp->w_next) {
+  for (; wp != nullptr; wp = wp->w_next) {
     if ((winnr -= win_has_winnr(wp, tp)) == 0) {
       return wp->handle;
     }
@@ -102,23 +102,23 @@ static void win_id2tabwin(typval_T *const argvars, typval_T *const rettv)
 
 win_T *win_id2wp(int id)
 {
-  return win_id2wp_tp(id, NULL);
+  return win_id2wp_tp(id, nullptr);
 }
 
 /// Return the window and tab pointer of window "id".
-/// Returns NULL when not found.
+/// Returns nullptr when not found.
 win_T *win_id2wp_tp(int id, tabpage_T **tpp)
 {
   FOR_ALL_TAB_WINDOWS(tp, wp) {
     if (wp->handle == id) {
-      if (tpp != NULL) {
+      if (tpp != nullptr) {
         *tpp = tp;
       }
       return wp;
     }
   }
 
-  return NULL;
+  return nullptr;
 }
 
 static int win_id2win(typval_T *argvars)
@@ -148,23 +148,23 @@ void win_findbuf(typval_T *argvars, list_T *list)
 
 /// Find window specified by "vp" in tabpage "tp".
 ///
-/// @param tp  NULL for current tab page
+/// @param tp  nullptr for current tab page
 /// @return  current window if "vp" is number zero.
-///          NULL if not found.
+///          nullptr if not found.
 win_T *find_win_by_nr(typval_T *vp, tabpage_T *tp)
 {
-  int nr = (int)tv_get_number_chk(vp, NULL);
+  int nr = (int)tv_get_number_chk(vp, nullptr);
 
   if (nr < 0) {
-    return NULL;
+    return nullptr;
   }
 
   if (nr == 0) {
     return curwin;
   }
 
-  // This method accepts NULL as an alias for curtab.
-  if (tp == NULL) {
+  // This method accepts nullptr as an alias for curtab.
+  if (tp == nullptr) {
     tp = curtab;
   }
 
@@ -177,28 +177,28 @@ win_T *find_win_by_nr(typval_T *vp, tabpage_T *tp)
       return wp;
     }
   }
-  return NULL;
+  return nullptr;
 }
 
 /// Find a window: When using a Window ID in any tab page, when using a number
 /// in the current tab page.
-/// Returns NULL when not found.
+/// Returns nullptr when not found.
 win_T *find_win_by_nr_or_id(typval_T *vp)
 {
-  int nr = (int)tv_get_number_chk(vp, NULL);
+  int nr = (int)tv_get_number_chk(vp, nullptr);
 
   if (nr >= LOWEST_WIN_ID) {
     return win_id2wp((int)tv_get_number(vp));
   }
 
-  return find_win_by_nr(vp, NULL);
+  return find_win_by_nr(vp, nullptr);
 }
 
 /// Find window specified by "wvp" in tabpage "tvp".
 win_T *find_tabwin(typval_T *wvp, typval_T *tvp)
 {
-  win_T *wp = NULL;
-  tabpage_T *tp = NULL;
+  win_T *wp = nullptr;
+  tabpage_T *tp = nullptr;
 
   if (wvp->v_type != VAR_UNKNOWN) {
     if (tvp->v_type != VAR_UNKNOWN) {
@@ -210,7 +210,7 @@ win_T *find_tabwin(typval_T *wvp, typval_T *tvp)
       tp = curtab;
     }
 
-    if (tp != NULL) {
+    if (tp != nullptr) {
       wp = find_win_by_nr(wvp, tp);
     }
   } else {
@@ -223,7 +223,7 @@ win_T *find_tabwin(typval_T *wvp, typval_T *tvp)
 /// Get the layout of the given tab page for winlayout().
 static void get_framelayout(const frame_T *fr, list_T *l, bool outer)
 {
-  if (fr == NULL) {
+  if (fr == nullptr) {
     return;
   }
 
@@ -237,7 +237,7 @@ static void get_framelayout(const frame_T *fr, list_T *l, bool outer)
   }
 
   if (fr->fr_layout == FR_LEAF) {
-    if (fr->fr_win != NULL) {
+    if (fr->fr_win != nullptr) {
       tv_list_append_string(fr_list, S_LEN("leaf"));
       tv_list_append_number(fr_list, fr->fr_win->handle);
     }
@@ -251,7 +251,7 @@ static void get_framelayout(const frame_T *fr, list_T *l, bool outer)
     list_T *const win_list = tv_list_alloc(kListLenUnknown);
     tv_list_append_list(fr_list, win_list);
     const frame_T *child = fr->fr_child;
-    while (child != NULL) {
+    while (child != nullptr) {
       get_framelayout(child, win_list, false);
       child = child->fr_next;
     }
@@ -267,13 +267,13 @@ static int get_winnr(tabpage_T *tp, typval_T *argvar)
   if (argvar->v_type != VAR_UNKNOWN) {
     bool invalid_arg = false;
     const char *const arg = tv_get_string_chk(argvar);
-    if (arg == NULL) {
+    if (arg == nullptr) {
       nr = 0;  // Type error; errmsg already given.
     } else if (strcmp(arg, "$") == 0) {
       twin = (tp == curtab) ? lastwin : tp->tp_lastwin;
     } else if (strcmp(arg, "#") == 0) {
       twin = (tp == curtab) ? prevwin : tp->tp_prevwin;
-      if (twin == NULL) {
+      if (twin == nullptr) {
         nr = 0;
       }
     } else {
@@ -284,7 +284,7 @@ static int get_winnr(tabpage_T *tp, typval_T *argvar)
         // if count is not specified, default to 1
         count = 1;
       }
-      if (endp != NULL && *endp != NUL) {
+      if (endp != nullptr && *endp != NUL) {
         if (strequal(endp, "j")) {
           twin = win_vert_neighbor(tp, twin, false, count);
         } else if (strequal(endp, "k")) {
@@ -315,13 +315,13 @@ static int get_winnr(tabpage_T *tp, typval_T *argvar)
 
   nr = 0;
   win_T *wp = (tp == curtab) ? firstwin : tp->tp_firstwin;
-  for (; wp != NULL; wp = wp->w_next) {
+  for (; wp != nullptr; wp = wp->w_next) {
     nr += win_has_winnr(wp, tp);
     if (wp == twin) {
       break;
     }
   }
-  if (wp == NULL) {
+  if (wp == nullptr) {
     nr = 0;  // didn't find it in this tabpage
   }
   return nr;
@@ -352,7 +352,7 @@ static dict_T *get_win_info(win_T *wp, int16_t tpnr, int16_t winnr)
   tv_dict_add_nr(dict, S_LEN("terminal"), bt_terminal(wp->w_buffer));
   tv_dict_add_nr(dict, S_LEN("quickfix"), bt_quickfix(wp->w_buffer));
   tv_dict_add_nr(dict, S_LEN("loclist"),
-                 (bt_quickfix(wp->w_buffer) && wp->w_llist_ref != NULL));
+                 (bt_quickfix(wp->w_buffer) && wp->w_llist_ref != nullptr));
 
   // Add a reference to window variables
   tv_dict_add_dict(dict, S_LEN("variables"), wp->w_vars);
@@ -383,7 +383,7 @@ static dict_T *get_tabpage_info(tabpage_T *tp, int tp_idx)
 /// "gettabinfo()" function
 void f_gettabinfo(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
 {
-  tabpage_T *tparg = NULL;
+  tabpage_T *tparg = nullptr;
 
   tv_list_alloc_ret(rettv, (argvars[0].v_type == VAR_UNKNOWN
                             ? 1
@@ -391,8 +391,8 @@ void f_gettabinfo(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
 
   if (argvars[0].v_type != VAR_UNKNOWN) {
     // Information about one tab page
-    tparg = find_tabpage((int)tv_get_number_chk(&argvars[0], NULL));
-    if (tparg == NULL) {
+    tparg = find_tabpage((int)tv_get_number_chk(&argvars[0], nullptr));
+    if (tparg == nullptr) {
       return;
     }
   }
@@ -401,12 +401,12 @@ void f_gettabinfo(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
   int tpnr = 0;
   FOR_ALL_TABS(tp) {
     tpnr++;
-    if (tparg != NULL && tp != tparg) {
+    if (tparg != nullptr && tp != tparg) {
       continue;
     }
     dict_T *const d = get_tabpage_info(tp, tpnr);
     tv_list_append_dict(rettv->vval.v_list, d);
-    if (tparg != NULL) {
+    if (tparg != nullptr) {
       return;
     }
   }
@@ -415,13 +415,13 @@ void f_gettabinfo(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
 /// "getwininfo()" function
 void f_getwininfo(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
 {
-  win_T *wparg = NULL;
+  win_T *wparg = nullptr;
 
   tv_list_alloc_ret(rettv, kListLenMayKnow);
 
   if (argvars[0].v_type != VAR_UNKNOWN) {
     wparg = win_id2wp((int)tv_get_number(&argvars[0]));
-    if (wparg == NULL) {
+    if (wparg == nullptr) {
       return;
     }
   }
@@ -434,12 +434,12 @@ void f_getwininfo(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
     int16_t winnr = 0;
     FOR_ALL_WINDOWS_IN_TAB(wp, tp) {
       winnr += win_has_winnr(wp, tp);
-      if (wparg != NULL && wp != wparg) {
+      if (wparg != nullptr && wp != wparg) {
         continue;
       }
       dict_T *const d = get_win_info(wp, tabnr, win_has_winnr(wp, tp) ? winnr : 0);
       tv_list_append_dict(rettv->vval.v_list, d);
-      if (wparg != NULL) {
+      if (wparg != nullptr) {
         // found information about a specific window
         return;
       }
@@ -475,9 +475,9 @@ void f_tabpagenr(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
   if (argvars[0].v_type != VAR_UNKNOWN) {
     const char *const arg = tv_get_string_chk(&argvars[0]);
     nr = 0;
-    if (arg != NULL) {
+    if (arg != nullptr) {
       if (strcmp(arg, "$") == 0) {
-        nr = tabpage_index(NULL) - 1;
+        nr = tabpage_index(nullptr) - 1;
       } else if (strcmp(arg, "#") == 0) {
         nr = valid_tabpage(lastused_tabpage) ? tabpage_index(lastused_tabpage) : 0;
       } else {
@@ -495,7 +495,7 @@ void f_tabpagewinnr(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
 {
   int nr = 1;
   tabpage_T *const tp = find_tabpage((int)tv_get_number(&argvars[0]));
-  if (tp == NULL) {
+  if (tp == nullptr) {
     nr = 0;
   } else {
     nr = get_winnr(tp, &argvars[1]);
@@ -513,14 +513,14 @@ bool win_execute_before(win_execute_T *args, win_T *wp, tabpage_T *tp)
   args->curpos = wp->w_cursor;
   args->cwd_status = FAIL;
   args->apply_acd = false;
-  args->save_sfname = NULL;
+  args->save_sfname = nullptr;
 
   // Getting and setting directory can be slow on some systems, only do
   // this when the current or target window/tab have a local directory or
   // 'acd' is set.
   if (curwin != wp
-      && (curwin->w_localdir != NULL || wp->w_localdir != NULL
-          || (curtab != tp && (curtab->tp_localdir != NULL || tp->tp_localdir != NULL))
+      && (curwin->w_localdir != nullptr || wp->w_localdir != nullptr
+          || (curtab != tp && (curtab->tp_localdir != nullptr || tp->tp_localdir != nullptr))
           || p_acd)) {
     args->cwd_status = os_dirname(args->cwd, MAXPATHL);
   }
@@ -528,7 +528,7 @@ bool win_execute_before(win_execute_T *args, win_T *wp, tabpage_T *tp)
   // If 'acd' is set, check we are using that directory.  If yes, then
   // apply 'acd' afterwards, otherwise restore the current directory.
   if (args->cwd_status == OK && p_acd) {
-    if (curbuf->b_sfname != NULL && curbuf->b_fname == curbuf->b_sfname) {
+    if (curbuf->b_sfname != nullptr && curbuf->b_fname == curbuf->b_sfname) {
       args->save_sfname = xstrdup(curbuf->b_sfname);
     }
     do_autochdir();
@@ -555,7 +555,7 @@ void win_execute_after(win_execute_T *args)
     do_autochdir();
   } else if (args->cwd_status == OK) {
     os_chdir(args->cwd);
-    if (args->save_sfname != NULL) {
+    if (args->save_sfname != nullptr) {
       xfree(curbuf->b_sfname);
       curbuf->b_sfname = args->save_sfname;
       curbuf->b_fname = curbuf->b_sfname;
@@ -580,12 +580,12 @@ void f_win_execute(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
 {
   // Return an empty string if something fails.
   rettv->v_type = VAR_STRING;
-  rettv->vval.v_string = NULL;
+  rettv->vval.v_string = nullptr;
 
   int id = (int)tv_get_number(argvars);
   tabpage_T *tp;
   win_T *wp = win_id2wp_tp(id, &tp);
-  if (wp == NULL || tp == NULL) {
+  if (wp == nullptr || tp == nullptr) {
     return;
   }
 
@@ -653,7 +653,7 @@ void f_win_move_separator(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
   rettv->vval.v_number = false;
 
   win_T *wp = find_win_by_nr_or_id(&argvars[0]);
-  if (wp == NULL || wp->w_floating) {
+  if (wp == nullptr || wp->w_floating) {
     return;
   }
   if (!win_valid(wp)) {
@@ -675,7 +675,7 @@ void f_win_move_statusline(typval_T *argvars, typval_T *rettv, EvalFuncData fptr
   rettv->vval.v_number = false;
 
   wp = find_win_by_nr_or_id(&argvars[0]);
-  if (wp == NULL || wp->w_floating) {
+  if (wp == nullptr || wp->w_floating) {
     return;
   }
   if (!win_valid(wp)) {
@@ -693,8 +693,8 @@ void f_win_screenpos(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
 {
   tv_list_alloc_ret(rettv, 2);
   const win_T *const wp = find_win_by_nr_or_id(&argvars[0]);
-  tv_list_append_number(rettv->vval.v_list, wp == NULL ? 0 : wp->w_winrow + 1);
-  tv_list_append_number(rettv->vval.v_list, wp == NULL ? 0 : wp->w_wincol + 1);
+  tv_list_append_number(rettv->vval.v_list, wp == nullptr ? 0 : wp->w_winrow + 1);
+  tv_list_append_number(rettv->vval.v_list, wp == nullptr ? 0 : wp->w_wincol + 1);
 }
 
 /// "win_splitmove()" function
@@ -706,7 +706,7 @@ void f_win_splitmove(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
 
   rettv->vval.v_number = -1;
 
-  if (wp == NULL || targetwin == NULL || wp == targetwin
+  if (wp == nullptr || targetwin == nullptr || wp == targetwin
       || !win_valid(wp) || !win_valid(targetwin)
       || targetwin->w_floating) {
     emsg(_(e_invalwindow));
@@ -728,7 +728,7 @@ void f_win_splitmove(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
     if (tv_dict_get_number(d, "vertical")) {
       flags |= WSP_VERT;
     }
-    if ((di = tv_dict_find(d, "rightbelow", -1)) != NULL) {
+    if ((di = tv_dict_find(d, "rightbelow", -1)) != nullptr) {
       flags |= tv_get_number(&di->di_tv) ? WSP_BELOW : WSP_ABOVE;
     }
     size = (int)tv_dict_get_number(d, "size");
@@ -763,10 +763,10 @@ void f_win_gettype(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
   win_T *wp = curwin;
 
   rettv->v_type = VAR_STRING;
-  rettv->vval.v_string = NULL;
+  rettv->vval.v_string = nullptr;
   if (argvars[0].v_type != VAR_UNKNOWN) {
     wp = find_win_by_nr_or_id(&argvars[0]);
-    if (wp == NULL) {
+    if (wp == nullptr) {
       rettv->vval.v_string = xstrdup("unknown");
       return;
     }
@@ -780,7 +780,7 @@ void f_win_gettype(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
   } else if (bt_cmdwin(wp->w_buffer)) {
     rettv->vval.v_string = xstrdup("command");
   } else if (bt_quickfix(wp->w_buffer)) {
-    rettv->vval.v_string = xstrdup((wp->w_llist_ref != NULL ? "loclist" : "quickfix"));
+    rettv->vval.v_string = xstrdup((wp->w_llist_ref != nullptr ? "loclist" : "quickfix"));
   }
 }
 
@@ -788,7 +788,7 @@ void f_win_gettype(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
 void f_getcmdwintype(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
 {
   rettv->v_type = VAR_STRING;
-  rettv->vval.v_string = NULL;
+  rettv->vval.v_string = nullptr;
   rettv->vval.v_string = xmallocz(1);
   rettv->vval.v_string[0] = (char)cmdwin_type;
 }
@@ -797,7 +797,7 @@ void f_getcmdwintype(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
 void f_winbufnr(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
 {
   win_T *wp = find_win_by_nr_or_id(&argvars[0]);
-  if (wp == NULL) {
+  if (wp == nullptr) {
     rettv->vval.v_number = -1;
   } else {
     rettv->vval.v_number = wp->w_buffer->b_fnum;
@@ -815,7 +815,7 @@ void f_wincol(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
 void f_winheight(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
 {
   win_T *wp = find_win_by_nr_or_id(&argvars[0]);
-  if (wp == NULL) {
+  if (wp == nullptr) {
     rettv->vval.v_number = -1;
   } else {
     rettv->vval.v_number = wp->w_view_height;
@@ -833,7 +833,7 @@ void f_winlayout(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
     tp = curtab;
   } else {
     tp = find_tabpage((int)tv_get_number(&argvars[0]));
-    if (tp == NULL) {
+    if (tp == nullptr) {
       return;
     }
   }
@@ -893,29 +893,29 @@ void f_winrestview(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
 
   dict_T *dict = argvars[0].vval.v_dict;
   dictitem_T *di;
-  if ((di = tv_dict_find(dict, S_LEN("lnum"))) != NULL) {
+  if ((di = tv_dict_find(dict, S_LEN("lnum"))) != nullptr) {
     curwin->w_cursor.lnum = (linenr_T)tv_get_number(&di->di_tv);
   }
-  if ((di = tv_dict_find(dict, S_LEN("col"))) != NULL) {
+  if ((di = tv_dict_find(dict, S_LEN("col"))) != nullptr) {
     curwin->w_cursor.col = (colnr_T)tv_get_number(&di->di_tv);
   }
-  if ((di = tv_dict_find(dict, S_LEN("coladd"))) != NULL) {
+  if ((di = tv_dict_find(dict, S_LEN("coladd"))) != nullptr) {
     curwin->w_cursor.coladd = (colnr_T)tv_get_number(&di->di_tv);
   }
-  if ((di = tv_dict_find(dict, S_LEN("curswant"))) != NULL) {
+  if ((di = tv_dict_find(dict, S_LEN("curswant"))) != nullptr) {
     curwin->w_curswant = (colnr_T)tv_get_number(&di->di_tv);
     curwin->w_set_curswant = false;
   }
-  if ((di = tv_dict_find(dict, S_LEN("topline"))) != NULL) {
+  if ((di = tv_dict_find(dict, S_LEN("topline"))) != nullptr) {
     set_topline(curwin, (linenr_T)tv_get_number(&di->di_tv));
   }
-  if ((di = tv_dict_find(dict, S_LEN("topfill"))) != NULL) {
+  if ((di = tv_dict_find(dict, S_LEN("topfill"))) != nullptr) {
     curwin->w_topfill = (int)tv_get_number(&di->di_tv);
   }
-  if ((di = tv_dict_find(dict, S_LEN("leftcol"))) != NULL) {
+  if ((di = tv_dict_find(dict, S_LEN("leftcol"))) != nullptr) {
     curwin->w_leftcol = (colnr_T)tv_get_number(&di->di_tv);
   }
-  if ((di = tv_dict_find(dict, S_LEN("skipcol"))) != NULL) {
+  if ((di = tv_dict_find(dict, S_LEN("skipcol"))) != nullptr) {
     curwin->w_skipcol = (colnr_T)tv_get_number(&di->di_tv);
   }
 
@@ -955,7 +955,7 @@ void f_winsaveview(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
 void f_winwidth(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
 {
   win_T *wp = find_win_by_nr_or_id(&argvars[0]);
-  if (wp == NULL) {
+  if (wp == nullptr) {
     rettv->vval.v_number = -1;
   } else {
     rettv->vval.v_number = wp->w_view_width;
@@ -989,7 +989,7 @@ int switch_win_noblock(switchwin_T *switchwin, win_T *win, tabpage_T *tp, bool n
     VIsual_active = false;
   }
 
-  if (tp != NULL) {
+  if (tp != nullptr) {
     switchwin->sw_curtab = curtab;
     if (no_display) {
       unuse_tabpage(curtab);
@@ -1018,7 +1018,7 @@ void restore_win(switchwin_T *switchwin, bool no_display)
 /// As restore_win() but without unblocking autocommands.
 void restore_win_noblock(switchwin_T *switchwin, bool no_display)
 {
-  if (switchwin->sw_curtab != NULL && valid_tabpage(switchwin->sw_curtab)) {
+  if (switchwin->sw_curtab != nullptr && valid_tabpage(switchwin->sw_curtab)) {
     if (no_display) {
       win_T *const old_tp_curwin = curtab->tp_curwin;
 

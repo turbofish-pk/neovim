@@ -46,19 +46,19 @@
 
 static void log_request(char *dir, uint64_t channel_id, uint32_t req_id, const char *name)
 {
-  logmsg(LOGLVL_DBG, "RPC: ", NULL, -1, false, "%s %" PRIu64 ": %s id=%u: %s\n", dir, channel_id,
+  logmsg(LOGLVL_DBG, "RPC: ", nullptr, -1, false, "%s %" PRIu64 ": %s id=%u: %s\n", dir, channel_id,
          REQ, req_id, name);
 }
 
 static void log_response(char *dir, uint64_t channel_id, char *kind, uint32_t req_id)
 {
-  logmsg(LOGLVL_DBG, "RPC: ", NULL, -1, false, "%s %" PRIu64 ": %s id=%u\n", dir, channel_id, kind,
+  logmsg(LOGLVL_DBG, "RPC: ", nullptr, -1, false, "%s %" PRIu64 ": %s id=%u\n", dir, channel_id, kind,
          req_id);
 }
 
 static void log_notify(char *dir, uint64_t channel_id, const char *name)
 {
-  logmsg(LOGLVL_DBG, "RPC: ", NULL, -1, false, "%s %" PRIu64 ": %s %s\n", dir, channel_id, NOT,
+  logmsg(LOGLVL_DBG, "RPC: ", nullptr, -1, false, "%s %" PRIu64 ": %s %s\n", dir, channel_id, NOT,
          name);
 }
 
@@ -101,7 +101,7 @@ static Channel *find_rpc_channel(uint64_t id)
 {
   Channel *chan = find_channel(id);
   if (!chan || !chan->is_rpc || chan->rpc.closed) {
-    return NULL;
+    return nullptr;
   }
   return chan;
 }
@@ -114,7 +114,7 @@ static Channel *find_rpc_channel(uint64_t id)
 /// @return True if the event was sent successfully, false otherwise.
 bool rpc_send_event(uint64_t id, const char *name, Array args)
 {
-  Channel *channel = NULL;
+  Channel *channel = nullptr;
 
   if (id && (!(channel = find_rpc_channel(id)))) {
     return false;
@@ -140,7 +140,7 @@ bool rpc_send_event(uint64_t id, const char *name, Array args)
 Object rpc_send_call(uint64_t id, const char *method_name, Array args, ArenaMem *result_mem,
                      Error *err)
 {
-  Channel *channel = NULL;
+  Channel *channel = nullptr;
 
   if (!(channel = find_rpc_channel(id))) {
     api_set_error(err, kErrorTypeException, "Invalid channel: %" PRIu64, id);
@@ -156,7 +156,7 @@ Object rpc_send_call(uint64_t id, const char *method_name, Array args, ArenaMem 
   log_request(SEND, channel->id, request_id, method_name);
 
   // Push the frame
-  ChannelCallFrame frame = { request_id, false, false, NIL, NULL };
+  ChannelCallFrame frame = { request_id, false, false, NIL, nullptr };
   kv_push(rpc->call_stack, &frame);
   LOOP_PROCESS_EVENTS_UNTIL(&main_loop, channel->events, -1, frame.returned || rpc->closed);
   (void)kv_pop(rpc->call_stack);
@@ -191,7 +191,7 @@ Object rpc_send_call(uint64_t id, const char *method_name, Array args, ArenaMem 
 
     // frame.result was allocated in an arena
     arena_mem_free(frame.result_mem);
-    frame.result_mem = NULL;
+    frame.result_mem = nullptr;
   }
 
   channel_decref(channel);
@@ -239,7 +239,7 @@ static ChannelCallFrame *find_call_frame(RpcState *rpc, uint32_t request_id)
       return frame;
     }
   }
-  return NULL;
+  return nullptr;
 }
 
 static void parse_msgpack(Channel *channel)
@@ -251,7 +251,7 @@ static void parse_msgpack(Channel *channel)
         if (p->has_grid_line_event) {
           ui_client_event_raw_line(&p->grid_line_event);
           p->has_grid_line_event = false;
-        } else if (p->ui_handler.fn != NULL && p->result.type == kObjectTypeArray) {
+        } else if (p->ui_handler.fn != nullptr && p->result.type == kObjectTypeArray) {
           p->ui_handler.fn(p->result.data.array);
         }
       }
@@ -260,7 +260,7 @@ static void parse_msgpack(Channel *channel)
       ChannelCallFrame *frame = channel->rpc.client_type == kClientTypeMsgpackRpc
                                 ? find_call_frame(&channel->rpc, p->request_id)
                                 : kv_last(channel->rpc.call_stack);
-      if (frame == NULL || p->request_id != frame->request_id) {
+      if (frame == nullptr || p->request_id != frame->request_id) {
         char buf[256];
         snprintf(buf, sizeof(buf),
                  "ch %" PRIu64 " (type=%" PRIu32 ") returned a response with an unknown request "
@@ -497,7 +497,7 @@ static void rpc_close_event(void **argv)
   // No more I/O can happen on this channel. Remove UI if there is one attached.
   // Do this here instead of in rpc_free() which isn't always called on exit, so that
   // UILeave events behave consistently.
-  remote_ui_disconnect(channel->id, NULL, false);
+  remote_ui_disconnect(channel->id, nullptr, false);
 
   bool is_ui_client = ui_client_channel_id && channel->id == ui_client_channel_id;
   if (is_ui_client) {
@@ -542,7 +542,7 @@ static void chan_close_on_err(Channel *channel, char *msg, int loglevel)
     frame->result_mem = arena_finish(&channel->rpc.unpacker->arena);
   }
 
-  channel_close(channel->id, kChannelPartRpc, NULL);
+  channel_close(channel->id, kChannelPartRpc, nullptr);
 
   LOG(loglevel, "RPC: %s", msg);
 }
@@ -659,7 +659,7 @@ void rpc_set_client_info(uint64_t id, Dict info)
 
   // Parse "type" on "info" and set "client_type"
   const char *type = get_client_info(chan, "type");
-  if (type == NULL || strequal(type, "remote")) {
+  if (type == nullptr || strequal(type, "remote")) {
     chan->rpc.client_type = kClientTypeRemote;
   } else if (strequal(type, "msgpack-rpc")) {
     chan->rpc.client_type = kClientTypeMsgpackRpc;
@@ -680,14 +680,14 @@ void rpc_set_client_info(uint64_t id, Dict info)
 
 Dict rpc_client_info(Channel *chan)
 {
-  return copy_dict(chan->rpc.info, NULL);
+  return copy_dict(chan->rpc.info, nullptr);
 }
 
 const char *get_client_info(Channel *chan, const char *key)
   FUNC_ATTR_NONNULL_ALL
 {
   if (!chan->is_rpc) {
-    return NULL;
+    return nullptr;
   }
   Dict info = chan->rpc.info;
   for (size_t i = 0; i < info.size; i++) {
@@ -697,7 +697,7 @@ const char *get_client_info(Channel *chan, const char *key)
     }
   }
 
-  return NULL;
+  return nullptr;
 }
 
 #ifdef EXITFREE

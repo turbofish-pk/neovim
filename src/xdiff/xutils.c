@@ -73,10 +73,10 @@ long xdl_mmfile_size(mmfile_t *mmf)
 
 int xdl_cha_init(chastore_t *cha, long isize, long icount) {
 
-	cha->head = cha->tail = NULL;
+	cha->head = cha->tail = nullptr;
 	cha->isize = isize;
 	cha->nsize = icount * isize;
-	cha->ancur = cha->sncur = NULL;
+	cha->ancur = cha->sncur = nullptr;
 	cha->scurr = 0;
 
 	return 0;
@@ -86,7 +86,7 @@ int xdl_cha_init(chastore_t *cha, long isize, long icount) {
 void xdl_cha_free(chastore_t *cha) {
 	chanode_t *cur, *tmp;
 
-	for (cur = cha->head; (tmp = cur) != NULL;) {
+	for (cur = cha->head; (tmp = cur) != nullptr;) {
 		cur = cur->next;
 		xdl_free(tmp);
 	}
@@ -100,10 +100,10 @@ void *xdl_cha_alloc(chastore_t *cha) {
 	if (!(ancur = cha->ancur) || ancur->icurr == cha->nsize) {
 		if (!(ancur = (chanode_t *) xdl_malloc(sizeof(chanode_t) + cha->nsize))) {
 
-			return NULL;
+			return nullptr;
 		}
 		ancur->icurr = 0;
-		ancur->next = NULL;
+		ancur->next = nullptr;
 		if (cha->tail)
 			cha->tail->next = ancur;
 		if (!cha->head)
@@ -122,7 +122,7 @@ long xdl_guess_lines(mmfile_t *mf, long sample) {
 	long nl = 0, size, tsize = 0;
 	char const *data, *cur, *top;
 
-	if ((cur = data = xdl_mmfile_first(mf, &size)) != NULL) {
+	if ((cur = data = xdl_mmfile_first(mf, &size)) != nullptr) {
 		for (top = data + size; nl < sample && cur < top; ) {
 			nl++;
 			if (!(cur = memchr(cur, '\n', top - cur)))

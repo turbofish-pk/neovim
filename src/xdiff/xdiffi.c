@@ -377,7 +377,7 @@ static xdchange_t *xdl_add_change(xdchange_t *xscr, long i1, long i2, long chg1,
 	xdchange_t *xch;
 
 	if (!(xch = (xdchange_t *) xdl_malloc(sizeof(xdchange_t))))
-		return NULL;
+		return nullptr;
 
 	xch->next = xscr;
 	xch->i1 = i1;
@@ -947,7 +947,7 @@ int xdl_change_compact(xdfile_t *xdf, xdfile_t *xdfo, long flags) {
 
 
 int xdl_build_script(xdfenv_t *xe, xdchange_t **xscr) {
-	xdchange_t *cscr = NULL, *xch;
+	xdchange_t *cscr = nullptr, *xch;
 	char *rchg1 = xe->xdf1.rchg, *rchg2 = xe->xdf2.rchg;
 	long i1, i2, l1, l2;
 
@@ -975,7 +975,7 @@ int xdl_build_script(xdfenv_t *xe, xdchange_t **xscr) {
 void xdl_free_script(xdchange_t *xscr) {
 	xdchange_t *xch;
 
-	while ((xch = xscr) != NULL) {
+	while ((xch = xscr) != nullptr) {
 		xscr = xscr->next;
 		xdl_free(xch);
 	}

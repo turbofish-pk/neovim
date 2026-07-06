@@ -70,7 +70,7 @@
  * 15.06.2025  improve color code logic
  * 08.08.2025  fix overflow with bitwise output
  * 20.08.2025  remove external library call for autoconversion on z/OS (MVS)
- * 24.08.2025  avoid NULL dereference with autoskip colorless
+ * 24.08.2025  avoid nullptr dereference with autoskip colorless
  * 26.11.2025  update indent in exit_with_usage()
  *
  * (c) 1990-1998 by Juergen Weigert (jnweiger@gmail.com)
@@ -306,7 +306,7 @@ static void exit_with_usage(void)
 static void perror_exit(int ret)
 {
   fprintf(stderr, "%s: ", pname);
-  perror(NULL);
+  perror(nullptr);
   exit(ret);
 }
 
@@ -717,14 +717,14 @@ int main(int argc, char *argv[])
   static char l[LLEN_NO_COLOR + 1];  // static because it may be too big for stack
   static char colors[LLEN_NO_COLOR + 1];  // color array
   char *pp;
-  char *varname = NULL;
+  char *varname = nullptr;
   int addrlen = 9;
   int color = 0;
   char *no_color;
   char cur_color = 0;
 
   no_color = getenv("NO_COLOR");
-  if (no_color == NULL || no_color[0] == '\0') {
+  if (no_color == nullptr || no_color[0] == '\0') {
     color = enable_color();
   }
 
@@ -780,24 +780,24 @@ int main(int argc, char *argv[])
         capitalize = 1;
       } else if (pp[2] && STRNCMP("ols", pp + 2, 3)) {
         colsgiven = 1;
-        cols = (int)strtol(pp + 2, NULL, 0);
+        cols = (int)strtol(pp + 2, nullptr, 0);
       } else {
         if (!argv[2]) {
           exit_with_usage();
         }
         colsgiven = 1;
-        cols = (int)strtol(argv[2], NULL, 0);
+        cols = (int)strtol(argv[2], nullptr, 0);
         argv++;
         argc--;
       }
     } else if (!STRNCMP(pp, "-g", 2)) {
       if (pp[2] && STRNCMP("roup", pp + 2, 4)) {
-        octspergrp = (int)strtol(pp + 2, NULL, 0);
+        octspergrp = (int)strtol(pp + 2, nullptr, 0);
       } else {
         if (!argv[2]) {
           exit_with_usage();
         }
-        octspergrp = (int)strtol(argv[2], NULL, 0);
+        octspergrp = (int)strtol(argv[2], nullptr, 0);
         argv++;
         argc--;
       }
@@ -805,7 +805,7 @@ int main(int argc, char *argv[])
       int reloffset = 0;
       int negoffset = 0;
       if (pp[2] && STRNCMP("ffset", pp + 2, 5)) {
-        displayoff = strtoul(pp + 2, NULL, 0);
+        displayoff = strtoul(pp + 2, nullptr, 0);
       } else {
         if (!argv[2]) {
           exit_with_usage();
@@ -819,9 +819,9 @@ int main(int argc, char *argv[])
         }
 
         if (negoffset) {
-          displayoff = ULONG_MAX - strtoul(argv[2] + reloffset + negoffset, NULL, 0) + 1;
+          displayoff = ULONG_MAX - strtoul(argv[2] + reloffset + negoffset, nullptr, 0) + 1;
         } else {
-          displayoff = strtoul(argv[2] + reloffset + negoffset, NULL, 0);
+          displayoff = strtoul(argv[2] + reloffset + negoffset, nullptr, 0);
         }
 
         argv++;
@@ -839,7 +839,7 @@ int main(int argc, char *argv[])
           negseek++;
         }
 #endif
-        seekoff = strtol(pp + 2 + relseek + negseek, (char **)NULL, 0);
+        seekoff = strtol(pp + 2 + relseek + negseek, (char **)nullptr, 0);
       } else {
         if (!argv[2]) {
           exit_with_usage();
@@ -852,18 +852,18 @@ int main(int argc, char *argv[])
           negseek++;
         }
 #endif
-        seekoff = strtol(argv[2] + relseek + negseek, (char **)NULL, 0);
+        seekoff = strtol(argv[2] + relseek + negseek, (char **)nullptr, 0);
         argv++;
         argc--;
       }
     } else if (!STRNCMP(pp, "-l", 2)) {
       if (pp[2] && STRNCMP("en", pp + 2, 2)) {
-        length = strtol(pp + 2, (char **)NULL, 0);
+        length = strtol(pp + 2, (char **)nullptr, 0);
       } else {
         if (!argv[2]) {
           exit_with_usage();
         }
-        length = strtol(argv[2], (char **)NULL, 0);
+        length = strtol(argv[2], (char **)nullptr, 0);
         argv++;
         argc--;
       }
@@ -971,7 +971,7 @@ int main(int argc, char *argv[])
   if (argc == 1 || (argv[1][0] == '-' && !argv[1][1])) {
     BIN_ASSIGN(fp = stdin, !revert);
   } else {
-    if ((fp = fopen(argv[1], BIN_READ(!revert))) == NULL) {
+    if ((fp = fopen(argv[1], BIN_READ(!revert))) == nullptr) {
       fprintf(stderr, "%s: ", pname);
       perror(argv[1]);
       return 2;
@@ -985,7 +985,7 @@ int main(int argc, char *argv[])
     int mode = revert ? O_WRONLY : (O_TRUNC|O_WRONLY);
 
     if (((fd = OPEN(argv[2], mode | BIN_CREAT(revert), 0666)) < 0)
-        || (fpo = fdopen(fd, BIN_WRITE(revert))) == NULL) {
+        || (fpo = fdopen(fd, BIN_WRITE(revert))) == nullptr) {
       fprintf(stderr, "%s: ", pname);
       perror(argv[2]);
       return 3;
@@ -1034,11 +1034,11 @@ int main(int argc, char *argv[])
 
   if (hextype & HEX_CINCLUDE) {
     // A user-set variable name overrides fp == stdin
-    if (varname == NULL && fp != stdin) {
+    if (varname == nullptr && fp != stdin) {
       varname = argv[1];
     }
 
-    if (varname != NULL) {
+    if (varname != nullptr) {
       FPRINTF_OR_DIE((fpo, "unsigned char %s", isdigit((unsigned char)varname[0]) ? "__" : ""));
       for (e = 0; (c = varname[e]) != 0; e++) {
         putc_or_die(isalnum((unsigned char)c) ? CONDITIONAL_CAPITALIZE(c) : '_', fpo);
@@ -1073,7 +1073,7 @@ int main(int argc, char *argv[])
       fputs_or_die("\n", fpo);
     }
 
-    if (varname != NULL) {
+    if (varname != nullptr) {
       fputs_or_die("};\n", fpo);
       FPRINTF_OR_DIE((fpo, "unsigned int %s", isdigit((unsigned char)varname[0]) ? "__" : ""));
       for (e = 0; (c = varname[e]) != 0; e++) {
@@ -1169,7 +1169,7 @@ int main(int argc, char *argv[])
       l[c++] = '\n';
       l[c] = '\0';
 
-      xxdline(fpo, l, color ? colors : NULL, autoskip ? nonzero : 1);
+      xxdline(fpo, l, color ? colors : nullptr, autoskip ? nonzero : 1);
       memset(colors, 0, c);
       nonzero = 0;
       p = 0;
@@ -1208,10 +1208,10 @@ int main(int argc, char *argv[])
       }
       xxdline(fpo, l, colors, 1);
     } else {
-      xxdline(fpo, l, NULL, 1);
+      xxdline(fpo, l, nullptr, 1);
     }
   } else if (autoskip) {
-    xxdline(fpo, l, color ? colors : NULL, -1);  // last chance to flush out suppressed lines
+    xxdline(fpo, l, color ? colors : nullptr, -1);  // last chance to flush out suppressed lines
   }
   fclose_or_die(fp, fpo);
   return 0;

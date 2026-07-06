@@ -18,21 +18,21 @@
 void rstream_init_fd(Loop *loop, RStream *stream, int fd)
   FUNC_ATTR_NONNULL_ARG(1, 2)
 {
-  stream_init(loop, &stream->s, fd, NULL);
+  stream_init(loop, &stream->s, fd, nullptr);
   rstream_init(stream);
 }
 
 void rstream_init_stream(RStream *stream, uv_stream_t *uvstream)
   FUNC_ATTR_NONNULL_ARG(1, 2)
 {
-  stream_init(NULL, &stream->s, -1, uvstream);
+  stream_init(nullptr, &stream->s, -1, uvstream);
   rstream_init(stream);
 }
 
 void rstream_init(RStream *stream)
   FUNC_ATTR_NONNULL_ARG(1)
 {
-  stream->read_cb = NULL;
+  stream->read_cb = nullptr;
   stream->num_bytes = 0;
   stream->buffer = alloc_block();
   stream->read_pos = stream->write_pos = stream->buffer;
@@ -155,7 +155,7 @@ static void fread_idle_cb(uv_idle_t *handle)
   stream->uvbuf.len = UV_BUF_LEN(rstream_space(stream));
 
   // Synchronous read
-  uv_fs_read(handle->loop, &req, stream->s.fd, &stream->uvbuf, 1, stream->s.fpos, NULL);
+  uv_fs_read(handle->loop, &req, stream->s.fd, &stream->uvbuf, 1, stream->s.fpos, nullptr);
 
   uv_fs_req_cleanup(&req);
 

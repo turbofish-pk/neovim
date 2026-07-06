@@ -5,6 +5,6 @@
 #include "eval/gc.c.generated.h"  // IWYU pragma: export
 
 /// Head of list of all dictionaries
-DLLEXPORT dict_T *gc_first_dict = NULL;
+DLLEXPORT dict_T *gc_first_dict = nullptr;
 /// Head of list of all lists
-DLLEXPORT list_T *gc_first_list = NULL;
+DLLEXPORT list_T *gc_first_list = nullptr;

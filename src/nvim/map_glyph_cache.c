@@ -1,6 +1,6 @@
 // Specialized version of Set() where interned strings is stored in a compact,
 // NUL-separated char array.
-// `String key` lookup keys don't need to be NULL terminated, but they
+// `String key` lookup keys don't need to be nullptr terminated, but they
 // must not contain embedded NUL:s. When reading a key from set->keys, they
 // are always NUL terminated, though. Thus, it is enough to store an index into
 // this array, and use strlen(), to retrieve an interned key.

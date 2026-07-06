@@ -82,7 +82,7 @@ static bool have_wildcard(int num, char **file)
 static bool have_dollars(int num, char **file)
 {
   for (int i = 0; i < num; i++) {
-    if (vim_strchr(file[i], '$') != NULL) {
+    if (vim_strchr(file[i], '$') != nullptr) {
       return true;
     }
   }
@@ -98,7 +98,7 @@ static bool have_dollars(int num, char **file)
 /// @param[out] file     is pointer to array of pointers to matched file names.
 ///                      Memory pointed to by the initial value of *file will
 ///                      not be freed.
-///                      Set to NULL if FAIL is returned. Otherwise points to
+///                      Set to nullptr if FAIL is returned. Otherwise points to
 ///                      allocated memory.
 /// @param      flags    is a combination of EW_* flags used in
 ///                      expand_wildcards().
@@ -114,7 +114,7 @@ int os_expand_wildcards(int num_pat, char **pat, int *num_file, char ***file, in
   int i;
   size_t len;
   char *p;
-  char *extra_shell_arg = NULL;
+  char *extra_shell_arg = nullptr;
   int shellopts = kShellOptExpand | kShellOptSilent;
   int j;
   char *tempname;
@@ -138,13 +138,13 @@ int os_expand_wildcards(int num_pat, char **pat, int *num_file, char ***file, in
 
   bool is_fish_shell =
 #ifdef UNIX
-    strncmp(invocation_path_tail(p_sh, NULL), "fish", 4) == 0;
+    strncmp(invocation_path_tail(p_sh, nullptr), "fish", 4) == 0;
 #else
     false;
 #endif
 
   *num_file = 0;        // default: no files found
-  *file = NULL;
+  *file = nullptr;
 
   // If there are no wildcards, just copy the names to allocated memory.
   // Saves a lot of time, because we don't have to start a new shell.
@@ -161,7 +161,7 @@ int os_expand_wildcards(int num_pat, char **pat, int *num_file, char ***file, in
   // Don't allow the use of backticks in secure.
   if (secure) {
     for (i = 0; i < num_pat; i++) {
-      if (vim_strchr(pat[i], '`') != NULL
+      if (vim_strchr(pat[i], '`') != nullptr
           && (check_secure())) {
         return FAIL;
       }
@@ -169,7 +169,7 @@ int os_expand_wildcards(int num_pat, char **pat, int *num_file, char ***file, in
   }
 
   // get a name for the temp file
-  if ((tempname = vim_tempname()) == NULL) {
+  if ((tempname = vim_tempname()) == nullptr) {
     emsg(_(e_notmp));
     return FAIL;
   }
@@ -200,9 +200,9 @@ int os_expand_wildcards(int num_pat, char **pat, int *num_file, char ***file, in
     }
   }
   if (shell_style == STYLE_ECHO) {
-    if (strstr(path_tail(p_sh), "bash") != NULL) {
+    if (strstr(path_tail(p_sh), "bash") != nullptr) {
       shell_style = STYLE_GLOBSTAR;
-    } else if (strstr(path_tail(p_sh), "sh") != NULL) {
+    } else if (strstr(path_tail(p_sh), "sh") != nullptr) {
       shell_style = STYLE_VIMGLOB;
     }
   }
@@ -222,7 +222,7 @@ int os_expand_wildcards(int num_pat, char **pat, int *num_file, char ***file, in
     // "command" below.
     len++;                              // add space
     for (j = 0; pat[i][j] != NUL; j++) {
-      if (vim_strchr(SHELL_SPECIAL, (uint8_t)pat[i][j]) != NULL) {
+      if (vim_strchr(SHELL_SPECIAL, (uint8_t)pat[i][j]) != nullptr) {
         len++;                  // may add a backslash
       }
       len++;
@@ -308,14 +308,14 @@ int os_expand_wildcards(int num_pat, char **pat, int *num_file, char ***file, in
           // backslash inside backticks, before a special character
           // and before a backtick.
           if (intick
-              || vim_strchr(SHELL_SPECIAL, (uint8_t)pat[i][j + 1]) != NULL
+              || vim_strchr(SHELL_SPECIAL, (uint8_t)pat[i][j + 1]) != nullptr
               || pat[i][j + 1] == '`') {
             *p++ = '\\';
           }
           j++;
         } else if (!intick
                    && ((flags & EW_KEEPDOLLAR) == 0 || pat[i][j] != '$')
-                   && vim_strchr(SHELL_SPECIAL, (uint8_t)pat[i][j]) != NULL) {
+                   && vim_strchr(SHELL_SPECIAL, (uint8_t)pat[i][j]) != nullptr) {
           // Put a backslash before a special character, but not
           // when inside ``. And not for $var when EW_KEEPDOLLAR is
           // set.
@@ -382,7 +382,7 @@ int os_expand_wildcards(int num_pat, char **pat, int *num_file, char ***file, in
 
   // read the names from the file into memory
   FILE *fd = fopen(tempname, READBIN);
-  if (fd == NULL) {
+  if (fd == nullptr) {
     // Something went wrong, perhaps a file name with a special char.
     if (!(flags & EW_SILENT)) {
       msg(_(e_wildexpand), 0);
@@ -536,7 +536,7 @@ int os_expand_wildcards(int num_pat, char **pat, int *num_file, char ***file, in
 
     // Skip files that are not executable if we check for that.
     if (!dir && (flags & EW_EXEC)
-        && !os_can_exe((*file)[i], NULL, !(flags & EW_SHELLCMD))) {
+        && !os_can_exe((*file)[i], nullptr, !(flags & EW_SHELLCMD))) {
       continue;
     }
 
@@ -570,13 +570,13 @@ notfound:
 ///
 ///   ["shell", "-extra_args", "-shellcmdflag", "command with spaces"]
 ///
-/// @param cmd Command string, or NULL to run an interactive shell.
-/// @param extra_args Extra arguments to the shell, or NULL.
+/// @param cmd Command string, or nullptr to run an interactive shell.
+/// @param extra_args Extra arguments to the shell, or nullptr.
 /// @return Newly allocated argument vector. Must be freed with shell_free_argv.
 char **shell_build_argv(const char *cmd, const char *extra_args)
   FUNC_ATTR_NONNULL_RET
 {
-  size_t argc = tokenize(p_sh, NULL) + (cmd ? tokenize(p_shcf, NULL) : 0);
+  size_t argc = tokenize(p_sh, nullptr) + (cmd ? tokenize(p_shcf, nullptr) : 0);
   char **rv = xmalloc((argc + 4) * sizeof(*rv));
 
   // Split 'shell'
@@ -591,7 +591,7 @@ char **shell_build_argv(const char *cmd, const char *extra_args)
     rv[i++] = shell_xescape_xquote(cmd);  // Copy (and escape) `cmd`.
   }
 
-  rv[i] = NULL;
+  rv[i] = nullptr;
 
   assert(rv[0]);
 
@@ -604,11 +604,11 @@ char **shell_build_argv(const char *cmd, const char *extra_args)
 void shell_free_argv(char **argv)
 {
   char **p = argv;
-  if (p == NULL) {
+  if (p == nullptr) {
     // Nothing was allocated, return
     return;
   }
-  while (*p != NULL) {
+  while (*p != nullptr) {
     // Free each argument
     xfree(*p);
     p++;
@@ -627,10 +627,10 @@ char *shell_argv_to_str(char **const argv)
   char **p = argv;
   char *rv = xcalloc(256, sizeof(*rv));
   const size_t maxsize = (256 * sizeof(*rv));
-  if (*p == NULL) {
+  if (*p == nullptr) {
     return rv;
   }
-  while (*p != NULL) {
+  while (*p != nullptr) {
     xstrlcat(rv, "'", maxsize);
     xstrlcat(rv, *p, maxsize);
     n = xstrlcat(rv,  "' ", maxsize);
@@ -654,16 +654,16 @@ char *shell_argv_to_str(char **const argv)
 /// Calls the user-configured 'shell' (p_sh) for running a command or wildcard
 /// expansion.
 ///
-/// @param cmd The command to execute, or NULL to run an interactive shell.
+/// @param cmd The command to execute, or nullptr to run an interactive shell.
 /// @param opts Options that control how the shell will work.
-/// @param extra_args Extra arguments to the shell, or NULL.
+/// @param extra_args Extra arguments to the shell, or nullptr.
 ///
 /// @return shell command exit code
 int os_call_shell(char *cmd, int opts, char *extra_args)
 {
   StringBuilder input = KV_INITIAL_VALUE;
-  char *output = NULL;
-  char **output_ptr = NULL;
+  char *output = nullptr;
+  char **output_ptr = nullptr;
   int current_state = State;
   bool forward_output = true;
 
@@ -728,7 +728,7 @@ int call_shell(char *cmd, int opts, char *extra_shell_arg)
 
   if (p_verbose > 3) {
     verbose_enter();
-    smsg(0, _("Executing command: \"%s\""), cmd == NULL ? p_sh : cmd);
+    smsg(0, _("Executing command: \"%s\""), cmd == nullptr ? p_sh : cmd);
     if (!ui_has(kUIMessages)) {
       msg_putchar('\n');
     }
@@ -758,28 +758,28 @@ int call_shell(char *cmd, int opts, char *extra_shell_arg)
 }
 
 /// Get the stdout of an external command.
-/// If "ret_len" is NULL replace NUL characters with NL. When "ret_len" is not
-/// NULL store the length there.
+/// If "ret_len" is nullptr replace NUL characters with NL. When "ret_len" is not
+/// nullptr store the length there.
 ///
 /// @param  cmd      command to execute
 /// @param  infile   optional input file name
 /// @param  flags    can be kShellOptSilent or 0
 /// @param  ret_len  length of the stdout
 ///
-/// @return an allocated string, or NULL for error.
+/// @return an allocated string, or nullptr for error.
 char *get_cmd_output(char *cmd, char *infile, int flags, size_t *ret_len)
 {
-  char *buffer = NULL;
+  char *buffer = nullptr;
 
   if (check_secure()) {
-    return NULL;
+    return nullptr;
   }
 
   // get a name for the temp file
   char *tempname = vim_tempname();
-  if (tempname == NULL) {
+  if (tempname == nullptr) {
     emsg(_(e_notmp));
-    return NULL;
+    return nullptr;
   }
 
   // Add the redirection stuff
@@ -788,7 +788,7 @@ char *get_cmd_output(char *cmd, char *infile, int flags, size_t *ret_len)
   // Call the shell to execute the command (errors are ignored).
   // Don't check timestamps here.
   no_check_timestamps++;
-  call_shell(command, kShellOptDoOut | kShellOptExpand | flags, NULL);
+  call_shell(command, kShellOptDoOut | kShellOptExpand | flags, nullptr);
   no_check_timestamps--;
 
   xfree(command);
@@ -798,12 +798,12 @@ char *get_cmd_output(char *cmd, char *infile, int flags, size_t *ret_len)
 
   // Not being able to seek means we can't read the file.
   long len_l;
-  if (fd == NULL
+  if (fd == nullptr
       || fseek(fd, 0L, SEEK_END) == -1
       || (len_l = ftell(fd)) == -1         // get size of temp file
       || fseek(fd, 0L, SEEK_SET) == -1) {  // back to the start
     semsg(_(e_cannot_read_from_str_2), tempname);
-    if (fd != NULL) {
+    if (fd != nullptr) {
       fclose(fd);
     }
     goto done;
@@ -817,7 +817,7 @@ char *get_cmd_output(char *cmd, char *infile, int flags, size_t *ret_len)
   if (i != len) {
     semsg(_(e_cant_read_file_str), tempname);
     XFREE_CLEAR(buffer);
-  } else if (ret_len == NULL) {
+  } else if (ret_len == nullptr) {
     // Change NUL into SOH, otherwise the string is truncated.
     for (i = 0; i < len; i++) {
       if (buffer[i] == NUL) {
@@ -837,22 +837,22 @@ done:
 /// os_system - synchronously execute a command in the shell
 ///
 /// example:
-///   char *output = NULL;
+///   char *output = nullptr;
 ///   size_t nread = 0;
-///   char *argv[] = {"ls", "-la", NULL};
-///   int exitcode = os_system(argv, NULL, 0, &output, &nread);
+///   char *argv[] = {"ls", "-la", nullptr};
+///   int exitcode = os_system(argv, nullptr, 0, &output, &nread);
 ///
 /// @param argv The commandline arguments to be passed to the shell. `argv`
 ///             will be consumed.
-/// @param input The input to the shell (NULL for no input), passed to the
+/// @param input The input to the shell (nullptr for no input), passed to the
 ///              stdin of the resulting process.
-/// @param len The length of the input buffer (not used if `input` == NULL)
+/// @param len The length of the input buffer (not used if `input` == nullptr)
 /// @param[out] output Pointer to a location where the output will be
-///                    allocated and stored. Will point to NULL if the shell
-///                    command did not output anything. If NULL is passed,
+///                    allocated and stored. Will point to nullptr if the shell
+///                    command did not output anything. If nullptr is passed,
 ///                    the shell output will be ignored.
 /// @param[out] nread the number of bytes in the returned buffer (if the
-///             returned buffer is not NULL)
+///             returned buffer is not nullptr)
 /// @return the return code of the process, -1 if the process couldn't be
 ///         started properly
 int os_system(char **argv, const char *input, size_t len, char **output,
@@ -880,8 +880,8 @@ static int do_os_system(char **argv, const char *input, size_t len, char **outpu
 #endif
 
   out_data_decide_throttle(0);  // Initialize throttle decider.
-  out_data_ring(NULL, 0);       // Initialize output ring-buffer.
-  bool has_input = (input != NULL && len > 0);
+  out_data_ring(nullptr, 0);       // Initialize output ring-buffer.
+  bool has_input = (input != nullptr && len > 0);
 
   // the output buffer
   StringBuilder buf = KV_INITIAL_VALUE;
@@ -893,7 +893,7 @@ static int do_os_system(char **argv, const char *input, size_t len, char **outpu
   if (forward_output) {
     data_cb = out_data_cb;
   } else if (!output) {
-    data_cb = NULL;
+    data_cb = nullptr;
   }
 
   // Copy the program name in case we need to report an error.
@@ -933,7 +933,7 @@ static int do_os_system(char **argv, const char *input, size_t len, char **outpu
 
   // write the input, if any
   if (has_input) {
-    WBuffer *input_buffer = wstream_new_buffer((char *)input, len, 1, NULL);
+    WBuffer *input_buffer = wstream_new_buffer((char *)input, len, 1, nullptr);
 
     if (wstream_write(&proc->in, input_buffer) != 0) {
       // couldn't write, stop the process and tell the user about it
@@ -941,7 +941,7 @@ static int do_os_system(char **argv, const char *input, size_t len, char **outpu
       goto end;
     }
     // close the input stream after everything is written
-    wstream_set_write_cb(&proc->in, shell_write_cb, NULL);
+    wstream_set_write_cb(&proc->in, shell_write_cb, nullptr);
   }
 
   // Invoke busy_start here so LOOP_PROCESS_EVENTS_UNTIL will not change the
@@ -954,10 +954,10 @@ static int do_os_system(char **argv, const char *input, size_t len, char **outpu
     msg_no_more = true;
     lines_left = -1;
   }
-  exitcode = proc_wait(proc, -1, NULL);
+  exitcode = proc_wait(proc, -1, nullptr);
   if (!got_int && out_data_decide_throttle(0)) {
     // Last chunk of output was skipped; display it now.
-    out_data_ring(NULL, SIZE_MAX);
+    out_data_ring(nullptr, SIZE_MAX);
   }
   if (forward_output) {
     // caller should decide if wait_return() is invoked
@@ -973,8 +973,8 @@ static int do_os_system(char **argv, const char *input, size_t len, char **outpu
   if (output) {
     assert(nread);
     if (buf.size == 0) {
-      // no data received from the process, return NULL
-      *output = NULL;
+      // no data received from the process, return nullptr
+      *output = nullptr;
       *nread = 0;
       kv_destroy(buf);
     } else {
@@ -1078,13 +1078,13 @@ static bool out_data_decide_throttle(size_t size)
 /// output for a shell-command is always displayed.
 ///
 /// Init mode: Resets the internal state.
-///   output = NULL
+///   output = nullptr
 ///   size   = 0
 /// Print mode: Displays the current saved data.
-///   output = NULL
+///   output = nullptr
 ///   size   = SIZE_MAX
 ///
-/// @param  output  Data to save, or NULL to invoke a special mode.
+/// @param  output  Data to save, or nullptr to invoke a special mode.
 /// @param  size    Length of `output`.
 static void out_data_ring(const char *output, size_t size)
 {
@@ -1092,14 +1092,14 @@ static void out_data_ring(const char *output, size_t size)
   static char last_skipped[MAX_CHUNK_SIZE];  // Saved output.
   static size_t last_skipped_len = 0;
 
-  assert(output != NULL || (size == 0 || size == SIZE_MAX));
+  assert(output != nullptr || (size == 0 || size == SIZE_MAX));
 
-  if (output == NULL && size == 0) {          // Init mode
+  if (output == nullptr && size == 0) {          // Init mode
     last_skipped_len = 0;
     return;
   }
 
-  if (output == NULL && size == SIZE_MAX) {   // Print mode
+  if (output == nullptr && size == SIZE_MAX) {   // Print mode
     out_data_append_to_screen(last_skipped, &last_skipped_len, STDOUT_FILENO, true);
     return;
   }
@@ -1187,7 +1187,7 @@ static size_t out_data_cb(RStream *stream, const char *ptr, size_t count, void *
 ///
 /// @param str The command string to be parsed
 /// @param argv The vector that will be filled with copies of the parsed
-///        words. It can be NULL if the caller only needs to count words.
+///        words. It can be nullptr if the caller only needs to count words.
 /// @return The number of words parsed.
 static size_t tokenize(const char *const str, char **const argv)
   FUNC_ATTR_NONNULL_ARG(1)
@@ -1198,7 +1198,7 @@ static size_t tokenize(const char *const str, char **const argv)
   while (*p != NUL) {
     const size_t len = word_length(p);
 
-    if (argv != NULL) {
+    if (argv != nullptr) {
       // Fill the slot
       argv[argc] = vim_strnsave_unquoted(p, len);
     }

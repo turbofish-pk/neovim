@@ -101,15 +101,15 @@ static FileDescriptor scriptin[NSCRIPT] = { 0 };
 
 #define MINIMAL_SIZE 20                 // minimal size for b_str
 
-static buffheader_T redobuff = { { NULL, 0, { NUL } }, NULL, 0, 0, false };
-static buffheader_T old_redobuff = { { NULL, 0, { NUL } }, NULL, 0, 0, false };
-static buffheader_T recordbuff = { { NULL, 0, { NUL } }, NULL, 0, 0, false };
+static buffheader_T redobuff = { { nullptr, 0, { NUL } }, nullptr, 0, 0, false };
+static buffheader_T old_redobuff = { { nullptr, 0, { NUL } }, nullptr, 0, 0, false };
+static buffheader_T recordbuff = { { nullptr, 0, { NUL } }, nullptr, 0, 0, false };
 
 /// First read ahead buffer. Used for translated commands.
-static buffheader_T readbuf1 = { { NULL, 0, { NUL } }, NULL, 0, 0, false };
+static buffheader_T readbuf1 = { { nullptr, 0, { NUL } }, nullptr, 0, 0, false };
 
 /// Second read ahead buffer. Used for redo.
-static buffheader_T readbuf2 = { { NULL, 0, { NUL } }, NULL, 0, 0, false };
+static buffheader_T readbuf2 = { { nullptr, 0, { NUL } }, nullptr, 0, 0, false };
 
 /// Buffer used to store typed characters for vim.on_key().
 static kvec_withinit_t(char, MAXMAPLEN + 1) on_key_buf = KVI_INITIAL_VALUE(on_key_buf);
@@ -175,12 +175,12 @@ static void free_buff(buffheader_T *buf)
 {
   buffblock_T *np;
 
-  for (buffblock_T *p = buf->bh_first.b_next; p != NULL; p = np) {
+  for (buffblock_T *p = buf->bh_first.b_next; p != nullptr; p = np) {
     np = p->b_next;
     xfree(p);
   }
-  buf->bh_first.b_next = NULL;
-  buf->bh_curr = NULL;
+  buf->bh_first.b_next = nullptr;
+  buf->bh_curr = nullptr;
 }
 
 /// Return the contents of a buffer as a single string.
@@ -191,12 +191,12 @@ static void free_buff(buffheader_T *buf)
 static char *get_buffcont(buffheader_T *buffer, int dozero, size_t *len)
 {
   size_t count = 0;
-  char *p = NULL;
+  char *p = nullptr;
   size_t i = 0;
 
   // compute the total length of the string
   for (const buffblock_T *bp = buffer->bh_first.b_next;
-       bp != NULL; bp = bp->b_next) {
+       bp != nullptr; bp = bp->b_next) {
     count += bp->b_strlen;
   }
 
@@ -204,7 +204,7 @@ static char *get_buffcont(buffheader_T *buffer, int dozero, size_t *len)
     p = xmalloc(count + 1);
     char *p2 = p;
     for (const buffblock_T *bp = buffer->bh_first.b_next;
-         bp != NULL; bp = bp->b_next) {
+         bp != nullptr; bp = bp->b_next) {
       for (const char *str = bp->b_str; *str;) {
         *p2++ = *str++;
       }
@@ -213,7 +213,7 @@ static char *get_buffcont(buffheader_T *buffer, int dozero, size_t *len)
     i = (size_t)(p2 - p);
   }
 
-  if (len != NULL) {
+  if (len != nullptr) {
     *len = i;
   }
 
@@ -227,8 +227,8 @@ char *get_recorded(void)
 {
   size_t len;
   char *p = get_buffcont(&recordbuff, true, &len);
-  if (p == NULL) {
-    return NULL;
+  if (p == nullptr) {
+    return nullptr;
   }
 
   free_buff(&recordbuff);
@@ -274,10 +274,10 @@ static void add_buff(buffheader_T *const buf, const char *const s, ptrdiff_t sle
     return;
   }
 
-  if (buf->bh_first.b_next == NULL) {  // first add to list
+  if (buf->bh_first.b_next == nullptr) {  // first add to list
     buf->bh_curr = &(buf->bh_first);
     buf->bh_create_newblock = true;
-  } else if (buf->bh_curr == NULL) {  // buffer has already been read
+  } else if (buf->bh_curr == nullptr) {  // buffer has already been read
     iemsg(_("E222: Add to read buffer"));
     return;
   } else if (buf->bh_index != 0) {
@@ -311,7 +311,7 @@ static void add_buff(buffheader_T *const buf, const char *const s, ptrdiff_t sle
 /// Only works when it was just added.
 static void delete_buff_tail(buffheader_T *buf, int slen)
 {
-  if (buf->bh_curr == NULL) {
+  if (buf->bh_curr == nullptr) {
     return;  // nothing to delete
   }
   if (buf->bh_curr->b_strlen < (size_t)slen) {
@@ -388,7 +388,7 @@ static int read_readbuffers(bool advance)
 
 static int read_readbuf(buffheader_T *buf, bool advance)
 {
-  if (buf->bh_first.b_next == NULL) {  // buffer is empty
+  if (buf->bh_first.b_next == nullptr) {  // buffer is empty
     return NUL;
   }
 
@@ -408,11 +408,11 @@ static int read_readbuf(buffheader_T *buf, bool advance)
 /// Prepare the read buffers for reading (if they contain something).
 static void start_stuff(void)
 {
-  if (readbuf1.bh_first.b_next != NULL) {
+  if (readbuf1.bh_first.b_next != nullptr) {
     readbuf1.bh_curr = &(readbuf1.bh_first);
     readbuf1.bh_create_newblock = true;  // force a new block to be created (see add_buff())
   }
-  if (readbuf2.bh_first.b_next != NULL) {
+  if (readbuf2.bh_first.b_next != nullptr) {
     readbuf2.bh_curr = &(readbuf2.bh_first);
     readbuf2.bh_create_newblock = true;  // force a new block to be created (see add_buff())
   }
@@ -422,7 +422,7 @@ static void start_stuff(void)
 bool stuff_empty(void)
   FUNC_ATTR_PURE
 {
-  return (readbuf1.bh_first.b_next == NULL && readbuf2.bh_first.b_next == NULL);
+  return (readbuf1.bh_first.b_next == nullptr && readbuf2.bh_first.b_next == nullptr);
 }
 
 /// @return  true if readbuf1 is empty.  There may still be redo characters in
@@ -430,7 +430,7 @@ bool stuff_empty(void)
 bool readbuf1_empty(void)
   FUNC_ATTR_PURE
 {
-  return (readbuf1.bh_first.b_next == NULL);
+  return (readbuf1.bh_first.b_next == nullptr);
 }
 
 /// Set a typeahead character that won't be flushed.
@@ -504,7 +504,7 @@ void ResetRedobuff(void)
 
   free_buff(&old_redobuff);
   old_redobuff = redobuff;
-  redobuff.bh_first.b_next = NULL;
+  redobuff.bh_first.b_next = nullptr;
 }
 
 /// Discard the contents of the redo buffer and restore the previous redo
@@ -517,7 +517,7 @@ void CancelRedo(void)
 
   free_buff(&redobuff);
   redobuff = old_redobuff;
-  old_redobuff.bh_first.b_next = NULL;
+  old_redobuff.bh_first.b_next = nullptr;
   start_stuff();
   while (read_readbuffers(true) != NUL) {}
 }
@@ -527,14 +527,14 @@ void CancelRedo(void)
 void saveRedobuff(save_redo_T *save_redo)
 {
   save_redo->sr_redobuff = redobuff;
-  redobuff.bh_first.b_next = NULL;
+  redobuff.bh_first.b_next = nullptr;
   save_redo->sr_old_redobuff = old_redobuff;
-  old_redobuff.bh_first.b_next = NULL;
+  old_redobuff.bh_first.b_next = nullptr;
 
   // Make a copy, so that ":normal ." in a function works.
   size_t slen;
   char *const s = get_buffcont(&save_redo->sr_redobuff, false, &slen);
-  if (s == NULL) {
+  if (s == nullptr) {
     return;
   }
 
@@ -746,7 +746,7 @@ static int read_redo(bool init, bool old_redo)
 
   if (init) {
     bp = old_redo ? old_redobuff.bh_first.b_next : redobuff.bh_first.b_next;
-    if (bp == NULL) {
+    if (bp == nullptr) {
       return FAIL;
     }
     p = (uint8_t *)bp->b_str;
@@ -768,7 +768,7 @@ static int read_redo(bool init, bool old_redo)
       c = TO_SPECIAL(p[1], p[2]);
       p += 2;
     }
-    if (*++p == NUL && bp->b_next != NULL) {
+    if (*++p == NUL && bp->b_next != nullptr) {
       bp = bp->b_next;
       p = (uint8_t *)bp->b_str;
     }
@@ -874,7 +874,7 @@ int start_redo_ins(void)
 
   // skip the count and the command character
   while ((c = read_redo(false, false)) != NUL) {
-    if (vim_strchr("AaIiRrOo", c) != NULL) {
+    if (vim_strchr("AaIiRrOo", c) != nullptr) {
       if (c == 'O' || c == 'o') {
         add_buff(&readbuf2, NL_STR, -1);
       }
@@ -898,7 +898,7 @@ void stop_redo_ins(void)
 /// be impossible to type anything.
 static void init_typebuf(void)
 {
-  if (typebuf.tb_buf != NULL) {
+  if (typebuf.tb_buf != nullptr) {
     return;
   }
 
@@ -1367,9 +1367,9 @@ void save_typeahead(tasave_T *tp)
   old_char = -1;
 
   tp->save_readbuf1 = readbuf1;
-  readbuf1.bh_first.b_next = NULL;
+  readbuf1.bh_first.b_next = nullptr;
   tp->save_readbuf2 = readbuf2;
-  readbuf2.bh_first.b_next = NULL;
+  readbuf2.bh_first.b_next = nullptr;
 }
 
 /// Restore the typeahead to what it was before calling save_typeahead().
@@ -1585,7 +1585,7 @@ static void add_byte_to_showcmd(uint8_t byte)
 
   if (*ptr != NUL) {
     const char *mb_ptr = mb_unescape((const char **)&ptr);
-    c = mb_ptr != NULL ? utf_ptr2char(mb_ptr) : *ptr++;
+    c = mb_ptr != nullptr ? utf_ptr2char(mb_ptr) : *ptr++;
     if (c <= 0x7f) {
       // Merge modifiers into the key to make the result more readable.
       int modifiers_after = modifiers;
@@ -1820,7 +1820,7 @@ int vgetc(void)
     // Keys following K_COMMAND/K_LUA/K_PASTE_START aren't normally received by
     // vim.on_key() callbacks, so discard them along with the current key.
     if (c == K_COMMAND) {
-      xfree(getcmdkeycmd(NUL, NULL, 0, false));
+      xfree(getcmdkeycmd(NUL, nullptr, 0, false));
     } else if (c == K_LUA) {
       map_execute_lua(false, true);
     } else if (c == K_PASTE_START) {
@@ -1847,7 +1847,7 @@ int safe_vgetc(void)
 {
   int c = vgetc();
   if (c == NUL) {
-    c = get_keystroke(NULL);
+    c = get_keystroke(nullptr);
   }
   return c;
 }
@@ -1932,7 +1932,7 @@ static void getchar_common(typval_T *argvars, typval_T *rettv, bool allow_number
     simplify = tv_dict_get_bool(d, "simplify", true);
 
     const char *cursor_str = tv_dict_get_string(d, "cursor", false);
-    if (cursor_str != NULL) {
+    if (cursor_str != nullptr) {
       if (strcmp(cursor_str, "hide") != 0
           && strcmp(cursor_str, "keep") != 0
           && strcmp(cursor_str, "msg") != 0) {
@@ -1968,7 +1968,7 @@ static void getchar_common(typval_T *argvars, typval_T *rettv, bool allow_number
       if (!char_avail()) {
         // Flush screen updates before blocking.
         ui_flush();
-        input_get(NULL, 0, -1, typebuf.tb_change_cnt, main_loop.events);
+        input_get(nullptr, 0, -1, typebuf.tb_change_cnt, main_loop.events);
         if (!input_available() && !multiqueue_empty(main_loop.events)) {
           state_handle_k_event();
           continue;
@@ -2044,7 +2044,7 @@ static void getchar_common(typval_T *argvars, typval_T *rettv, bool allow_number
         // Find the window at the mouse coordinates and compute the
         // text position.
         win_T *const win = mouse_find_win_inner(&grid, &row, &col);
-        if (win == NULL) {
+        if (win == nullptr) {
           return;
         }
         mouse_comp_pos(win, &row, &col, &lnum);
@@ -2250,7 +2250,7 @@ static int char_iter(const uint8_t **itp, int nomap)
 /// - On failure (out of memory) return map_result_fail.
 static int handle_mapping(int *keylenp, const bool *timedout, int *mapdepth)
 {
-  mapblock_T *mp = NULL;
+  mapblock_T *mp = nullptr;
   mapblock_T *mp2;
   mapblock_T *mp_match;
   int mp_match_len = 0;
@@ -2321,20 +2321,20 @@ static int handle_mapping(int *keylenp, const bool *timedout, int *mapdepth)
     // First try buffer-local mappings.
     mp = get_buf_maphash_list(local_State, tb_b1);
     mp2 = get_maphash_list(local_State, tb_b1);
-    if (mp == NULL) {
+    if (mp == nullptr) {
       // There are no buffer-local mappings.
       mp = mp2;
-      mp2 = NULL;
+      mp2 = nullptr;
     }
     // Loop until a partly matching mapping is found or all (local)
     // mappings have been checked.
     // The longest full match is remembered in "mp_match".
     // A full match is only accepted if there is no partly match, so "aa"
     // and "aaa" can both be mapped.
-    mp_match = NULL;
+    mp_match = nullptr;
     mp_match_len = 0;
     tb_match_len = 0;
-    for (; mp != NULL; mp->m_next == NULL ? (mp = mp2, mp2 = NULL) : (mp = mp->m_next)) {
+    for (; mp != nullptr; mp->m_next == nullptr ? (mp = mp2, mp2 = nullptr) : (mp = mp->m_next)) {
       // Only consider an entry if the first character matches and it is
       // for the current state.
       // Skip ":lmap" mappings if keys were mapped.
@@ -2411,14 +2411,14 @@ static int handle_mapping(int *keylenp, const bool *timedout, int *mapdepth)
           }
 
           if (keylen > typebuf.tb_len) {
-            if (!*timedout && !(mp_match != NULL && mp_match->m_nowait)) {
+            if (!*timedout && !(mp_match != nullptr && mp_match->m_nowait)) {
               // break at a partly match
               keylen = KEYLEN_PART_MAP;
               break;
             }
           } else if (keylen > mp_match_len
                      || (keylen == mp_match_len
-                         && mp_match != NULL
+                         && mp_match != nullptr
                          && (mp_match->m_mode & MODE_LANGMAP) == 0
                          && (mp->m_mode & MODE_LANGMAP) != 0)) {
             // found a longer match
@@ -2434,13 +2434,13 @@ static int handle_mapping(int *keylenp, const bool *timedout, int *mapdepth)
     }
 
     // If no partly match found, use the longest full match.
-    if (keylen != KEYLEN_PART_MAP && mp_match != NULL) {
+    if (keylen != KEYLEN_PART_MAP && mp_match != nullptr) {
       mp = mp_match;
       keylen = tb_match_len;
     }
   }
 
-  if ((mp == NULL || max_mlen > mp_match_len) && keylen != KEYLEN_PART_MAP) {
+  if ((mp == nullptr || max_mlen > mp_match_len) && keylen != KEYLEN_PART_MAP) {
     // When no matching mapping found or found a non-matching mapping that
     // matches at least what the matching mapping matched:
     // Try to include the modifier into the key when mapping is allowed.
@@ -2464,7 +2464,7 @@ static int handle_mapping(int *keylenp, const bool *timedout, int *mapdepth)
     if (keylen == 0) {  // no simplification has been done
       // If there was no mapping at all use the character from the
       // typeahead buffer right here.
-      if (mp == NULL) {
+      if (mp == nullptr) {
         *keylenp = keylen;
         return map_result_get;  // get character from typeahead
       }
@@ -2479,7 +2479,7 @@ static int handle_mapping(int *keylenp, const bool *timedout, int *mapdepth)
       // Incomplete key sequence: get some more characters.
       assert(keylen == KEYLEN_PART_KEY);
     } else {
-      assert(mp != NULL);
+      assert(mp != nullptr);
       // When a matching mapping was found use that one.
       keylen = tb_match_len;
     }
@@ -2488,7 +2488,7 @@ static int handle_mapping(int *keylenp, const bool *timedout, int *mapdepth)
   // complete match
   if (keylen >= 0 && keylen <= typebuf.tb_len) {
     int i;
-    char *map_str = NULL;
+    char *map_str = nullptr;
 
     // Write chars to script file(s).
     // Note: :lmap mappings are written *after* being applied. #5658
@@ -2528,9 +2528,9 @@ static int handle_mapping(int *keylenp, const bool *timedout, int *mapdepth)
     const bool save_m_expr = mp->m_expr;
     const int save_m_noremap = mp->m_noremap;
     const bool save_m_silent = mp->m_silent;
-    char *save_m_keys = NULL;  // only saved when needed
-    char *save_alt_m_keys = NULL;  // only saved when needed
-    const int save_alt_m_keylen = mp->m_alt != NULL ? mp->m_alt->m_keylen : 0;
+    char *save_m_keys = nullptr;  // only saved when needed
+    char *save_alt_m_keys = nullptr;  // only saved when needed
+    const int save_alt_m_keylen = mp->m_alt != nullptr ? mp->m_alt->m_keylen : 0;
 
     // Handle ":map <expr>": evaluate the {rhs} as an
     // expression.  Also save and restore the command line
@@ -2544,12 +2544,12 @@ static int handle_mapping(int *keylenp, const bool *timedout, int *mapdepth)
       may_garbage_collect = false;
 
       save_m_keys = xmemdupz(mp->m_keys, (size_t)mp->m_keylen);
-      save_alt_m_keys = mp->m_alt != NULL
+      save_alt_m_keys = mp->m_alt != nullptr
                         ? xmemdupz(mp->m_alt->m_keys, (size_t)save_alt_m_keylen)
-                        : NULL;
+                        : nullptr;
       map_str = eval_map_expr(mp, NUL);
 
-      if ((map_str == NULL || *map_str == NUL)) {
+      if ((map_str == nullptr || *map_str == NUL)) {
         // If an error was displayed and the expression returns an empty
         // string, generate a <Nop> to allow for a redraw.
         if (prev_did_emsg != did_emsg) {
@@ -2582,7 +2582,7 @@ static int handle_mapping(int *keylenp, const bool *timedout, int *mapdepth)
     // If 'from' field is the same as the start of the 'to' field, don't
     // remap the first character (but do allow abbreviations).
     // If m_noremap is set, don't remap the whole 'to' part.
-    if (map_str == NULL) {
+    if (map_str == nullptr) {
       i = FAIL;
     } else {
       int noremap;
@@ -2597,11 +2597,11 @@ static int handle_mapping(int *keylenp, const bool *timedout, int *mapdepth)
         noremap = save_m_noremap;
       } else if (save_m_expr
                  ? strncmp(map_str, save_m_keys, (size_t)keylen) == 0
-                 || (save_alt_m_keys != NULL
+                 || (save_alt_m_keys != nullptr
                      && strncmp(map_str, save_alt_m_keys,
                                 (size_t)save_alt_m_keylen) == 0)
                  : strncmp(map_str, mp->m_keys, (size_t)keylen) == 0
-                 || (mp->m_alt != NULL
+                 || (mp->m_alt != nullptr
                      && strncmp(map_str, mp->m_alt->m_keys,
                                 (size_t)mp->m_alt->m_keylen) == 0)) {
         noremap = REMAP_SKIP;
@@ -2995,7 +2995,7 @@ static int vgetorpeek(bool advance)
           // This looks nice when typing a dead character map.
           // There is no actual command line for get_number().
           if ((State & MODE_CMDLINE)
-              && get_cmdline_info()->cmdbuff != NULL
+              && get_cmdline_info()->cmdbuff != nullptr
               && cmdline_star == 0) {
             char *p = (char *)typebuf.tb_buf + typebuf.tb_off + typebuf.tb_len - 1;
             if (ptr2cells(p) == 1 && (uint8_t)(*p) < 128) {
@@ -3038,7 +3038,7 @@ static int vgetorpeek(bool advance)
             edit_unputchar();
           }
           if ((State & MODE_CMDLINE)
-              && get_cmdline_info()->cmdbuff != NULL) {
+              && get_cmdline_info()->cmdbuff != nullptr) {
             unputcmdline();
           } else {
             setcursor();  // put cursor back where it belongs
@@ -3176,7 +3176,7 @@ static int inchar(uint8_t *buf, int maxlen, long wait_time)
       uint8_t dum[DUM_LEN + 1];
 
       while (true) {
-        len = input_get(dum, DUM_LEN, 0, 0, NULL);
+        len = input_get(dum, DUM_LEN, 0, 0, nullptr);
         if (len == 0 || (len == 1 && dum[0] == Ctrl_C)) {
           break;
         }
@@ -3192,7 +3192,7 @@ static int inchar(uint8_t *buf, int maxlen, long wait_time)
 
     // Fill up to a third of the buffer, because each character may be
     // tripled below.
-    len = input_get(buf, maxlen / 3, (int)wait_time, tb_change_cnt, NULL);
+    len = input_get(buf, maxlen / 3, (int)wait_time, tb_change_cnt, nullptr);
   }
 
   // If the typebuf was changed further down, it is like nothing was added by
@@ -3369,7 +3369,7 @@ bool map_execute_lua(bool may_repeat, bool discard)
 
   Error err = ERROR_INIT;
   Array args = ARRAY_DICT_INIT;
-  nlua_call_ref(ref, NULL, args, kRetNilBool, NULL, &err);
+  nlua_call_ref(ref, nullptr, args, kRetNilBool, nullptr, &err);
   if (ERROR_SET(&err)) {
     semsg_multiline("emsg", "E5108: %s", err.msg);
     api_clear_error(&err);

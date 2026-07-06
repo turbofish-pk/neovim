@@ -23,7 +23,7 @@ void api_err_invalid(Error *err, const char *name, const char *val_s, int64_t va
   }
 
   // Number value.
-  if (val_s == NULL) {
+  if (val_s == nullptr) {
     api_set_error(err, errtype, has_space ? "Invalid %s: %" PRId64 : "Invalid '%s': %" PRId64,
                   name, val_n);
     return;

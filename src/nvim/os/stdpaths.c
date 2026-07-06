@@ -33,9 +33,9 @@ static const char *const xdg_defaults_env_vars[] = {
   [kXDGDataHome] = "LOCALAPPDATA",
   [kXDGCacheHome] = "TEMP",
   [kXDGStateHome] = "LOCALAPPDATA",
-  [kXDGRuntimeDir] = NULL,  // Decided by vim_mktempdir().
-  [kXDGConfigDirs] = NULL,
-  [kXDGDataDirs] = NULL,
+  [kXDGRuntimeDir] = nullptr,  // Decided by vim_mktempdir().
+  [kXDGConfigDirs] = nullptr,
+  [kXDGDataDirs] = nullptr,
 };
 #endif
 
@@ -48,15 +48,15 @@ static const char *const xdg_defaults[] = {
   [kXDGDataHome] = "~/AppData/Local",
   [kXDGCacheHome] = "~/AppData/Local/Temp",
   [kXDGStateHome] = "~/AppData/Local",
-  [kXDGRuntimeDir] = NULL,  // Decided by vim_mktempdir().
-  [kXDGConfigDirs] = NULL,
-  [kXDGDataDirs] = NULL,
+  [kXDGRuntimeDir] = nullptr,  // Decided by vim_mktempdir().
+  [kXDGConfigDirs] = nullptr,
+  [kXDGDataDirs] = nullptr,
 #else
   [kXDGConfigHome] = "~/.config",
   [kXDGDataHome] = "~/.local/share",
   [kXDGCacheHome] = "~/.cache",
   [kXDGStateHome] = "~/.local/state",
-  [kXDGRuntimeDir] = NULL,  // Decided by vim_mktempdir().
+  [kXDGRuntimeDir] = nullptr,  // Decided by vim_mktempdir().
   [kXDGConfigDirs] = "/etc/xdg/",
   [kXDGDataDirs] = "/usr/local/share/:/usr/share/",
 #endif
@@ -95,11 +95,11 @@ bool appname_is_valid(void)
       || strequal(appname, ".")
       || strequal(appname, "..")
 #ifdef BACKSLASH_IN_FILENAME
-      || strstr(appname, "\\..") != NULL
-      || strstr(appname, "..\\") != NULL
+      || strstr(appname, "\\..") != nullptr
+      || strstr(appname, "..\\") != nullptr
 #endif
-      || strstr(appname, "/..") != NULL
-      || strstr(appname, "../") != NULL) {
+      || strstr(appname, "/..") != nullptr
+      || strstr(appname, "../") != nullptr) {
     return false;
   }
   return true;
@@ -114,7 +114,7 @@ static char *xdg_remove_duplicate(char *ret, const char *sep)
   char *saveptr;
 
   char *token = os_strtok(ret, sep, &saveptr);
-  while (token != NULL) {
+  while (token != nullptr) {
     // Check if the directory is not already in the list
     bool is_duplicate = false;
     for (size_t i = 0; i < data.size; i++) {
@@ -127,7 +127,7 @@ static char *xdg_remove_duplicate(char *ret, const char *sep)
     if (!is_duplicate) {
       kv_push(data, token);
     }
-    token = os_strtok(NULL, sep, &saveptr);
+    token = os_strtok(nullptr, sep, &saveptr);
   }
 
   StringBuilder result = KV_INITIAL_VALUE;
@@ -159,39 +159,39 @@ char *stdpaths_get_xdg_var(const XDGVarType idx)
   char *env_val = os_getenv(env);
 
 #ifdef MSWIN
-  if (env_val == NULL && xdg_defaults_env_vars[idx] != NULL) {
+  if (env_val == nullptr && xdg_defaults_env_vars[idx] != nullptr) {
     env_val = os_getenv(xdg_defaults_env_vars[idx]);
   }
-  if (env_val != NULL && idx == kXDGCacheHome) {
-    char *real_path = os_realpath(env_val, NULL, MAXPATHL);
-    if (real_path != NULL) {
+  if (env_val != nullptr && idx == kXDGCacheHome) {
+    char *real_path = os_realpath(env_val, nullptr, MAXPATHL);
+    if (real_path != nullptr) {
       xfree(env_val);
       env_val = real_path;
     }
   }
 #else
-  if (env_val == NULL && os_env_exists(env, false)) {
+  if (env_val == nullptr && os_env_exists(env, false)) {
     env_val = xstrdup("");
   }
 #endif
   TO_SLASH(env_val);
 
-  char *ret = NULL;
-  if (env_val != NULL) {
+  char *ret = nullptr;
+  if (env_val != nullptr) {
     ret = env_val;
   } else if (fallback) {
     ret = expand_env_save((char *)fallback);
   } else if (idx == kXDGRuntimeDir) {
     // Special-case: stdpath('run') is defined at startup.
     ret = vim_gettempdir();
-    if (ret == NULL) {
+    if (ret == nullptr) {
       ret = "/tmp/";
     }
     size_t len = strlen(ret);
     ret = xmemdupz(ret, len >= 2 ? len - 1 : 0);  // Trim trailing slash.
   }
 
-  if ((idx == kXDGDataDirs || idx == kXDGConfigDirs) && ret != NULL) {
+  if ((idx == kXDGDataDirs || idx == kXDGConfigDirs) && ret != nullptr) {
     ret = xdg_remove_duplicate(ret, ENV_SEPSTR);
   }
 

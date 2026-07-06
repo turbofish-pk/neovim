@@ -58,7 +58,7 @@ bool has_format_option(int x)
   if (p_paste) {
     return false;
   }
-  return vim_strchr(curbuf->b_p_fo, x) != NULL;
+  return vim_strchr(curbuf->b_p_fo, x) != nullptr;
 }
 
 /// Format text at the current insert position.
@@ -102,7 +102,7 @@ void internal_format(int textwidth, int second_indent, int flags, bool format_on
     int foundcol;                       // column for start of spaces
     int end_foundcol = 0;               // column for start of word
     int orig_col = 0;
-    char *saved_text = NULL;
+    char *saved_text = nullptr;
     colnr_T col;
     bool did_do_comment = false;
 
@@ -121,12 +121,12 @@ void internal_format(int textwidth, int second_indent, int flags, bool format_on
     // Don't break until after the comment leader
     if (do_comments) {
       char *line = get_cursor_line_ptr();
-      leader_len = get_leader_len(line, NULL, false, true);
+      leader_len = get_leader_len(line, nullptr, false, true);
       if (leader_len == 0 && curbuf->b_p_cin) {
         // Check for a line comment after code.
         int comment_start = check_linecomment(line);
         if (comment_start != MAXCOL) {
-          leader_len = get_leader_len(line + comment_start, NULL, false, true);
+          leader_len = get_leader_len(line + comment_start, nullptr, false, true);
           if (leader_len != 0) {
             leader_len += comment_start;
           }
@@ -465,7 +465,7 @@ void internal_format(int textwidth, int second_indent, int flags, bool format_on
 /// comment leader changes.
 static int fmt_check_par(linenr_T lnum, int *leader_len, char **leader_flags, bool do_comments)
 {
-  char *flags = NULL;        // init for GCC
+  char *flags = nullptr;        // init for GCC
   char *ptr = ml_get(lnum);
   if (do_comments) {
     *leader_len = get_leader_len(ptr, leader_flags, false, true);
@@ -518,7 +518,7 @@ static bool same_leader(linenr_T lnum, int leader1_len, char *leader1_flags, int
   // If first leader has 'e' flag, the lines can never be joined.
   // If first leader has 's' flag, the lines can only be joined if there is
   // some text after it and the second line has the 'm' flag.
-  if (leader1_flags != NULL) {
+  if (leader1_flags != nullptr) {
     for (char *p = leader1_flags; *p && *p != ':'; p++) {
       if (*p == COM_FIRST) {
         return leader2_len == 0;
@@ -531,7 +531,7 @@ static bool same_leader(linenr_T lnum, int leader1_len, char *leader1_flags, int
         if (line_len <= leader1_len) {
           return false;
         }
-        if (leader2_flags == NULL || leader2_len == 0) {
+        if (leader2_flags == nullptr || leader2_len == 0) {
           return false;
         }
         for (p = leader2_flags; *p && *p != ':'; p++) {
@@ -572,9 +572,9 @@ static bool same_leader(linenr_T lnum, int leader1_len, char *leader1_flags, int
 static bool paragraph_start(linenr_T lnum)
 {
   int leader_len = 0;                // leader len of current line
-  char *leader_flags = NULL;         // flags for leader of current line
+  char *leader_flags = nullptr;         // flags for leader of current line
   int next_leader_len = 0;           // leader len of next line
-  char *next_leader_flags = NULL;    // flags for leader of next line
+  char *next_leader_flags = nullptr;    // flags for leader of next line
 
   if (lnum <= 1) {
     return true;                // start of the file
@@ -665,7 +665,7 @@ void auto_format(bool trailblank, bool prev_line)
   // With the 'c' flag in 'formatoptions' and 't' missing: only format
   // comments.
   if (has_format_option(FO_WRAP_COMS) && !has_format_option(FO_WRAP)
-      && get_leader_len(old, NULL, false, true) == 0) {
+      && get_leader_len(old, nullptr, false, true) == 0) {
     return;
   }
 
@@ -888,7 +888,7 @@ int fex_format(linenr_T lnum, long count, int c)
     sandbox--;
   }
 
-  set_vim_var_string(VV_CHAR, NULL, -1);
+  set_vim_var_string(VV_CHAR, nullptr, -1);
   xfree(fex);
   current_sctx = save_sctx;
 
@@ -911,8 +911,8 @@ void format_lines(linenr_T line_count, bool avoid_fex)
   bool next_is_start_par = false;
   int leader_len = 0;               // leader len of current line
   int next_leader_len;              // leader len of next line
-  char *leader_flags = NULL;        // flags for leader of current line
-  char *next_leader_flags = NULL;   // flags for leader of next line
+  char *leader_flags = nullptr;        // flags for leader of current line
+  char *next_leader_flags = nullptr;   // flags for leader of next line
   bool advance = true;
   int second_indent = -1;           // indent for second line (comment aware)
   bool first_par_line = true;
@@ -962,7 +962,7 @@ void format_lines(linenr_T line_count, bool avoid_fex)
     if (count == 1 || curwin->w_cursor.lnum == curbuf->b_ml.ml_line_count) {
       next_is_not_par = true;
       next_leader_len = 0;
-      next_leader_flags = NULL;
+      next_leader_flags = nullptr;
     } else {
       next_is_not_par = fmt_check_par(curwin->w_cursor.lnum + 1,
                                       &next_leader_len, &next_leader_flags, do_comments);
@@ -1021,7 +1021,7 @@ void format_lines(linenr_T line_count, bool avoid_fex)
         // Special case: If the next line starts with a line comment
         // and this line has a line comment after some text, the
         // paragraph doesn't really end.
-        if (next_leader_flags == NULL
+        if (next_leader_flags == nullptr
             || strncmp(next_leader_flags, "://", 3) != 0
             || check_linecomment(get_cursor_line_ptr()) == MAXCOL) {
           is_end_par = true;

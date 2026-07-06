@@ -103,7 +103,7 @@ static int regex_match_line(lua_State *lstate)
   }
 
   buf_T *buf = bufnr ? handle_get_buffer(bufnr) : curbuf;
-  if (!buf || buf->b_ml.ml_mfp == NULL) {
+  if (!buf || buf->b_ml.ml_mfp == nullptr) {
     return luaL_error(lstate, "invalid buffer");
   }
 
@@ -163,7 +163,7 @@ static struct luaL_Reg regex_meta[] = {
   { "__tostring", regex_tostring },
   { "match_str", regex_match_str },
   { "match_line", regex_match_line },
-  { NULL, NULL }
+  { nullptr, nullptr }
 };
 
 /// convert byte index to UTF-32 and UTF-16 indices
@@ -298,7 +298,7 @@ int nlua_regex(lua_State *lstate)
 {
   Error err = ERROR_INIT;
   const char *text = luaL_checkstring(lstate, 1);
-  regprog_T *prog = NULL;
+  regprog_T *prog = nullptr;
 
   TRY_WRAP(&err, {
     prog = vim_regcomp(text, RE_AUTO | RE_MAGIC | RE_STRICT);
@@ -308,7 +308,7 @@ int nlua_regex(lua_State *lstate)
     nlua_push_errstr(lstate, "couldn't parse regex: %s", err.msg);
     api_clear_error(&err);
     return lua_error(lstate);
-  } else if (prog == NULL) {
+  } else if (prog == nullptr) {
     nlua_push_errstr(lstate, "couldn't parse regex");
     return lua_error(lstate);
   }
@@ -325,7 +325,7 @@ static dict_T *nlua_get_var_scope(lua_State *lstate)
 {
   const char *scope = luaL_checkstring(lstate, 1);
   handle_T handle = (handle_T)luaL_checkinteger(lstate, 2);
-  dict_T *dict = NULL;
+  dict_T *dict = nullptr;
   Error err = ERROR_INIT;
   if (strequal(scope, "g")) {
     dict = get_globvar_dict();
@@ -348,14 +348,14 @@ static dict_T *nlua_get_var_scope(lua_State *lstate)
     }
   } else {
     luaL_error(lstate, "invalid scope");
-    return NULL;
+    return nullptr;
   }
 
   if (ERROR_SET(&err)) {
     nlua_push_errstr(lstate, "scoped variable: %s", err.msg);
     api_clear_error(&err);
     lua_error(lstate);
-    return NULL;
+    return nullptr;
   }
   return dict;
 }
@@ -382,13 +382,13 @@ int nlua_setvar(lua_State *lstate)
 
   if (del) {
     // Delete the key
-    if (di == NULL) {
+    if (di == nullptr) {
       // Doesn't exist, nothing to do
       return 0;
     }
     // Notify watchers
     if (watched) {
-      tv_dict_watcher_notify(dict, key.data, NULL, &di->di_tv);
+      tv_dict_watcher_notify(dict, key.data, nullptr, &di->di_tv);
     }
 
     // Delete the entry
@@ -405,7 +405,7 @@ int nlua_setvar(lua_State *lstate)
 
     typval_T oldtv = TV_INITIAL_VALUE;
 
-    if (di == NULL) {
+    if (di == nullptr) {
       // Need to create an entry
       di = tv_dict_item_alloc_len(key.data, key.size);
       tv_dict_add(dict, di);
@@ -449,13 +449,13 @@ int nlua_getvar(lua_State *lstate)
   const char *name = luaL_checklstring(lstate, 3, &len);
 
   dictitem_T *di = tv_dict_find(dict, name, (ptrdiff_t)len);
-  if (di == NULL && dict == get_globvar_dict()) {  // try to autoload script
+  if (di == nullptr && dict == get_globvar_dict()) {  // try to autoload script
     if (!script_autoload(name, len, false) || aborting()) {
       return 0;  // nil
     }
     di = tv_dict_find(dict, name, (ptrdiff_t)len);
   }
-  if (di == NULL) {
+  if (di == nullptr) {
     return 0;  // nil
   }
   nlua_push_typval(lstate, &di->di_tv, 0);
@@ -486,12 +486,12 @@ static int nlua_stricmp(lua_State *const lstate) FUNC_ATTR_NONNULL_ALL
     ret = STRICMP(s1, s2);
     if (ret == 0) {
       // Compare "a\0" greater then "a".
-      if ((nul1 == NULL) != (nul2 == NULL)) {
-        ret = ((nul1 != NULL) - (nul2 != NULL));
+      if ((nul1 == nullptr) != (nul2 == nullptr)) {
+        ret = ((nul1 != nullptr) - (nul2 != nullptr));
         break;
       }
-      if (nul1 != NULL) {
-        assert(nul2 != NULL);
+      if (nul1 != nullptr) {
+        assert(nul2 != nullptr);
         // Can't shift both strings by the same amount of bytes: lowercase
         // letter may have different byte-length than uppercase.
         s1_len -= (size_t)(nul1 - s1) + 1;
@@ -528,8 +528,8 @@ static int nlua_iconv(lua_State *lstate)
   size_t str_len = 0;
   const char *str = lua_tolstring(lstate, 1, &str_len);
 
-  char *from = enc_canonize(enc_skip((char *)lua_tolstring(lstate, 2, NULL)));
-  char *to = enc_canonize(enc_skip((char *)lua_tolstring(lstate, 3, NULL)));
+  char *from = enc_canonize(enc_skip((char *)lua_tolstring(lstate, 2, nullptr)));
+  char *to = enc_canonize(enc_skip((char *)lua_tolstring(lstate, 3, nullptr)));
 
   vimconv_T vimconv;
   vimconv.vc_type = CONV_NONE;
@@ -537,12 +537,12 @@ static int nlua_iconv(lua_State *lstate)
 
   char *ret = string_convert(&vimconv, (char *)str, &str_len);
 
-  convert_setup(&vimconv, NULL, NULL);
+  convert_setup(&vimconv, nullptr, nullptr);
 
   xfree(from);
   xfree(to);
 
-  if (ret == NULL) {
+  if (ret == nullptr) {
     lua_pushnil(lstate);
   } else {
     lua_pushlstring(lstate, ret, str_len);
@@ -580,8 +580,8 @@ static int nlua_foldupdate(lua_State *lstate)
 static int nlua_with(lua_State *L)
 {
   int flags = 0;
-  buf_T *buf = NULL;
-  win_T *win = NULL;
+  buf_T *buf = nullptr;
+  win_T *win = nullptr;
   int log_level = -1;
 
 #define APPLY_FLAG(key, flag) \
@@ -728,7 +728,7 @@ void nlua_state_add_stdlib(lua_State *const lstate, bool is_thread)
     lua_pushcfunction(lstate, &nlua_regex);
     lua_setfield(lstate, -2, "regex");
     luaL_newmetatable(lstate, "nvim_regex");
-    luaL_register(lstate, NULL, regex_meta);
+    luaL_register(lstate, nullptr, regex_meta);
 
     lua_pushvalue(lstate, -1);  // [meta, meta]
     lua_setfield(lstate, -2, "__index");  // [meta]

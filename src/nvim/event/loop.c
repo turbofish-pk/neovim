@@ -21,7 +21,7 @@ void loop_init(Loop *loop, void *data)
   kv_init(loop->children);
   loop->events = multiqueue_new(loop_on_put, loop);
   loop->fast_events = multiqueue_new_child(loop->events);
-  loop->thread_events = multiqueue_new(NULL, NULL);
+  loop->thread_events = multiqueue_new(nullptr, nullptr);
   uv_mutex_init(&loop->mutex);
   uv_async_init(&loop->uv, &loop->async, async_cb);
   uv_signal_init(&loop->uv, &loop->children_watcher);
@@ -135,7 +135,7 @@ void loop_on_put(MultiQueue *queue, void *data)
 static void loop_walk_cb(uv_handle_t *handle, void *arg)
 {
   if (!uv_is_closing(handle)) {
-    uv_close(handle, NULL);
+    uv_close(handle, nullptr);
   }
 }
 #endif
@@ -151,11 +151,11 @@ bool loop_close(Loop *loop, bool wait)
   bool rv = true;
   loop->closing = true;
   uv_mutex_destroy(&loop->mutex);
-  uv_close((uv_handle_t *)&loop->children_watcher, NULL);
-  uv_close((uv_handle_t *)&loop->children_kill_timer, NULL);
+  uv_close((uv_handle_t *)&loop->children_watcher, nullptr);
+  uv_close((uv_handle_t *)&loop->children_kill_timer, nullptr);
   uv_close((uv_handle_t *)&loop->poll_timer, timer_close_cb);
-  uv_close((uv_handle_t *)&loop->exit_delay_timer, NULL);
-  uv_close((uv_handle_t *)&loop->async, NULL);
+  uv_close((uv_handle_t *)&loop->exit_delay_timer, nullptr);
+  uv_close((uv_handle_t *)&loop->async, nullptr);
   uint64_t start = wait ? os_hrtime() : 0;
   bool didstop = false;
   while (true) {
@@ -181,7 +181,7 @@ bool loop_close(Loop *loop, bool wait)
       uv_stop(&loop->uv);
       // XXX: Close all (lua/luv!) handles. But loop_walk_cb() does not call
       // resource-specific close-callbacks, so this leaks memory...
-      uv_walk(&loop->uv, loop_walk_cb, NULL);
+      uv_walk(&loop->uv, loop_walk_cb, nullptr);
       didstop = true;
     }
 #endif

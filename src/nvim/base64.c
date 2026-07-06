@@ -68,7 +68,7 @@ static inline uint32_t vim_htobe32(uint32_t host_32bits)
 char *base64_encode(const char *src, size_t src_len)
   FUNC_ATTR_NONNULL_ALL
 {
-  assert(src != NULL);
+  assert(src != nullptr);
 
   const size_t out_len = ((src_len + 2) / 3) * 4;
   char *dest = xmalloc(out_len + 1);
@@ -144,10 +144,10 @@ char *base64_encode(const char *src, size_t src_len)
 char *base64_decode(const char *src, size_t src_len, size_t *out_lenp)
   FUNC_ATTR_NONNULL_ALL
 {
-  assert(src != NULL);
-  assert(out_lenp != NULL);
+  assert(src != nullptr);
+  assert(out_lenp != nullptr);
 
-  char *dest = NULL;
+  char *dest = nullptr;
 
   if (src_len % 4 != 0) {
     goto invalid;
@@ -222,5 +222,5 @@ invalid:
 
   *out_lenp = 0;
 
-  return NULL;
+  return nullptr;
 }

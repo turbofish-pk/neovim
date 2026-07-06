@@ -559,7 +559,7 @@ pub fn build(b: *std.Build) !void {
     @memcpy(src_paths[filtered_sources.items.len..], unit_test_sources.items);
 
     const flags = [_][]const u8{
-        "-std=gnu99",
+        "-std=gnu23",
         "-DZIG_BUILD",
         "-D_GNU_SOURCE",
         if (support_unittests) "-DUNIT_TESTING" else "",

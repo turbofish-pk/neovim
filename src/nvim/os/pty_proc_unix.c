@@ -83,7 +83,7 @@ static int vim_openpty(int *amaster, int *aslave, char *name, struct termios *te
   }
 
   char *slave_name = ptsname(master);
-  if (slave_name == NULL) {
+  if (slave_name == nullptr) {
     goto error;
   }
 
@@ -126,7 +126,7 @@ error:
 static int vim_login_tty(int fd)
 {
   setsid();
-  if (ioctl(fd, TIOCSCTTY, NULL) == -1) {
+  if (ioctl(fd, TIOCSCTTY, nullptr) == -1) {
     return -1;
   }
 
@@ -183,7 +183,7 @@ int pty_proc_spawn(PtyProc *ptyproc)
   ptyproc->winsize = (struct winsize){ ptyproc->height, ptyproc->width, 0, 0 };
   uv_disable_stdio_inheritance();
   int master;
-  int pid = forkpty(&master, NULL, &termios_default, &ptyproc->winsize);
+  int pid = forkpty(&master, nullptr, &termios_default, &ptyproc->winsize);
 
   if (pid < 0) {
     status = -errno;
@@ -229,7 +229,7 @@ int pty_proc_spawn(PtyProc *ptyproc)
 error:
   close(master);
   kill(pid, SIGKILL);
-  waitpid(pid, NULL, 0);
+  waitpid(pid, nullptr, 0);
   return status;
 }
 

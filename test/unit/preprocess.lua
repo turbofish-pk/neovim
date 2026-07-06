@@ -90,8 +90,8 @@ end
 --- @field get_declarations_extra_flags string[]
 local Gcc = {
   preprocessor_extra_flags = {},
-  get_defines_extra_flags = { '-std=c99', '-dM', '-E' },
-  get_declarations_extra_flags = { '-std=c99', '-P', '-E' },
+  get_defines_extra_flags = { '-std=c23', '-dM', '-E' },
+  get_declarations_extra_flags = { '-std=c23', '-P', '-E' },
 }
 
 --- @param name string

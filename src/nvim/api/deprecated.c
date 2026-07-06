@@ -62,7 +62,7 @@ Object nvim_execute_lua(String code, Array args, Arena *arena, Error *err)
   FUNC_API_DEPRECATED_SINCE(7)
   FUNC_API_REMOTE_ONLY
 {
-  return nlua_exec(code, NULL, args, kRetObject, arena, err);
+  return nlua_exec(code, nullptr, args, kRetObject, arena, err);
 }
 
 /// Gets the buffer number
@@ -184,8 +184,8 @@ Integer nvim_buf_add_highlight(Buffer buffer, Integer ns_id, String hl_group, In
   DecorInline decor = DECOR_INLINE_INIT;
   decor.data.hl.hl_id = hl_id;
 
-  extmark_set(buf, ns, NULL, (int)line, (colnr_T)col_start, end_line, (colnr_T)col_end,
-              decor, MT_FLAG_DECOR_HL, true, false, false, false, NULL);
+  extmark_set(buf, ns, nullptr, (int)line, (colnr_T)col_start, end_line, (colnr_T)col_end,
+              decor, MT_FLAG_DECOR_HL, true, false, false, false, nullptr);
   return ns_id;
 }
 /// Set the virtual text (annotation) for a buffer line.
@@ -257,8 +257,8 @@ Integer nvim_buf_set_virtual_text(Buffer buffer, Integer src_id, Integer line, A
 
   DecorInline decor = { .ext = true, .data.ext.vt = vt, .data.ext.sh_idx = DECOR_ID_INVALID };
 
-  extmark_set(buf, ns_id, NULL, (int)line, 0, -1, -1, decor, 0, true,
-              false, false, false, NULL);
+  extmark_set(buf, ns_id, nullptr, (int)line, 0, -1, -1, decor, 0, true,
+              false, false, false, nullptr);
   return src_id;
 }
 
@@ -340,7 +340,7 @@ String buffer_get_line(Buffer buffer, Integer index, Arena *arena, Error *err)
   String rv = { .size = 0 };
 
   index = convert_index(index);
-  Array slice = nvim_buf_get_lines(0, buffer, index, index + 1, true, arena, NULL, err);
+  Array slice = nvim_buf_get_lines(0, buffer, index, index + 1, true, arena, nullptr, err);
 
   if (!ERROR_SET(err) && slice.size) {
     rv = slice.items[0].data.string;
@@ -412,7 +412,7 @@ ArrayOf(String) buffer_get_line_slice(Buffer buffer,
 {
   start = convert_index(start) + !include_start;
   end = convert_index(end) + include_end;
-  return nvim_buf_get_lines(0, buffer, start, end, false, arena, NULL, err);
+  return nvim_buf_get_lines(0, buffer, start, end, false, arena, nullptr, err);
 }
 
 /// Replaces a line range on the buffer
@@ -621,7 +621,7 @@ void nvim_set_option(uint64_t channel_id, String name, Object value, Error *err)
   FUNC_API_SINCE(1)
   FUNC_API_DEPRECATED_SINCE(11)
 {
-  set_option_to(channel_id, NULL, kOptScopeGlobal, name, value, err);
+  set_option_to(channel_id, nullptr, kOptScopeGlobal, name, value, err);
 }
 
 /// Gets the global value of an option.
@@ -635,7 +635,7 @@ Object nvim_get_option(String name, Error *err)
   FUNC_API_DEPRECATED_SINCE(11)
   FUNC_API_RET_ALLOC
 {
-  return get_option_from(NULL, kOptScopeGlobal, name, err);
+  return get_option_from(nullptr, kOptScopeGlobal, name, err);
 }
 
 /// Gets a buffer option value
@@ -837,7 +837,7 @@ Array nvim_call_atomic(uint64_t channel_id, Array calls, Arena *arena, Error *er
       goto theend;
     });
     Array call = calls.items[i].data.array;
-    VALIDATE_EXP((call.size == 2), "'calls' item", "2-item Array", NULL, {
+    VALIDATE_EXP((call.size == 2), "'calls' item", "2-item Array", nullptr, {
       goto theend;
     });
     VALIDATE_T("name", kObjectTypeString, call.items[0].type, {

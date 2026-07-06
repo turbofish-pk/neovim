@@ -69,7 +69,7 @@ static LuaTableProps nlua_traverse_table(lua_State *const lstate)
     case LUA_TSTRING: {
       size_t len;
       const char *s = lua_tolstring(lstate, -2, &len);
-      if (memchr(s, NUL, len) != NULL) {
+      if (memchr(s, NUL, len) != nullptr) {
         ret.has_string_with_nul = true;
       }
       ret.string_keys_num++;
@@ -335,7 +335,7 @@ bool nlua_pop_typval(lua_State *lstate, typval_T *ret_tv)
             assert(cur.tv->v_type == VAR_DICT);
             dictitem_T *const val_di = tv_dict_find(cur.tv->vval.v_dict,
                                                     S_LEN("_VAL"));
-            assert(val_di != NULL);
+            assert(val_di != nullptr);
             cur.tv = &val_di->di_tv;
             cur.tv->vval.v_list->lua_table_ref = table_ref;
             assert(cur.tv->v_type == VAR_LIST);
@@ -450,14 +450,14 @@ static bool typval_conv_special = false;
 #define TYPVAL_ENCODE_CONV_BLOB(tv, blob, len) \
   do { \
     const blob_T *const blob_ = (blob); \
-    lua_pushlstring(lstate, blob_ != NULL ? blob_->bv_ga.ga_data : "", (size_t)(len)); \
+    lua_pushlstring(lstate, blob_ != nullptr ? blob_->bv_ga.ga_data : "", (size_t)(len)); \
   } while (0)
 
 #define TYPVAL_ENCODE_CONV_FUNC_START(tv, fun, prefix) \
   do { \
     const char *const fun_ = (fun); \
     ufunc_T *fp; \
-    if (fun_ != NULL && (fp = find_func(fun_)) != NULL && fp->uf_flags & FC_LUAREF) { \
+    if (fun_ != nullptr && (fp = find_func(fun_)) != nullptr && fp->uf_flags & FC_LUAREF) { \
       nlua_pushref(lstate, fp->uf_luaref); \
     } else { \
       TYPVAL_ENCODE_CONV_NIL(tv); \
@@ -789,12 +789,12 @@ String nlua_pop_String(lua_State *lstate, Arena *arena, Error *err)
   if (lua_type(lstate, -1) != LUA_TSTRING) {
     lua_pop(lstate, 1);
     api_set_error(err, kErrorTypeValidation, "Expected Lua string");
-    return (String) { .size = 0, .data = NULL };
+    return (String) { .size = 0, .data = nullptr };
   }
   String ret;
 
   ret.data = (char *)lua_tolstring(lstate, -1, &(ret.size));
-  assert(ret.data != NULL);
+  assert(ret.data != nullptr);
   // TODO(bfredl): it would be "nice" to just use the memory of the Lua string
   // directly, although ensuring the lifetime of such strings is a bit tricky
   // (an API call could invoke nested Lua, which triggers GC, and kaboom?)
@@ -872,7 +872,7 @@ Boolean nlua_pop_Boolean_strict(lua_State *lstate, Error *err)
 /// Check whether typed table on top of the stack has given type
 ///
 /// @param[in]  lstate  Lua state.
-/// @param[out]  err  Location where error will be saved. May be NULL.
+/// @param[out]  err  Location where error will be saved. May be nullptr.
 /// @param[in]  type  Type to check.
 ///
 /// @return @see nlua_traverse_table().
@@ -950,7 +950,7 @@ static Array nlua_pop_Array_unchecked(lua_State *const lstate, const LuaTablePro
       if (!arena) {
         api_free_array(ret);
       }
-      return (Array) { .size = 0, .items = NULL };
+      return (Array) { .size = 0, .items = nullptr };
     }
     ADD_C(ret, val);
   }
@@ -967,7 +967,7 @@ Array nlua_pop_Array(lua_State *lstate, Arena *arena, Error *err)
 {
   const LuaTableProps table_props = nlua_check_type(lstate, err, kObjectTypeArray);
   if (table_props.type != kObjectTypeArray) {
-    return (Array) { .size = 0, .items = NULL };
+    return (Array) { .size = 0, .items = nullptr };
   }
   return nlua_pop_Array_unchecked(lstate, table_props, arena, err);
 }
@@ -1017,7 +1017,7 @@ static Dict nlua_pop_Dict_unchecked(lua_State *lstate, const LuaTableProps table
         }
         lua_pop(lstate, 2);
         // stack:
-        return (Dict) { .size = 0, .items = NULL };
+        return (Dict) { .size = 0, .items = nullptr };
       }
       i++;
     } else {
@@ -1040,7 +1040,7 @@ Dict nlua_pop_Dict(lua_State *lstate, bool ref, Arena *arena, Error *err)
                                                     kObjectTypeDict);
   if (table_props.type != kObjectTypeDict) {
     lua_pop(lstate, 1);
-    return (Dict) { .size = 0, .items = NULL };
+    return (Dict) { .size = 0, .items = nullptr };
   }
 
   return nlua_pop_Dict_unchecked(lstate, table_props, ref, arena, err);

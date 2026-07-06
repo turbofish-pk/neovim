@@ -65,7 +65,7 @@ void channel_teardown(void)
 {
   Channel *chan;
   map_foreach_value(&channels, chan, {
-    channel_close(chan->id, kChannelPartAll, NULL);
+    channel_close(chan->id, kChannelPartAll, nullptr);
   });
 }
 
@@ -252,9 +252,9 @@ void channel_create_event(Channel *chan, const char *ext_source)
   typval_T tv = TV_INITIAL_VALUE;
   // TODO(bfredl): do the conversion in one step. Also would be nice
   // to pretty print top level dict in defined order
-  object_to_vim(DICT_OBJ(info), &tv, NULL);
+  object_to_vim(DICT_OBJ(info), &tv, nullptr);
   assert(tv.v_type == VAR_DICT);
-  char *str = encode_tv2json(&tv, NULL);
+  char *str = encode_tv2json(&tv, nullptr);
   ILOG("new channel %" PRIu64 " (%s) : %s", chan->id, source, str);
   xfree(str);
   arena_mem_free(arena_finish(&arena));
@@ -317,7 +317,7 @@ static void channel_destroy(Channel *chan)
 static void free_channel_event(void **argv)
 {
   Channel *chan = argv[0];
-  pmap_del(uint64_t)(&channels, chan->id, NULL);
+  pmap_del(uint64_t)(&channels, chan->id, nullptr);
   channel_destroy(chan);
 }
 
@@ -326,7 +326,7 @@ static void channel_destroy_early(Channel *chan)
   if ((chan->id != --next_chan_id)) {
     abort();
   }
-  pmap_del(uint64_t)(&channels, chan->id, NULL);
+  pmap_del(uint64_t)(&channels, chan->id, nullptr);
   chan->id = 0;
 
   if ((--chan->refcount != 0)) {
@@ -345,8 +345,8 @@ static void close_cb(Stream *stream, void *data)
 /// Starts a job and returns the associated channel
 ///
 /// @param[in]  argv  Arguments vector specifying the command to run,
-///                   NULL-terminated
-/// @param[in]  exepath  The path to the executable. If NULL, use `argv[0]`.
+///                   nullptr-terminated
+/// @param[in]  exepath  The path to the executable. If nullptr, use `argv[0]`.
 /// @param[in]  on_stdout  Callback to read the job's stdout
 /// @param[in]  on_stderr  Callback to read the job's stderr
 /// @param[in]  on_exit  Callback to receive the job's exit status
@@ -359,10 +359,10 @@ static void close_cb(Stream *stream, void *data)
 ///                         channel for stdin or kChannelStdinNull to leave
 ///                         stdin disconnected.
 /// @param[in]  cwd  Initial working directory for the job.  Nvim's working
-///                  directory if `cwd` is NULL
+///                  directory if `cwd` is nullptr
 /// @param[in]  pty_width  Width of the pty, ignored if `pty` is false
 /// @param[in]  pty_height  Height of the pty, ignored if `pty` is false
-/// @param[in]  env  Nvim's configured environment is used if this is NULL,
+/// @param[in]  env  Nvim's configured environment is used if this is nullptr,
 ///                  otherwise defines all environment variables
 /// @param[out]  status_out  0 for invalid arguments, > 0 for the channel id,
 ///                          < 0 if the job can't start
@@ -388,7 +388,7 @@ Channel *channel_job_start(char **argv, const char *exepath, CallbackReader on_s
       }
       channel_destroy_early(chan);
       *status_out = 0;
-      return NULL;
+      return nullptr;
     }
     chan->stream.pty = pty_proc_init(&main_loop, chan);
     if (pty_width > 0) {
@@ -446,7 +446,7 @@ Channel *channel_job_start(char **argv, const char *exepath, CallbackReader on_s
     }
     channel_destroy_early(chan);
     *status_out = proc->status;
-    return NULL;
+    return nullptr;
   }
   xfree(cmd);
   if (proc->env) {
@@ -752,7 +752,7 @@ static void on_channel_event(void **args)
   channel_reader_callbacks(chan, &chan->on_data);
   channel_reader_callbacks(chan, &chan->on_stderr);
   if (exit_status > -1) {
-    channel_callback_call(chan, NULL);
+    channel_callback_call(chan, nullptr);
     chan->exit_status = -1;
   }
 
@@ -771,7 +771,7 @@ void channel_reader_callbacks(Channel *chan, CallbackReader *reader)
   if (reader->buffered) {
     if (reader->eof) {
       if (reader->self) {
-        if (tv_dict_find(reader->self, reader->type, -1) == NULL) {
+        if (tv_dict_find(reader->self, reader->type, -1) == nullptr) {
           list_T *data = buffer_to_tv_list(reader->buffer.ga_data,
                                            (size_t)reader->buffer.ga_len);
           tv_dict_add_list(reader->self, reader->type, strlen(reader->type),
@@ -974,12 +974,12 @@ static void set_info_event(void **argv)
   Arena arena = ARENA_EMPTY;
   Dict info = channel_info(chan->id, &arena);
   typval_T retval;
-  object_to_vim(DICT_OBJ(info), &retval, NULL);
+  object_to_vim(DICT_OBJ(info), &retval, nullptr);
   assert(retval.v_type == VAR_DICT);
   tv_dict_add_dict(dict, S_LEN("info"), retval.vval.v_dict);
   tv_dict_set_keys_readonly(dict);
 
-  apply_autocmds(event, NULL, NULL, true, curbuf);
+  apply_autocmds(event, nullptr, nullptr, true, curbuf);
 
   restore_v_event(dict, &save_v_event);
   arena_mem_free(arena_finish(&arena));
@@ -1017,9 +1017,9 @@ Dict channel_info(uint64_t id, Arena *arena)
 
     char **args = chan->stream.proc.argv;
     Array argv = ARRAY_DICT_INIT;
-    if (args != NULL) {
+    if (args != nullptr) {
       size_t n;
-      for (n = 0; args[n] != NULL; n++) {}
+      for (n = 0; args[n] != nullptr; n++) {}
       argv = arena_array(arena, n);
       for (size_t i = 0; i < n; i++) {
         ADD_C(argv, CSTR_AS_OBJ(args[i]));

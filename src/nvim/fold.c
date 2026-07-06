@@ -153,12 +153,12 @@ int hasAnyFolding(win_T *win)
 
 // hasFolding() {{{2
 /// When returning true, *firstp and *lastp are set to the first and last
-/// lnum of the sequence of folded lines (skipped when NULL).
+/// lnum of the sequence of folded lines (skipped when nullptr).
 ///
 /// @return  true if line "lnum" in window "win" is part of a closed fold.
 bool hasFolding(win_T *win, linenr_T lnum, linenr_T *firstp, linenr_T *lastp)
 {
-  return hasFoldingWin(win, lnum, firstp, lastp, true, NULL);
+  return hasFoldingWin(win, lnum, firstp, lastp, true, nullptr);
 }
 
 // hasFoldingWin() {{{2
@@ -177,7 +177,7 @@ bool hasFoldingWin(win_T *const win, const linenr_T lnum, linenr_T *const firstp
 
   // Return quickly when there is no folding at all in this window.
   if (!hasAnyFolding(win)) {
-    if (infop != NULL) {
+    if (infop != nullptr) {
       infop->fi_level = 0;
     }
     return false;
@@ -239,7 +239,7 @@ bool hasFoldingWin(win_T *const win, const linenr_T lnum, linenr_T *const firstp
   }
 
   if (!had_folded) {
-    if (infop != NULL) {
+    if (infop != nullptr) {
       infop->fi_level = level;
       infop->fi_lnum = lnum - lnum_rel;
       infop->fi_low_level = low_level == 0 ? level : low_level;
@@ -248,13 +248,13 @@ bool hasFoldingWin(win_T *const win, const linenr_T lnum, linenr_T *const firstp
   }
 
   last = MIN(last, win->w_buffer->b_ml.ml_line_count);
-  if (lastp != NULL) {
+  if (lastp != nullptr) {
     *lastp = last;
   }
-  if (firstp != NULL) {
+  if (firstp != nullptr) {
     *firstp = first;
   }
-  if (infop != NULL) {
+  if (infop != nullptr) {
     infop->fi_level = level + 1;
     infop->fi_lnum = first;
     infop->fi_low_level = low_level == 0 ? level + 1 : low_level;
@@ -309,7 +309,7 @@ foldinfo_T fold_info(win_T *win, linenr_T lnum)
   foldinfo_T info;
   linenr_T last;
 
-  if (hasFoldingWin(win, lnum, NULL, &last, false, &info)) {
+  if (hasFoldingWin(win, lnum, nullptr, &last, false, &info)) {
     info.fi_lines = (last - lnum + 1);
   } else {
     info.fi_lines = 0;
@@ -372,7 +372,7 @@ void closeFold(pos_T pos, int count)
 /// Close fold for current window at position `pos` recursively.
 void closeFoldRecurse(pos_T pos)
 {
-  setManualFold(pos, false, true, NULL);
+  setManualFold(pos, false, true, nullptr);
 }
 
 // opFoldRange() {{{2
@@ -396,13 +396,13 @@ void opFoldRange(pos_T firstpos, pos_T lastpos, int opening, int recurse, bool h
     // Opening one level only: next fold to open is after the one going to
     // be opened.
     if (opening && !recurse) {
-      hasFolding(curwin, lnum, NULL, &lnum_next);
+      hasFolding(curwin, lnum, nullptr, &lnum_next);
     }
     setManualFold(temp, opening, recurse, &done);
     // Closing one level only: next line to close a fold is after just
     // closed fold.
     if (!opening && !recurse) {
-      hasFolding(curwin, lnum, NULL, &lnum_next);
+      hasFolding(curwin, lnum, nullptr, &lnum_next);
     }
   }
   if (done == DONE_NOTHING) {
@@ -426,7 +426,7 @@ void openFold(pos_T pos, int count)
 /// Open fold for current window at position `pos` recursively.
 void openFoldRecurse(pos_T pos)
 {
-  setManualFold(pos, true, true, NULL);
+  setManualFold(pos, true, true, nullptr);
 }
 
 // foldOpenCursor() {{{2
@@ -667,7 +667,7 @@ void foldCreate(win_T *wp, pos_T start, pos_T end)
 void deleteFold(win_T *const wp, const linenr_T start, const linenr_T end, const int recursive,
                 const bool had_visual)
 {
-  fold_T *found_fp = NULL;
+  fold_T *found_fp = nullptr;
   linenr_T found_off = 0;
   bool maybe_small = false;
   int level = 0;
@@ -681,7 +681,7 @@ void deleteFold(win_T *const wp, const linenr_T start, const linenr_T end, const
   while (lnum <= end) {
     // Find the deepest fold for "start".
     garray_T *gap = &wp->w_folds;
-    garray_T *found_ga = NULL;
+    garray_T *found_ga = nullptr;
     linenr_T lnum_off = 0;
     bool use_level = false;
     while (true) {
@@ -705,7 +705,7 @@ void deleteFold(win_T *const wp, const linenr_T start, const linenr_T end, const
       lnum_off += fp->fd_top;
       level++;
     }
-    if (found_ga == NULL) {
+    if (found_ga == nullptr) {
       lnum++;
     } else {
       lnum = found_fp->fd_top + found_fp->fd_len + found_off;
@@ -995,11 +995,11 @@ void foldAdjustVisual(void)
     start = &curwin->w_cursor;
     end = &VIsual;
   }
-  if (hasFolding(curwin, start->lnum, &start->lnum, NULL)) {
+  if (hasFolding(curwin, start->lnum, &start->lnum, nullptr)) {
     start->col = 0;
   }
 
-  if (!hasFolding(curwin, end->lnum, NULL, &end->lnum)) {
+  if (!hasFolding(curwin, end->lnum, nullptr, &end->lnum)) {
     return;
   }
 
@@ -1015,7 +1015,7 @@ void foldAdjustVisual(void)
 /// Move the cursor to the first line of a closed fold.
 void foldAdjustCursor(win_T *wp)
 {
-  hasFolding(wp, wp->w_cursor.lnum, &wp->w_cursor.lnum, NULL);
+  hasFolding(wp, wp->w_cursor.lnum, &wp->w_cursor.lnum, nullptr);
 }
 
 // Internal functions for "fold_T" {{{1
@@ -1055,7 +1055,7 @@ void cloneFoldGrowArray(garray_T *from, garray_T *to)
 static bool foldFind(const garray_T *gap, linenr_T lnum, fold_T **fpp)
 {
   if (gap->ga_len == 0) {
-    *fpp = NULL;
+    *fpp = nullptr;
     return false;
   }
 
@@ -1153,7 +1153,7 @@ static linenr_T setManualFold(pos_T pos, bool opening, bool recurse, int *donep)
       if (wp != curwin && foldmethodIsDiff(wp) && wp->w_p_scb) {
         dlnum = diff_lnum_win(curwin->w_cursor.lnum, wp);
         if (dlnum != 0) {
-          setManualFoldWin(wp, dlnum, opening, recurse, NULL);
+          setManualFoldWin(wp, dlnum, opening, recurse, nullptr);
         }
       }
     }
@@ -1164,9 +1164,9 @@ static linenr_T setManualFold(pos_T pos, bool opening, bool recurse, int *donep)
 
 // setManualFoldWin() {{{2
 /// Open or close the fold in window "wp" which contains "lnum".
-/// "donep", when not NULL, points to flag that is set to DONE_FOLD when some
+/// "donep", when not nullptr, points to flag that is set to DONE_FOLD when some
 /// fold was found and to DONE_ACTION when some fold was opened or closed.
-/// When "donep" is NULL give an error message when no fold was found for
+/// When "donep" is nullptr give an error message when no fold was found for
 /// "lnum", but only if "wp" is "curwin".
 ///
 /// @param opening  true when opening, false when closing
@@ -1178,7 +1178,7 @@ static linenr_T setManualFoldWin(win_T *wp, linenr_T lnum, bool opening, bool re
 {
   fold_T *fp;
   fold_T *fp2;
-  fold_T *found = NULL;
+  fold_T *found = nullptr;
   int level = 0;
   bool use_level = false;
   bool found_fold = false;
@@ -1193,7 +1193,7 @@ static linenr_T setManualFoldWin(win_T *wp, linenr_T lnum, bool opening, bool re
   while (true) {
     if (!foldFind(gap, lnum, &fp)) {
       // If there is a following fold, continue there next time.
-      if (fp != NULL && fp < (fold_T *)gap->ga_data + gap->ga_len) {
+      if (fp != nullptr && fp < (fold_T *)gap->ga_data + gap->ga_len) {
         next = fp->fd_top + off;
       }
       break;
@@ -1244,7 +1244,7 @@ static linenr_T setManualFoldWin(win_T *wp, linenr_T lnum, bool opening, bool re
   }
   if (found_fold) {
     // When closing and not recurse, close deepest open fold.
-    if (!opening && found != NULL) {
+    if (!opening && found != nullptr) {
       found->fd_flags = FD_CLOSED;
       done |= DONE_ACTION;
     }
@@ -1253,11 +1253,11 @@ static linenr_T setManualFoldWin(win_T *wp, linenr_T lnum, bool opening, bool re
       changed_window_setting(wp);
     }
     done |= DONE_FOLD;
-  } else if (donep == NULL && wp == curwin) {
+  } else if (donep == nullptr && wp == curwin) {
     emsg(_(e_nofold));
   }
 
-  if (donep != NULL) {
+  if (donep != nullptr) {
     *donep |= done;
   }
 
@@ -1597,7 +1597,7 @@ static void foldAddMarker(buf_T *buf, pos_T pos, const char *marker, size_t mark
   char *newline = xmalloc(line_len + markerlen + strlen(cms) + 1);
   STRCPY(newline, line);
   // Append the marker to the end of the line
-  if (p == NULL || line_is_comment) {
+  if (p == nullptr || line_is_comment) {
     xmemcpyz(newline + line_len, marker, markerlen);
     added = markerlen;
   } else {
@@ -1657,7 +1657,7 @@ static void foldDelMarker(buf_T *buf, linenr_T lnum, char *marker, size_t marker
     if (*cms != NUL) {
       // Also delete 'commentstring' if it matches.
       char *cms2 = strstr(cms, "%s");
-      if (cms2 != NULL && p - line >= cms2 - cms
+      if (cms2 != nullptr && p - line >= cms2 - cms
           && strncmp(p - (cms2 - cms), cms, (size_t)(cms2 - cms)) == 0
           && strncmp(p + len, cms2 + 2, strlen(cms2 + 2)) == 0) {
         p -= cms2 - cms;
@@ -1691,14 +1691,14 @@ char *get_foldtext(win_T *wp, linenr_T lnum, linenr_T lnume, foldinfo_T foldinfo
                    VirtText *vt)
   FUNC_ATTR_NONNULL_ALL
 {
-  char *text = NULL;
+  char *text = nullptr;
   // an error occurred when evaluating 'fdt' setting
   static bool got_fdt_error = false;
   int save_did_emsg = did_emsg;
-  static win_T *last_wp = NULL;
+  static win_T *last_wp = nullptr;
   static linenr_T last_lnum = 0;
 
-  if (last_wp == NULL || last_wp != wp || last_lnum > lnum || last_lnum == 0) {
+  if (last_wp == nullptr || last_wp != wp || last_lnum > lnum || last_lnum == 0) {
     // window changed, try evaluating foldtext setting once again
     got_fdt_error = false;
   }
@@ -1737,7 +1737,7 @@ char *get_foldtext(win_T *wp, linenr_T lnum, linenr_T lnume, foldinfo_T foldinfo
       Object obj = eval_foldtext(wp);
       if (obj.type == kObjectTypeArray) {
         Error err = ERROR_INIT;
-        *vt = parse_virt_text(obj.data.array, &err, NULL, false);
+        *vt = parse_virt_text(obj.data.array, &err, nullptr, false);
         if (!ERROR_SET(&err)) {
           *buf = NUL;
           text = buf;
@@ -1751,7 +1751,7 @@ char *get_foldtext(win_T *wp, linenr_T lnum, linenr_T lnume, foldinfo_T foldinfo
 
       emsg_off--;
 
-      if (text == NULL || did_emsg) {
+      if (text == nullptr || did_emsg) {
         got_fdt_error = true;
       }
 
@@ -1761,13 +1761,13 @@ char *get_foldtext(win_T *wp, linenr_T lnum, linenr_T lnume, foldinfo_T foldinfo
     }
     last_lnum = lnum;
     last_wp = wp;
-    set_vim_var_string(VV_FOLDDASHES, NULL, -1);
+    set_vim_var_string(VV_FOLDDASHES, nullptr, -1);
 
     if (!did_emsg && save_did_emsg) {
       did_emsg = save_did_emsg;
     }
 
-    if (text != NULL) {
+    if (text != nullptr) {
       // Replace unprintable characters, if there are any.  But
       // replace a TAB with a space.
       char *p;
@@ -1792,7 +1792,7 @@ char *get_foldtext(win_T *wp, linenr_T lnum, linenr_T lnume, foldinfo_T foldinfo
       }
     }
   }
-  if (text == NULL) {
+  if (text == nullptr) {
     int count = lnume - lnum + 1;
 
     vim_snprintf(buf, FOLD_TEXT_LEN,
@@ -1818,7 +1818,7 @@ static void foldtext_cleanup(char *str)
   // locate "%s" in 'commentstring', use the part before and after it.
   char *cms_end = strstr(cms_start, "%s");
   size_t cms_elen = 0;
-  if (cms_end != NULL) {
+  if (cms_end != nullptr) {
     cms_elen = cms_slen - (size_t)(cms_end - cms_start);
     cms_slen = (size_t)(cms_end - cms_start);
 
@@ -1858,7 +1858,7 @@ static void foldtext_cleanup(char *str)
         len += (size_t)(s - p) + cms_slen;
         s = p - cms_slen;
       }
-    } else if (cms_end != NULL) {
+    } else if (cms_end != nullptr) {
       if (!did1 && cms_slen > 0 && strncmp(s, cms_start, cms_slen) == 0) {
         len = cms_slen;
         did1 = true;
@@ -1930,7 +1930,7 @@ static void foldUpdateIEMS(win_T *const wp, linenr_T top, linenr_T bot)
   invalid_top = top;
   invalid_bot = bot;
 
-  LevelGetter getlevel = NULL;
+  LevelGetter getlevel = nullptr;
 
   if (foldmethodIsMarker(wp)) {
     getlevel = foldlevelMarker;
@@ -2004,7 +2004,7 @@ static void foldUpdateIEMS(win_T *const wp, linenr_T top, linenr_T bot)
   // to point to the end of the current fold:
   if (foldlevelSyntax == getlevel) {
     garray_T *gap = &wp->w_folds;
-    fold_T *fpn = NULL;
+    fold_T *fpn = nullptr;
     int current_fdl = 0;
     linenr_T fold_start_lnum = 0;
     linenr_T lnum_rel = fline.lnum;
@@ -2019,7 +2019,7 @@ static void foldUpdateIEMS(win_T *const wp, linenr_T top, linenr_T bot)
       gap = &fpn->fd_nested;
       lnum_rel -= fpn->fd_top;
     }
-    if (fpn != NULL && current_fdl == fline.lvl) {
+    if (fpn != nullptr && current_fdl == fline.lvl) {
       linenr_T fold_end_lnum = fold_start_lnum + fpn->fd_len;
 
       bot = MAX(bot, fold_end_lnum);
@@ -2132,7 +2132,7 @@ static linenr_T foldUpdateIEMSRecurse(garray_T *const gap, const int level,
                                       const linenr_T startlnum, fline_T *const flp,
                                       LevelGetter getlevel, linenr_T bot, const char topflags)
 {
-  fold_T *fp = NULL;
+  fold_T *fp = nullptr;
 
   // If using the marker method, the start line is not the start of a fold
   // at the level we're dealing with and the level is non-zero, we must use
@@ -2141,10 +2141,10 @@ static linenr_T foldUpdateIEMSRecurse(garray_T *const gap, const int level,
   if (getlevel == foldlevelMarker && flp->start <= flp->lvl - level
       && flp->lvl > 0) {
     foldFind(gap, startlnum - 1, &fp);
-    if (fp != NULL
+    if (fp != nullptr
         && (fp >= ((fold_T *)gap->ga_data) + gap->ga_len
             || fp->fd_top >= startlnum)) {
-      fp = NULL;
+      fp = nullptr;
     }
   }
 
@@ -2179,7 +2179,7 @@ static linenr_T foldUpdateIEMSRecurse(garray_T *const gap, const int level,
       lvl = 0;
     }
 
-    if (flp->lnum > bot && !finish && fp != NULL) {
+    if (flp->lnum > bot && !finish && fp != nullptr) {
       // For "marker" and "syntax" methods:
       // - If a change caused a nested fold to be removed, we need to
       //   delete it and continue at least until where it ended.
@@ -2204,7 +2204,7 @@ static linenr_T foldUpdateIEMSRecurse(garray_T *const gap, const int level,
       }
       if (lvl < level + i) {
         foldFind(&fp->fd_nested, flp->lnum - fp->fd_top, &fp2);
-        if (fp2 != NULL) {
+        if (fp2 != nullptr) {
           bot = fp2->fd_top + fp2->fd_len - 1 + fp->fd_top;
         }
       } else if (fp->fd_top + fp->fd_len <= flp->lnum && lvl >= level) {
@@ -2217,7 +2217,7 @@ static linenr_T foldUpdateIEMSRecurse(garray_T *const gap, const int level,
     // At the start of the first nested fold and at the end of the current
     // fold: check if existing folds at this level, before the current
     // one, need to be deleted or truncated.
-    if (fp == NULL
+    if (fp == nullptr
         && (lvl != level
             || flp->lnum_save >= bot
             || flp->start != 0
@@ -2331,7 +2331,7 @@ static linenr_T foldUpdateIEMSRecurse(garray_T *const gap, const int level,
             fold_changed = true;
           }
         } else {
-          // Insert new fold.  Careful: ga_data may be NULL and it
+          // Insert new fold.  Careful: ga_data may be nullptr and it
           // may change!
           int i;
           if (gap->ga_len == 0) {
@@ -2381,7 +2381,7 @@ static linenr_T foldUpdateIEMSRecurse(garray_T *const gap, const int level,
 
     // The fold includes the line "flp->lnum" and "flp->lnum_save".
     // Check "fp" for safety.
-    if (lvl > level && fp != NULL) {
+    if (lvl > level && fp != nullptr) {
       // There is a nested fold, handle it recursively.
       // At least do one line (can happen when finish is true).
       bot = MAX(bot, flp->lnum);
@@ -2435,7 +2435,7 @@ static linenr_T foldUpdateIEMSRecurse(garray_T *const gap, const int level,
     }
   }
 
-  if (fp == NULL) {     // only happens when got_int is set
+  if (fp == nullptr) {     // only happens when got_int is set
     return bot;
   }
 
@@ -2561,7 +2561,7 @@ static void foldSplit(buf_T *buf, garray_T *const gap, const int i, const linenr
   garray_T *const gap1 = &fp->fd_nested;
   garray_T *const gap2 = &fp[1].fd_nested;
   foldFind(gap1, bot + 1 - fp->fd_top, &fp2);
-  if (fp2 != NULL) {
+  if (fp2 != nullptr) {
     const int len = (int)((fold_T *)gap1->ga_data + gap1->ga_len - fp2);
     if (len > 0) {
       ga_grow(gap2, len);
@@ -2601,7 +2601,7 @@ static void foldRemove(win_T *const wp, garray_T *gap, linenr_T top, linenr_T bo
     return;             // nothing to do
   }
 
-  fold_T *fp = NULL;
+  fold_T *fp = nullptr;
 
   while (gap->ga_len > 0) {
     // Find fold that includes top or a following one.
@@ -2619,7 +2619,7 @@ static void foldRemove(win_T *const wp, garray_T *gap, linenr_T top, linenr_T bo
       fold_changed = true;
       continue;
     }
-    if (gap->ga_data == NULL
+    if (gap->ga_data == nullptr
         || fp >= (fold_T *)(gap->ga_data) + gap->ga_len
         || fp->fd_top > bot) {
       // 6: Found a fold below bot, can stop looking.
@@ -2852,7 +2852,7 @@ static void foldlevelIndent(fline_T *flp)
 
   // empty line or lines starting with a character in 'foldignore': level
   // depends on surrounding lines
-  if (*s == NUL || vim_strchr(flp->wp->w_p_fdi, (uint8_t)(*s)) != NULL) {
+  if (*s == NUL || vim_strchr(flp->wp->w_p_fdi, (uint8_t)(*s)) != nullptr) {
     // first and last line can't be undefined, use level 0
     flp->lvl = (lnum == 1 || lnum == buf->b_ml.ml_line_count) ? 0 : -1;
   } else {
@@ -3182,7 +3182,7 @@ static void foldclosed_both(typval_T *argvars, typval_T *rettv, bool end)
   if (lnum >= 1 && lnum <= curbuf->b_ml.ml_line_count) {
     linenr_T first;
     linenr_T last;
-    if (hasFoldingWin(curwin, lnum, &first, &last, false, NULL)) {
+    if (hasFoldingWin(curwin, lnum, &first, &last, false, nullptr)) {
       rettv->vval.v_number = (varnumber_T)(end ? last : first);
       return;
     }
@@ -3215,7 +3215,7 @@ void f_foldlevel(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
 void f_foldtext(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
 {
   rettv->v_type = VAR_STRING;
-  rettv->vval.v_string = NULL;
+  rettv->vval.v_string = nullptr;
 
   linenr_T foldstart = (linenr_T)get_vim_var_nr(VV_FOLDSTART);
   linenr_T foldend = (linenr_T)get_vim_var_nr(VV_FOLDEND);
@@ -3264,7 +3264,7 @@ void f_foldtextresult(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
   static bool entered = false;
 
   rettv->v_type = VAR_STRING;
-  rettv->vval.v_string = NULL;
+  rettv->vval.v_string = nullptr;
   if (entered) {
     return;  // reject recursive use
   }
@@ -3285,7 +3285,7 @@ void f_foldtextresult(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
       for (size_t i = 0; i < kv_size(vt);) {
         int attr = 0;
         char *new_text = next_virt_text_chunk(vt, &i, &attr);
-        if (new_text == NULL) {
+        if (new_text == nullptr) {
           break;
         }
         new_text = concat_str(text, new_text);

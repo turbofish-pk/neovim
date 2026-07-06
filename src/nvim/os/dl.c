@@ -26,14 +26,14 @@ typedef int (*int_int_fn)(int i);
 /// an example of calling a function that takes a string and returns an int:
 ///
 ///   int int_out = 0;
-///   os_libcall("mylib.so", "somefn", "string-argument", 0, NULL, &int_out);
+///   os_libcall("mylib.so", "somefn", "string-argument", 0, nullptr, &int_out);
 ///
 /// @param libname the name of the library to load (e.g.: libsomething.so)
 /// @param funcname the name of the library function (e.g.: myfunc)
-/// @param argv the input string, NULL when using `argi`
-/// @param argi the input integer, not used when using `argv` != NULL
+/// @param argv the input string, nullptr when using `argi`
+/// @param argi the input integer, not used when using `argv` != nullptr
 /// @param[out] str_out an allocated output string, caller must free if
-///             not NULL. NULL when using `int_out`.
+///             not nullptr. nullptr when using `int_out`.
 /// @param[out] int_out the output integer param
 /// @return true on success, false on failure
 bool os_libcall(const char *libname, const char *funcname, const char *argv, int argi,
@@ -70,9 +70,9 @@ bool os_libcall(const char *libname, const char *funcname, const char *argv, int
 
     const char *res = argv ? sfn(argv) : ifn(argi);
 
-    // assume that ptr values of NULL, 1 or -1 are illegal
+    // assume that ptr values of nullptr, 1 or -1 are illegal
     *str_out = (res && (intptr_t)res != 1 && (intptr_t)res != -1)
-               ? xstrdup(res) : NULL;
+               ? xstrdup(res) : nullptr;
   } else {
     str_int_fn sfn = (str_int_fn)fn;
     int_int_fn ifn = (int_int_fn)fn;

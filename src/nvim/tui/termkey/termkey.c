@@ -53,7 +53,7 @@ struct TermKeyDriver termkey_driver_csi = {
 static struct TermKeyDriver *drivers[] = {
   &termkey_driver_ti,
   &termkey_driver_csi,
-  NULL,
+  nullptr,
 };
 
 static struct {
@@ -120,7 +120,7 @@ static struct {
   { TERMKEY_SYM_KPCOMMA,   "KPComma" },
   { TERMKEY_SYM_KPPERIOD,  "KPPeriod" },
   { TERMKEY_SYM_KPEQUALS,  "KPEquals" },
-  { 0, NULL },
+  { 0, nullptr },
 };
 
 // Mouse event names
@@ -323,7 +323,7 @@ static TermKey *termkey_alloc(void)
   tk->flags = 0;
   tk->canonflags = 0;
 
-  tk->buffer = NULL;
+  tk->buffer = nullptr;
   tk->buffstart = 0;
   tk->buffcount = 0;
   tk->buffsize = 256;  // bytes
@@ -333,8 +333,8 @@ static TermKey *termkey_alloc(void)
   tk->restore_termios_valid = 0;
 #endif
 
-  tk->ti_getstr_hook = NULL;
-  tk->ti_getstr_hook_data = NULL;
+  tk->ti_getstr_hook = nullptr;
+  tk->ti_getstr_hook_data = nullptr;
 
   tk->waittime = 50;  // msec
 
@@ -342,13 +342,13 @@ static TermKey *termkey_alloc(void)
   tk->is_started = 0;
 
   tk->nkeynames = 64;
-  tk->keynames = NULL;
+  tk->keynames = nullptr;
 
   for (int i = 0; i < 32; i++) {
     tk->c0[i].sym = TERMKEY_SYM_NONE;
   }
 
-  tk->drivers = NULL;
+  tk->drivers = nullptr;
 
   tk->method.emit_codepoint = &emit_codepoint;
   tk->method.peekkey_simple = &peekkey_simple;
@@ -364,7 +364,7 @@ static int termkey_init(TermKey *tk, TerminfoEntry *term)
 
   int i;
   for (i = 0; i < tk->nkeynames; i++) {
-    tk->keynames[i] = NULL;
+    tk->keynames[i] = nullptr;
   }
 
   for (i = 0; keynames[i].name; i++) {
@@ -373,11 +373,11 @@ static int termkey_init(TermKey *tk, TerminfoEntry *term)
     }
   }
 
-  register_c0(tk, TERMKEY_SYM_TAB,    0x09, NULL);
-  register_c0(tk, TERMKEY_SYM_ENTER,  0x0d, NULL);
-  register_c0(tk, TERMKEY_SYM_ESCAPE, 0x1b, NULL);
+  register_c0(tk, TERMKEY_SYM_TAB,    0x09, nullptr);
+  register_c0(tk, TERMKEY_SYM_ENTER,  0x0d, nullptr);
+  register_c0(tk, TERMKEY_SYM_ESCAPE, 0x1b, nullptr);
 
-  struct TermKeyDriverNode *tail = NULL;
+  struct TermKeyDriverNode *tail = nullptr;
 
   for (i = 0; drivers[i]; i++) {
     void *info = (*drivers[i]->new_driver)(tk, term);
@@ -396,7 +396,7 @@ static int termkey_init(TermKey *tk, TerminfoEntry *term)
 
     thisdrv->driver = drivers[i];
     thisdrv->info = info;
-    thisdrv->next = NULL;
+    thisdrv->next = nullptr;
 
     if (!tail) {
       tk->drivers = thisdrv;
@@ -437,7 +437,7 @@ TermKey *termkey_new_abstract(TerminfoEntry *term, int flags)
 {
   TermKey *tk = termkey_alloc();
   if (!tk) {
-    return NULL;
+    return nullptr;
   }
 
   tk->fd = -1;
@@ -446,7 +446,7 @@ TermKey *termkey_new_abstract(TerminfoEntry *term, int flags)
 
   if (!termkey_init(tk, term)) {
     xfree(tk);
-    return NULL;
+    return nullptr;
   }
 
   if (!(flags & TERMKEY_FLAG_NOSTART) && !termkey_start(tk)) {
@@ -457,13 +457,13 @@ TermKey *termkey_new_abstract(TerminfoEntry *term, int flags)
 
 abort:
   xfree(tk);
-  return NULL;
+  return nullptr;
 }
 
 void termkey_free(TermKey *tk)
 {
-  xfree(tk->buffer); tk->buffer = NULL;
-  xfree(tk->keynames); tk->keynames = NULL;
+  xfree(tk->buffer); tk->buffer = nullptr;
+  xfree(tk->keynames); tk->keynames = nullptr;
 
   struct TermKeyDriverNode *p;
   for (p = tk->drivers; p;) {
@@ -1049,7 +1049,7 @@ TermKeySym termkey_register_keyname(TermKey *tk, TermKeySym sym, const char *nam
 
     // Fill in the hole
     for (int i = tk->nkeynames; i < sym; i++) {
-      tk->keynames[i] = NULL;
+      tk->keynames[i] = nullptr;
     }
 
     tk->nkeynames = sym + 1;
@@ -1097,7 +1097,7 @@ static const char *termkey_lookup_keyname_format(TermKey *tk, const char *str, T
     }
   }
 
-  return NULL;
+  return nullptr;
 }
 
 const char *termkey_lookup_keyname(TermKey *tk, const char *str, TermKeySym *sym)

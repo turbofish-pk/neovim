@@ -161,7 +161,7 @@ bool terminfo_from_database(TerminfoEntry *ti, char *termname, Arena *arena)
 
   for (size_t i = 0; i < ARRAY_SIZE(uni_ids); i++) {
     const char *val = unibi_get_str(ut, uni_ids[i]);
-    ti->defs[i] = val ? arena_strdup(arena, val) : NULL;
+    ti->defs[i] = val ? arena_strdup(arena, val) : nullptr;
   }
 
   static const char *uni_ext[] = {
@@ -177,7 +177,7 @@ bool terminfo_from_database(TerminfoEntry *ti, char *termname, Arena *arena)
       const char *n = unibi_get_ext_str_name(ut, val);
       if (n && strequal(n, name)) {
         const char *data = unibi_get_ext_str(ut, val);
-        ti->defs[kTermExtOffset + i] = data ? arena_strdup(arena, data) : NULL;
+        ti->defs[kTermExtOffset + i] = data ? arena_strdup(arena, data) : nullptr;
         break;
       }
     }
@@ -197,7 +197,7 @@ bool terminfo_from_database(TerminfoEntry *ti, char *termname, Arena *arena)
       ti->keys[i][0] = arena_strdup(arena, val);
       if (uni_keys[i][1] != unibi_string_begin_) {
         const char *sval = unibi_get_str(ut, uni_keys[i][1]);
-        ti->keys[i][1] = sval ? arena_strdup(arena, sval) : NULL;
+        ti->keys[i][1] = sval ? arena_strdup(arena, sval) : nullptr;
       }
     }
   }
@@ -210,7 +210,7 @@ bool terminfo_from_database(TerminfoEntry *ti, char *termname, Arena *arena)
 
   for (size_t i = 0; i < ARRAY_SIZE(uni_fkeys); i++) {
     const char *val = unibi_get_str(ut, uni_fkeys[i]);
-    ti->f_keys[i] = val ? arena_strdup(arena, val) : NULL;
+    ti->f_keys[i] = val ? arena_strdup(arena, val) : nullptr;
   }
 
   unibi_destroy(ut);
@@ -367,7 +367,7 @@ static int pop(long *num, char **string, TPSTACK *stack)
       *num = 0;
     }
     if (string) {
-      *string = NULL;
+      *string = nullptr;
     }
     return -1;
   }
@@ -517,14 +517,14 @@ size_t terminfo_fmt(char *buf_start, char *buf_end, const char *str, TPVAR param
     // Handle commands
     switch (c) {
     case 'c':
-      pop(&val, NULL, &stack);
+      pop(&val, nullptr, &stack);
       if (!ochar(&buf, buf_end, (unsigned char)val)) {
         return false;
       }
       break;
     case 's':
-      pop(NULL, &ostr, &stack);
-      if (ostr != NULL) {
+      pop(nullptr, &ostr, &stack);
+      if (ostr != nullptr) {
         int r;
 
         l = strlen(ostr);
@@ -542,19 +542,19 @@ size_t terminfo_fmt(char *buf_start, char *buf_end, const char *str, TPVAR param
       }
       break;
     case 'l':
-      pop(NULL, &ostr, &stack);
-      if (ostr == NULL) {
+      pop(nullptr, &ostr, &stack);
+      if (ostr == nullptr) {
         l = 0;
       } else {
         l = strlen(ostr);
       }
-      push((long)l, NULL, &stack);
+      push((long)l, nullptr, &stack);
       break;
     case 'd':
     case 'o':
     case 'x':
     case 'X':
-      pop(&val, NULL, &stack);
+      pop(&val, nullptr, &stack);
       if (onum(&buf, buf_end, fmt, (int)val, olen) == 0) {
         return 0;
       }
@@ -569,7 +569,7 @@ size_t terminfo_fmt(char *buf_start, char *buf_end, const char *str, TPVAR param
       }
       break;
     case 'P':
-      pop(&val, NULL, &stack);
+      pop(&val, nullptr, &stack);
       if (*str >= 'a' && *str <= 'z') {
         dnums[*str - 'a'] = val;
       } else if (*str >= 'A' && *str <= 'Z') {
@@ -578,11 +578,11 @@ size_t terminfo_fmt(char *buf_start, char *buf_end, const char *str, TPVAR param
       break;
     case 'g':
       if (*str >= 'a' && *str <= 'z') {
-        if (push(dnums[*str - 'a'], NULL, &stack)) {
+        if (push(dnums[*str - 'a'], nullptr, &stack)) {
           return 0;
         }
       } else if (*str >= 'A' && *str <= 'Z') {
-        if (push(snums[*str - 'A'], NULL, &stack)) {
+        if (push(snums[*str - 'A'], nullptr, &stack)) {
           return 0;
         }
       }
@@ -592,7 +592,7 @@ size_t terminfo_fmt(char *buf_start, char *buf_end, const char *str, TPVAR param
       params[1].num++;
       break;
     case '\'':
-      if (push((long)(unsigned char)(*str++), NULL, &stack)) {
+      if (push((long)(unsigned char)(*str++), nullptr, &stack)) {
         return 0;
       }
       while (*str != '\0' && *str != '\'') {
@@ -607,7 +607,7 @@ size_t terminfo_fmt(char *buf_start, char *buf_end, const char *str, TPVAR param
       for (; isdigit((unsigned char)(*str)); str++) {
         val = (val * 10) + (*str - '0');
       }
-      if (push(val, NULL, &stack)) {
+      if (push(val, nullptr, &stack)) {
         return 0;
       }
       while (*str != '\0' && *str != '}') {
@@ -630,8 +630,8 @@ size_t terminfo_fmt(char *buf_start, char *buf_end, const char *str, TPVAR param
     case '=':
     case '<':
     case '>':
-      pop(&val, NULL, &stack);
-      pop(&val2, NULL, &stack);
+      pop(&val, nullptr, &stack);
+      pop(&val2, nullptr, &stack);
       switch (c) {
       case '+':
         val = val + val2;
@@ -673,13 +673,13 @@ size_t terminfo_fmt(char *buf_start, char *buf_end, const char *str, TPVAR param
         val = val2 > val;
         break;
       }
-      if (push(val, NULL, &stack)) {
+      if (push(val, nullptr, &stack)) {
         return 0;
       }
       break;
     case '!':
     case '~':
-      pop(&val, NULL, &stack);
+      pop(&val, nullptr, &stack);
       switch (c) {
       case '!':
         val = !val;
@@ -688,14 +688,14 @@ size_t terminfo_fmt(char *buf_start, char *buf_end, const char *str, TPVAR param
         val = ~val;
         break;
       }
-      if (push(val, NULL, &stack)) {
+      if (push(val, nullptr, &stack)) {
         return 0;
       }
       break;
     case '?':  // if
       break;
     case 't':  // then
-      pop(&val, NULL, &stack);
+      pop(&val, nullptr, &stack);
       if (val == 0) {
         l = 0;
         for (; *str != '\0'; str++) {

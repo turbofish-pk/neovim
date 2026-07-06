@@ -49,14 +49,14 @@ size_t ctx_size(void)
 }
 
 /// Returns pointer to Context object with given zero-based index from the top
-/// of context stack or NULL if index is out of bounds.
+/// of context stack or nullptr if index is out of bounds.
 Context *ctx_get(size_t index)
   FUNC_ATTR_PURE
 {
   if (index < kv_size(ctx_stack)) {
     return &kv_Z(ctx_stack, index);
   }
-  return NULL;
+  return nullptr;
 }
 
 /// Free resources used by Context object.
@@ -74,14 +74,14 @@ void ctx_free(Context *ctx)
 
 /// Saves the editor state to a context.
 ///
-/// If "context" is NULL, pushes context on context stack.
+/// If "context" is nullptr, pushes context on context stack.
 /// Use "flags" to select particular types of context.
 ///
-/// @param  ctx    Save to this context, or push on context stack if NULL.
+/// @param  ctx    Save to this context, or push on context stack if nullptr.
 /// @param  flags  Flags, see ContextTypeFlags enum.
 void ctx_save(Context *ctx, const int flags)
 {
-  if (ctx == NULL) {
+  if (ctx == nullptr) {
     kv_push(ctx_stack, CONTEXT_INIT);
     ctx = &kv_last(ctx_stack);
   }
@@ -111,17 +111,17 @@ void ctx_save(Context *ctx, const int flags)
 
 /// Restores the editor state from a context.
 ///
-/// If "context" is NULL, pops context from context stack.
+/// If "context" is nullptr, pops context from context stack.
 /// Use "flags" to select particular types of context.
 ///
-/// @param  ctx    Restore from this context. Pop from context stack if NULL.
+/// @param  ctx    Restore from this context. Pop from context stack if nullptr.
 /// @param  flags  Flags, see ContextTypeFlags enum.
 ///
 /// @return true on success, false otherwise (i.e.: empty context stack).
 bool ctx_restore(Context *ctx, const int flags)
 {
   bool free_ctx = false;
-  if (ctx == NULL) {
+  if (ctx == nullptr) {
     if (ctx_stack.size == 0) {
       return false;
     }
@@ -272,7 +272,7 @@ static inline String array_to_string(Array array, Error *err)
 Dict ctx_to_dict(Context *ctx, Arena *arena)
   FUNC_ATTR_NONNULL_ALL
 {
-  assert(ctx != NULL);
+  assert(ctx != nullptr);
 
   Dict rv = arena_dict(arena, 5);
 
@@ -295,7 +295,7 @@ Dict ctx_to_dict(Context *ctx, Arena *arena)
 int ctx_from_dict(Dict dict, Context *ctx, Error *err)
   FUNC_ATTR_NONNULL_ALL
 {
-  assert(ctx != NULL);
+  assert(ctx != nullptr);
 
   int types = 0;
   for (size_t i = 0; i < dict.size && !ERROR_SET(err); i++) {
@@ -317,7 +317,7 @@ int ctx_from_dict(Dict dict, Context *ctx, Error *err)
       ctx->gvars = array_to_string(item.value.data.array, err);
     } else if (strequal(item.key.data, "funcs")) {
       types |= kCtxFuncs;
-      ctx->funcs = copy_object(item.value, NULL).data.array;
+      ctx->funcs = copy_object(item.value, nullptr).data.array;
     }
   }
 

@@ -387,7 +387,7 @@ void shift_line(bool left, bool round, int amount, int call_changed_bytes)
   if (sw_val != 0) {
     // 'shiftwidth' is not zero; use it as the shift size.
     count = get_new_sw_indent(left, round, amount, sw_val);
-  } else if ((vts_array == NULL) || (vts_array[0] == 0)) {
+  } else if ((vts_array == nullptr) || (vts_array[0] == 0)) {
     // 'shiftwidth' is zero and 'vartabstop' is empty; use 'tabstop' as the
     // shift size.
     count = get_new_sw_indent(left, round, amount, ts_val);
@@ -769,7 +769,7 @@ int op_delete(oparg_T *oap)
       // marks as if it happened.
       goto setmarks;
     }
-    if (vim_strchr(p_cpo, CPO_EMPTYREGION) != NULL) {
+    if (vim_strchr(p_cpo, CPO_EMPTYREGION) != nullptr) {
       beep_flush();
     }
     return OK;
@@ -779,7 +779,7 @@ int op_delete(oparg_T *oap)
   // If a yank register was specified, put the deleted text into that
   // register.  For the black hole register '_' don't yank anything.
   if (oap->regname != '_') {
-    yankreg_T *reg = NULL;
+    yankreg_T *reg = nullptr;
     bool did_yank = false;
     if (oap->regname != 0) {
       // check for read-only register
@@ -813,7 +813,7 @@ int op_delete(oparg_T *oap)
     }
 
     if (did_yank || oap->regname == 0) {
-      if (reg == NULL) {
+      if (reg == nullptr) {
         abort();
       }
       set_clipboard(oap->regname, reg);
@@ -942,7 +942,7 @@ int op_delete(oparg_T *oap)
       }
 
       // if 'cpoptions' contains '$', display '$' at end of change
-      if (vim_strchr(p_cpo, CPO_DOLLAR) != NULL
+      if (vim_strchr(p_cpo, CPO_DOLLAR) != nullptr
           && oap->op_type == OP_CHANGE
           && oap->end.lnum == curwin->w_cursor.lnum
           && !oap->is_VIsual) {
@@ -1083,7 +1083,7 @@ static int op_replace(oparg_T *oap, int c)
 {
   int n;
   struct block_def bd;
-  char *after_p = NULL;
+  char *after_p = nullptr;
   bool had_ctrl_v_cr = false;
 
   if ((curbuf->b_ml.ml_flags & ML_EMPTY) || oap->empty) {
@@ -1204,7 +1204,7 @@ static int op_replace(oparg_T *oap, int c)
       ml_replace(curwin->w_cursor.lnum, newp, false);
       curbuf_splice_pending++;
       linenr_T baselnum = curwin->w_cursor.lnum;
-      if (after_p != NULL) {
+      if (after_p != nullptr) {
         ml_append(curwin->w_cursor.lnum++, after_p, (int)after_p_len, false);
         appended_lines_mark(curwin->w_cursor.lnum, 1);
         oap->end.lnum++;
@@ -1806,7 +1806,7 @@ void adjust_cursor_eol(void)
     colnr_T scol, ecol;
 
     // Coladd is set to the width of the last character.
-    getvcol(curwin, &curwin->w_cursor, &scol, NULL, &ecol, 0);
+    getvcol(curwin, &curwin->w_cursor, &scol, nullptr, &ecol, 0);
     curwin->w_cursor.coladd = ecol - scol + 1;
   }
 }
@@ -1824,7 +1824,7 @@ void adjust_cursor_eol(void)
 ///  comment.
 char *skip_comment(char *line, bool process, bool include_space, bool *is_comment)
 {
-  char *comment_flags = NULL;
+  char *comment_flags = nullptr;
   int leader_offset = get_last_leader_offset(line, &comment_flags);
 
   *is_comment = false;
@@ -1885,15 +1885,15 @@ char *skip_comment(char *line, bool process, bool include_space, bool *is_commen
 /// @return  FAIL for failure, OK otherwise
 int do_join(size_t count, bool insert_space, bool save_undo, bool use_formatoptions, bool setmark)
 {
-  char *curr = NULL;
-  char *curr_start = NULL;
+  char *curr = nullptr;
+  char *curr_start = nullptr;
   char *cend;
   int endcurr1 = NUL;
   int endcurr2 = NUL;
   int currsize = 0;             // size of the current line
   int sumsize = 0;              // size of the long new line
   int ret = OK;
-  int *comments = NULL;
+  int *comments = nullptr;
   bool remove_comments = use_formatoptions && has_format_option(FO_REMOVE_COMS);
   bool prev_was_comment = false;
   assert(count >= 1);
@@ -2062,7 +2062,7 @@ int do_join(size_t count, bool insert_space, bool save_undo, bool use_formatopti
   // Vi compatible: use the column of the first join
   // vim:             use the column of the last join
   curwin->w_cursor.col =
-    (vim_strchr(p_cpo, CPO_JOINCOL) != NULL ? currsize : col);
+    (vim_strchr(p_cpo, CPO_JOINCOL) != nullptr ? currsize : col);
   check_cursor_col(curwin);
 
   curwin->w_cursor.coladd = 0;
@@ -2256,7 +2256,7 @@ void charwise_block_prep(pos_T start, pos_T end, struct block_def *bdp, linenr_T
   if (lnum == start.lnum) {
     startcol = start.col;
     if (virtual_op) {
-      getvcol(curwin, &start, &cs, NULL, &ce, 0);
+      getvcol(curwin, &start, &cs, nullptr, &ce, 0);
       if (ce != cs && start.coladd > 0) {
         // Part of a tab selected -- but don't double-count it.
         bdp->start_char_vcols = ce - cs + 1;
@@ -2269,7 +2269,7 @@ void charwise_block_prep(pos_T start, pos_T end, struct block_def *bdp, linenr_T
   if (lnum == end.lnum) {
     endcol = end.col;
     if (virtual_op) {
-      getvcol(curwin, &end, &cs, NULL, &ce, 0);
+      getvcol(curwin, &end, &cs, nullptr, &ce, 0);
       if (p[endcol] == NUL || (cs + end.coladd < ce
                                // Don't add space for double-wide
                                // char; endcol will be on last byte
@@ -2425,12 +2425,12 @@ bool do_addsub(int op_type, pos_T *pos, int length, linenr_T Prenum1)
   pos_T endpos;
   colnr_T save_coladd = 0;
 
-  const bool do_hex = vim_strchr(curbuf->b_p_nf, 'x') != NULL;       // "heX"
-  const bool do_oct = vim_strchr(curbuf->b_p_nf, 'o') != NULL;       // "Octal"
-  const bool do_bin = vim_strchr(curbuf->b_p_nf, 'b') != NULL;       // "Bin"
-  const bool do_alpha = vim_strchr(curbuf->b_p_nf, 'p') != NULL;     // "alPha"
-  const bool do_unsigned = vim_strchr(curbuf->b_p_nf, 'u') != NULL;  // "Unsigned"
-  const bool do_blank = vim_strchr(curbuf->b_p_nf, 'k') != NULL;     // "blanK"
+  const bool do_hex = vim_strchr(curbuf->b_p_nf, 'x') != nullptr;       // "heX"
+  const bool do_oct = vim_strchr(curbuf->b_p_nf, 'o') != nullptr;       // "Octal"
+  const bool do_bin = vim_strchr(curbuf->b_p_nf, 'b') != nullptr;       // "Bin"
+  const bool do_alpha = vim_strchr(curbuf->b_p_nf, 'p') != nullptr;     // "alPha"
+  const bool do_unsigned = vim_strchr(curbuf->b_p_nf, 'u') != nullptr;  // "Unsigned"
+  const bool do_blank = vim_strchr(curbuf->b_p_nf, 'k') != nullptr;     // "blanK"
 
   if (virtual_active(curwin)) {
     save_coladd = pos->coladd;
@@ -2589,7 +2589,7 @@ bool do_addsub(int op_type, pos_T *pos, int length, linenr_T Prenum1)
                0 + (do_bin ? STR2NR_BIN : 0)
                + (do_oct ? STR2NR_OCT : 0)
                + (do_hex ? STR2NR_HEX : 0),
-               NULL, &n, maxlen, false, &overflow);
+               nullptr, &n, maxlen, false, &overflow);
 
     // ignore leading '-' for hex, octal and bin numbers
     if (pre && negative) {
@@ -2818,7 +2818,7 @@ static varnumber_T line_count_info(char *line, varnumber_T *wc, varnumber_T *cc,
 /// In Visual mode, give some info about the selected region.  (In this case,
 /// the *_count_cursor variables store running totals for the selection.)
 ///
-/// @param dict  when not NULL, store the info there instead of showing it.
+/// @param dict  when not nullptr, store the info there instead of showing it.
 void cursor_pos_info(dict_T *dict)
 {
   char buf1[50];
@@ -2838,7 +2838,7 @@ void cursor_pos_info(dict_T *dict)
 
   // Compute the length of the file in characters.
   if (curbuf->b_ml.ml_flags & ML_EMPTY) {
-    if (dict == NULL) {
+    if (dict == nullptr) {
       msg(_(no_lines_msg), 0);
       return;
     }
@@ -2903,7 +2903,7 @@ void cursor_pos_info(dict_T *dict)
       // Do extra processing for VIsual mode.
       if (l_VIsual_active
           && lnum >= min_pos.lnum && lnum <= max_pos.lnum) {
-        char *s = NULL;
+        char *s = nullptr;
         int len = 0;
 
         switch (l_VIsual_mode) {
@@ -2929,7 +2929,7 @@ void cursor_pos_info(dict_T *dict)
         }
         break;
         }
-        if (s != NULL) {
+        if (s != nullptr) {
           byte_count_cursor += line_count_info(s, &word_count_cursor,
                                                &char_count_cursor, len, eol_size);
           if (lnum == curbuf->b_ml.ml_line_count
@@ -2961,7 +2961,7 @@ void cursor_pos_info(dict_T *dict)
       byte_count -= eol_size;
     }
 
-    if (dict == NULL) {
+    if (dict == nullptr) {
       if (l_VIsual_active) {
         if (l_VIsual_mode == Ctrl_V && curwin->w_curswant < MAXCOL) {
           getvcols(curwin, &min_pos, &max_pos, &min_pos.col, &max_pos.col, 0);
@@ -3030,12 +3030,12 @@ void cursor_pos_info(dict_T *dict)
     }
 
     bom_count = bomb_size();
-    if (dict == NULL && bom_count > 0) {
+    if (dict == nullptr && bom_count > 0) {
       const size_t len = strlen(IObuff);
       vim_snprintf(IObuff + len, IOSIZE - len,
                    _("(+%" PRId64 " for BOM)"), (int64_t)bom_count);
     }
-    if (dict == NULL) {
+    if (dict == nullptr) {
       // Don't shorten this message, the user asked for it.
       char *p = p_shm;
       p_shm = "";
@@ -3048,7 +3048,7 @@ void cursor_pos_info(dict_T *dict)
     }
   }
 
-  if (dict != NULL) {
+  if (dict != nullptr) {
     // Don't shorten this message, the user asked for it.
     tv_dict_add_nr(dict, S_LEN("words"), word_count);
     tv_dict_add_nr(dict, S_LEN("chars"), char_count);
@@ -3082,7 +3082,7 @@ static void op_colon(oparg_T *oap)
     // When using !! on a closed fold the range ".!" works best to operate
     // on, it will be made the whole closed fold later.
     linenr_T endOfStartFold = oap->start.lnum;
-    hasFolding(curwin, oap->start.lnum, NULL, &endOfStartFold);
+    hasFolding(curwin, oap->start.lnum, nullptr, &endOfStartFold);
     if (oap->end.lnum != oap->start.lnum && oap->end.lnum != endOfStartFold) {
       // Make it a range with the end line.
       stuffcharReadbuff(',');
@@ -3093,7 +3093,7 @@ static void op_colon(oparg_T *oap)
       } else if (oap->start.lnum == curwin->w_cursor.lnum
                  // do not use ".+number" for a closed fold, it would count
                  // folded lines twice
-                 && !hasFolding(curwin, oap->end.lnum, NULL, NULL)) {
+                 && !hasFolding(curwin, oap->end.lnum, nullptr, nullptr)) {
         stuffReadbuff(".+");
         stuffnumReadbuff(oap->line_count - 1);
       } else {
@@ -3130,7 +3130,7 @@ const char *did_set_operatorfunc(optset_T *args FUNC_ATTR_UNUSED)
   if (option_set_callback_func(p_opfunc, &opfunc_cb) == FAIL) {
     return e_invarg;
   }
-  return NULL;
+  return nullptr;
 }
 
 #ifdef EXITFREE
@@ -3144,7 +3144,7 @@ void free_operatorfunc_option(void)
 /// garbage collected.
 bool set_ref_in_opfunc(int copyID)
 {
-  return set_ref_in_callback(&opfunc_cb, copyID, NULL, NULL);
+  return set_ref_in_callback(&opfunc_cb, copyID, nullptr, nullptr);
 }
 
 /// Handle the "g@" operator: call 'operatorfunc'.
@@ -3216,9 +3216,9 @@ static void get_op_vcol(oparg_T *oap, colnr_T redo_VIsual_vcol, bool initial)
   // prevent from moving onto a trail byte
   mark_mb_adjustpos(curwin->w_buffer, &oap->end);
 
-  getvvcol(curwin, &(oap->start), &oap->start_vcol, NULL, &oap->end_vcol, 0);
+  getvvcol(curwin, &(oap->start), &oap->start_vcol, nullptr, &oap->end_vcol, 0);
   if (!redo_VIsual_busy) {
-    getvvcol(curwin, &(oap->end), &start, NULL, &end, 0);
+    getvvcol(curwin, &(oap->end), &start, nullptr, &end, 0);
 
     oap->start_vcol = MIN(oap->start_vcol, start);
     if (end > oap->end_vcol) {
@@ -3238,7 +3238,7 @@ static void get_op_vcol(oparg_T *oap, colnr_T redo_VIsual_vcol, bool initial)
     oap->end_vcol = 0;
     for (curwin->w_cursor.lnum = oap->start.lnum;
          curwin->w_cursor.lnum <= oap->end.lnum; curwin->w_cursor.lnum++) {
-      getvvcol(curwin, &curwin->w_cursor, NULL, NULL, &end, 0);
+      getvvcol(curwin, &curwin->w_cursor, nullptr, nullptr, &end, 0);
       oap->end_vcol = MAX(oap->end_vcol, end);
     }
   } else if (redo_VIsual_busy) {
@@ -3294,7 +3294,7 @@ void do_pending_operator(cmdarg_T *cap, int old_col, bool gui_yank)
     bool include_line_break = false;
     // Yank can be redone when 'y' is in 'cpoptions', but not when yanking
     // for the clipboard.
-    const bool redo_yank = vim_strchr(p_cpo, CPO_YANK) != NULL && !gui_yank;
+    const bool redo_yank = vim_strchr(p_cpo, CPO_YANK) != nullptr && !gui_yank;
 
     // Avoid a problem with unwanted linebreaks in block mode
     reset_lbr();
@@ -3343,7 +3343,7 @@ void do_pending_operator(cmdarg_T *cap, int old_col, bool gui_yank)
       if (cap->cmdchar == '/' || cap->cmdchar == '?') {     // was a search
         // If 'cpoptions' does not contain 'r', insert the search
         // pattern to really repeat the same command.
-        if (vim_strchr(p_cpo, CPO_REDO) == NULL) {
+        if (vim_strchr(p_cpo, CPO_REDO) == nullptr) {
           AppendToRedobuffLit(cap->searchbuf, -1);
         }
         AppendToRedobuff(NL_STR);
@@ -3351,7 +3351,7 @@ void do_pending_operator(cmdarg_T *cap, int old_col, bool gui_yank)
         // do_cmdline() has stored the first typed line in
         // "repeat_cmdline".  When several lines are typed repeating
         // won't be possible.
-        if (repeat_cmdline == NULL) {
+        if (repeat_cmdline == nullptr) {
           ResetRedobuff();
         } else {
           if (cap->cmdchar == ':') {
@@ -3432,13 +3432,13 @@ void do_pending_operator(cmdarg_T *cap, int old_col, bool gui_yank)
     if (lt(oap->start, curwin->w_cursor)) {
       // Include folded lines completely.
       if (!VIsual_active) {
-        if (hasFolding(curwin, oap->start.lnum, &oap->start.lnum, NULL)) {
+        if (hasFolding(curwin, oap->start.lnum, &oap->start.lnum, nullptr)) {
           oap->start.col = 0;
         }
         if ((curwin->w_cursor.col > 0
              || oap->inclusive
              || oap->motion_type == kMTLineWise)
-            && hasFolding(curwin, curwin->w_cursor.lnum, NULL,
+            && hasFolding(curwin, curwin->w_cursor.lnum, nullptr,
                           &curwin->w_cursor.lnum)) {
           curwin->w_cursor.col = get_cursor_line_len();
         }
@@ -3454,10 +3454,10 @@ void do_pending_operator(cmdarg_T *cap, int old_col, bool gui_yank)
       // Include folded lines completely.
       if (!VIsual_active && oap->motion_type == kMTLineWise) {
         if (hasFolding(curwin, curwin->w_cursor.lnum, &curwin->w_cursor.lnum,
-                       NULL)) {
+                       nullptr)) {
           curwin->w_cursor.col = 0;
         }
-        if (hasFolding(curwin, oap->start.lnum, NULL, &oap->start.lnum)) {
+        if (hasFolding(curwin, oap->start.lnum, nullptr, &oap->start.lnum)) {
           oap->start.col = ml_get_len(oap->start.lnum);
         }
       }
@@ -3483,11 +3483,11 @@ void do_pending_operator(cmdarg_T *cap, int old_col, bool gui_yank)
           resel_VIsual_vcol = MAXCOL;
         } else {
           if (VIsual_mode != Ctrl_V) {
-            getvvcol(curwin, &(oap->end), NULL, NULL, &oap->end_vcol, 0);
+            getvvcol(curwin, &(oap->end), nullptr, nullptr, &oap->end_vcol, 0);
           }
           if (VIsual_mode == Ctrl_V || oap->line_count <= 1) {
             if (VIsual_mode != Ctrl_V) {
-              getvvcol(curwin, &(oap->start), &oap->start_vcol, NULL, NULL, 0);
+              getvvcol(curwin, &(oap->start), &oap->start_vcol, nullptr, nullptr, 0);
             }
             resel_VIsual_vcol = oap->end_vcol - oap->start_vcol + 1;
           } else {
@@ -3613,7 +3613,7 @@ void do_pending_operator(cmdarg_T *cap, int old_col, bool gui_yank)
     // For delete, change and yank, it's an error to operate on an
     // empty region, when 'E' included in 'cpoptions' (Vi compatible).
     empty_region_error = (oap->empty
-                          && vim_strchr(p_cpo, CPO_EMPTYREGION) != NULL);
+                          && vim_strchr(p_cpo, CPO_EMPTYREGION) != nullptr);
 
     // Force a redraw when operating on an empty Visual region, when
     // 'modifiable is off or creating a fold.
@@ -3735,7 +3735,7 @@ void do_pending_operator(cmdarg_T *cap, int old_col, bool gui_yank)
       break;
 
     case OP_FILTER:
-      if (vim_strchr(p_cpo, CPO_FILTER) != NULL) {
+      if (vim_strchr(p_cpo, CPO_FILTER) != nullptr) {
         AppendToRedobuff("!\r");  // Use any last used !cmd.
       } else {
         bangredo = true;  // do_bang() will put cmd in redo buffer.

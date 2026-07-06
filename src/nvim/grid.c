@@ -71,7 +71,7 @@ ScreenGrid *grid_adjust(GridView *grid, int *row_off, int *col_off)
 
 schar_T schar_from_str(const char *str)
 {
-  if (str == NULL) {
+  if (str == nullptr) {
     return 0;
   }
   return schar_from_buf(str, strlen(str));
@@ -334,18 +334,18 @@ static bool grid_invalid_row(ScreenGrid *grid, int row)
 schar_T grid_getchar(ScreenGrid *grid, int row, int col, int *attrp)
 {
   // safety check
-  if (grid->chars == NULL || row >= grid->rows || col >= grid->cols) {
+  if (grid->chars == nullptr || row >= grid->rows || col >= grid->cols) {
     return NUL;
   }
 
   size_t off = grid->line_offset[row] + (size_t)col;
-  if (attrp != NULL) {
+  if (attrp != nullptr) {
     *attrp = grid->attrs[off];
   }
   return grid->chars[off];
 }
 
-static ScreenGrid *grid_line_grid = NULL;
+static ScreenGrid *grid_line_grid = nullptr;
 static int grid_line_row = -1;
 static int grid_line_coloff = 0;
 static int grid_line_maxcol = 0;
@@ -370,7 +370,7 @@ void grid_line_start(GridView *view, int row)
 void screengrid_line_start(ScreenGrid *grid, int row, int col)
 {
   grid_line_maxcol = grid->cols;
-  assert(grid_line_grid == NULL);
+  assert(grid_line_grid == nullptr);
   grid_line_row = row;
   grid_line_grid = grid;
   grid_line_coloff = col;
@@ -403,7 +403,7 @@ schar_T grid_line_getchar(int col, int *attr)
   if (col < grid_line_maxcol) {
     col += grid_line_coloff;
     size_t off = grid_line_grid->line_offset[grid_line_row] + (size_t)col;
-    if (attr != NULL) {
+    if (attr != nullptr) {
       *attr = grid_line_grid->attrs[off];
     }
     return grid_line_grid->chars[off];
@@ -590,7 +590,7 @@ void linebuf_mirror(int *firstp, int *lastp, int *clearp, int width)
 void grid_line_flush(void)
 {
   ScreenGrid *grid = grid_line_grid;
-  grid_line_grid = NULL;
+  grid_line_grid = nullptr;
   grid_line_clear_to = MAX(grid_line_last, grid_line_clear_to);
   assert(grid_line_clear_to <= grid_line_maxcol);
   if (grid_line_first >= grid_line_clear_to) {
@@ -611,7 +611,7 @@ void grid_line_flush_if_valid_row(void)
     if (rdb_flags & kOptRdbFlagInvalid) {
       abort();
     } else {
-      grid_line_grid = NULL;
+      grid_line_grid = nullptr;
       return;
     }
   }
@@ -624,7 +624,7 @@ void grid_clear(GridView *grid, int start_row, int end_row, int start_col, int e
     grid_line_start(grid, row);
     end_col = MIN(end_col, grid_line_maxcol);
     if (grid_line_row >= grid_line_grid->rows || start_col >= end_col) {
-      grid_line_grid = NULL;  // TODO(bfredl): make callers behave instead
+      grid_line_grid = nullptr;  // TODO(bfredl): make callers behave instead
       return;
     }
     grid_line_clear_end(start_col, end_col, attr, 0);
@@ -677,7 +677,7 @@ void grid_put_linebuf(ScreenGrid *grid, int row, int coloff, int col, int endcol
   }
 
   // Safety check. Avoids clang warnings down the call stack.
-  if (grid->chars == NULL || row >= grid->rows || coloff >= grid->cols) {
+  if (grid->chars == nullptr || row >= grid->rows || coloff >= grid->cols) {
     DLOG("invalid state, skipped");
     return;
   }
@@ -864,7 +864,7 @@ void grid_alloc(ScreenGrid *grid, int rows, int columns, bool copy, bool valid)
       // possible from the old screen to the new one and clear the rest
       // (used when resizing the window at the "--more--" prompt or when
       // executing an external command, for the GUI).
-      if (new_row < grid->rows && grid->chars != NULL) {
+      if (new_row < grid->rows && grid->chars != nullptr) {
         int len = MIN(grid->cols, ngrid.cols);
         memmove(ngrid.chars + ngrid.line_offset[new_row],
                 grid->chars + grid->line_offset[new_row],
@@ -903,10 +903,10 @@ void grid_free(ScreenGrid *grid)
   xfree(grid->vcols);
   xfree(grid->line_offset);
 
-  grid->chars = NULL;
-  grid->attrs = NULL;
-  grid->vcols = NULL;
-  grid->line_offset = NULL;
+  grid->chars = nullptr;
+  grid->attrs = nullptr;
+  grid->vcols = nullptr;
+  grid->line_offset = nullptr;
 }
 
 #ifdef EXITFREE
@@ -938,7 +938,7 @@ void win_grid_alloc(win_T *wp)
   int total_cols = wp->w_width_outer;
 
   bool want_allocation = ui_has(kUIMultigrid) || wp->w_floating;
-  bool has_allocation = (grid_allocated->chars != NULL);
+  bool has_allocation = (grid_allocated->chars != nullptr);
 
   if (wp->w_view_height > wp->w_lines_size) {
     wp->w_lines_valid = 0;
@@ -1097,7 +1097,7 @@ static void grid_draw_bordertext(VirtText vt, int col, int winbl, const int *hl_
   for (size_t i = 0; i < kv_size(vt);) {
     int attr = -1;
     char *text = next_virt_text_chunk(vt, &i, &attr);
-    if (text == NULL) {
+    if (text == nullptr) {
       break;
     }
     if (attr == -1) {  // No highlight specified.
@@ -1142,7 +1142,7 @@ void grid_draw_border(ScreenGrid *grid, WinConfig *config, int *adj, int winbl, 
 {
   int *attrs = config->border_attr;
   int default_adj[4] = { 1, 1, 1, 1 };
-  if (adj == NULL) {
+  if (adj == nullptr) {
     adj = default_adj;
   }
   schar_T chars[8];
@@ -1232,7 +1232,7 @@ win_T *get_win_by_grid_handle(handle_T handle)
       return wp;
     }
   }
-  return NULL;
+  return nullptr;
 }
 
 /// Put a unicode character in a screen cell.

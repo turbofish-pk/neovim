@@ -262,7 +262,7 @@ static int lmpack_unpacker_new(lua_State *L)
   if (!rv->parser) return luaL_error(L, "Failed to allocate memory");
   mpack_parser_init(rv->parser, 0);
   rv->parser->data.p = rv;
-  rv->string_buffer = NULL;
+  rv->string_buffer = nullptr;
   rv->L = L;
   rv->unpacking = 0;
   luaL_getmetatable(L, UNPACKER_META_NAME);
@@ -348,7 +348,7 @@ static void lmpack_parse_exit(mpack_parser_t *parser, mpack_node_t *node)
     case MPACK_TOKEN_EXT:
       lua_pushlstring(L, unpacker->string_buffer, node->tok.length);
       free(unpacker->string_buffer);
-      unpacker->string_buffer = NULL;
+      unpacker->string_buffer = nullptr;
       if (node->tok.type == MPACK_TOKEN_EXT && unpacker->ext != LUA_NOREF) {
         /* check if there's a handler for this type */
         lmpack_geti(L, unpacker->reg, unpacker->ext);
@@ -574,7 +574,7 @@ static void lmpack_unparse_enter(mpack_parser_t *parser, mpack_node_t *node)
     if (parent->tok.type > MPACK_TOKEN_MAP) {
       /* strings are a special case, they are packed as single child chunk
        * node */
-      const char *str = lua_tolstring(L, -1, NULL);
+      const char *str = lua_tolstring(L, -1, nullptr);
       node->tok = mpack_pack_chunk(str, parent->tok.length);
       lua_pop(L, 1);
       return;
@@ -632,8 +632,8 @@ static void lmpack_unparse_enter(mpack_parser_t *parser, mpack_node_t *node)
         is_bin = lua_toboolean(L, -1);
         lua_pop(L, 1);
       }
-      if (is_bin) node->tok = mpack_pack_bin(lmpack_objlen(L, NULL));
-      else node->tok = mpack_pack_str(lmpack_objlen(L, NULL));
+      if (is_bin) node->tok = mpack_pack_bin(lmpack_objlen(L, nullptr));
+      else node->tok = mpack_pack_str(lmpack_objlen(L, nullptr));
       break;
     }
     case LUA_TTABLE: {
@@ -675,7 +675,7 @@ static void lmpack_unparse_enter(mpack_parser_t *parser, mpack_node_t *node)
           if (!lua_isstring(L, -1))
             luaL_error(L,
                 "the second result from ext packer must be a string");
-          node->tok = mpack_pack_ext((int)ext, lmpack_objlen(L, NULL));
+          node->tok = mpack_pack_ext((int)ext, lmpack_objlen(L, nullptr));
           /* stack: 
            *
            * -1: ext string
@@ -866,7 +866,7 @@ static int lmpack_session_receive(lua_State *L)
   size_t len;
   const char *str, *str_init;
   Session *session;
-  Unpacker *unpacker = NULL;
+  Unpacker *unpacker = nullptr;
 
   if ((argc = lua_gettop(L)) > 3 || argc < 2)
     return luaL_error(L, "expecting between 2 and 3 arguments"); 
@@ -1059,7 +1059,7 @@ static int lmpack_unpack(lua_State *L)
   unpacker.parser = &parser;
   mpack_parser_init(unpacker.parser, 0);
   unpacker.parser->data.p = &unpacker;
-  unpacker.string_buffer = NULL;
+  unpacker.string_buffer = nullptr;
   unpacker.L = L;
 
   lua_getfield(L, LUA_REGISTRYINDEX, EMPTY_DICT_NAME);
@@ -1143,13 +1143,13 @@ static int lmpack_pack(lua_State *L)
 static const luaL_reg unpacker_methods[] = {
   {"__call", lmpack_unpacker_unpack},
   {"__gc", lmpack_unpacker_delete},
-  {NULL, NULL}
+  {nullptr, nullptr}
 };
 
 static const luaL_reg packer_methods[] = {
   {"__call", lmpack_packer_pack},
   {"__gc", lmpack_packer_delete},
-  {NULL, NULL}
+  {nullptr, nullptr}
 };
 
 static const luaL_reg session_methods[] = {
@@ -1158,7 +1158,7 @@ static const luaL_reg session_methods[] = {
   {"reply", lmpack_session_reply},
   {"notify", lmpack_session_notify},
   {"__gc", lmpack_session_delete},
-  {NULL, NULL}
+  {nullptr, nullptr}
 };
 
 static const luaL_reg mpack_functions[] = {
@@ -1167,7 +1167,7 @@ static const luaL_reg mpack_functions[] = {
   {"Session", lmpack_session_new},
   {UNPACK_FN_NAME, lmpack_unpack},
   {PACK_FN_NAME, lmpack_pack},
-  {NULL, NULL}
+  {nullptr, nullptr}
 };
 
 int luaopen_mpack(lua_State *L)
@@ -1176,19 +1176,19 @@ int luaopen_mpack(lua_State *L)
   luaL_newmetatable(L, UNPACKER_META_NAME);
   lua_pushvalue(L, -1);
   lua_setfield(L, -2, "__index");
-  luaL_register(L, NULL, unpacker_methods);
+  luaL_register(L, nullptr, unpacker_methods);
   lua_pop(L, 1);
   /* Packer */
   luaL_newmetatable(L, PACKER_META_NAME);
   lua_pushvalue(L, -1);
   lua_setfield(L, -2, "__index");
-  luaL_register(L, NULL, packer_methods);
+  luaL_register(L, nullptr, packer_methods);
   lua_pop(L, 1);
   /* Session */
   luaL_newmetatable(L, SESSION_META_NAME);
   lua_pushvalue(L, -1);
   lua_setfield(L, -2, "__index");
-  luaL_register(L, NULL, session_methods);
+  luaL_register(L, nullptr, session_methods);
   lua_pop(L, 1);
   /* NIL */
   /* Check if NIL is already stored in the registry */
@@ -1212,7 +1212,7 @@ int luaopen_mpack(lua_State *L)
 
   /* module */
   lua_newtable(L);
-  luaL_register(L, NULL, mpack_functions);
+  luaL_register(L, nullptr, mpack_functions);
   /* save NIL on the module */
   lua_getfield(L, LUA_REGISTRYINDEX, NIL_NAME);
   lua_setfield(L, -2, "NIL");

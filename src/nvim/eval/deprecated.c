@@ -33,7 +33,7 @@ void f_rpcstart(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
     return;
   }
 
-  list_T *args = NULL;
+  list_T *args = nullptr;
   int argsl = 0;
   if (argvars[1].v_type == VAR_LIST) {
     args = argvars[1].vval.v_list;
@@ -50,12 +50,12 @@ void f_rpcstart(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
     });
   }
 
-  if (argvars[0].vval.v_string == NULL || argvars[0].vval.v_string[0] == NUL) {
+  if (argvars[0].vval.v_string == nullptr || argvars[0].vval.v_string[0] == NUL) {
     emsg(_(e_api_spawn_failed));
     return;
   }
 
-  // Allocate extra memory for the argument vector and the NULL pointer
+  // Allocate extra memory for the argument vector and the nullptr pointer
   int argvl = argsl + 2;
   char **argv = xmalloc(sizeof(char *) * (size_t)argvl);
 
@@ -70,16 +70,16 @@ void f_rpcstart(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
     });
   }
 
-  // The last item of argv must be NULL
-  argv[i] = NULL;
+  // The last item of argv must be nullptr
+  argv[i] = nullptr;
 
-  Channel *chan = channel_job_start(argv, NULL, CALLBACK_READER_INIT,
+  Channel *chan = channel_job_start(argv, nullptr, CALLBACK_READER_INIT,
                                     CALLBACK_READER_INIT, CALLBACK_NONE,
                                     false, true, false, false,
-                                    kChannelStdinPipe, NULL, 0, 0, NULL,
+                                    kChannelStdinPipe, nullptr, 0, 0, nullptr,
                                     &rettv->vval.v_number);
   if (chan) {
-    channel_create_event(chan, NULL);
+    channel_create_event(chan, nullptr);
   }
 }
 

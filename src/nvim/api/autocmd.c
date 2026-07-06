@@ -111,7 +111,7 @@ ArrayOf(DictAs(get_autocmds__ret)) nvim_get_autocmds(Dict(get_autocmds) *opts, A
     break;
   case kObjectTypeInteger:
     group = (int)opts->group.data.integer;
-    char *name = group == 0 ? NULL : augroup_name(group);
+    char *name = group == 0 ? nullptr : augroup_name(group);
     VALIDATE_INT(augroup_exists(name), "group", opts->group.data.integer, {
       goto cleanup;
     });
@@ -141,7 +141,7 @@ ArrayOf(DictAs(get_autocmds__ret)) nvim_get_autocmds(Dict(get_autocmds) *opts, A
         event_set[event_nr] = true;
       })
     } else {
-      VALIDATE_EXP(false, "event", "String or Array", NULL, {
+      VALIDATE_EXP(false, "event", "String or Array", nullptr, {
         goto cleanup;
       });
     }
@@ -237,7 +237,7 @@ ArrayOf(DictAs(get_autocmds__ret)) nvim_get_autocmds(Dict(get_autocmds) *opts, A
       AutoCmd *const ac = &kv_A(*acs, i);
       AutoPat *const ap = ac->pat;
 
-      if (ap == NULL) {
+      if (ap == nullptr) {
         continue;
       }
 
@@ -289,7 +289,7 @@ ArrayOf(DictAs(get_autocmds__ret)) nvim_get_autocmds(Dict(get_autocmds) *opts, A
         PUT_C(autocmd_info, "id", INTEGER_OBJ(ac->id));
       }
 
-      if (ac->desc != NULL) {
+      if (ac->desc != nullptr) {
         PUT_C(autocmd_info, "desc", CSTR_AS_OBJ(ac->desc));
       }
 
@@ -393,8 +393,8 @@ Integer nvim_create_autocmd(uint64_t channel_id, Object event, Dict(create_autoc
   FUNC_API_SINCE(9)
 {
   int64_t autocmd_id = -1;
-  char *desc = NULL;
-  char *handler_cmd = NULL;
+  char *desc = nullptr;
+  char *handler_cmd = nullptr;
   Callback handler_fn = CALLBACK_NONE;
 
   Array event_array = unpack_string_or_array(event, "event", true, arena, err);
@@ -659,7 +659,7 @@ void nvim_del_augroup_by_id(Integer id, Error *err)
   FUNC_API_SINCE(9)
 {
   TRY_WRAP(err, {
-    char *name = id == 0 ? NULL : augroup_name((int)id);
+    char *name = id == 0 ? nullptr : augroup_name((int)id);
     augroup_del(name, false);
   });
 }
@@ -695,7 +695,7 @@ void nvim_exec_autocmds(Object event, Dict(exec_autocmds) *opts, Arena *arena, E
   int au_group = AUGROUP_ALL;
   bool modeline = true;
   buf_T *b = curbuf;
-  Object *data = NULL;
+  Object *data = nullptr;
 
   Array event_array = unpack_string_or_array(event, "event", true, arena, err);
   if (ERROR_SET(err)) {
@@ -713,7 +713,7 @@ void nvim_exec_autocmds(Object event, Dict(exec_autocmds) *opts, Arena *arena, E
     break;
   case kObjectTypeInteger:
     au_group = (int)opts->group.data.integer;
-    char *name = au_group == 0 ? NULL : augroup_name(au_group);
+    char *name = au_group == 0 ? nullptr : augroup_name(au_group);
     VALIDATE_INT(augroup_exists(name), "group", (int64_t)au_group, {
       return;
     });
@@ -760,8 +760,8 @@ void nvim_exec_autocmds(Object event, Dict(exec_autocmds) *opts, Arena *arena, E
     GET_ONE_EVENT(event_nr, event_str, return )
 
     FOREACH_ITEM(patterns, pat, {
-      char *fname = !has_buf ? pat.data.string.data : NULL;
-      did_aucmd |= apply_autocmds_group(event_nr, fname, NULL, true, au_group, b, NULL, data,
+      char *fname = !has_buf ? pat.data.string.data : nullptr;
+      did_aucmd |= apply_autocmds_group(event_nr, fname, nullptr, true, au_group, b, nullptr, data,
                                         has_buf);
     })
   })
@@ -809,7 +809,7 @@ static int get_augroup_from_object(Object group, Error *err)
     return au_group;
   case kObjectTypeInteger:
     au_group = (int)group.data.integer;
-    char *name = au_group == 0 ? NULL : augroup_name(au_group);
+    char *name = au_group == 0 ? nullptr : augroup_name(au_group);
     VALIDATE_INT(augroup_exists(name), "group", (int64_t)au_group, {
       return AUGROUP_ERROR;
     });

@@ -47,10 +47,10 @@ int check_linecomment(const char *line)
   const char *p = line;  // scan from start
   // skip Lispish one-line comments
   if (curbuf->b_p_lisp) {
-    if (vim_strchr(p, ';') != NULL) {   // there may be comments
+    if (vim_strchr(p, ';') != nullptr) {   // there may be comments
       bool in_str = false;       // inside of string
 
-      while ((p = strpbrk(p, "\";")) != NULL) {
+      while ((p = strpbrk(p, "\";")) != nullptr) {
         if (*p == '"') {
           if (in_str) {
             if (*(p - 1) != '\\') {             // skip escaped quote
@@ -69,7 +69,7 @@ int check_linecomment(const char *line)
         p++;
       }
     } else {
-      p = NULL;
+      p = nullptr;
     }
   } else {
     // Scan the line once, skipping over strings, char constants and raw
@@ -89,11 +89,11 @@ int check_linecomment(const char *line)
       }
     }
     if (*p == NUL) {
-      p = NULL;
+      p = nullptr;
     }
   }
 
-  if (p == NULL) {
+  if (p == nullptr) {
     return MAXCOL;
   }
   return (int)(p - line);
@@ -101,7 +101,7 @@ int check_linecomment(const char *line)
 
 // Find the start of a comment, not knowing if we are in a comment right now.
 // Search starts at w_cursor.lnum and goes backwards.
-// Return NULL when not inside a comment.
+// Return nullptr when not inside a comment.
 static pos_T *ind_find_start_comment(void)  // XXX
 {
   return find_start_comment(curbuf->b_ind_maxcomment);
@@ -113,8 +113,8 @@ pos_T *find_start_comment(int ind_maxcomment)  // XXX
   int64_t cur_maxcomment = ind_maxcomment;
 
   while (true) {
-    pos = findmatchlimit(NULL, '*', FM_BACKWARD, cur_maxcomment);
-    if (pos == NULL) {
+    pos = findmatchlimit(nullptr, '*', FM_BACKWARD, cur_maxcomment);
+    if (pos == nullptr) {
       break;
     }
 
@@ -125,7 +125,7 @@ pos_T *find_start_comment(int ind_maxcomment)  // XXX
     }
     cur_maxcomment = curwin->w_cursor.lnum - pos->lnum - 1;
     if (cur_maxcomment <= 0) {
-      pos = NULL;
+      pos = nullptr;
       break;
     }
   }
@@ -137,7 +137,7 @@ pos_T *find_start_comment(int ind_maxcomment)  // XXX
 /// Search starts at w_cursor.lnum and goes backwards.
 /// If is_raw is given and returns start of raw_string, sets it to true.
 ///
-/// @returns NULL when not inside a comment or raw string.
+/// @returns nullptr when not inside a comment or raw string.
 ///
 /// @note "CORS" -> Comment Or Raw String
 static pos_T *ind_find_start_CORS(linenr_T *is_raw)
@@ -146,7 +146,7 @@ static pos_T *ind_find_start_CORS(linenr_T *is_raw)
   static pos_T comment_pos_copy;
 
   pos_T *comment_pos = find_start_comment(curbuf->b_ind_maxcomment);
-  if (comment_pos != NULL) {
+  if (comment_pos != nullptr) {
     // Need to make a copy of the static pos in findmatchlimit(),
     // calling find_start_rawstring() may change it.
     comment_pos_copy = *comment_pos;
@@ -156,8 +156,8 @@ static pos_T *ind_find_start_CORS(linenr_T *is_raw)
 
   // If comment_pos is before rs_pos the raw string is inside the comment.
   // If rs_pos is before comment_pos the comment is inside the raw string.
-  if (comment_pos == NULL || (rs_pos != NULL && lt(*rs_pos, *comment_pos))) {
-    if (is_raw != NULL && rs_pos != NULL) {
+  if (comment_pos == nullptr || (rs_pos != nullptr && lt(*rs_pos, *comment_pos))) {
+    if (is_raw != nullptr && rs_pos != nullptr) {
       *is_raw = rs_pos->lnum;
     }
     return rs_pos;
@@ -167,15 +167,15 @@ static pos_T *ind_find_start_CORS(linenr_T *is_raw)
 
 // Find the start of a raw string, not knowing if we are in one right now.
 // Search starts at w_cursor.lnum and goes backwards.
-// Return NULL when not inside a raw string.
+// Return nullptr when not inside a raw string.
 static pos_T *find_start_rawstring(int ind_maxcomment)  // XXX
 {
   pos_T *pos;
   int cur_maxcomment = ind_maxcomment;
 
   while (true) {
-    pos = findmatchlimit(NULL, 'R', FM_BACKWARD, cur_maxcomment);
-    if (pos == NULL) {
+    pos = findmatchlimit(nullptr, 'R', FM_BACKWARD, cur_maxcomment);
+    if (pos == nullptr) {
       break;
     }
 
@@ -186,7 +186,7 @@ static pos_T *find_start_rawstring(int ind_maxcomment)  // XXX
     }
     cur_maxcomment = curwin->w_cursor.lnum - pos->lnum - 1;
     if (cur_maxcomment <= 0) {
-      pos = NULL;
+      pos = nullptr;
       break;
     }
   }
@@ -232,7 +232,7 @@ static const char *skip_string(const char *p)
       const char *delim = p + 2;
       const char *paren = vim_strchr(delim, '(');
 
-      if (paren != NULL) {
+      if (paren != nullptr) {
         const ptrdiff_t delim_len = paren - delim;
 
         for (p += 3; *p; p++) {
@@ -363,7 +363,7 @@ static pos_T *find_line_comment(void)  // XXX
       break;
     }
   }
-  return NULL;
+  return nullptr;
 }
 
 /// Checks if `text` starts with "key:".
@@ -432,7 +432,7 @@ static bool cin_islabel(void)  // XXX
     return false;
   }
 
-  if (ind_find_start_CORS(NULL)) {
+  if (ind_find_start_CORS(nullptr)) {
     return false;  // Don't accept a label in a comment or a raw string.
   }
   // Only accept a label if the previous line is terminated or is a case
@@ -448,7 +448,7 @@ static bool cin_islabel(void)  // XXX
     // If we're in a comment or raw string now, skip to the start of
     // it.
     curwin->w_cursor.col = 0;
-    if ((trypos = ind_find_start_CORS(NULL)) != NULL) {   // XXX
+    if ((trypos = ind_find_start_CORS(nullptr)) != nullptr) {   // XXX
       curwin->w_cursor = *trypos;
     }
 
@@ -477,7 +477,7 @@ static bool cin_islabel(void)  // XXX
 /// "string0" |*comment*| "string1"
 static const char *cin_skip_comment_and_string(const char *s)
 {
-  const char *r = NULL, *p = s;
+  const char *r = nullptr, *p = s;
   do {
     r = p;
     p = cin_skipcomment(p);
@@ -493,7 +493,7 @@ static const char *cin_skip_comment_and_string(const char *s)
 /// The number of opening braces is arbitrary.
 static bool cin_is_compound_init(const char *s)
 {
-  const char *p = s, *r = NULL;
+  const char *p = s, *r = nullptr;
 
   while (*p) {
     if (*p == '=') {
@@ -698,7 +698,7 @@ static bool cin_is_cpp_namespace(const char *s)
 }
 
 // Return a pointer to the first non-empty non-comment character after a ':'.
-// Return NULL if not found.
+// Return nullptr if not found.
 //        case 234:    a = b;
 //                     ^
 static const char *after_label(const char *l)
@@ -715,11 +715,11 @@ static const char *after_label(const char *l)
     }
   }
   if (*l == NUL) {
-    return NULL;
+    return nullptr;
   }
   l = cin_skipcomment(l + 1);
   if (*l == NUL) {
-    return NULL;
+    return nullptr;
   }
   return l;
 }
@@ -735,13 +735,13 @@ static int get_indent_nolabel(linenr_T lnum)  // XXX
 
   l = ml_get(lnum);
   p = after_label(l);
-  if (p == NULL) {
+  if (p == nullptr) {
     return 0;
   }
 
   fp.col = (colnr_T)(p - l);
   fp.lnum = lnum;
-  getvcol(curwin, &fp, &col, NULL, NULL, 0);
+  getvcol(curwin, &fp, &col, nullptr, nullptr, 0);
   return (int)col;
 }
 
@@ -762,7 +762,7 @@ static int skip_label(linenr_T lnum, const char **pp)
   if (cin_iscase(l, false) || cin_isscopedecl(l) || cin_islabel()) {
     amount = get_indent_nolabel(lnum);
     l = after_label(get_cursor_line_ptr());
-    if (l == NULL) {            // just in case
+    if (l == nullptr) {            // just in case
       l = get_cursor_line_ptr();
     }
   } else {
@@ -816,7 +816,7 @@ static int cin_first_id_amount(void)
   p = skipwhite(p + len);
   fp.lnum = curwin->w_cursor.lnum;
   fp.col = (colnr_T)(p - line);
-  getvcol(curwin, &fp, &col, NULL, NULL, 0);
+  getvcol(curwin, &fp, &col, nullptr, nullptr, 0);
   return (int)col;
 }
 
@@ -843,7 +843,7 @@ static int cin_get_equal_amount(linenr_T lnum)
 
   s = ml_get(lnum);
   line = s;
-  while (*s != NUL && vim_strchr("=;{}\"'", (uint8_t)(*s)) == NULL) {
+  while (*s != NUL && vim_strchr("=;{}\"'", (uint8_t)(*s)) == nullptr) {
     if (cin_iscomment(s)) {     // ignore comments
       s = cin_skipcomment(s);
     } else {
@@ -865,7 +865,7 @@ static int cin_get_equal_amount(linenr_T lnum)
 
   fp.lnum = lnum;
   fp.col = (colnr_T)(s - line);
-  getvcol(curwin, &fp, &col, NULL, NULL, 0);
+  getvcol(curwin, &fp, &col, nullptr, nullptr, 0);
   return (int)col;
 }
 
@@ -987,7 +987,7 @@ static char cin_isterminated(const char *s, int incl_open, int incl_comma)
 /// When a line ends in a comma we continue looking in the next line.
 ///
 /// @param[in]  sp  Points to a string with the line. When looking at other
-///                 lines it must be restored to the line. When it's NULL fetch
+///                 lines it must be restored to the line. When it's nullptr fetch
 ///                 lines here.
 /// @param[in]  first_lnum Where to start looking.
 /// @param[in]  min_lnum The line before which we will not be looking.
@@ -1000,7 +1000,7 @@ static int cin_isfuncdecl(const char **sp, linenr_T first_lnum, linenr_T min_lnu
   pos_T *trypos;
   int just_started = true;
 
-  if (sp == NULL) {
+  if (sp == nullptr) {
     s = ml_get(lnum);
   } else {
     s = *sp;
@@ -1008,7 +1008,7 @@ static int cin_isfuncdecl(const char **sp, linenr_T first_lnum, linenr_T min_lnu
 
   curwin->w_cursor.lnum = lnum;
   if (find_last_paren(s, '(', ')')
-      && (trypos = find_match_paren(curbuf->b_ind_maxparen)) != NULL) {
+      && (trypos = find_match_paren(curbuf->b_ind_maxparen)) != nullptr) {
     lnum = trypos->lnum;
     if (lnum < min_lnum) {
       curwin->w_cursor.lnum = save_lnum;
@@ -1094,7 +1094,7 @@ static int cin_isfuncdecl(const char **sp, linenr_T first_lnum, linenr_T min_lnu
   }
 
 done:
-  if (lnum != first_lnum && sp != NULL) {
+  if (lnum != first_lnum && sp != nullptr) {
     *sp = ml_get(first_lnum);
   }
 
@@ -1141,7 +1141,7 @@ static int cin_iswhileofdo(const char *p, linenr_T lnum)  // XXX
       p++;
       curwin->w_cursor.col++;
     }
-    if ((trypos = findmatchlimit(NULL, 0, FM_SKIPCOMM, curbuf->b_ind_maxparen)) != NULL
+    if ((trypos = findmatchlimit(nullptr, 0, FM_SKIPCOMM, curbuf->b_ind_maxparen)) != nullptr
         && *cin_skipcomment(ml_get_pos(trypos) + 1) == ';') {
       retval = true;
     }
@@ -1222,7 +1222,7 @@ static int cin_iswhileofdo_end(int terminated)
         i = (int)(p - line);
         curwin->w_cursor.col = i;
         trypos = find_match_paren(curbuf->b_ind_maxparen);
-        if (trypos != NULL) {
+        if (trypos != nullptr) {
           s = cin_skipcomment(ml_get(trypos->lnum));
           if (*s == '}') {                      // accept "} while (cond);"
             s = cin_skipcomment(s + 1);
@@ -1421,7 +1421,7 @@ static int get_baseclass_amount(int col)
   if (col == 0) {
     amount = get_indent();
     if (find_last_paren(get_cursor_line_ptr(), '(', ')')
-        && (trypos = find_match_paren(curbuf->b_ind_maxparen)) != NULL) {
+        && (trypos = find_match_paren(curbuf->b_ind_maxparen)) != nullptr) {
       amount = get_indent_lnum(trypos->lnum);       // XXX
     }
     if (!cin_ends_in(get_cursor_line_ptr(), ",")) {
@@ -1429,7 +1429,7 @@ static int get_baseclass_amount(int col)
     }
   } else {
     curwin->w_cursor.col = col;
-    getvcol(curwin, &curwin->w_cursor, &vcol, NULL, NULL, 0);
+    getvcol(curwin, &curwin->w_cursor, &vcol, nullptr, nullptr, 0);
     amount = (int)vcol;
   }
   if (amount < curbuf->b_ind_cpp_baseclass) {
@@ -1531,7 +1531,7 @@ static int cin_skip2pos(pos_T *trypos)
 }
 
 // Find the '{' at the start of the block we are in.
-// Return NULL if no match found.
+// Return nullptr if no match found.
 // Ignore a '{' that is in a comment, makes indenting the next three lines
 // work.
 // foo()
@@ -1546,17 +1546,17 @@ static pos_T *find_start_brace(void)  // XXX
   static pos_T pos_copy;
 
   cursor_save = curwin->w_cursor;
-  while ((trypos = findmatchlimit(NULL, '{', FM_BLOCKSTOP | FM_SKIPCOMM, 0)) != NULL) {
+  while ((trypos = findmatchlimit(nullptr, '{', FM_BLOCKSTOP | FM_SKIPCOMM, 0)) != nullptr) {
     pos_copy = *trypos;         // copy pos_T, next findmatch will change it
     trypos = &pos_copy;
     curwin->w_cursor = *trypos;
-    pos = NULL;
+    pos = nullptr;
     // ignore the { if it's in a // or / *  * / comment
     if ((colnr_T)cin_skip2pos(trypos) == trypos->col
-        && (pos = ind_find_start_CORS(NULL)) == NULL) {   // XXX
+        && (pos = ind_find_start_CORS(nullptr)) == nullptr) {   // XXX
       break;
     }
-    if (pos != NULL) {
+    if (pos != nullptr) {
       curwin->w_cursor = *pos;
     }
   }
@@ -1565,7 +1565,7 @@ static pos_T *find_start_brace(void)  // XXX
 }
 
 /// Find the matching '(', ignoring it if it is in a comment.
-/// @returns NULL or the found match.
+/// @returns nullptr or the found match.
 static pos_T *find_match_paren(int ind_maxparen)
 {
   return find_match_char('(', ind_maxparen);
@@ -1581,7 +1581,7 @@ static pos_T *find_match_char(char c, int ind_maxparen)
   cursor_save = curwin->w_cursor;
   ind_maxp_wk = ind_maxparen;
 retry:
-  if ((trypos = findmatchlimit(NULL, (uint8_t)c, FM_SKIPCOMM, ind_maxp_wk)) != NULL) {
+  if ((trypos = findmatchlimit(nullptr, (uint8_t)c, FM_SKIPCOMM, ind_maxp_wk)) != nullptr) {
     // check if the ( is in a // comment
     if ((colnr_T)cin_skip2pos(trypos) > trypos->col) {
       ind_maxp_wk = ind_maxparen - (cursor_save.lnum - trypos->lnum);
@@ -1590,20 +1590,20 @@ retry:
         curwin->w_cursor.col = 0;  // XXX
         goto retry;
       }
-      trypos = NULL;
+      trypos = nullptr;
     } else {
       pos_T *trypos_wk;
 
       pos_copy = *trypos;           // copy trypos, findmatch will change it
       trypos = &pos_copy;
       curwin->w_cursor = *trypos;
-      if ((trypos_wk = ind_find_start_CORS(NULL)) != NULL) {  // XXX
+      if ((trypos_wk = ind_find_start_CORS(nullptr)) != nullptr) {  // XXX
         ind_maxp_wk = ind_maxparen - (cursor_save.lnum - trypos_wk->lnum);
         if (ind_maxp_wk > 0) {
           curwin->w_cursor = *trypos_wk;
           goto retry;
         }
-        trypos = NULL;
+        trypos = nullptr;
       }
     }
   }
@@ -1613,22 +1613,22 @@ retry:
 
 /// Find the matching '(', ignoring it if it is in a comment or before an
 /// unmatched {.
-/// @returns NULL or the found match.
+/// @returns nullptr or the found match.
 static pos_T *find_match_paren_after_brace(int ind_maxparen)
 {
   pos_T *trypos = find_match_paren(ind_maxparen);
-  if (trypos == NULL) {
-    return NULL;
+  if (trypos == nullptr) {
+    return nullptr;
   }
 
   pos_T *tryposBrace = find_start_brace();
   // If both an unmatched '(' and '{' is found.  Ignore the '('
   // position if the '{' is further down.
-  if (tryposBrace != NULL
+  if (tryposBrace != nullptr
       && (trypos->lnum != tryposBrace->lnum
           ? trypos->lnum < tryposBrace->lnum
           : trypos->col < tryposBrace->col)) {
-    trypos = NULL;
+    trypos = nullptr;
   }
   return trypos;
 }
@@ -1988,7 +1988,7 @@ int get_c_indent(void)
   char *linecopy;
   pos_T *trypos;
   pos_T *comment_pos;
-  pos_T *tryposBrace = NULL;
+  pos_T *tryposBrace = nullptr;
   pos_T tryposCopy;
   pos_T our_paren_pos;
   char *start;
@@ -2064,13 +2064,13 @@ int get_c_indent(void)
   // If we are inside a raw string don't change the indent.
   // Ignore a raw string inside a comment.
   comment_pos = ind_find_start_comment();
-  if (comment_pos != NULL) {
+  if (comment_pos != nullptr) {
     // findmatchlimit() static pos is overwritten, make a copy
     tryposCopy = *comment_pos;
     comment_pos = &tryposCopy;
   }
   trypos = find_start_rawstring(curbuf->b_ind_maxcomment);
-  if (trypos != NULL && (comment_pos == NULL || lt(*trypos, *comment_pos))) {
+  if (trypos != nullptr && (comment_pos == nullptr || lt(*trypos, *comment_pos))) {
     amount = -1;
     goto laterend;
   }
@@ -2098,7 +2098,7 @@ int get_c_indent(void)
     pos_T linecomment_pos;
 
     trypos = find_line_comment();  // XXX
-    if (trypos == NULL && curwin->w_cursor.lnum > 1) {
+    if (trypos == nullptr && curwin->w_cursor.lnum > 1) {
       // There may be a statement before the comment, search from the end
       // of the line for a comment start.
       linecomment_pos.col = check_linecomment(ml_get(curwin->w_cursor.lnum - 1));
@@ -2107,16 +2107,16 @@ int get_c_indent(void)
         trypos->lnum = curwin->w_cursor.lnum - 1;
       }
     }
-    if (trypos != NULL) {
+    if (trypos != nullptr) {
       // find how indented the line beginning the comment is
-      getvcol(curwin, trypos, &col, NULL, NULL, 0);
+      getvcol(curwin, trypos, &col, nullptr, nullptr, 0);
       amount = col;
       goto theend;
     }
   }
   // If we're inside a comment and not looking at the start of the
   // comment, try using the 'comments' option.
-  if (!cin_iscomment(theline) && comment_pos != NULL) {  // XXX
+  if (!cin_iscomment(theline) && comment_pos != nullptr) {  // XXX
     int lead_start_len = 2;
     int lead_middle_len = 1;
     char lead_start[COM_MAX_LEN];             // start-comment string
@@ -2129,7 +2129,7 @@ int get_c_indent(void)
     int done = false;
 
     // find how indented the line beginning the comment is
-    getvcol(curwin, comment_pos, &col, NULL, NULL, 0);
+    getvcol(curwin, comment_pos, &col, nullptr, nullptr, 0);
     amount = col;
     *lead_start = NUL;
     *lead_middle = NUL;
@@ -2242,7 +2242,7 @@ int get_c_indent(void)
             comment_pos->col = (colnr_T)(skipwhite(look) - start);
           }
         }
-        getvcol(curwin, comment_pos, &col, NULL, NULL, 0);
+        getvcol(curwin, comment_pos, &col, nullptr, nullptr, 0);
         amount = col;
         if (curbuf->b_ind_in_comment2 || *look == NUL) {
           amount += curbuf->b_ind_in_comment;
@@ -2253,30 +2253,30 @@ int get_c_indent(void)
   }
   // Are we looking at a ']' that has a match?
   if (*skipwhite(theline) == ']'
-      && (trypos = find_match_char('[', curbuf->b_ind_maxparen)) != NULL) {
+      && (trypos = find_match_char('[', curbuf->b_ind_maxparen)) != nullptr) {
     // align with the line containing the '['.
     amount = get_indent_lnum(trypos->lnum);
     goto theend;
   }
   // Are we inside parentheses or braces?
   // XXX
-  if (((trypos = find_match_paren(curbuf->b_ind_maxparen)) != NULL
+  if (((trypos = find_match_paren(curbuf->b_ind_maxparen)) != nullptr
        && curbuf->b_ind_java == 0)
-      || (tryposBrace = find_start_brace()) != NULL
-      || trypos != NULL) {
-    if (trypos != NULL && tryposBrace != NULL) {
+      || (tryposBrace = find_start_brace()) != nullptr
+      || trypos != nullptr) {
+    if (trypos != nullptr && tryposBrace != nullptr) {
       // Both an unmatched '(' and '{' is found.  Use the one which is
-      // closer to the current cursor position, set the other to NULL.
+      // closer to the current cursor position, set the other to nullptr.
       if (trypos->lnum != tryposBrace->lnum
           ? trypos->lnum < tryposBrace->lnum
           : trypos->col < tryposBrace->col) {
-        trypos = NULL;
+        trypos = nullptr;
       } else {
-        tryposBrace = NULL;
+        tryposBrace = nullptr;
       }
     }
 
-    if (trypos != NULL) {
+    if (trypos != nullptr) {
       our_paren_pos = *trypos;
       // If the matching paren is more than one line away, use the indent of
       // a previous non-empty line that matches the same paren.
@@ -2296,13 +2296,13 @@ int get_c_indent(void)
           curwin->w_cursor.lnum = lnum;
 
           // Skip a comment or raw string. XXX
-          if ((trypos = ind_find_start_CORS(NULL)) != NULL) {
+          if ((trypos = ind_find_start_CORS(nullptr)) != nullptr) {
             lnum = trypos->lnum + 1;
             continue;
           }
 
           // XXX
-          if ((trypos = find_match_paren(corr_ind_maxparen(&cur_curpos))) != NULL
+          if ((trypos = find_match_paren(corr_ind_maxparen(&cur_curpos))) != nullptr
               && trypos->lnum == our_paren_pos.lnum
               && trypos->col == our_paren_pos.col) {
             amount = get_indent_lnum(lnum);             // XXX
@@ -2364,9 +2364,9 @@ int get_c_indent(void)
           line = get_cursor_line_ptr();
           look_col = (int)(look - line);
           curwin->w_cursor.col = look_col + 1;
-          if ((trypos = findmatchlimit(NULL, ')', FM_SKIPCOMM,
+          if ((trypos = findmatchlimit(nullptr, ')', FM_SKIPCOMM,
                                        curbuf->b_ind_maxparen))
-              != NULL
+              != nullptr
               && trypos->lnum == our_paren_pos.lnum
               && trypos->col < our_paren_pos.col) {
             ignore_paren_col = trypos->col + 1;
@@ -2429,7 +2429,7 @@ int get_c_indent(void)
           // Find how indented the paren is, or the character after it
           // if we did the above "if".
           if (our_paren_pos.col > 0) {
-            getvcol(curwin, &our_paren_pos, &col, NULL, NULL, 0);
+            getvcol(curwin, &our_paren_pos, &col, nullptr, nullptr, 0);
             if (cur_amount > (int)col) {
               cur_amount = col;
             }
@@ -2512,7 +2512,7 @@ int get_c_indent(void)
       // a whole and then add the "imaginary indent" to that.
       look = skipwhite(start);
       if (*look == '{') {
-        getvcol(curwin, trypos, &col, NULL, NULL, 0);
+        getvcol(curwin, trypos, &col, nullptr, nullptr, 0);
         amount = col;
         if (*start == '{') {
           start_brace = BRACE_IN_COL0;
@@ -2528,7 +2528,7 @@ int get_c_indent(void)
         // matching it will take us back to the start of the line.
         lnum = ourscope;
         if (find_last_paren(start, '(', ')')
-            && (trypos = find_match_paren(curbuf->b_ind_maxparen)) != NULL) {
+            && (trypos = find_match_paren(curbuf->b_ind_maxparen)) != nullptr) {
           lnum = trypos->lnum;
         }
 
@@ -2671,8 +2671,8 @@ int get_c_indent(void)
 
               // If we're in a comment or raw string now, skip to
               // the start of it.
-              trypos = ind_find_start_CORS(NULL);
-              if (trypos != NULL) {
+              trypos = ind_find_start_CORS(nullptr);
+              if (trypos != nullptr) {
                 curwin->w_cursor.lnum = trypos->lnum + 1;
                 curwin->w_cursor.col = 0;
                 continue;
@@ -2723,16 +2723,16 @@ int get_c_indent(void)
                 // over the rightmost paren, so that matching it
                 // will take us back to the start of the line.
                 // XXX
-                trypos = NULL;
+                trypos = nullptr;
                 if (find_last_paren(l, '(', ')')) {
                   trypos = find_match_paren(curbuf->b_ind_maxparen);
                 }
 
-                if (trypos == NULL && find_last_paren(l, '{', '}')) {
+                if (trypos == nullptr && find_last_paren(l, '{', '}')) {
                   trypos = find_start_brace();
                 }
 
-                if (trypos != NULL) {
+                if (trypos != nullptr) {
                   curwin->w_cursor.lnum = trypos->lnum + 1;
                   curwin->w_cursor.col = 0;
                   continue;
@@ -2780,8 +2780,8 @@ int get_c_indent(void)
 
                 // If we're in a comment or raw string now, skip
                 // to the start of it.
-                trypos = ind_find_start_CORS(NULL);
-                if (trypos != NULL) {
+                trypos = ind_find_start_CORS(nullptr);
+                if (trypos != nullptr) {
                   curwin->w_cursor.lnum = trypos->lnum + 1;
                   curwin->w_cursor.col = 0;
                   continue;
@@ -2815,7 +2815,7 @@ int get_c_indent(void)
           // If we're in a comment or raw string now, skip to the start
           // of it.
           // XXX
-          if ((trypos = ind_find_start_CORS(&raw_string_start)) != NULL) {
+          if ((trypos = ind_find_start_CORS(&raw_string_start)) != nullptr) {
             curwin->w_cursor.lnum = trypos->lnum + 1;
             curwin->w_cursor.col = 0;
             continue;
@@ -2860,7 +2860,7 @@ int get_c_indent(void)
               // Check that this case label is not for another
               // switch()
               // XXX
-              if ((trypos = find_start_brace()) == NULL
+              if ((trypos = find_start_brace()) == nullptr
                   || trypos->lnum == ourscope) {
                 amount = get_indent();                  // XXX
                 break;
@@ -2896,7 +2896,7 @@ int get_c_indent(void)
             if (n) {
               amount = n;
               l = after_label(get_cursor_line_ptr());
-              if (l != NULL && cin_is_cinword(l)) {
+              if (l != nullptr && cin_is_cinword(l)) {
                 if (theline[0] == '{') {
                   amount += curbuf->b_ind_open_extra;
                 } else {
@@ -2925,7 +2925,7 @@ int get_c_indent(void)
           // ignore other lines, skip {}-blocks.
           if (lookfor == LOOKFOR_CASE || lookfor == LOOKFOR_SCOPEDECL) {
             if (find_last_paren(l, '{', '}')
-                && (trypos = find_start_brace()) != NULL) {
+                && (trypos = find_start_brace()) != nullptr) {
               curwin->w_cursor.lnum = trypos->lnum + 1;
               curwin->w_cursor.col = 0;
             }
@@ -2935,7 +2935,7 @@ int get_c_indent(void)
           // Ignore jump labels with nothing after them.
           if (!curbuf->b_ind_js && cin_islabel()) {
             l = after_label(get_cursor_line_ptr());
-            if (l == NULL || cin_nocode(l)) {
+            if (l == nullptr || cin_nocode(l)) {
               continue;
             }
           }
@@ -3014,7 +3014,7 @@ int get_c_indent(void)
             break;
           }
           if (lookfor == LOOKFOR_COMMA) {
-            if (tryposBrace != NULL && tryposBrace->lnum
+            if (tryposBrace != nullptr && tryposBrace->lnum
                 >= curwin->w_cursor.lnum) {
               break;
             }
@@ -3048,24 +3048,24 @@ int get_c_indent(void)
             // Ignore a match before the start of the block.
             (void)find_last_paren(l, '(', ')');
             trypos = find_match_paren(corr_ind_maxparen(&cur_curpos));
-            if (trypos != NULL && (trypos->lnum < tryposBrace->lnum
+            if (trypos != nullptr && (trypos->lnum < tryposBrace->lnum
                                    || (trypos->lnum == tryposBrace->lnum
                                        && trypos->col < tryposBrace->col))) {
-              trypos = NULL;
+              trypos = nullptr;
             }
 
             l = get_cursor_line_ptr();
 
             // If we are looking for ',', we also look for matching
             // braces.
-            if (trypos == NULL && terminated == ',') {
+            if (trypos == nullptr && terminated == ',') {
               if (find_last_paren(l, '{', '}')) {
                 trypos = find_start_brace();
               }
               l = get_cursor_line_ptr();
             }
 
-            if (trypos != NULL) {
+            if (trypos != nullptr) {
               // Check if we are on a case label now.  This is
               // handled above.
               //     case xx:  if ( asdf &&
@@ -3194,7 +3194,7 @@ int get_c_indent(void)
                     (colnr_T)(l - get_cursor_line_ptr()) + 1;
                 }
 
-                if ((trypos = find_start_brace()) == NULL
+                if ((trypos = find_start_brace()) == nullptr
                     || find_match(LOOKFOR_IF, trypos->lnum)
                     == FAIL) {
                   break;
@@ -3280,7 +3280,7 @@ int get_c_indent(void)
                     }
                     lookfor = LOOKFOR_COMMA;
                     trypos = find_match_char('[', curbuf->b_ind_maxparen);
-                    if (trypos != NULL) {
+                    if (trypos != nullptr) {
                       if (trypos->lnum == curwin->w_cursor.lnum - 1) {
                         // Current line is first inside
                         // [], line up with it.
@@ -3403,7 +3403,7 @@ int get_c_indent(void)
 term_again:
               l = get_cursor_line_ptr();
               if (find_last_paren(l, '(', ')')
-                  && (trypos = find_match_paren(curbuf->b_ind_maxparen)) != NULL) {
+                  && (trypos = find_match_paren(curbuf->b_ind_maxparen)) != nullptr) {
                 // Check if we are on a case label now.  This is
                 // handled above.
                 //         case xx:  if ( asdf &&
@@ -3451,7 +3451,7 @@ term_again:
                   && *l != '}'
                   && cin_iselse(l)
                   && whilelevel == 0) {
-                if ((trypos = find_start_brace()) == NULL
+                if ((trypos = find_start_brace()) == nullptr
                     || find_match(LOOKFOR_IF, trypos->lnum)
                     == FAIL) {
                   break;
@@ -3463,7 +3463,7 @@ term_again:
               // that block.
               l = get_cursor_line_ptr();
               if (find_last_paren(l, '{', '}')           // XXX
-                  && (trypos = find_start_brace()) != NULL) {
+                  && (trypos = find_start_brace()) != nullptr) {
                 curwin->w_cursor = *trypos;
                 // if not "else {" check for terminated again
                 // but skip block for "} else {"
@@ -3514,11 +3514,11 @@ term_again:
   // contains { or }: "void f() {\n if (1)"
   if (cur_curpos.lnum < curbuf->b_ml.ml_line_count
       && !cin_nocode(theline)
-      && vim_strchr(theline, '{') == NULL
-      && vim_strchr(theline, '}') == NULL
+      && vim_strchr(theline, '{') == nullptr
+      && vim_strchr(theline, '}') == nullptr
       && !cin_ends_in(theline, ":")
       && !cin_ends_in(theline, ",")
-      && cin_isfuncdecl(NULL, cur_curpos.lnum + 1, cur_curpos.lnum + 1)
+      && cin_isfuncdecl(nullptr, cur_curpos.lnum + 1, cur_curpos.lnum + 1)
       && !cin_isterminated(theline, false, true)) {
     amount = curbuf->b_ind_func_type;
     goto theend;
@@ -3536,7 +3536,7 @@ term_again:
     // If we're in a comment or raw string now, skip to the start
     // of it.
     // XXX
-    if ((trypos = ind_find_start_CORS(NULL)) != NULL) {
+    if ((trypos = ind_find_start_CORS(nullptr)) != nullptr) {
       curwin->w_cursor.lnum = trypos->lnum + 1;
       curwin->w_cursor.col = 0;
       continue;
@@ -3578,7 +3578,7 @@ term_again:
         || (*l != NUL && (n = (uint8_t)l[strlen(l) - 1]) == '\\')) {
       // take us back to opening paren
       if (find_last_paren(l, '(', ')')
-          && (trypos = find_match_paren(curbuf->b_ind_maxparen)) != NULL) {
+          && (trypos = find_match_paren(curbuf->b_ind_maxparen)) != nullptr) {
         curwin->w_cursor = *trypos;
       }
 
@@ -3609,7 +3609,7 @@ term_again:
 
     // If the line looks like a function declaration, and we're
     // not in a comment, put it the left margin.
-    if (cin_isfuncdecl(NULL, cur_curpos.lnum, 0)) {        // XXX
+    if (cin_isfuncdecl(nullptr, cur_curpos.lnum, 0)) {        // XXX
       break;
     }
     l = get_cursor_line_ptr();
@@ -3687,7 +3687,7 @@ term_again:
     // matching it will take us back to the start of the line.
     (void)find_last_paren(l, '(', ')');
 
-    if ((trypos = find_match_paren(curbuf->b_ind_maxparen)) != NULL) {
+    if ((trypos = find_match_paren(curbuf->b_ind_maxparen)) != nullptr) {
       curwin->w_cursor = *trypos;
     }
     amount = get_indent();              // XXX
@@ -3763,7 +3763,7 @@ static int find_match(int lookfor, linenr_T ourscope)
     // if we've gone outside the braces entirely,
     // we must be out of scope...
     theirscope = find_start_brace();        // XXX
-    if (theirscope == NULL) {
+    if (theirscope == nullptr) {
       break;
     }
 
@@ -3951,7 +3951,7 @@ bool in_cinkeys(int keytyped, int when, bool line_is_empty)
         // make up some named keys <o>, <O>, <e>, <0>, <>>, <<>, <*>,
         // <:> and <!> so that people can re-indent on o, O, e, 0, <,
         // >, *, : and ! keys if they really really want to.
-        if (vim_strchr("<>!*oOe0:", (uint8_t)look[1]) != NULL
+        if (vim_strchr("<>!*oOe0:", (uint8_t)look[1]) != nullptr
             && keytyped == look[1]) {
           return true;
         }
@@ -3976,7 +3976,7 @@ bool in_cinkeys(int keytyped, int when, bool line_is_empty)
         icase = false;
       }
       p = vim_strchr(look, ',');
-      if (p == NULL) {
+      if (p == nullptr) {
         p = look + strlen(look);
       }
       if ((try_match || try_match_word)

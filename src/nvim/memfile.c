@@ -75,8 +75,8 @@ static const char e_block_was_not_locked[] = N_("E293: Block was not locked");
 /// Open a new or existing memory block file.
 ///
 /// @param fname  Name of file to use.
-///               - If NULL, it means no file (use memory only).
-///               - If not NULL:
+///               - If nullptr, it means no file (use memory only).
+///               - If not nullptr:
 ///                 * Should correspond to an existing file.
 ///                 * String must have been allocated (it is not copied).
 ///                 * If opening the file fails, it is freed and function fails.
@@ -84,23 +84,23 @@ static const char e_block_was_not_locked[] = N_("E293: Block was not locked");
 /// @param flags  Flags for open() call.
 ///
 /// @return - The open memory file, on success.
-///         - NULL, on failure (e.g. file does not exist).
+///         - nullptr, on failure (e.g. file does not exist).
 memfile_T *mf_open(char *fname, int flags)
 {
   memfile_T *mfp = xmalloc(sizeof(memfile_T));
 
-  if (fname == NULL) {               // no file, use memory only
-    mfp->mf_fname = NULL;
-    mfp->mf_ffname = NULL;
+  if (fname == nullptr) {               // no file, use memory only
+    mfp->mf_fname = nullptr;
+    mfp->mf_ffname = nullptr;
     mfp->mf_fd = -1;
   } else {                           // try to open the file
     if (!mf_do_open(mfp, fname, flags)) {
       xfree(mfp);
-      return NULL;                   // fail if file could not be opened
+      return nullptr;                   // fail if file could not be opened
     }
   }
 
-  mfp->mf_free_first = NULL;         // free list is empty
+  mfp->mf_free_first = nullptr;         // free list is empty
   mfp->mf_dirty = MF_DIRTY_NO;
   mfp->mf_hash = (PMap(int64_t)) MAP_INIT;
   mfp->mf_trans = (Map(int64_t, int64_t)) MAP_INIT;
@@ -146,8 +146,8 @@ memfile_T *mf_open(char *fname, int flags)
 /// Used when updatecount set from 0 to some value.
 ///
 /// @param fname  Name of file to use.
-///               - If NULL, it means no file (use memory only).
-///               - If not NULL:
+///               - If nullptr, it means no file (use memory only).
+///               - If not nullptr:
 ///                 * Should correspond to an existing file.
 ///                 * String must have been allocated (it is not copied).
 ///                 * If opening the file fails, it is freed and function fails.
@@ -169,13 +169,13 @@ int mf_open_file(memfile_T *mfp, char *fname)
 /// @param del_file  Whether to delete associated file.
 void mf_close(memfile_T *mfp, bool del_file)
 {
-  if (mfp == NULL) {                    // safety check
+  if (mfp == nullptr) {                    // safety check
     return;
   }
   if (mfp->mf_fd >= 0 && close(mfp->mf_fd) < 0) {
     emsg(_(e_swapclose));
   }
-  if (del_file && mfp->mf_fname != NULL) {
+  if (del_file && mfp->mf_fname != nullptr) {
     os_remove(mfp->mf_fname);
   }
 
@@ -184,7 +184,7 @@ void mf_close(memfile_T *mfp, bool del_file)
   map_foreach_value(&mfp->mf_hash, hp, {
     mf_free_bhdr(hp);
   })
-  while (mfp->mf_free_first != NULL) {  // free entries in free list
+  while (mfp->mf_free_first != nullptr) {  // free entries in free list
     xfree(mf_rem_free(mfp));
   }
   map_destroy(int64_t, &mfp->mf_hash);
@@ -199,7 +199,7 @@ void mf_close(memfile_T *mfp, bool del_file)
 void mf_close_file(buf_T *buf, bool getlines)
 {
   memfile_T *mfp = buf->b_ml.ml_mfp;
-  if (mfp == NULL || mfp->mf_fd < 0) {   // nothing to close
+  if (mfp == nullptr || mfp->mf_fd < 0) {   // nothing to close
     return;
   }
 
@@ -215,7 +215,7 @@ void mf_close_file(buf_T *buf, bool getlines)
   }
   mfp->mf_fd = -1;
 
-  if (mfp->mf_fname != NULL) {
+  if (mfp->mf_fname != nullptr) {
     os_remove(mfp->mf_fname);    // delete the swap file
     mf_free_fnames(mfp);
   }
@@ -234,14 +234,14 @@ void mf_new_page_size(memfile_T *mfp, unsigned new_size)
 /// @param page_count  Desired number of pages.
 bhdr_T *mf_new(memfile_T *mfp, bool negative, unsigned page_count)
 {
-  bhdr_T *hp = NULL;
+  bhdr_T *hp = nullptr;
 
   // Decide on the number to use:
   // If there is a free block, use its number.
   // Otherwise use mf_block_min for a negative number, mf_block_max for
   // a positive number.
   bhdr_T *freep = mfp->mf_free_first;        // first free block
-  if (!negative && freep != NULL && freep->bh_page_count >= page_count) {
+  if (!negative && freep != nullptr && freep->bh_page_count >= page_count) {
     if (freep->bh_page_count > page_count) {
       // If the block in the free list has more pages, take only the number
       // of pages needed and allocate a new bhdr_T with data.
@@ -282,19 +282,19 @@ bhdr_T *mf_new(memfile_T *mfp, bool negative, unsigned page_count)
 //
 // Caller should first check a negative nr with mf_trans_del().
 //
-// @return  NULL if not found
+// @return  nullptr if not found
 bhdr_T *mf_get(memfile_T *mfp, blocknr_T nr, unsigned page_count)
 {
   // check block number exists
   if (nr >= mfp->mf_blocknr_max || nr <= mfp->mf_blocknr_min) {
-    return NULL;
+    return nullptr;
   }
 
   // see if it is in the cache
   bhdr_T *hp = pmap_get(int64_t)(&mfp->mf_hash, nr);
-  if (hp == NULL) {                             // not in the hash list
+  if (hp == nullptr) {                             // not in the hash list
     if (nr < 0 || nr >= mfp->mf_infile_count) {  // can't be in the file
-      return NULL;
+      return nullptr;
     }
 
     // could check here if the block is in the free list
@@ -302,8 +302,8 @@ bhdr_T *mf_get(memfile_T *mfp, blocknr_T nr, unsigned page_count)
     if (page_count > 0) {
       hp = mf_alloc_bhdr(mfp, page_count);
     }
-    if (hp == NULL) {
-      return NULL;
+    if (hp == nullptr) {
+      return nullptr;
     }
 
     hp->bh_bnum = nr;
@@ -311,10 +311,10 @@ bhdr_T *mf_get(memfile_T *mfp, blocknr_T nr, unsigned page_count)
     hp->bh_page_count = page_count;
     if (mf_read(mfp, hp) == FAIL) {             // cannot read the block
       mf_free_bhdr(hp);
-      return NULL;
+      return nullptr;
     }
   } else {
-    pmap_del(int64_t)(&mfp->mf_hash, hp->bh_bnum, NULL);
+    pmap_del(int64_t)(&mfp->mf_hash, hp->bh_bnum, nullptr);
   }
 
   hp->bh_flags |= BH_LOCKED;
@@ -351,7 +351,7 @@ void mf_put(memfile_T *mfp, bhdr_T *hp, bool dirty, bool infile)
 void mf_free(memfile_T *mfp, bhdr_T *hp)
 {
   xfree(hp->bh_data);           // free data
-  pmap_del(int64_t)(&mfp->mf_hash, hp->bh_bnum, NULL);  // get *hp out of the hash table
+  pmap_del(int64_t)(&mfp->mf_hash, hp->bh_bnum, nullptr);  // get *hp out of the hash table
   if (hp->bh_bnum < 0) {
     xfree(hp);                  // don't want negative numbers in free list
     mfp->mf_neg_count--;
@@ -392,7 +392,7 @@ int mf_sync(memfile_T *mfp, int flags)
   // Then we only try to write blocks within the existing file. If that also
   // fails then we give up.
   int status = OK;
-  bhdr_T *hp = NULL;
+  bhdr_T *hp = nullptr;
   // note, "last" block is typically earlier in the hash list
   map_foreach_value(&mfp->mf_hash, hp, {
     if (((flags & MFS_ALL) || hp->bh_bnum >= 0)
@@ -423,7 +423,7 @@ int mf_sync(memfile_T *mfp, int flags)
 
   // If the whole list is flushed, the memfile is not dirty anymore.
   // In case of an error, dirty flag is also set, to avoid trying all the time.
-  if (hp == NULL || status == FAIL) {
+  if (hp == nullptr || status == FAIL) {
     mfp->mf_dirty = MF_DIRTY_NO;
   }
 
@@ -461,7 +461,7 @@ bool mf_release_all(void)
   bool retval = false;
   FOR_ALL_BUFFERS(buf) {
     memfile_T *mfp = buf->b_ml.ml_mfp;
-    if (mfp != NULL) {
+    if (mfp != nullptr) {
       // If no swap file yet, try to open one.
       if (mfp->mf_fd < 0 && buf->b_may_swap) {
         ml_open_file(buf);
@@ -474,7 +474,7 @@ bool mf_release_all(void)
           if (!(hp->bh_flags & BH_LOCKED)
               && (!(hp->bh_flags & BH_DIRTY)
                   || mf_write(mfp, hp) != FAIL)) {
-            pmap_del(int64_t)(&mfp->mf_hash, hp->bh_bnum, NULL);
+            pmap_del(int64_t)(&mfp->mf_hash, hp->bh_bnum, nullptr);
             mf_free_bhdr(hp);
             retval = true;
             // Rerun with the same value of i. another item will have taken
@@ -514,7 +514,7 @@ static void mf_ins_free(memfile_T *mfp, bhdr_T *hp)
 
 /// Remove the first block in the free list and return it.
 ///
-/// Caller must check that mfp->mf_free_first is not NULL.
+/// Caller must check that mfp->mf_free_first is not nullptr.
 static bhdr_T *mf_rem_free(memfile_T *mfp)
 {
   bhdr_T *hp = mfp->mf_free_first;
@@ -586,14 +586,14 @@ static int mf_write(memfile_T *mfp, bhdr_T *hp)
     blocknr_T nr = hp->bh_bnum;  // block nr which is being written
     if (nr > mfp->mf_infile_count) {            // beyond end of file
       nr = mfp->mf_infile_count;
-      hp2 = pmap_get(int64_t)(&mfp->mf_hash, nr);  // NULL caught below
+      hp2 = pmap_get(int64_t)(&mfp->mf_hash, nr);  // nullptr caught below
     } else {
       hp2 = hp;
     }
 
     // TODO(elmart): Check (page_size * nr) within off_T bounds.
     off_T offset = (off_T)(page_size * nr);  // offset in the file
-    if (hp2 == NULL) {              // freed block, fill with dummy data
+    if (hp2 == nullptr) {              // freed block, fill with dummy data
       page_count = 1;
     } else {
       page_count = hp2->bh_page_count;
@@ -606,7 +606,7 @@ static int mf_write(memfile_T *mfp, bhdr_T *hp)
           PERROR(_("E296: Seek error in swap file write"));
           return FAIL;
         }
-        void *data = (hp2 == NULL) ? hp->bh_data : hp2->bh_data;
+        void *data = (hp2 == nullptr) ? hp->bh_data : hp2->bh_data;
         if ((unsigned)write_eintr(mfp->mf_fd, data, size) == size) {
           break;
         }
@@ -636,7 +636,7 @@ static int mf_write(memfile_T *mfp, bhdr_T *hp)
     }
 
     did_swapwrite_msg = false;
-    if (hp2 != NULL) {                             // written a non-dummy block
+    if (hp2 != nullptr) {                             // written a non-dummy block
       hp2->bh_flags &= ~BH_DIRTY;
     }
     if (nr + (blocknr_T)page_count > mfp->mf_infile_count) {  // appended to file
@@ -665,7 +665,7 @@ static int mf_trans_add(memfile_T *mfp, bhdr_T *hp)
   blocknr_T new_bnum;
   bhdr_T *freep = mfp->mf_free_first;
   unsigned page_count = hp->bh_page_count;
-  if (freep != NULL && freep->bh_page_count >= page_count) {
+  if (freep != nullptr && freep->bh_page_count >= page_count) {
     new_bnum = freep->bh_bnum;
     // If the page count of the free block was larger, reduce it.
     // If the page count matches, remove the block from the free list.
@@ -682,7 +682,7 @@ static int mf_trans_add(memfile_T *mfp, bhdr_T *hp)
   }
 
   blocknr_T old_bnum = hp->bh_bnum;            // adjust number
-  pmap_del(int64_t)(&mfp->mf_hash, hp->bh_bnum, NULL);
+  pmap_del(int64_t)(&mfp->mf_hash, hp->bh_bnum, nullptr);
   hp->bh_bnum = new_bnum;
   pmap_put(int64_t)(&mfp->mf_hash, new_bnum, hp);
 
@@ -698,8 +698,8 @@ static int mf_trans_add(memfile_T *mfp, bhdr_T *hp)
 ///          The old number           When not found.
 blocknr_T mf_trans_del(memfile_T *mfp, blocknr_T old_nr)
 {
-  blocknr_T *num = map_ref(int64_t, int64_t)(&mfp->mf_trans, old_nr, NULL);
-  if (num == NULL) {  // not found
+  blocknr_T *num = map_ref(int64_t, int64_t)(&mfp->mf_trans, old_nr, nullptr);
+  if (num == nullptr) {  // not found
     return old_nr;
   }
 
@@ -707,7 +707,7 @@ blocknr_T mf_trans_del(memfile_T *mfp, blocknr_T old_nr)
   blocknr_T new_bnum = *num;
 
   // remove entry from the trans list
-  map_del(int64_t, int64_t)(&mfp->mf_trans, old_nr, NULL);
+  map_del(int64_t, int64_t)(&mfp->mf_trans, old_nr, nullptr);
 
   return new_bnum;
 }
@@ -735,19 +735,19 @@ void mf_set_fnames(memfile_T *mfp, char *fname)
 /// Used before doing a :cd
 void mf_fullname(memfile_T *mfp)
 {
-  if (mfp == NULL || mfp->mf_fname == NULL || mfp->mf_ffname == NULL) {
+  if (mfp == nullptr || mfp->mf_fname == nullptr || mfp->mf_ffname == nullptr) {
     return;
   }
 
   xfree(mfp->mf_fname);
   mfp->mf_fname = mfp->mf_ffname;
-  mfp->mf_ffname = NULL;
+  mfp->mf_ffname = nullptr;
 }
 
 /// Return true if there are any translations pending for memfile.
 bool mf_need_trans(memfile_T *mfp)
 {
-  return mfp->mf_fname != NULL && mfp->mf_neg_count > 0;
+  return mfp->mf_fname != nullptr && mfp->mf_neg_count > 0;
 }
 
 /// Open memfile's swapfile.
@@ -760,7 +760,7 @@ static bool mf_do_open(memfile_T *mfp, char *fname, int flags)
 {
   // fname cannot be NameBuff, because it must have been allocated.
   mf_set_fnames(mfp, fname);
-  assert(mfp->mf_fname != NULL);
+  assert(mfp->mf_fname != nullptr);
 
   /// Extra security check: When creating a swap file it really shouldn't
   /// exist yet. If there is a symbolic link, this is most likely an attack.

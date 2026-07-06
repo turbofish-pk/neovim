@@ -106,7 +106,7 @@ static void do_outofmem_msg(size_t size)
 ///
 /// @see {try_to_free_memory}
 /// @param size
-/// @return pointer to allocated space. NULL if out of memory
+/// @return pointer to allocated space. nullptr if out of memory
 void *try_malloc(size_t size) FUNC_ATTR_MALLOC FUNC_ATTR_ALLOC_SIZE(1)
 {
   size_t allocated_size = size ? size : 1;
@@ -119,11 +119,11 @@ void *try_malloc(size_t size) FUNC_ATTR_MALLOC FUNC_ATTR_ALLOC_SIZE(1)
 }
 
 /// try_malloc() wrapper that shows an out-of-memory error message to the user
-/// before returning NULL
+/// before returning nullptr
 ///
 /// @see {try_malloc}
 /// @param size
-/// @return pointer to allocated space. NULL if out of memory
+/// @return pointer to allocated space. nullptr if out of memory
 void *verbose_try_malloc(size_t size) FUNC_ATTR_MALLOC FUNC_ATTR_ALLOC_SIZE(1)
 {
   void *ret = try_malloc(size);
@@ -133,14 +133,14 @@ void *verbose_try_malloc(size_t size) FUNC_ATTR_MALLOC FUNC_ATTR_ALLOC_SIZE(1)
   return ret;
 }
 
-/// malloc() wrapper that never returns NULL
+/// malloc() wrapper that never returns nullptr
 ///
 /// xmalloc() succeeds or gracefully aborts when out of memory.
 /// Before aborting try to free some memory and call malloc again.
 ///
 /// @see {try_to_free_memory}
 /// @param size
-/// @return pointer to allocated space. Never NULL
+/// @return pointer to allocated space. Never nullptr
 void *xmalloc(size_t size)
   FUNC_ATTR_MALLOC FUNC_ATTR_ALLOC_SIZE(1) FUNC_ATTR_NONNULL_RET
 {
@@ -164,7 +164,7 @@ void xfree(void *ptr)
 /// @see {xmalloc}
 /// @param count
 /// @param size
-/// @return pointer to allocated space. Never NULL
+/// @return pointer to allocated space. Never nullptr
 void *xcalloc(size_t count, size_t size)
   FUNC_ATTR_MALLOC FUNC_ATTR_ALLOC_SIZE_PROD(1, 2) FUNC_ATTR_NONNULL_RET
 {
@@ -185,7 +185,7 @@ void *xcalloc(size_t count, size_t size)
 ///
 /// @see {xmalloc}
 /// @param size
-/// @return pointer to reallocated space. Never NULL
+/// @return pointer to reallocated space. Never nullptr
 void *xrealloc(void *ptr, size_t size)
   FUNC_ATTR_WARN_UNUSED_RESULT FUNC_ATTR_ALLOC_SIZE(2) FUNC_ATTR_NONNULL_RET
 {
@@ -207,7 +207,7 @@ void *xrealloc(void *ptr, size_t size)
 ///
 /// @see {xmalloc}
 /// @param size
-/// @return pointer to allocated space. Never NULL
+/// @return pointer to allocated space. Never nullptr
 void *xmallocz(size_t size)
   FUNC_ATTR_MALLOC FUNC_ATTR_NONNULL_RET FUNC_ATTR_WARN_UNUSED_RESULT
 {
@@ -256,7 +256,7 @@ size_t xstrnlen(const char *s, size_t n)
   FUNC_ATTR_NONNULL_ALL FUNC_ATTR_PURE
 {
   const char *end = memchr(s, NUL, n);
-  if (end == NULL) {
+  if (end == nullptr) {
     return n;
   }
   return (size_t)(end - s);
@@ -355,7 +355,7 @@ size_t memcnt(const void *data, char c, size_t len)
   size_t cnt = 0;
   const char *ptr = data;
   const char *end = ptr + len;
-  while ((ptr = memchr(ptr, c, (size_t)(end - ptr))) != NULL) {
+  while ((ptr = memchr(ptr, c, (size_t)(end - ptr))) != nullptr) {
     cnt++;
     ptr++;  // Skip the instance of c.
   }
@@ -486,11 +486,11 @@ char *xstrdup(const char *str)
 
 /// strdup() wrapper
 ///
-/// Unlike xstrdup() allocates a new empty string if it receives NULL.
+/// Unlike xstrdup() allocates a new empty string if it receives nullptr.
 char *xstrdupnul(const char *const str)
   FUNC_ATTR_MALLOC FUNC_ATTR_WARN_UNUSED_RESULT FUNC_ATTR_NONNULL_RET
 {
-  if (str == NULL) {
+  if (str == nullptr) {
     return xmallocz(0);
   }
   return xstrdup(str);
@@ -503,7 +503,7 @@ char *xstrdupnul(const char *const str)
 /// @param src The source memory object.
 /// @param c   The byte to search for.
 /// @param len The length of the memory object.
-/// @returns a pointer to the found byte in src[len], or NULL.
+/// @returns a pointer to the found byte in src[len], or nullptr.
 void *xmemrchr(const void *src, uint8_t c, size_t len)
   FUNC_ATTR_NONNULL_ALL FUNC_ATTR_PURE
 {
@@ -512,7 +512,7 @@ void *xmemrchr(const void *src, uint8_t c, size_t len)
       return (uint8_t *)src + len;
     }
   }
-  return NULL;
+  return nullptr;
 }
 
 /// strndup() wrapper
@@ -541,18 +541,18 @@ void *xmemdup(const void *data, size_t len)
   return memcpy(xmalloc(len), data, len);
 }
 
-/// Returns true if strings `a` and `b` are equal. Arguments may be NULL.
+/// Returns true if strings `a` and `b` are equal. Arguments may be nullptr.
 bool strequal(const char *a, const char *b)
   FUNC_ATTR_PURE FUNC_ATTR_WARN_UNUSED_RESULT
 {
-  return (a == NULL && b == NULL) || (a && b && strcmp(a, b) == 0);
+  return (a == nullptr && b == nullptr) || (a && b && strcmp(a, b) == 0);
 }
 
-/// Returns true if first `n` characters of strings `a` and `b` are equal. Arguments may be NULL.
+/// Returns true if first `n` characters of strings `a` and `b` are equal. Arguments may be nullptr.
 bool strnequal(const char *a, const char *b, size_t n)
   FUNC_ATTR_PURE FUNC_ATTR_WARN_UNUSED_RESULT
 {
-  return (a == NULL && b == NULL) || (a && b && strncmp(a, b, n) == 0);
+  return (a == nullptr && b == nullptr) || (a && b && strncmp(a, b, n) == 0);
 }
 
 /// Writes time_t to "buf[8]".
@@ -587,8 +587,8 @@ void *mergesort_list(void *head, MergeSortGetFunc get_next, MergeSortSetFunc set
   }
 
   for (int size = 1; size < n; size *= 2) {
-    void *new_head = NULL;
-    void *tail = NULL;
+    void *new_head = nullptr;
+    void *tail = nullptr;
     curr = head;
 
     while (curr) {
@@ -605,28 +605,28 @@ void *mergesort_list(void *head, MergeSortGetFunc get_next, MergeSortSetFunc set
       }
 
       // Break links
-      void *l_end = right ? get_prev(right) : NULL;
+      void *l_end = right ? get_prev(right) : nullptr;
       if (l_end) {
-        set_next(l_end, NULL);
+        set_next(l_end, nullptr);
       }
       if (right) {
-        set_prev(right, NULL);
+        set_prev(right, nullptr);
       }
 
-      void *r_end = next ? get_prev(next) : NULL;
+      void *r_end = next ? get_prev(next) : nullptr;
       if (r_end) {
-        set_next(r_end, NULL);
+        set_next(r_end, nullptr);
       }
       if (next) {
-        set_prev(next, NULL);
+        set_prev(next, nullptr);
       }
 
       // Merge
-      void *merged = NULL;
-      void *merged_tail = NULL;
+      void *merged = nullptr;
+      void *merged_tail = nullptr;
 
       while (left || right) {
-        void *chosen = NULL;
+        void *chosen = nullptr;
         if (!left) {
           chosen = right;
           right = get_next(right);
@@ -647,7 +647,7 @@ void *mergesort_list(void *head, MergeSortGetFunc get_next, MergeSortSetFunc set
           merged_tail = chosen;
         } else {
           merged = merged_tail = chosen;
-          set_prev(chosen, NULL);
+          set_prev(chosen, nullptr);
         }
       }
 
@@ -735,7 +735,7 @@ static size_t arena_align_offset(uint64_t off)
 #undef ARENA_ALIGN
 }
 
-/// @param arena if NULL, do a global allocation. caller must then free the value!
+/// @param arena if nullptr, do a global allocation. caller must then free the value!
 /// @param size if zero, will still return a non-null pointer, but not a usable or unique one
 void *arena_alloc(Arena *arena, size_t size, bool align)
 {
@@ -792,7 +792,7 @@ void arena_mem_free(ArenaMem mem)
   struct consumed_blk *b = mem;
   // peel of the first block, as it is guaranteed to be ARENA_BLOCK_SIZE,
   // not a custom fix_blk
-  if (b != NULL) {
+  if (b != nullptr) {
     struct consumed_blk *reuse_blk = b;
     b = b->prev;
     free_block(reuse_blk);
@@ -870,7 +870,7 @@ void free_all_mem(void)
 
   // Close all tabs and windows.  Reset 'equalalways' to avoid redraws.
   p_ea = false;
-  if (first_tabpage != NULL && first_tabpage->tp_next != NULL) {
+  if (first_tabpage != nullptr && first_tabpage->tp_next != nullptr) {
     do_cmdline_cmd("tabonly!");
   }
 
@@ -878,9 +878,9 @@ void free_all_mem(void)
   spell_free_all();
 
   // Clear user commands (before deleting buffers).
-  ex_comclear(NULL);
+  ex_comclear(nullptr);
 
-  if (curbuf != NULL) {
+  if (curbuf != nullptr) {
     // Clear menus.
     do_cmdline_cmd("aunmenu *");
     do_cmdline_cmd("tlunmenu *");
@@ -913,8 +913,8 @@ void free_all_mem(void)
   free_tag_stuff();
   free_cd_dir();
   free_signs();
-  set_expr_line(NULL);
-  if (curtab != NULL) {
+  set_expr_line(nullptr);
+  if (curtab != nullptr) {
     diff_clear(curtab);
   }
   clear_sb_text(true);            // free any scrollback text
@@ -922,7 +922,7 @@ void free_all_mem(void)
   // Free some global vars.
   xfree(last_cmdline);
   xfree(new_last_cmdline);
-  set_keep_msg(NULL, 0);
+  set_keep_msg(nullptr, 0);
 
   // Clear cmdline history.
   p_hi = 0;
@@ -933,7 +933,7 @@ void free_all_mem(void)
   // Close all script inputs.
   close_all_scripts();
 
-  if (curwin != NULL) {
+  if (curwin != nullptr) {
     // Destroy all windows.  Must come before freeing buffers.
     win_free_all();
   }
@@ -946,7 +946,7 @@ void free_all_mem(void)
   // Must be after eval_clear to avoid it trying to access b:changedtick after
   // freeing it.
   p_acd = false;
-  for (buf = firstbuf; buf != NULL;) {
+  for (buf = firstbuf; buf != nullptr;) {
     bufref_T bufref;
     set_bufref(&bufref, buf);
     nextbuf = buf->b_next;
@@ -957,7 +957,7 @@ void free_all_mem(void)
     // callbacks are called, so free them before closing the buffer.
     buf_free_callbacks(buf);
 
-    close_buffer(NULL, buf, DOBUF_WIPE, false, false, false);
+    close_buffer(nullptr, buf, DOBUF_WIPE, false, false, false);
     // Didn't work, try next one.
     buf = bufref_valid(&bufref) ? nextbuf : firstbuf;
   }
@@ -972,9 +972,9 @@ void free_all_mem(void)
 
   reset_last_sourcing();
 
-  if (first_tabpage != NULL) {
+  if (first_tabpage != nullptr) {
     free_tabpage(first_tabpage);
-    first_tabpage = NULL;
+    first_tabpage = nullptr;
   }
 
   // message history

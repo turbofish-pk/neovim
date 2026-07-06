@@ -67,7 +67,7 @@ static inline uint32_t hash_path_t(const char *p)
   }
 #endif
 #ifdef CASE_INSENSITIVE_FILENAME
-  char *folded = str_foldcase((char *)p, (int)strlen(p), NULL, 0);
+  char *folded = str_foldcase((char *)p, (int)strlen(p), nullptr, 0);
   uint32_t h = hash_cstr_t(folded);
   xfree(folded);
   return h;
@@ -81,7 +81,7 @@ static inline bool equal_path_t(const char *a, const char *b)
   if (a == b) {
     return true;
   }
-  if (a == NULL || b == NULL) {
+  if (a == nullptr || b == nullptr) {
     return false;
   }
 #ifdef BACKSLASH_IN_FILENAME
@@ -132,7 +132,7 @@ static inline bool equal_ColorKey(ColorKey ae1, ColorKey ae2)
 #define roundup32(x) (--(x), (x) |= (x)>>1, (x) |= (x)>>2, (x) |= (x)>>4, (x) |= (x)>>8, \
                       (x) |= (x)>>16, ++(x))
 
-// h->hash must either be NULL or an already valid pointer
+// h->hash must either be nullptr or an already valid pointer
 void mh_realloc(MapHash *h, uint32_t n_min_buckets)
 {
   xfree(h->hash);
@@ -247,7 +247,7 @@ void mh_clear(MapHash *h)
 ///
 void pmap_del2(PMap(cstr_t) *map, const char *key)
 {
-  cstr_t key_alloc = NULL;
+  cstr_t key_alloc = nullptr;
   ptr_t val = pmap_del(cstr_t)(map, key, &key_alloc);
   xfree((void *)key_alloc);
   xfree(val);

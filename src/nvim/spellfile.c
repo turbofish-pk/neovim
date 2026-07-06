@@ -348,7 +348,7 @@ static const char *msg_compressing = N_("Compressing word tree...");
                                 // and .dic file.
 // Main structure to store the contents of a ".aff" file.
 typedef struct {
-  char *af_enc;                 // "SET", normalized, alloc'ed string or NULL
+  char *af_enc;                 // "SET", normalized, alloc'ed string or nullptr
   int af_flagtype;              // AFT_CHAR, AFT_LONG, AFT_NUM or AFT_CAPLONG
   unsigned af_rare;             // RARE ID for rare word
   unsigned af_keepcase;         // KEEPCASE ID for keep-case word
@@ -377,11 +377,11 @@ typedef struct affentry_S affentry_T;
 // Affix entry from ".aff" file.  Used for prefixes and suffixes.
 struct affentry_S {
   affentry_T *ae_next;          // next affix with same name/number
-  char *ae_chop;                // text to chop off basic word (can be NULL)
-  char *ae_add;                 // text to add to basic word (can be NULL)
-  char *ae_flags;               // flags on the affix (can be NULL)
-  char *ae_cond;                // condition (NULL for ".")
-  regprog_T *ae_prog;           // regexp program for ae_cond or NULL
+  char *ae_chop;                // text to chop off basic word (can be nullptr)
+  char *ae_add;                 // text to add to basic word (can be nullptr)
+  char *ae_flags;               // flags on the affix (can be nullptr)
+  char *ae_cond;                // condition (nullptr for ".")
+  regprog_T *ae_prog;           // regexp program for ae_cond or nullptr
   char ae_compforbid;           // COMPOUNDFORBIDFLAG found
   char ae_comppermit;           // COMPOUNDPERMITFLAG found
 };
@@ -495,7 +495,7 @@ typedef struct {
   int si_memtot;                // runtime memory used
   int si_verbose;               // verbose messages
   int si_msg_count;             // number of words added since last message
-  char *si_info;                // info text chars or NULL
+  char *si_info;                // info text chars or nullptr
   int si_region_count;          // number of regions supported (1 when there
                                 // are no regions)
   char si_region_name[MAXREGIONS * 2 + 1];
@@ -516,7 +516,7 @@ typedef struct {
   time_t si_sugtime;            // timestamp for .sug file
   int si_rem_accents;           // soundsalike: remove accents
   garray_T si_map;              // MAP info concatenated
-  char *si_midword;             // MIDWORD chars or NULL
+  char *si_midword;             // MIDWORD chars or nullptr
   int si_compmax;               // max nr of words for compounding
   int si_compminlen;            // minimal length for compounding
   int si_compsylmax;            // max nr of syllables for compounding
@@ -596,25 +596,25 @@ static inline int spell_check_magic_string(FILE *const fd)
 ///
 /// This is invoked in three ways:
 /// - From spell_load_cb() to load a spell file for the first time.  "lang" is
-///   the language name, "old_lp" is NULL.  Will allocate an slang_T.
-/// - To reload a spell file that was changed.  "lang" is NULL and "old_lp"
+///   the language name, "old_lp" is nullptr.  Will allocate an slang_T.
+/// - To reload a spell file that was changed.  "lang" is nullptr and "old_lp"
 ///   points to the existing slang_T.
 /// - Just after writing a .spl file; it's read back to produce the .sug file.
-///   "old_lp" is NULL and "lang" is NULL.  Will allocate an slang_T.
+///   "old_lp" is nullptr and "lang" is nullptr.  Will allocate an slang_T.
 ///
 /// @param silent  no error if file doesn't exist
 ///
-/// @return  the slang_T the spell file was loaded into.  NULL for error.
+/// @return  the slang_T the spell file was loaded into.  nullptr for error.
 slang_T *spell_load_file(char *fname, char *lang, slang_T *old_lp, bool silent)
 {
   char *p;
-  slang_T *lp = NULL;
+  slang_T *lp = nullptr;
   int res;
   bool did_estack_push = false;
   ESTACK_CHECK_DECLARATION;
 
   FILE *fd = os_fopen(fname, "r");
-  if (fd == NULL) {
+  if (fd == nullptr) {
     if (!silent) {
       semsg(_(e_notopen), fname);
     } else if (p_verbose > 2) {
@@ -630,14 +630,14 @@ slang_T *spell_load_file(char *fname, char *lang, slang_T *old_lp, bool silent)
     verbose_leave();
   }
 
-  if (old_lp == NULL) {
+  if (old_lp == nullptr) {
     lp = slang_alloc(lang);
 
     // Remember the file name, used to reload the file when it's updated.
     lp->sl_fname = xstrdup(fname);
 
     // Check for .add.spl.
-    lp->sl_add = strstr(path_tail(fname), SPL_FNAME_ADD) != NULL;
+    lp->sl_add = strstr(path_tail(fname), SPL_FNAME_ADD) != nullptr;
   } else {
     lp = old_lp;
   }
@@ -688,7 +688,7 @@ slang_T *spell_load_file(char *fname, char *lang, slang_T *old_lp, bool silent)
     case SN_INFO:
       XFREE_CLEAR(lp->sl_info);
       lp->sl_info = read_string(fd, (size_t)len);  // <infotext>
-      if (lp->sl_info == NULL) {
+      if (lp->sl_info == nullptr) {
         goto endFAIL;
       }
       break;
@@ -704,7 +704,7 @@ slang_T *spell_load_file(char *fname, char *lang, slang_T *old_lp, bool silent)
     case SN_MIDWORD:
       XFREE_CLEAR(lp->sl_midword);
       lp->sl_midword = read_string(fd, (size_t)len);  // <midword>
-      if (lp->sl_midword == NULL) {
+      if (lp->sl_midword == nullptr) {
         goto endFAIL;
       }
       break;
@@ -731,7 +731,7 @@ slang_T *spell_load_file(char *fname, char *lang, slang_T *old_lp, bool silent)
 
     case SN_MAP:
       p = read_string(fd, (size_t)len);  // <mapstr>
-      if (p == NULL) {
+      if (p == nullptr) {
         goto endFAIL;
       }
       set_map_str(lp, p);
@@ -765,7 +765,7 @@ slang_T *spell_load_file(char *fname, char *lang, slang_T *old_lp, bool silent)
     case SN_SYLLABLE:
       XFREE_CLEAR(lp->sl_syllable);
       lp->sl_syllable = read_string(fd, (size_t)len);  // <syllable>
-      if (lp->sl_syllable == NULL) {
+      if (lp->sl_syllable == nullptr) {
         goto endFAIL;
       }
       if (init_syl_tab(lp) != OK) {
@@ -810,20 +810,20 @@ truncerr:
   }
 
   // <KWORDTREE>
-  res = spell_read_tree(fd, &lp->sl_kbyts, NULL, &lp->sl_kidxs, false, 0);
+  res = spell_read_tree(fd, &lp->sl_kbyts, nullptr, &lp->sl_kidxs, false, 0);
   if (res != 0) {
     goto someerror;
   }
 
   // <PREFIXTREE>
-  res = spell_read_tree(fd, &lp->sl_pbyts, NULL, &lp->sl_pidxs, true,
+  res = spell_read_tree(fd, &lp->sl_pbyts, nullptr, &lp->sl_pidxs, true,
                         lp->sl_prefixcnt);
   if (res != 0) {
     goto someerror;
   }
 
   // For a new file link it in the list of spell files.
-  if (old_lp == NULL && lang != NULL) {
+  if (old_lp == nullptr && lang != nullptr) {
     lp->sl_next = first_lang;
     first_lang = lp;
   }
@@ -831,17 +831,17 @@ truncerr:
   goto endOK;
 
 endFAIL:
-  if (lang != NULL) {
+  if (lang != nullptr) {
     // truncating the name signals the error to spell_load_lang()
     *lang = NUL;
   }
-  if (lp != NULL && old_lp == NULL) {
+  if (lp != nullptr && old_lp == nullptr) {
     slang_free(lp);
   }
-  lp = NULL;
+  lp = nullptr;
 
 endOK:
-  if (fd != NULL) {
+  if (fd != nullptr) {
     fclose(fd);
   }
   if (did_estack_push) {
@@ -918,12 +918,12 @@ void suggest_load_files(void)
       slang->sl_sugloaded = true;
 
       char *dotp = strrchr(slang->sl_fname, '.');
-      if (dotp == NULL || path_fnamecmp(dotp, ".spl") != 0) {
+      if (dotp == nullptr || path_fnamecmp(dotp, ".spl") != 0) {
         continue;
       }
       STRCPY(dotp, ".sug");
       FILE *fd = os_fopen(slang->sl_fname, "r");
-      if (fd == NULL) {
+      if (fd == nullptr) {
         goto nextone;
       }
 
@@ -1008,7 +1008,7 @@ someerror:
       tree_count_words(slang->sl_sbyts, slang->sl_sbyts_len, slang->sl_sidxs);
 
 nextone:
-      if (fd != NULL) {
+      if (fd != nullptr) {
         fclose(fd);
       }
       STRCPY(dotp, ".spl");
@@ -1018,7 +1018,7 @@ nextone:
 
 // Read a length field from "fd" in "cnt_bytes" bytes.
 // Allocate memory, read the string into it and add a NUL at the end.
-// Returns NULL when the count is zero.
+// Returns nullptr when the count is zero.
 // Sets "*cntp" to SP_*ERROR when there is an error, length of the result
 // otherwise.
 static char *read_cnt_string(FILE *fd, int cnt_bytes, int *cntp)
@@ -1031,16 +1031,16 @@ static char *read_cnt_string(FILE *fd, int cnt_bytes, int *cntp)
 
     if (c == EOF) {
       *cntp = SP_TRUNCERROR;
-      return NULL;
+      return nullptr;
     }
     cnt = (int)(((unsigned)cnt << 8) + (unsigned)c);
   }
   *cntp = cnt;
   if (cnt == 0) {
-    return NULL;            // nothing to read, return NULL
+    return nullptr;            // nothing to read, return nullptr
   }
   char *str = read_string(fd, (size_t)cnt);
-  if (str == NULL) {
+  if (str == nullptr) {
     *cntp = SP_OTHERERROR;
   }
   return str;
@@ -1079,7 +1079,7 @@ static int read_charflags_section(FILE *fd)
   }
 
   // Set the word-char flags and fill SPELL_ISUPPER() table.
-  if (flags != NULL && fol != NULL) {
+  if (flags != nullptr && fol != nullptr) {
     set_spell_charflags(flags, flagslen, fol);
   }
 
@@ -1087,7 +1087,7 @@ static int read_charflags_section(FILE *fd)
   xfree(fol);
 
   // When <charflagslen> is zero then <fcharlen> must also be zero.
-  if ((flags == NULL) != (fol == NULL)) {
+  if ((flags == nullptr) != (fol == nullptr)) {
     return SP_FORMERROR;
   }
   return 0;
@@ -1215,7 +1215,7 @@ static int read_sal_section(FILE *fd, slang_T *slang)
     int i = 0;
     for (; i < ccnt; i++) {
       c = getc(fd);                             // <salfrom>
-      if (vim_strchr("0123456789(-<^$", c) != NULL) {
+      if (vim_strchr("0123456789(-<^$", c) != nullptr) {
         break;
       }
       *p++ = (char)(uint8_t)c;
@@ -1238,7 +1238,7 @@ static int read_sal_section(FILE *fd, slang_T *slang)
         c = getc(fd);
       }
     } else {
-      smp->sm_oneof = NULL;
+      smp->sm_oneof = nullptr;
     }
 
     // Any following chars go in sm_rules.
@@ -1266,13 +1266,13 @@ static int read_sal_section(FILE *fd, slang_T *slang)
     // convert the multi-byte strings to wide char strings
     smp->sm_lead_w = mb_str2wide(smp->sm_lead);
     smp->sm_leadlen = mb_charlen(smp->sm_lead);
-    if (smp->sm_oneof == NULL) {
-      smp->sm_oneof_w = NULL;
+    if (smp->sm_oneof == nullptr) {
+      smp->sm_oneof_w = nullptr;
     } else {
       smp->sm_oneof_w = mb_str2wide(smp->sm_oneof);
     }
-    if (smp->sm_to == NULL) {
-      smp->sm_to_w = NULL;
+    if (smp->sm_to == nullptr) {
+      smp->sm_to_w = nullptr;
     } else {
       smp->sm_to_w = mb_str2wide(smp->sm_to);
     }
@@ -1287,11 +1287,11 @@ static int read_sal_section(FILE *fd, slang_T *slang)
     smp->sm_lead = p;
     smp->sm_lead_w = mb_str2wide(smp->sm_lead);
     smp->sm_leadlen = 0;
-    smp->sm_oneof = NULL;
-    smp->sm_oneof_w = NULL;
+    smp->sm_oneof = nullptr;
+    smp->sm_oneof_w = nullptr;
     smp->sm_rules = p;
-    smp->sm_to = NULL;
-    smp->sm_to_w = NULL;
+    smp->sm_to = nullptr;
+    smp->sm_to_w = nullptr;
     gap->ga_len++;
   }
 
@@ -1353,9 +1353,9 @@ static int read_sofo_section(FILE *fd, slang_T *slang)
   }
 
   // Store the info in slang->sl_sal and/or slang->sl_sal_first.
-  if (from != NULL && to != NULL) {
+  if (from != nullptr && to != nullptr) {
     res = set_sofo(slang, from, to);
-  } else if (from != NULL || to != NULL) {
+  } else if (from != nullptr || to != nullptr) {
     res = SP_FORMERROR;        // only one of two strings is an error
   } else {
     res = 0;
@@ -1470,7 +1470,7 @@ static int read_compound(FILE *fd, slang_T *slang, int len)
     }
 
     // Add all flags to "sl_compallflags".
-    if (vim_strchr("?*+[]/", c) == NULL
+    if (vim_strchr("?*+[]/", c) == nullptr
         && !byte_in_str(slang->sl_compallflags, c)) {
       *ap++ = (uint8_t)c;
       *ap = NUL;
@@ -1495,10 +1495,10 @@ static int read_compound(FILE *fd, slang_T *slang, int len)
     }
 
     // Copy flag to "sl_comprules", unless we run into a wildcard.
-    if (crp != NULL) {
+    if (crp != nullptr) {
       if (c == '?' || c == '+' || c == '*') {
         XFREE_CLEAR(slang->sl_comprules);
-        crp = NULL;
+        crp = nullptr;
       } else {
         *crp++ = (uint8_t)c;
       }
@@ -1521,13 +1521,13 @@ static int read_compound(FILE *fd, slang_T *slang, int len)
   *pp++ = '$';
   *pp = NUL;
 
-  if (crp != NULL) {
+  if (crp != nullptr) {
     *crp = NUL;
   }
 
   slang->sl_compprog = vim_regcomp(pat, RE_MAGIC + RE_STRING + RE_STRICT);
   xfree(pat);
-  if (slang->sl_compprog == NULL) {
+  if (slang->sl_compprog == nullptr) {
     return SP_FORMERROR;
   }
 
@@ -1690,7 +1690,7 @@ static int spell_read_tree(FILE *fd, uint8_t **bytsp, int *bytsp_len, idx_T **id
   // instead of consuming an arbitrary heap byte as a siblingcount.
   uint8_t *bp = xcalloc(1, (size_t)len);
   *bytsp = bp;
-  if (bytsp_len != NULL) {
+  if (bytsp_len != nullptr) {
     *bytsp_len = len;
   }
 
@@ -1835,10 +1835,10 @@ static void spell_reload_one(char *fname, bool added_word)
 {
   bool didit = false;
 
-  for (slang_T *slang = first_lang; slang != NULL; slang = slang->sl_next) {
+  for (slang_T *slang = first_lang; slang != nullptr; slang = slang->sl_next) {
     if (path_full_compare(fname, slang->sl_fname, false, true) == kEqualFiles) {
       slang_clear(slang);
-      if (spell_load_file(fname, NULL, slang, false) == NULL) {
+      if (spell_load_file(fname, nullptr, slang, false) == nullptr) {
         // reloading failed, clear the language
         slang_clear(slang);
       }
@@ -1934,7 +1934,7 @@ static void spell_clear_flags(wordnode_T *node)
 {
   wordnode_T *np;
 
-  for (np = node; np != NULL; np = np->wn_sibling) {
+  for (np = node; np != nullptr; np = np->wn_sibling) {
     np->wn_u1.index = false;
     spell_clear_flags(np->wn_child);
   }
@@ -1954,7 +1954,7 @@ static void spell_print_node(wordnode_T *node, int depth)
     node->wn_u1.index = true;
 
     if (node->wn_byte != NUL) {
-      if (node->wn_child != NULL) {
+      if (node->wn_child != nullptr) {
         PRINTSOME(line1, depth, " %c -> ", node->wn_byte, 0);
       } else {
         // Cannot happen?
@@ -1966,7 +1966,7 @@ static void spell_print_node(wordnode_T *node, int depth)
 
     PRINTSOME(line2, depth, "%d/%d    ", node->wn_nr, node->wn_refs);
 
-    if (node->wn_sibling != NULL) {
+    if (node->wn_sibling != nullptr) {
       PRINTSOME(line3, depth, " |    ", 0, 0);
     } else {
       PRINTSOME(line3, depth, "      ", 0, 0);
@@ -1979,12 +1979,12 @@ static void spell_print_node(wordnode_T *node, int depth)
     }
 
     // do the children
-    if (node->wn_byte != NUL && node->wn_child != NULL) {
+    if (node->wn_byte != NUL && node->wn_child != nullptr) {
       spell_print_node(node->wn_child, depth + 1);
     }
 
     // do the siblings
-    if (node->wn_sibling != NULL) {
+    if (node->wn_sibling != nullptr) {
       // get rid of all parent details except |
       STRCPY(line1, line3);
       STRCPY(line2, line3);
@@ -1995,7 +1995,7 @@ static void spell_print_node(wordnode_T *node, int depth)
 
 static void spell_print_tree(wordnode_T *root)
 {
-  if (root == NULL) {
+  if (root == nullptr) {
     return;
   }
 
@@ -2009,41 +2009,41 @@ static void spell_print_tree(wordnode_T *root)
 #endif  // SPELL_PRINTTREE
 
 // Reads the affix file "fname".
-// Returns an afffile_T, NULL for complete failure.
+// Returns an afffile_T, nullptr for complete failure.
 static afffile_T *spell_read_aff(spellinfo_T *spin, char *fname)
 {
   char rline[MAXLINELEN];
   char *line;
-  char *pc = NULL;
+  char *pc = nullptr;
 #define MAXITEMCNT  30
   char *(items[MAXITEMCNT]);
   char *p;
   int lnum = 0;
-  affheader_T *cur_aff = NULL;
+  affheader_T *cur_aff = nullptr;
   bool did_postpone_prefix = false;
   int aff_todo = 0;
   hashtab_T *tp;
-  char *low = NULL;
-  char *fol = NULL;
-  char *upp = NULL;
+  char *low = nullptr;
+  char *fol = nullptr;
+  char *upp = nullptr;
   bool found_map = false;
   hashitem_T *hi;
   int compminlen = 0;              // COMPOUNDMIN value
   int compsylmax = 0;              // COMPOUNDSYLMAX value
   int compoptions = 0;             // COMP_ flags
   int compmax = 0;                 // COMPOUNDWORDMAX value
-  char *compflags = NULL;          // COMPOUNDFLAG and COMPOUNDRULE
+  char *compflags = nullptr;          // COMPOUNDFLAG and COMPOUNDRULE
                                    // concatenated
-  char *midword = NULL;            // MIDWORD value
-  char *syllable = NULL;           // SYLLABLE value
-  char *sofofrom = NULL;           // SOFOFROM value
-  char *sofoto = NULL;             // SOFOTO value
+  char *midword = nullptr;            // MIDWORD value
+  char *syllable = nullptr;           // SYLLABLE value
+  char *sofofrom = nullptr;           // SOFOFROM value
+  char *sofoto = nullptr;             // SOFOTO value
 
   // Open the file.
   FILE *fd = os_fopen(fname, "r");
-  if (fd == NULL) {
+  if (fd == nullptr) {
     semsg(_(e_notopen), fname);
-    return NULL;
+    return nullptr;
   }
 
   vim_snprintf(IObuff, IOSIZE, _("Reading affix file %s..."), fname);
@@ -2080,15 +2080,15 @@ static afffile_T *spell_read_aff(spellinfo_T *spin, char *fname)
     // Convert from "SET" to 'encoding' when needed.
     xfree(pc);
     if (spin->si_conv.vc_type != CONV_NONE) {
-      pc = string_convert(&spin->si_conv, rline, NULL);
-      if (pc == NULL) {
+      pc = string_convert(&spin->si_conv, rline, nullptr);
+      if (pc == nullptr) {
         smsg(0, _("Conversion failure for word in %s line %d: %s"),
              fname, lnum, rline);
         continue;
       }
       line = pc;
     } else {
-      pc = NULL;
+      pc = nullptr;
       line = rline;
     }
 
@@ -2124,7 +2124,7 @@ static afffile_T *spell_read_aff(spellinfo_T *spin, char *fname)
 
     // Handle non-empty lines.
     if (itemcnt > 0) {
-      if (is_aff_rule(items, itemcnt, "SET", 2) && aff->af_enc == NULL) {
+      if (is_aff_rule(items, itemcnt, "SET", 2) && aff->af_enc == nullptr) {
         // Setup for conversion from "ENC" to 'encoding'.
         aff->af_enc = enc_canonize(items[1]);
         if (!spin->si_ascii
@@ -2153,7 +2153,7 @@ static afffile_T *spell_read_aff(spellinfo_T *spin, char *fname)
             || aff->af_needcomp != 0
             || aff->af_comproot != 0
             || aff->af_nosuggest != 0
-            || compflags != NULL
+            || compflags != nullptr
             || aff->af_suff.ht_used > 0
             || aff->af_pref.ht_used > 0) {
           smsg(0, _("FLAG after using flags in %s line %d: %s"),
@@ -2161,10 +2161,10 @@ static afffile_T *spell_read_aff(spellinfo_T *spin, char *fname)
         }
       } else if (spell_info_item(items[0]) && itemcnt > 1) {
         p = getroom(spin,
-                    (spin->si_info == NULL ? 0 : strlen(spin->si_info))
+                    (spin->si_info == nullptr ? 0 : strlen(spin->si_info))
                     + strlen(items[0])
                     + strlen(items[1]) + 3, false);
-        if (spin->si_info != NULL) {
+        if (spin->si_info != nullptr) {
           STRCPY(p, spin->si_info);
           strcat(p, "\n");
         }
@@ -2172,7 +2172,7 @@ static afffile_T *spell_read_aff(spellinfo_T *spin, char *fname)
         strcat(p, " ");
         strcat(p, items[1]);
         spin->si_info = p;
-      } else if (is_aff_rule(items, itemcnt, "MIDWORD", 2) && midword == NULL) {
+      } else if (is_aff_rule(items, itemcnt, "MIDWORD", 2) && midword == nullptr) {
         midword = getroom_save(spin, items[1]);
       } else if (is_aff_rule(items, itemcnt, "TRY", 2)) {
         // ignored, we look in the tree for what chars may appear
@@ -2221,7 +2221,7 @@ static afffile_T *spell_read_aff(spellinfo_T *spin, char *fname)
                fname, lnum);
         }
       } else if (is_aff_rule(items, itemcnt, "COMPOUNDFLAG", 2)
-                 && compflags == NULL) {
+                 && compflags == nullptr) {
         // Turn flag "c" into COMPOUNDRULE compatible string "c+",
         // "Na" into "Na+", "1234" into "1234+".
         p = getroom(spin, strlen(items[1]) + 2, false);
@@ -2237,15 +2237,15 @@ static afffile_T *spell_read_aff(spellinfo_T *spin, char *fname)
         }
       } else if (is_aff_rule(items, itemcnt, "COMPOUNDRULE", 2)) {
         // Don't use the first rule if it is a number.
-        if (compflags != NULL || *skipdigits(items[1]) != NUL) {
+        if (compflags != nullptr || *skipdigits(items[1]) != NUL) {
           // Concatenate this string to previously defined ones,
           // using a slash to separate them.
           int l = (int)strlen(items[1]) + 1;
-          if (compflags != NULL) {
+          if (compflags != nullptr) {
             l += (int)strlen(compflags) + 1;
           }
           p = getroom(spin, (size_t)l, false);
-          if (compflags != NULL) {
+          if (compflags != nullptr) {
             STRCPY(p, compflags);
             strcat(p, "/");
           }
@@ -2303,7 +2303,7 @@ static afffile_T *spell_read_aff(spellinfo_T *spin, char *fname)
           ((char **)(gap->ga_data))[gap->ga_len++] = getroom_save(spin, items[2]);
         }
       } else if (is_aff_rule(items, itemcnt, "SYLLABLE", 2)
-                 && syllable == NULL) {
+                 && syllable == nullptr) {
         syllable = getroom_save(spin, items[1]);
       } else if (is_aff_rule(items, itemcnt, "NOBREAK", 1)) {
         spin->si_nobreak = true;
@@ -2441,7 +2441,7 @@ static afffile_T *spell_read_aff(spellinfo_T *spin, char *fname)
 
           // Recognize flags on the affix: abcd/XYZ
           aff_entry->ae_flags = vim_strchr(aff_entry->ae_add, '/');
-          if (aff_entry->ae_flags != NULL) {
+          if (aff_entry->ae_flags != nullptr) {
             *aff_entry->ae_flags++ = NUL;
             aff_process_flags(aff, aff_entry);
           }
@@ -2462,7 +2462,7 @@ static afffile_T *spell_read_aff(spellinfo_T *spin, char *fname)
             // not happen in practice
             snprintf(buf, sizeof(buf), *items[0] == 'P' ? "^%s" : "%s$", items[4]);
             aff_entry->ae_prog = vim_regcomp(buf, RE_MAGIC + RE_STRING + RE_STRICT);
-            if (aff_entry->ae_prog == NULL) {
+            if (aff_entry->ae_prog == nullptr) {
               smsg(0, _("Broken condition in %s line %d: %s"),
                    fname, lnum, items[4]);
             }
@@ -2473,37 +2473,37 @@ static afffile_T *spell_read_aff(spellinfo_T *spin, char *fname)
           // Can't be done for an affix with flags, ignoring
           // COMPOUNDFORBIDFLAG and COMPOUNDPERMITFLAG.
           if (*items[0] == 'P' && aff->af_pfxpostpone
-              && aff_entry->ae_flags == NULL) {
+              && aff_entry->ae_flags == nullptr) {
             bool upper = false;
             // When the chop string is one lower-case letter and
             // the add string ends in the upper-case letter we set
             // the "upper" flag, clear "ae_chop" and remove the
             // letters from "ae_add".  The condition must either
             // be empty or start with the same letter.
-            if (aff_entry->ae_chop != NULL
-                && aff_entry->ae_add != NULL
+            if (aff_entry->ae_chop != nullptr
+                && aff_entry->ae_add != nullptr
                 && aff_entry->ae_chop[utfc_ptr2len(aff_entry->ae_chop)] ==
                 NUL) {
               int c = utf_ptr2char(aff_entry->ae_chop);
               int c_up = SPELL_TOUPPER(c);
               if (c_up != c
-                  && (aff_entry->ae_cond == NULL
+                  && (aff_entry->ae_cond == nullptr
                       || utf_ptr2char(aff_entry->ae_cond) == c)) {
                 p = aff_entry->ae_add + strlen(aff_entry->ae_add);
                 MB_PTR_BACK(aff_entry->ae_add, p);
                 if (utf_ptr2char(p) == c_up) {
                   upper = true;
-                  aff_entry->ae_chop = NULL;
+                  aff_entry->ae_chop = nullptr;
                   *p = NUL;
 
                   // The condition is matched with the
                   // actual word, thus must check for the
                   // upper-case letter.
-                  if (aff_entry->ae_cond != NULL) {
+                  if (aff_entry->ae_cond != nullptr) {
                     char buf[MAXLINELEN];
                     onecap_copy(items[4], buf, true);
                     aff_entry->ae_cond = getroom_save(spin, buf);
-                    if (aff_entry->ae_cond != NULL) {
+                    if (aff_entry->ae_cond != nullptr) {
                       snprintf(buf, MAXLINELEN, "^%s", aff_entry->ae_cond);
                       vim_regfree(aff_entry->ae_prog);
                       aff_entry->ae_prog = vim_regcomp(buf, RE_MAGIC + RE_STRING);
@@ -2513,7 +2513,7 @@ static afffile_T *spell_read_aff(spellinfo_T *spin, char *fname)
               }
             }
 
-            if (aff_entry->ae_chop == NULL) {
+            if (aff_entry->ae_chop == nullptr) {
               int idx;
 
               // Find a previously used condition.
@@ -2527,12 +2527,12 @@ static afffile_T *spell_read_aff(spellinfo_T *spin, char *fname)
                 // Not found, add a new condition.
                 idx = spin->si_prefcond.ga_len;
                 char **pp = GA_APPEND_VIA_PTR(char *, &spin->si_prefcond);
-                *pp = (aff_entry->ae_cond == NULL)
-                      ? NULL : getroom_save(spin, aff_entry->ae_cond);
+                *pp = (aff_entry->ae_cond == nullptr)
+                      ? nullptr : getroom_save(spin, aff_entry->ae_cond);
               }
 
               // Add the prefix to the prefix tree.
-              if (aff_entry->ae_add == NULL) {
+              if (aff_entry->ae_add == nullptr) {
                 p = "";
               } else {
                 p = aff_entry->ae_add;
@@ -2565,11 +2565,11 @@ static afffile_T *spell_read_aff(spellinfo_T *spin, char *fname)
             }
           }
         }
-      } else if (is_aff_rule(items, itemcnt, "FOL", 2) && fol == NULL) {
+      } else if (is_aff_rule(items, itemcnt, "FOL", 2) && fol == nullptr) {
         fol = xstrdup(items[1]);
-      } else if (is_aff_rule(items, itemcnt, "LOW", 2) && low == NULL) {
+      } else if (is_aff_rule(items, itemcnt, "LOW", 2) && low == nullptr) {
         low = xstrdup(items[1]);
-      } else if (is_aff_rule(items, itemcnt, "UPP", 2) && upp == NULL) {
+      } else if (is_aff_rule(items, itemcnt, "UPP", 2) && upp == nullptr) {
         upp = xstrdup(items[1]);
       } else if (is_aff_rule(items, itemcnt, "REP", 2)
                  || is_aff_rule(items, itemcnt, "REPSAL", 2)) {
@@ -2619,8 +2619,8 @@ static afffile_T *spell_read_aff(spellinfo_T *spin, char *fname)
             int c = mb_ptr2char_adv((const char **)&p);
             if ((!GA_EMPTY(&spin->si_map)
                  && vim_strchr(spin->si_map.ga_data, c)
-                 != NULL)
-                || vim_strchr(p, c) != NULL) {
+                 != nullptr)
+                || vim_strchr(p, c) != nullptr) {
               smsg(0, _("Duplicate character in MAP in %s line %d"),
                    fname, lnum);
             }
@@ -2651,10 +2651,10 @@ static afffile_T *spell_read_aff(spellinfo_T *spin, char *fname)
           }
         }
       } else if (is_aff_rule(items, itemcnt, "SOFOFROM", 2)
-                 && sofofrom == NULL) {
+                 && sofofrom == nullptr) {
         sofofrom = getroom_save(spin, items[1]);
       } else if (is_aff_rule(items, itemcnt, "SOFOTO", 2)
-                 && sofoto == NULL) {
+                 && sofoto == nullptr) {
         sofoto = getroom_save(spin, items[1]);
       } else if (strcmp(items[0], "COMMON") == 0) {
         for (int i = 1; i < itemcnt; i++) {
@@ -2670,7 +2670,7 @@ static afffile_T *spell_read_aff(spellinfo_T *spin, char *fname)
     }
   }
 
-  if (fol != NULL || low != NULL || upp != NULL) {
+  if (fol != nullptr || low != nullptr || upp != nullptr) {
     if (spin->si_clear_chartab) {
       // Clear the char type tables, don't want to use any of the
       // currently used spell properties.
@@ -2695,7 +2695,7 @@ static afffile_T *spell_read_aff(spellinfo_T *spin, char *fname)
   }
 
   if (compsylmax != 0) {
-    if (syllable == NULL) {
+    if (syllable == nullptr) {
       smsg(0, "%s", _("COMPOUNDSYLMAX used without SYLLABLE"));
     }
     aff_check_number(spin->si_compsylmax, compsylmax, "COMPOUNDSYLMAX");
@@ -2707,7 +2707,7 @@ static afffile_T *spell_read_aff(spellinfo_T *spin, char *fname)
     spin->si_compoptions |= compoptions;
   }
 
-  if (compflags != NULL) {
+  if (compflags != nullptr) {
     process_compflags(spin, aff, compflags);
   }
 
@@ -2722,15 +2722,15 @@ static afffile_T *spell_read_aff(spellinfo_T *spin, char *fname)
     }
   }
 
-  if (syllable != NULL) {
+  if (syllable != nullptr) {
     aff_check_string(spin->si_syllable, syllable, "SYLLABLE");
     spin->si_syllable = syllable;
   }
 
-  if (sofofrom != NULL || sofoto != NULL) {
-    if (sofofrom == NULL || sofoto == NULL) {
+  if (sofofrom != nullptr || sofoto != nullptr) {
+    if (sofofrom == nullptr || sofoto == nullptr) {
       smsg(0, _("Missing SOFO%s line in %s"),
-           sofofrom == NULL ? "FROM" : "TO", fname);
+           sofofrom == nullptr ? "FROM" : "TO", fname);
     } else if (!GA_EMPTY(&spin->si_sal)) {
       smsg(0, _("Both SAL and SOFO lines in %s"), fname);
     } else {
@@ -2741,7 +2741,7 @@ static afffile_T *spell_read_aff(spellinfo_T *spin, char *fname)
     }
   }
 
-  if (midword != NULL) {
+  if (midword != nullptr) {
     aff_check_string(spin->si_midword, midword, "MIDWORD");
     spin->si_midword = midword;
   }
@@ -2764,7 +2764,7 @@ static bool is_aff_rule(char **items, int itemcnt, char *rulename, int mincount)
 // ae_flags to ae_comppermit and ae_compforbid.
 static void aff_process_flags(afffile_T *affile, affentry_T *entry)
 {
-  if (entry->ae_flags != NULL
+  if (entry->ae_flags != nullptr
       && (affile->af_compforbid != 0 || affile->af_comppermit != 0)) {
     for (char *p = entry->ae_flags; *p != NUL;) {
       char *prevp = p;
@@ -2783,7 +2783,7 @@ static void aff_process_flags(afffile_T *affile, affentry_T *entry)
       }
     }
     if (*entry->ae_flags == NUL) {
-      entry->ae_flags = NULL;           // nothing left
+      entry->ae_flags = nullptr;           // nothing left
     }
   }
 }
@@ -2866,11 +2866,11 @@ static void process_compflags(spellinfo_T *spin, afffile_T *aff, char *compflags
   // between.  Processing it makes it shorter, but we don't know by how
   // much, thus allocate the maximum.
   int len = (int)strlen(compflags) + 1;
-  if (spin->si_compflags != NULL) {
+  if (spin->si_compflags != nullptr) {
     len += (int)strlen(spin->si_compflags) + 1;
   }
   char *p = getroom(spin, (size_t)len, false);
-  if (spin->si_compflags != NULL) {
+  if (spin->si_compflags != nullptr) {
     STRCPY(p, spin->si_compflags);
     strcat(p, "/");
   }
@@ -2878,7 +2878,7 @@ static void process_compflags(spellinfo_T *spin, afffile_T *aff, char *compflags
   uint8_t *tp = (uint8_t *)p + strlen(p);
 
   for (p = compflags; *p != NUL;) {
-    if (vim_strchr("/?*+[]", (uint8_t)(*p)) != NULL) {
+    if (vim_strchr("/?*+[]", (uint8_t)(*p)) != nullptr) {
       // Copy non-flag characters directly.
       *tp++ = (uint8_t)(*p++);
     } else {
@@ -2901,7 +2901,7 @@ static void process_compflags(spellinfo_T *spin, afffile_T *aff, char *compflags
           do {
             check_renumber(spin);
             id = spin->si_newcompID--;
-          } while (vim_strchr("/?*+[]\\-^", id) != NULL);
+          } while (vim_strchr("/?*+[]\\-^", id) != nullptr);
           ci->ci_newID = id;
           hash_add(&aff->af_comp, ci->ci_key);
         }
@@ -2946,7 +2946,7 @@ static bool flag_in_afflist(int flagtype, char *afflist, unsigned flag)
 {
   switch (flagtype) {
   case AFT_CHAR:
-    return vim_strchr(afflist, (int)flag) != NULL;
+    return vim_strchr(afflist, (int)flag) != nullptr;
 
   case AFT_CAPLONG:
   case AFT_LONG:
@@ -2994,17 +2994,17 @@ static void aff_check_number(int spinval, int affval, char *name)
 /// Give a warning when "spinval" and "affval" strings are set and not the same.
 static void aff_check_string(char *spinval, char *affval, char *name)
 {
-  if (spinval != NULL && strcmp(spinval, affval) != 0) {
+  if (spinval != nullptr && strcmp(spinval, affval) != 0) {
     smsg(0, _("%s value differs from what is used in another .aff file"),
          name);
   }
 }
 
 /// @return  true if strings "s1" and "s2" are equal.  Also consider both being
-///          NULL as equal.
+///          nullptr as equal.
 static bool str_equal(char *s1, char *s2)
 {
-  if (s1 == NULL || s2 == NULL) {
+  if (s1 == nullptr || s2 == nullptr) {
     return s1 == s2;
   }
   return strcmp(s1, s2) == 0;
@@ -3041,7 +3041,7 @@ static void spell_free_aff(afffile_T *aff)
       if (!HASHITEM_EMPTY(hi)) {
         todo--;
         affheader_T *ah = HI2AH(hi);
-        for (affentry_T *ae = ah->ah_first; ae != NULL; ae = ae->ae_next) {
+        for (affentry_T *ae = ah->ah_first; ae != nullptr; ae = ae->ae_next) {
           vim_regfree(ae->ae_prog);
         }
       }
@@ -3074,7 +3074,7 @@ static int spell_read_dic(spellinfo_T *spin, char *fname, afffile_T *affile)
 
   // Open the file.
   FILE *fd = os_fopen(fname, "r");
-  if (fd == NULL) {
+  if (fd == nullptr) {
     semsg(_(e_notopen), fname);
     return FAIL;
   }
@@ -3116,21 +3116,21 @@ static int spell_read_dic(spellinfo_T *spin, char *fname, afffile_T *affile)
 
     // Convert from "SET" to 'encoding' when needed.
     if (spin->si_conv.vc_type != CONV_NONE) {
-      pc = string_convert(&spin->si_conv, line, NULL);
-      if (pc == NULL) {
+      pc = string_convert(&spin->si_conv, line, nullptr);
+      if (pc == nullptr) {
         smsg(0, _("Conversion failure for word in %s line %d: %s"),
              fname, lnum, line);
         continue;
       }
       w = pc;
     } else {
-      pc = NULL;
+      pc = nullptr;
       w = line;
     }
 
     // Truncate the word at the "/", set "afflist" to what follows.
     // Replace "\/" by "/" and "\\" by "\".
-    char *afflist = NULL;
+    char *afflist = nullptr;
     for (char *p = w; *p != NUL; MB_PTR_ADV(p)) {
       if (*p == '\\' && (p[1] == '\\' || p[1] == '/')) {
         STRMOVE(p, p + 1);
@@ -3168,7 +3168,7 @@ static int spell_read_dic(spellinfo_T *spin, char *fname, afffile_T *affile)
 
     // Store the word in the hashtable to be able to find duplicates.
     char *dw = getroom_save(spin, w);
-    if (dw == NULL) {
+    if (dw == nullptr) {
       retval = FAIL;
       xfree(pc);
       break;
@@ -3194,7 +3194,7 @@ static int spell_read_dic(spellinfo_T *spin, char *fname, afffile_T *affile)
     int pfxlen = 0;
     int totlen = 0;
     bool need_affix = false;
-    if (afflist != NULL) {
+    if (afflist != nullptr) {
       // Extract flags from the affix list.
       flags |= get_affix_flags(affile, afflist);
 
@@ -3214,7 +3214,7 @@ static int spell_read_dic(spellinfo_T *spin, char *fname, afffile_T *affile)
         pfxlen = totlen;
       }
 
-      if (spin->si_compflags != NULL) {
+      if (spin->si_compflags != nullptr) {
         // Need to store the list of compound flags with the word.
         // Concatenate them to the list of prefix IDs.
         if (get_compflags(affile, afflist, store_afflist, &totlen) == FAIL) {
@@ -3231,7 +3231,7 @@ static int spell_read_dic(spellinfo_T *spin, char *fname, afffile_T *affile)
       retval = FAIL;
     }
 
-    if (afflist != NULL) {
+    if (afflist != nullptr) {
       // Find all matching suffixes and add the resulting words.
       // Additionally do matching prefixes that combine.
       if (store_aff_word(spin, dw, afflist, affile,
@@ -3242,7 +3242,7 @@ static int spell_read_dic(spellinfo_T *spin, char *fname, afffile_T *affile)
 
       // Find all matching prefixes and add the resulting words.
       if (store_aff_word(spin, dw, afflist, affile,
-                         &affile->af_pref, NULL,
+                         &affile->af_pref, nullptr,
                          CONDIT_SUF, flags, store_afflist, pfxlen) == FAIL) {
         retval = FAIL;
       }
@@ -3361,7 +3361,7 @@ static int get_compflags(afffile_T *affile, char *afflist, char *store_afflist, 
 /// Apply affixes to a word and store the resulting words.
 /// "ht" is the hashtable with affentry_T that need to be applied, either
 /// prefixes or suffixes.
-/// "xht", when not NULL, is the prefix hashtable, to be used additionally on
+/// "xht", when not nullptr, is the prefix hashtable, to be used additionally on
 /// the resulting words for combining affixes.
 ///
 /// @param spin  spell info
@@ -3397,7 +3397,7 @@ static int store_aff_word(spellinfo_T *spin, char *word, char *afflist, afffile_
           && flag_in_afflist(affile->af_flagtype, afflist,
                              ah->ah_flag)) {
         // Loop over all affix entries with this name.
-        for (ae = ah->ah_first; ae != NULL; ae = ae->ae_next) {
+        for (ae = ah->ah_first; ae != nullptr; ae = ae->ae_next) {
           // Check the condition.  It's not logical to match case
           // here, but it is required for compatibility with
           // Myspell.
@@ -3408,28 +3408,28 @@ static int store_aff_word(spellinfo_T *spin, char *word, char *afflist, afffile_
           // When a previously added affix had CIRCUMFIX this one
           // must have it too, if it had not then this one must not
           // have one either.
-          if ((xht != NULL || !affile->af_pfxpostpone
-               || ae->ae_chop != NULL
-               || ae->ae_flags != NULL)
-              && (ae->ae_chop == NULL
+          if ((xht != nullptr || !affile->af_pfxpostpone
+               || ae->ae_chop != nullptr
+               || ae->ae_flags != nullptr)
+              && (ae->ae_chop == nullptr
                   || strlen(ae->ae_chop) < wordlen)
-              && (ae->ae_prog == NULL
+              && (ae->ae_prog == nullptr
                   || vim_regexec_prog(&ae->ae_prog, false, word, 0))
               && (((condit & CONDIT_CFIX) == 0)
                   == ((condit & CONDIT_AFF) == 0
-                      || ae->ae_flags == NULL
+                      || ae->ae_flags == nullptr
                       || !flag_in_afflist(affile->af_flagtype,
                                           ae->ae_flags, affile->af_circumfix)))) {
             // Match.  Remove the chop and add the affix.
-            if (xht == NULL) {
+            if (xht == nullptr) {
               // prefix: chop/add at the start of the word
-              if (ae->ae_add == NULL) {
+              if (ae->ae_add == nullptr) {
                 *newword = NUL;
               } else {
                 xstrlcpy(newword, ae->ae_add, MAXWLEN);
               }
               char *p = word;
-              if (ae->ae_chop != NULL) {
+              if (ae->ae_chop != nullptr) {
                 // Skip chop string.
                 int i = mb_charlen(ae->ae_chop);
                 for (; i > 0; i--) {
@@ -3442,7 +3442,7 @@ static int store_aff_word(spellinfo_T *spin, char *word, char *afflist, afffile_
             } else {
               // suffix: chop/add at the end of the word
               xstrlcpy(newword, word, MAXWLEN);
-              if (ae->ae_chop != NULL) {
+              if (ae->ae_chop != nullptr) {
                 // Remove chop string.
                 char *p = newword + strlen(newword);
                 int i = mb_charlen(ae->ae_chop);
@@ -3451,7 +3451,7 @@ static int store_aff_word(spellinfo_T *spin, char *word, char *afflist, afffile_
                 }
                 *p = NUL;
               }
-              if (ae->ae_add != NULL) {
+              if (ae->ae_add != nullptr) {
                 // Note: this silently truncates the buffer, but this should
                 // not happen in practice
                 xstrlcat(newword, ae->ae_add, MAXWLEN);
@@ -3463,7 +3463,7 @@ static int store_aff_word(spellinfo_T *spin, char *word, char *afflist, afffile_
             int use_pfxlen = pfxlen;
             bool need_affix = false;
             int use_condit = condit | CONDIT_COMB | CONDIT_AFF;
-            if (ae->ae_flags != NULL) {
+            if (ae->ae_flags != nullptr) {
               // Extract flags from the affix list.
               use_flags |= get_affix_flags(affile, ae->ae_flags);
 
@@ -3486,7 +3486,7 @@ static int store_aff_word(spellinfo_T *spin, char *word, char *afflist, afffile_
               }
 
               if (affile->af_pfxpostpone
-                  || spin->si_compflags != NULL) {
+                  || spin->si_compflags != nullptr) {
                 int listlen = 0;
 
                 if (affile->af_pfxpostpone) {
@@ -3521,7 +3521,7 @@ static int store_aff_word(spellinfo_T *spin, char *word, char *afflist, afffile_
                   break;
                 }
 
-                if (spin->si_compflags != NULL) {
+                if (spin->si_compflags != nullptr) {
                   // Get compound IDS from the affix list.
                   if (get_compflags(affile, ae->ae_flags,
                                     use_pfxlist, &listlen) == FAIL) {
@@ -3558,21 +3558,21 @@ static int store_aff_word(spellinfo_T *spin, char *word, char *afflist, afffile_
 
             // Obey a "COMPOUNDFORBIDFLAG" of the affix: don't
             // use the compound flags.
-            if (use_pfxlist != NULL && ae->ae_compforbid) {
+            if (use_pfxlist != nullptr && ae->ae_compforbid) {
               xmemcpyz(pfx_pfxlist, use_pfxlist, (size_t)use_pfxlen);
               use_pfxlist = pfx_pfxlist;
             }
 
             // When there are postponed prefixes...
-            if (spin->si_prefroot != NULL
-                && spin->si_prefroot->wn_sibling != NULL) {
+            if (spin->si_prefroot != nullptr
+                && spin->si_prefroot->wn_sibling != nullptr) {
               // ... add a flag to indicate an affix was used.
               use_flags |= WF_HAS_AFF;
 
               // ... don't use a prefix list if combining
               // affixes is not allowed.  But do use the
               // compound flags after them.
-              if (!ah->ah_combine && use_pfxlist != NULL) {
+              if (!ah->ah_combine && use_pfxlist != nullptr) {
                 use_pfxlist += use_pfxlen;
               }
             }
@@ -3580,8 +3580,8 @@ static int store_aff_word(spellinfo_T *spin, char *word, char *afflist, afffile_
             // When compounding is supported and there is no
             // "COMPOUNDPERMITFLAG" then forbid compounding on the
             // side where the affix is applied.
-            if (spin->si_compflags != NULL && !ae->ae_comppermit) {
-              if (xht != NULL) {
+            if (spin->si_compflags != nullptr && !ae->ae_comppermit) {
+              if (xht != nullptr) {
                 use_flags |= WF_NOCOMPAFT;
               } else {
                 use_flags |= WF_NOCOMPBEF;
@@ -3597,10 +3597,10 @@ static int store_aff_word(spellinfo_T *spin, char *word, char *afflist, afffile_
 
             // When added a prefix or a first suffix and the affix
             // has flags may add a(nother) suffix.  RECURSIVE!
-            if ((condit & CONDIT_SUF) && ae->ae_flags != NULL) {
+            if ((condit & CONDIT_SUF) && ae->ae_flags != nullptr) {
               if (store_aff_word(spin, newword, ae->ae_flags,
                                  affile, &affile->af_suff, xht,
-                                 use_condit & (xht == NULL
+                                 use_condit & (xht == nullptr
                                                ? ~0 : ~CONDIT_SUF),
                                  use_flags, use_pfxlist, pfxlen) == FAIL) {
                 retval = FAIL;
@@ -3610,16 +3610,16 @@ static int store_aff_word(spellinfo_T *spin, char *word, char *afflist, afffile_
             // When added a suffix and combining is allowed also
             // try adding a prefix additionally.  Both for the
             // word flags and for the affix flags.  RECURSIVE!
-            if (xht != NULL && ah->ah_combine) {
+            if (xht != nullptr && ah->ah_combine) {
               if (store_aff_word(spin, newword,
                                  afflist, affile,
-                                 xht, NULL, use_condit,
+                                 xht, nullptr, use_condit,
                                  use_flags, use_pfxlist,
                                  pfxlen) == FAIL
-                  || (ae->ae_flags != NULL
+                  || (ae->ae_flags != nullptr
                       && store_aff_word(spin, newword,
                                         ae->ae_flags, affile,
-                                        xht, NULL, use_condit,
+                                        xht, nullptr, use_condit,
                                         use_flags, use_pfxlist,
                                         pfxlen) == FAIL)) {
                 retval = FAIL;
@@ -3640,14 +3640,14 @@ static int spell_read_wordfile(spellinfo_T *spin, char *fname)
   linenr_T lnum = 0;
   char rline[MAXLINELEN];
   char *line;
-  char *pc = NULL;
+  char *pc = nullptr;
   int retval = OK;
   bool did_word = false;
   int non_ascii = 0;
 
   // Open the file.
   FILE *fd = os_fopen(fname, "r");
-  if (fd == NULL) {
+  if (fd == nullptr) {
     semsg(_(e_notopen), fname);
     return FAIL;
   }
@@ -3678,15 +3678,15 @@ static int spell_read_wordfile(spellinfo_T *spin, char *fname)
     // Convert from "/encoding={encoding}" to 'encoding' when needed.
     xfree(pc);
     if (spin->si_conv.vc_type != CONV_NONE) {
-      pc = string_convert(&spin->si_conv, rline, NULL);
-      if (pc == NULL) {
+      pc = string_convert(&spin->si_conv, rline, nullptr);
+      if (pc == nullptr) {
         smsg(0, _("Conversion failure for word in %s line %" PRIdLINENR ": %s"),
              fname, lnum, rline);
         continue;
       }
       line = pc;
     } else {
-      pc = NULL;
+      pc = nullptr;
       line = rline;
     }
 
@@ -3744,7 +3744,7 @@ static int spell_read_wordfile(spellinfo_T *spin, char *fname)
 
     // Check for flags and region after a slash.
     char *p = vim_strchr(line, '/');
-    if (p != NULL) {
+    if (p != nullptr) {
       *p++ = NUL;
       while (*p != NUL) {
         if (*p == '=') {                // keep-case word
@@ -3782,7 +3782,7 @@ static int spell_read_wordfile(spellinfo_T *spin, char *fname)
     }
 
     // Normal word: store it.
-    if (store_word(spin, line, flags, regionmask, NULL, false) == FAIL) {
+    if (store_word(spin, line, flags, regionmask, nullptr, false) == FAIL) {
       retval = FAIL;
       break;
     }
@@ -3816,13 +3816,13 @@ static void *getroom(spellinfo_T *spin, size_t len, bool align)
 
   assert(len <= SBLOCKSIZE);
 
-  if (align && bl != NULL) {
+  if (align && bl != nullptr) {
     // Round size up for alignment.  On some systems structures need to be
     // aligned to the size of a pointer (e.g., SPARC).
     bl->sb_used = (int)(((size_t)bl->sb_used + sizeof(char *) - 1) & ~(sizeof(char *) - 1));
   }
 
-  if (bl == NULL || (size_t)bl->sb_used + len > SBLOCKSIZE) {
+  if (bl == nullptr || (size_t)bl->sb_used + len > SBLOCKSIZE) {
     // Allocate a block of memory. It is not freed until much later.
     bl = xcalloc(1, offsetof(sblock_T, sb_data) + SBLOCKSIZE + 1);
     bl->sb_next = spin->si_blocks;
@@ -3839,7 +3839,7 @@ static void *getroom(spellinfo_T *spin, size_t len, bool align)
 
 /// Make a copy of a string into memory allocated with getroom().
 ///
-/// @return  NULL when out of memory.
+/// @return  nullptr when out of memory.
 static char *getroom_save(spellinfo_T *spin, char *s)
 {
   const size_t s_size = strlen(s) + 1;
@@ -3849,7 +3849,7 @@ static char *getroom_save(spellinfo_T *spin, char *s)
 // Free the list of allocated sblock_T.
 static void free_blocks(sblock_T *bl)
 {
-  while (bl != NULL) {
+  while (bl != nullptr) {
     sblock_T *next = bl->sb_next;
     xfree(bl);
     bl = next;
@@ -3857,7 +3857,7 @@ static void free_blocks(sblock_T *bl)
 }
 
 // Allocate the root of a word tree.
-// Returns NULL when out of memory.
+// Returns nullptr when out of memory.
 static wordnode_T *wordtree_alloc(spellinfo_T *spin)
   FUNC_ATTR_NONNULL_RET
 {
@@ -3884,7 +3884,7 @@ static bool valid_spell_word(const char *word, const char *end)
 /// useful when the word can also be used with all caps (no WF_FIXCAP flag) and
 /// used to find suggestions.
 /// For a keep-case word also store it in the keep-case tree.
-/// When "pfxlist" is not NULL store the word for each postponed prefix ID and
+/// When "pfxlist" is not nullptr store the word for each postponed prefix ID and
 /// compound flag.
 ///
 /// @param flags  extra flags, wf_banned
@@ -3906,11 +3906,11 @@ static int store_word(spellinfo_T *spin, char *word, int flags, int region, cons
 
   spell_casefold(curwin, word, len, foldword, MAXWLEN);
   for (const char *p = pfxlist; res == OK; p++) {
-    if (!need_affix || (p != NULL && *p != NUL)) {
+    if (!need_affix || (p != nullptr && *p != NUL)) {
       res = tree_add_word(spin, foldword, spin->si_foldroot, ct | flags,
-                          region, p == NULL ? 0 : *p);
+                          region, p == nullptr ? 0 : *p);
     }
-    if (p == NULL || *p == NUL) {
+    if (p == nullptr || *p == NUL) {
       break;
     }
   }
@@ -3918,11 +3918,11 @@ static int store_word(spellinfo_T *spin, char *word, int flags, int region, cons
 
   if (res == OK && (ct == WF_KEEPCAP || (flags & WF_KEEPCAP))) {
     for (const char *p = pfxlist; res == OK; p++) {
-      if (!need_affix || (p != NULL && *p != NUL)) {
+      if (!need_affix || (p != nullptr && *p != NUL)) {
         res = tree_add_word(spin, word, spin->si_keeproot, flags,
-                            region, p == NULL ? 0 : *p);
+                            region, p == nullptr ? 0 : *p);
       }
-      if (p == NULL || *p == NUL) {
+      if (p == nullptr || *p == NUL) {
         break;
       }
     }
@@ -3939,24 +3939,24 @@ static int tree_add_word(spellinfo_T *spin, const char *word, wordnode_T *root, 
                          int region, int affixID)
 {
   wordnode_T *node = root;
-  wordnode_T **prev = NULL;
+  wordnode_T **prev = nullptr;
 
   // Add each byte of the word to the tree, including the NUL at the end.
   for (int i = 0;; i++) {
     // When there is more than one reference to this node we need to make
     // a copy, so that we can modify it.  Copy the whole list of siblings
     // (we don't optimize for a partly shared list of siblings).
-    if (node != NULL && node->wn_refs > 1) {
+    if (node != nullptr && node->wn_refs > 1) {
       node->wn_refs--;
       wordnode_T **copyprev = prev;
-      for (wordnode_T *copyp = node; copyp != NULL; copyp = copyp->wn_sibling) {
+      for (wordnode_T *copyp = node; copyp != nullptr; copyp = copyp->wn_sibling) {
         // Allocate a new node and copy the info.
         wordnode_T *np = get_wordnode(spin);
-        if (np == NULL) {
+        if (np == nullptr) {
           return FAIL;
         }
         np->wn_child = copyp->wn_child;
-        if (np->wn_child != NULL) {
+        if (np->wn_child != nullptr) {
           np->wn_child->wn_refs++;              // child gets extra ref
         }
         np->wn_byte = copyp->wn_byte;
@@ -3968,7 +3968,7 @@ static int tree_add_word(spellinfo_T *spin, const char *word, wordnode_T *root, 
 
         // Link the new node in the list, there will be one ref.
         np->wn_refs = 1;
-        if (copyprev != NULL) {
+        if (copyprev != nullptr) {
           *copyprev = np;
         }
         copyprev = &np->wn_sibling;
@@ -3984,7 +3984,7 @@ static int tree_add_word(spellinfo_T *spin, const char *word, wordnode_T *root, 
     // on byte value, thus stop searching when a sibling is found with a
     // higher byte value.  For zero bytes (end of word) the sorting is
     // done on flags and then on affixID.
-    while (node != NULL
+    while (node != nullptr
            && (node->wn_byte < (uint8_t)word[i]
                || (node->wn_byte == NUL
                    && (flags < 0
@@ -3998,7 +3998,7 @@ static int tree_add_word(spellinfo_T *spin, const char *word, wordnode_T *root, 
       prev = &node->wn_sibling;
       node = *prev;
     }
-    if (node == NULL
+    if (node == nullptr
         || node->wn_byte != (uint8_t)word[i]
         || (word[i] == NUL
             && (flags < 0
@@ -4007,22 +4007,22 @@ static int tree_add_word(spellinfo_T *spin, const char *word, wordnode_T *root, 
                 || node->wn_affixID != affixID))) {
       // Allocate a new node.
       wordnode_T *np = get_wordnode(spin);
-      if (np == NULL) {
+      if (np == nullptr) {
         return FAIL;
       }
       np->wn_byte = (uint8_t)word[i];
 
-      // If "node" is NULL this is a new child or the end of the sibling
+      // If "node" is nullptr this is a new child or the end of the sibling
       // list: ref count is one.  Otherwise use ref count of sibling and
       // make ref count of sibling one (matters when inserting in front
       // of the list of siblings).
-      if (node == NULL) {
+      if (node == nullptr) {
         np->wn_refs = 1;
       } else {
         np->wn_refs = node->wn_refs;
         node->wn_refs = 1;
       }
-      if (prev != NULL) {
+      if (prev != nullptr) {
         *prev = np;
       }
       np->wn_sibling = node;
@@ -4100,12 +4100,12 @@ static int tree_add_word(spellinfo_T *spin, const char *word, wordnode_T *root, 
 
 // Get a wordnode_T, either from the list of previously freed nodes or
 // allocate a new one.
-// Returns NULL when out of memory.
+// Returns nullptr when out of memory.
 static wordnode_T *get_wordnode(spellinfo_T *spin)
 {
   wordnode_T *n;
 
-  if (spin->si_first_free == NULL) {
+  if (spin->si_first_free == nullptr) {
     n = (wordnode_T *)getroom(spin, sizeof(wordnode_T), true);
   } else {
     n = spin->si_first_free;
@@ -4114,7 +4114,7 @@ static wordnode_T *get_wordnode(spellinfo_T *spin)
     spin->si_free_count--;
   }
 #ifdef SPELL_PRINTTREE
-  if (n != NULL) {
+  if (n != nullptr) {
     n->wn_nr = ++spin->si_wordnode_nr;
   }
 #endif
@@ -4131,8 +4131,8 @@ static int deref_wordnode(spellinfo_T *spin, wordnode_T *node)
   int cnt = 0;
 
   if (--node->wn_refs == 0) {
-    for (wordnode_T *np = node; np != NULL; np = np->wn_sibling) {
-      if (np->wn_child != NULL) {
+    for (wordnode_T *np = node; np != nullptr; np = np->wn_sibling) {
+      if (np->wn_child != nullptr) {
         cnt += deref_wordnode(spin, np->wn_child);
       }
       free_wordnode(spin, np);
@@ -4163,7 +4163,7 @@ static void wordtree_compress(spellinfo_T *spin, wordnode_T *root, const char *n
 
   // Skip the root itself, it's not actually used.  The first sibling is the
   // start of the tree.
-  if (root->wn_sibling == NULL) {
+  if (root->wn_sibling == nullptr) {
     return;
   }
 
@@ -4209,9 +4209,9 @@ static int node_compress(spellinfo_T *spin, wordnode_T *node, hashtab_T *ht, int
   // finding an identical child to replace it.
   // Note that with "child" we mean not just the node that is pointed to,
   // but the whole list of siblings of which the child node is the first.
-  for (wordnode_T *np = node; np != NULL && !got_int; np = np->wn_sibling) {
+  for (wordnode_T *np = node; np != nullptr && !got_int; np = np->wn_sibling) {
     len++;
-    if ((child = np->wn_child) != NULL) {
+    if ((child = np->wn_child) != nullptr) {
       // Compress the child first.  This fills hashkey.
       compressed += node_compress(spin, child, ht, tot);
 
@@ -4223,7 +4223,7 @@ static int node_compress(spellinfo_T *spin, wordnode_T *node, hashtab_T *ht, int
         // There are children we encountered before with a hash value
         // identical to the current child.  Now check if there is one
         // that is really identical.
-        for (tp = HI2WN(hi); tp != NULL; tp = tp->wn_u2.next) {
+        for (tp = HI2WN(hi); tp != nullptr; tp = tp->wn_u2.next) {
           if (node_equal(child, tp)) {
             // Found one!  Now use that child in place of the
             // current one.  This means the current child and all
@@ -4234,7 +4234,7 @@ static int node_compress(spellinfo_T *spin, wordnode_T *node, hashtab_T *ht, int
             break;
           }
         }
-        if (tp == NULL) {
+        if (tp == nullptr) {
           // No other child with this hash value equals the child of
           // the node, add it to the linked list after the first
           // item.
@@ -4256,7 +4256,7 @@ static int node_compress(spellinfo_T *spin, wordnode_T *node, hashtab_T *ht, int
   // list, otherwise the hash key would become invalid by the compression.
   node->wn_u1.hashkey[0] = (uint8_t)len;
   unsigned nr = 0;
-  for (wordnode_T *np = node; np != NULL; np = np->wn_sibling) {
+  for (wordnode_T *np = node; np != nullptr; np = np->wn_sibling) {
     if (np->wn_byte == NUL) {
       // end node: use wn_flags, wn_region and wn_affixID
       n = (unsigned)(np->wn_flags + (np->wn_region << 8) + (np->wn_affixID << 16));
@@ -4290,7 +4290,7 @@ static bool node_equal(wordnode_T *n1, wordnode_T *n2)
   wordnode_T *p1;
   wordnode_T *p2;
 
-  for (p1 = n1, p2 = n2; p1 != NULL && p2 != NULL;
+  for (p1 = n1, p2 = n2; p1 != nullptr && p2 != nullptr;
        p1 = p1->wn_sibling, p2 = p2->wn_sibling) {
     if (p1->wn_byte != p2->wn_byte
         || (p1->wn_byte == NUL
@@ -4302,7 +4302,7 @@ static bool node_equal(wordnode_T *n1, wordnode_T *n2)
     }
   }
 
-  return p1 == NULL && p2 == NULL;
+  return p1 == nullptr && p2 == nullptr;
 }
 
 /// Function given to qsort() to sort the REP items on "from" string.
@@ -4323,7 +4323,7 @@ static int write_vim_spell(spellinfo_T *spin, char *fname)
   int regionmask;
 
   FILE *fd = os_fopen(fname, "w");
-  if (fd == NULL) {
+  if (fd == nullptr) {
     semsg(_(e_notopen), fname);
     return FAIL;
   }
@@ -4341,7 +4341,7 @@ static int write_vim_spell(spellinfo_T *spin, char *fname)
   // <SECTIONS>: <section> ... <sectionend>
 
   // SN_INFO: <infotext>
-  if (spin->si_info != NULL) {
+  if (spin->si_info != nullptr) {
     putc(SN_INFO, fd);                                  // <sectionID>
     putc(0, fd);                                        // <sectionflags>
     size_t i = strlen(spin->si_info);
@@ -4402,7 +4402,7 @@ static int write_vim_spell(spellinfo_T *spin, char *fname)
   }
 
   // SN_MIDWORD: <midword>
-  if (spin->si_midword != NULL) {
+  if (spin->si_midword != nullptr) {
     putc(SN_MIDWORD, fd);                               // <sectionID>
     putc(SNF_REQUIRED, fd);                             // <sectionflags>
 
@@ -4417,7 +4417,7 @@ static int write_vim_spell(spellinfo_T *spin, char *fname)
     putc(SN_PREFCOND, fd);                              // <sectionID>
     putc(SNF_REQUIRED, fd);                             // <sectionflags>
 
-    size_t l = (size_t)write_spell_prefcond(NULL, &spin->si_prefcond, &fwv);
+    size_t l = (size_t)write_spell_prefcond(nullptr, &spin->si_prefcond, &fwv);
     put_bytes(fd, l, 4);                                // <sectionlen>
 
     write_spell_prefcond(fd, &spin->si_prefcond, &fwv);
@@ -4436,7 +4436,7 @@ static int write_vim_spell(spellinfo_T *spin, char *fname)
       gap = &spin->si_rep;
     } else if (round == 2) {
       // Don't write SN_SAL when using a SN_SOFO section
-      if (spin->si_sofofr != NULL && spin->si_sofoto != NULL) {
+      if (spin->si_sofofr != nullptr && spin->si_sofoto != nullptr) {
         continue;
       }
       gap = &spin->si_sal;
@@ -4507,7 +4507,7 @@ static int write_vim_spell(spellinfo_T *spin, char *fname)
 
   // SN_SOFO: <sofofromlen> <sofofrom> <sofotolen> <sofoto>
   // This is for making suggestions, section is not required.
-  if (spin->si_sofofr != NULL && spin->si_sofoto != NULL) {
+  if (spin->si_sofofr != nullptr && spin->si_sofoto != nullptr) {
     putc(SN_SOFO, fd);                                  // <sectionID>
     putc(0, fd);                                        // <sectionflags>
 
@@ -4569,13 +4569,13 @@ static int write_vim_spell(spellinfo_T *spin, char *fname)
   // right.
   if (!spin->si_nosugfile
       && (!GA_EMPTY(&spin->si_sal)
-          || (spin->si_sofofr != NULL && spin->si_sofoto != NULL))) {
+          || (spin->si_sofofr != nullptr && spin->si_sofoto != nullptr))) {
     putc(SN_SUGFILE, fd);                               // <sectionID>
     putc(0, fd);                                        // <sectionflags>
     put_bytes(fd, 8, 4);                                // <sectionlen>
 
     // Set si_sugtime and write it to the file.
-    spin->si_sugtime = time(NULL);
+    spin->si_sugtime = time(nullptr);
     put_time(fd, spin->si_sugtime);                     // <timestamp>
   }
 
@@ -4600,7 +4600,7 @@ static int write_vim_spell(spellinfo_T *spin, char *fname)
   // SN_COMPOUND: compound info.
   // We don't mark it required, when not supported all compound words will
   // be bad words.
-  if (spin->si_compflags != NULL) {
+  if (spin->si_compflags != nullptr) {
     putc(SN_COMPOUND, fd);                              // <sectionID>
     putc(0, fd);                                        // <sectionflags>
 
@@ -4639,7 +4639,7 @@ static int write_vim_spell(spellinfo_T *spin, char *fname)
   // SN_SYLLABLE: syllable info.
   // We don't mark it required, when not supported syllables will not be
   // counted.
-  if (spin->si_syllable != NULL) {
+  if (spin->si_syllable != nullptr) {
     putc(SN_SYLLABLE, fd);                              // <sectionID>
     putc(0, fd);                                        // <sectionflags>
 
@@ -4669,7 +4669,7 @@ static int write_vim_spell(spellinfo_T *spin, char *fname)
     // Count the number of nodes.  Needed to be able to allocate the
     // memory when reading the nodes.  Also fills in index for shared
     // nodes.
-    size_t nodecount = (size_t)put_node(NULL, tree, 0, regionmask, round == 3);
+    size_t nodecount = (size_t)put_node(nullptr, tree, 0, regionmask, round == 3);
 
     // number of nodes in 4 bytes
     put_bytes(fd, nodecount, 4);                        // <nodecount>
@@ -4704,10 +4704,10 @@ theend:
 // space.
 static void clear_node(wordnode_T *node)
 {
-  if (node != NULL) {
-    for (wordnode_T *np = node; np != NULL; np = np->wn_sibling) {
+  if (node != nullptr) {
+    for (wordnode_T *np = node; np != nullptr; np = np->wn_sibling) {
       np->wn_u1.index = 0;
-      np->wn_u2.wnode = NULL;
+      np->wn_u2.wnode = nullptr;
 
       if (np->wn_byte != NUL) {
         clear_node(np->wn_child);
@@ -4725,14 +4725,14 @@ static void clear_node(wordnode_T *node)
 /// assumptions are made about the indexes (so that we don't have to write them
 /// in the file).
 ///
-/// @param fd  NULL when only counting
+/// @param fd  nullptr when only counting
 /// @param prefixtree  true for PREFIXTREE
 ///
 /// @return  the number of nodes used.
 static int put_node(FILE *fd, wordnode_T *node, int idx, int regionmask, bool prefixtree)
 {
   // If "node" is zero the tree is empty.
-  if (node == NULL) {
+  if (node == nullptr) {
     return 0;
   }
 
@@ -4741,18 +4741,18 @@ static int put_node(FILE *fd, wordnode_T *node, int idx, int regionmask, bool pr
 
   // Count the number of siblings.
   int siblingcount = 0;
-  for (wordnode_T *np = node; np != NULL; np = np->wn_sibling) {
+  for (wordnode_T *np = node; np != nullptr; np = np->wn_sibling) {
     siblingcount++;
   }
 
   // Write the sibling count.
-  if (fd != NULL) {
+  if (fd != nullptr) {
     putc(siblingcount, fd);                             // <siblingcount>
   }
   // Write each sibling byte and optionally extra info.
-  for (wordnode_T *np = node; np != NULL; np = np->wn_sibling) {
+  for (wordnode_T *np = node; np != nullptr; np = np->wn_sibling) {
     if (np->wn_byte == 0) {
-      if (fd != NULL) {
+      if (fd != nullptr) {
         // For a NUL byte (end of word) write the flags etc.
         if (prefixtree) {
           // In PREFIXTREE write the required affixID and the
@@ -4801,16 +4801,16 @@ static int put_node(FILE *fd, wordnode_T *node, int idx, int regionmask, bool pr
       if (np->wn_child->wn_u1.index != 0
           && np->wn_child->wn_u2.wnode != node) {
         // The child is written elsewhere, write the reference.
-        if (fd != NULL) {
+        if (fd != nullptr) {
           putc(BY_INDEX, fd);                                      // <byte>
           put_bytes(fd, (uintmax_t)np->wn_child->wn_u1.index, 3);  // <nodeidx>
         }
-      } else if (np->wn_child->wn_u2.wnode == NULL) {
+      } else if (np->wn_child->wn_u2.wnode == nullptr) {
         // We will write the child below and give it an index.
         np->wn_child->wn_u2.wnode = node;
       }
 
-      if (fd != NULL) {
+      if (fd != nullptr) {
         if (putc(np->wn_byte, fd) == EOF) {       // <byte> or <xbyte>
           emsg(_(e_write));
           return 0;
@@ -4824,7 +4824,7 @@ static int put_node(FILE *fd, wordnode_T *node, int idx, int regionmask, bool pr
   int newindex = idx + siblingcount + 1;
 
   // Recursively dump the children of each sibling.
-  for (wordnode_T *np = node; np != NULL; np = np->wn_sibling) {
+  for (wordnode_T *np = node; np != nullptr; np = np->wn_sibling) {
     if (np->wn_byte != 0 && np->wn_child->wn_u2.wnode == node) {
       newindex = put_node(fd, np->wn_child, newindex, regionmask,
                           prefixtree);
@@ -4862,7 +4862,7 @@ void ex_mkspell(exarg_T *eap)
 // Writes the file with the name "wfname", with ".spl" changed to ".sug".
 static void spell_make_sugfile(spellinfo_T *spin, char *wfname)
 {
-  char *fname = NULL;
+  char *fname = nullptr;
   slang_T *slang;
   bool free_slang = false;
 
@@ -4871,27 +4871,27 @@ static void spell_make_sugfile(spellinfo_T *spin, char *wfname)
   // pointer-linked version of the trie.  And it avoids having two versions
   // of the code for the soundfolding stuff.
   // It might have been done already by spell_reload_one().
-  for (slang = first_lang; slang != NULL; slang = slang->sl_next) {
+  for (slang = first_lang; slang != nullptr; slang = slang->sl_next) {
     if (path_full_compare(wfname, slang->sl_fname, false, true)
         == kEqualFiles) {
       break;
     }
   }
-  if (slang == NULL) {
+  if (slang == nullptr) {
     spell_message(spin, _("Reading back spell file..."));
-    slang = spell_load_file(wfname, NULL, NULL, false);
-    if (slang == NULL) {
+    slang = spell_load_file(wfname, nullptr, nullptr, false);
+    if (slang == nullptr) {
       return;
     }
     free_slang = true;
   }
 
   // Clear the info in "spin" that is used.
-  spin->si_blocks = NULL;
+  spin->si_blocks = nullptr;
   spin->si_blocks_cnt = 0;
   spin->si_compress_cnt = 0;        // will stay at 0 all the time
   spin->si_free_count = 0;
-  spin->si_first_free = NULL;
+  spin->si_first_free = nullptr;
   spin->si_foldwcount = 0;
 
   // Go through the trie of good words, soundfold each word and add it to
@@ -4954,7 +4954,7 @@ static int sug_filltree(spellinfo_T *spin, slang_T *slang)
   // in the trie.  Bail out if the tree is empty.
   uint8_t *byts = slang->sl_fbyts;
   idx_T *idxs = slang->sl_fidxs;
-  if (byts == NULL || idxs == NULL) {
+  if (byts == nullptr || idxs == nullptr) {
     return FAIL;
   }
 
@@ -5056,11 +5056,11 @@ static int sug_filltable(spellinfo_T *spin, wordnode_T *node, int startwordnr, g
 {
   int wordnr = startwordnr;
 
-  for (wordnode_T *p = node; p != NULL; p = p->wn_sibling) {
+  for (wordnode_T *p = node; p != nullptr; p = p->wn_sibling) {
     if (p->wn_byte == NUL) {
       gap->ga_len = 0;
       int prev_nr = 0;
-      for (wordnode_T *np = p; np != NULL && np->wn_byte == NUL; np = np->wn_sibling) {
+      for (wordnode_T *np = p; np != nullptr && np->wn_byte == NUL; np = np->wn_sibling) {
         ga_grow(gap, 10);
 
         int nr = (np->wn_flags << 16) + (np->wn_region & 0xffff);
@@ -5084,7 +5084,7 @@ static int sug_filltable(spellinfo_T *spin, wordnode_T *node, int startwordnr, g
 
       // Remove extra NUL entries, we no longer need them. We don't
       // bother freeing the nodes, they won't be reused anyway.
-      while (p->wn_sibling != NULL && p->wn_sibling->wn_byte == NUL) {
+      while (p->wn_sibling != nullptr && p->wn_sibling->wn_byte == NUL) {
         p->wn_sibling = p->wn_sibling->wn_sibling;
       }
 
@@ -5145,7 +5145,7 @@ static void sug_write(spellinfo_T *spin, char *fname)
 {
   // Create the file.  Note that an existing file is silently overwritten!
   FILE *fd = os_fopen(fname, "w");
-  if (fd == NULL) {
+  if (fd == nullptr) {
     semsg(_(e_notopen), fname);
     return;
   }
@@ -5174,7 +5174,7 @@ static void sug_write(spellinfo_T *spin, char *fname)
   // Count the number of nodes.  Needed to be able to allocate the
   // memory when reading the nodes.  Also fills in index for shared
   // nodes.
-  size_t nodecount = (size_t)put_node(NULL, tree, 0, 0, false);
+  size_t nodecount = (size_t)put_node(nullptr, tree, 0, 0, false);
 
   // number of nodes in 4 bytes
   put_bytes(fd, nodecount, 4);                          // <nodecount>
@@ -5225,7 +5225,7 @@ theend:
 /// @param added_word  invoked through "zg"
 static void mkspell(int fcount, char **fnames, bool ascii, bool over_write, bool added_word)
 {
-  char *fname = NULL;
+  char *fname = nullptr;
   afffile_T *(afile[MAXREGIONS]);
   bool error = false;
   spellinfo_T spin;
@@ -5273,19 +5273,19 @@ static void mkspell(int fcount, char **fnames, bool ascii, bool over_write, bool
     }
 
     // Check for .ascii.spl.
-    if (strstr(path_tail(wfname), SPL_FNAME_ASCII) != NULL) {
+    if (strstr(path_tail(wfname), SPL_FNAME_ASCII) != nullptr) {
       spin.si_ascii = true;
     }
 
     // Check for .add.spl.
-    if (strstr(path_tail(wfname), SPL_FNAME_ADD) != NULL) {
+    if (strstr(path_tail(wfname), SPL_FNAME_ADD) != nullptr) {
       spin.si_add = true;
     }
   }
 
   if (incount <= 0) {
     emsg(_(e_invarg));          // need at least output and input names
-  } else if (vim_strchr(path_tail(wfname), '_') != NULL) {
+  } else if (vim_strchr(path_tail(wfname), '_') != nullptr) {
     emsg(_("E751: Output file name must not have region name"));
   } else if (incount > MAXREGIONS) {
     semsg(_("E754: Only up to %d regions supported"), MAXREGIONS);
@@ -5306,7 +5306,7 @@ static void mkspell(int fcount, char **fnames, bool ascii, bool over_write, bool
     // Init the aff and dic pointers.
     // Get the region names if there are more than 2 arguments.
     for (int i = 0; i < incount; i++) {
-      afile[i] = NULL;
+      afile[i] = nullptr;
 
       if (incount > 1) {
         int len = (int)strlen(innames[i]);
@@ -5346,7 +5346,7 @@ static void mkspell(int fcount, char **fnames, bool ascii, bool over_write, bool
         // Read the .aff file.  Will init "spin->si_conv" based on the
         // "SET" line.
         afile[i] = spell_read_aff(&spin, fname);
-        if (afile[i] == NULL) {
+        if (afile[i] == nullptr) {
           error = true;
         } else {
           // Read the .dic file and store the words in the trees.
@@ -5364,10 +5364,10 @@ static void mkspell(int fcount, char **fnames, bool ascii, bool over_write, bool
       }
 
       // Free any conversion stuff.
-      convert_setup(&spin.si_conv, NULL, NULL);
+      convert_setup(&spin.si_conv, nullptr, nullptr);
     }
 
-    if (spin.si_compflags != NULL && spin.si_nobreak) {
+    if (spin.si_compflags != nullptr && spin.si_nobreak) {
       msg(_("Warning: both compounding and NOBREAK specified"), 0);
     }
 
@@ -5409,7 +5409,7 @@ static void mkspell(int fcount, char **fnames, bool ascii, bool over_write, bool
 
     // Free the .aff file structures.
     for (int i = 0; i < incount; i++) {
-      if (afile[i] != NULL) {
+      if (afile[i] != nullptr) {
         spell_free_aff(afile[i]);
       }
     }
@@ -5467,11 +5467,11 @@ void ex_spell(exarg_T *eap)
 /// @param bool  // true for "zug", "zuG", "zuw" and "zuW"
 void spell_add_word(char *word, int len, SpellAddType what, int idx, bool undo)
 {
-  FILE *fd = NULL;
-  buf_T *buf = NULL;
+  FILE *fd = nullptr;
+  buf_T *buf = nullptr;
   bool new_spf = false;
   char *fname;
-  char *fnamebuf = NULL;
+  char *fnamebuf = nullptr;
   char line[MAXWLEN * 2];
   char *spf;
 
@@ -5481,9 +5481,9 @@ void spell_add_word(char *word, int len, SpellAddType what, int idx, bool undo)
   }
 
   if (idx == 0) {           // use internal wordlist
-    if (int_wordlist == NULL) {
+    if (int_wordlist == nullptr) {
       int_wordlist = vim_tempname();
-      if (int_wordlist == NULL) {
+      if (int_wordlist == nullptr) {
         return;
       }
     }
@@ -5516,10 +5516,10 @@ void spell_add_word(char *word, int len, SpellAddType what, int idx, bool undo)
 
     // Check that the user isn't editing the .add file somewhere.
     buf = buflist_findname_exp(fnamebuf);
-    if (buf != NULL && buf->b_ml.ml_mfp == NULL) {
-      buf = NULL;
+    if (buf != nullptr && buf->b_ml.ml_mfp == nullptr) {
+      buf = nullptr;
     }
-    if (buf != NULL && bufIsChanged(buf)) {
+    if (buf != nullptr && bufIsChanged(buf)) {
       emsg(_(e_bufloaded));
       xfree(fnamebuf);
       return;
@@ -5534,7 +5534,7 @@ void spell_add_word(char *word, int len, SpellAddType what, int idx, bool undo)
     // When the word appears as good word we need to remove that one,
     // since its flags sort before the one with WF_BANNED.
     fd = os_fopen(fname, "r");
-    if (fd != NULL) {
+    if (fd != nullptr) {
       while (!vim_fgets(line, MAXWLEN * 2, fd)) {
         fpos = fpos_next;
         fpos_next = (int)ftell(fd);
@@ -5550,13 +5550,13 @@ void spell_add_word(char *word, int len, SpellAddType what, int idx, bool undo)
           // doesn't work for all systems, close the file first.
           fclose(fd);
           fd = os_fopen(fname, "r+");
-          if (fd == NULL) {
+          if (fd == nullptr) {
             break;
           }
           if (fseek(fd, fpos, SEEK_SET) == 0) {
             fputc('#', fd);
             if (undo) {
-              home_replace(NULL, fname, NameBuff, MAXPATHL, true);
+              home_replace(nullptr, fname, NameBuff, MAXPATHL, true);
               smsg(0, _("Word '%.*s' removed from %s"), len, word, NameBuff);
             }
           }
@@ -5566,7 +5566,7 @@ void spell_add_word(char *word, int len, SpellAddType what, int idx, bool undo)
           }
         }
       }
-      if (fd != NULL) {
+      if (fd != nullptr) {
         fclose(fd);
       }
     }
@@ -5574,7 +5574,7 @@ void spell_add_word(char *word, int len, SpellAddType what, int idx, bool undo)
 
   if (!undo) {
     fd = os_fopen(fname, "a");
-    if (fd == NULL && new_spf) {
+    if (fd == nullptr && new_spf) {
       char *p;
 
       // We just initialized the 'spellfile' option and can't open the
@@ -5594,7 +5594,7 @@ void spell_add_word(char *word, int len, SpellAddType what, int idx, bool undo)
       }
     }
 
-    if (fd == NULL) {
+    if (fd == nullptr) {
       semsg(_(e_notopen), fname);
     } else {
       if (what == SPELL_ADD_BAD) {
@@ -5606,17 +5606,17 @@ void spell_add_word(char *word, int len, SpellAddType what, int idx, bool undo)
       }
       fclose(fd);
 
-      home_replace(NULL, fname, NameBuff, MAXPATHL, true);
+      home_replace(nullptr, fname, NameBuff, MAXPATHL, true);
       smsg(0, _("Word '%.*s' added to %s"), len, word, NameBuff);
     }
   }
 
-  if (fd != NULL) {
+  if (fd != nullptr) {
     // Update the .add.spl file.
     mkspell(1, &fname, false, true, true);
 
     // If the .add file is edited somewhere, reload it.
-    if (buf != NULL) {
+    if (buf != nullptr) {
       buf_reload(buf, buf->b_orig_mode, false);
     }
 
@@ -5642,7 +5642,7 @@ static void init_spellfile(void)
   // Find the end of the language name.  Exclude the region.  If there
   // is a path separator remember the start of the tail.
   for (lend = curwin->w_s->b_p_spl; *lend != NUL
-       && vim_strchr(",._", (uint8_t)(*lend)) == NULL; lend++) {
+       && vim_strchr(",._", (uint8_t)(*lend)) == nullptr; lend++) {
     if (vim_ispathsep(*lend)) {
       aspath = true;
       lstart = lend + 1;
@@ -5660,7 +5660,7 @@ static void init_spellfile(void)
     xstrlcat(buf, "/site/spell", buf_len);
 
     char *failed_dir;
-    if (os_mkdir_recurse(buf, 0755, &failed_dir, NULL) != 0) {
+    if (os_mkdir_recurse(buf, 0755, &failed_dir, nullptr) != 0) {
       xfree(buf);
       xfree(failed_dir);
       return;
@@ -5679,7 +5679,7 @@ static void init_spellfile(void)
   // Append ".ascii.add" or ".{enc}.add"
   char *fname = LANGP_ENTRY(curwin->w_s->b_langp, 0)->lp_slang->sl_fname;
   const char *enc_suffix =
-    (fname != NULL && strstr(path_tail(fname), ".ascii.") != NULL) ? "ascii" : spell_enc();
+    (fname != nullptr && strstr(path_tail(fname), ".ascii.") != nullptr) ? "ascii" : spell_enc();
   vim_snprintf(buf + strlen(buf), buf_len - strlen(buf), ".%s.add", enc_suffix);
 
   set_option_value_give_err(kOptSpellfile, CSTR_AS_OPTVAL(buf), OPT_LOCAL);
@@ -5740,27 +5740,27 @@ static int set_spell_finish(spelltab_T *new_st)
 }
 
 // Write the table with prefix conditions to the .spl file.
-// When "fd" is NULL only count the length of what is written.
+// When "fd" is nullptr only count the length of what is written.
 static int write_spell_prefcond(FILE *fd, garray_T *gap, size_t *fwv)
 {
   assert(gap->ga_len >= 0);
 
-  if (fd != NULL) {
+  if (fd != nullptr) {
     put_bytes(fd, (uintmax_t)gap->ga_len, 2);           // <prefcondcnt>
   }
   size_t totlen = 2 + (size_t)gap->ga_len;  // <prefcondcnt> and <condlen> bytes
   for (int i = 0; i < gap->ga_len; i++) {
     // <prefcond> : <condlen> <condstr>
     char *p = ((char **)gap->ga_data)[i];
-    if (p != NULL) {
+    if (p != nullptr) {
       size_t len = strlen(p);
-      if (fd != NULL) {
+      if (fd != nullptr) {
         assert(len <= INT_MAX);
         fputc((int)len, fd);
         *fwv &= fwrite(p, len, 1, fd);
       }
       totlen += len;
-    } else if (fd != NULL) {
+    } else if (fd != nullptr) {
       fputc(0, fd);
     }
   }

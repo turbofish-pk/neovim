@@ -25,11 +25,11 @@ static int tv_op_blob(typval_T *tv1, const typval_T *tv2, const char *op)
   }
 
   // Blob += Blob
-  if (tv2->vval.v_blob == NULL) {
+  if (tv2->vval.v_blob == nullptr) {
     return OK;
   }
 
-  if (tv1->vval.v_blob == NULL) {
+  if (tv1->vval.v_blob == nullptr) {
     tv1->vval.v_blob = tv2->vval.v_blob;
     tv1->vval.v_blob->bv_refcount++;
     return OK;
@@ -59,15 +59,15 @@ static int tv_op_list(typval_T *tv1, const typval_T *tv2, const char *op)
   }
 
   // List += List
-  if (tv2->vval.v_list == NULL) {
+  if (tv2->vval.v_list == nullptr) {
     return OK;
   }
 
-  if (tv1->vval.v_list == NULL) {
+  if (tv1->vval.v_list == nullptr) {
     tv1->vval.v_list = tv2->vval.v_list;
     tv_list_ref(tv1->vval.v_list);
   } else {
-    tv_list_extend(tv1->vval.v_list, tv2->vval.v_list, NULL);
+    tv_list_extend(tv1->vval.v_list, tv2->vval.v_list, nullptr);
   }
 
   return OK;
@@ -155,7 +155,7 @@ static int tv_op_nr_or_string(typval_T *tv1, const typval_T *tv2, const char *op
     return FAIL;
   }
 
-  if (vim_strchr("+-*/%", (uint8_t)(*op)) != NULL) {
+  if (vim_strchr("+-*/%", (uint8_t)(*op)) != nullptr) {
     return tv_op_number(tv1, tv2, op);
   }
 

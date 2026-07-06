@@ -212,14 +212,14 @@ static struct entry *find_longest_common_sequence(struct hashmap *map)
 	int anchor_i = -1;
 
 	// Added to silence Coverity.
-	if (sequence == NULL)
+	if (sequence == nullptr)
 		return map->first;
 
 	for (entry = map->first; entry; entry = entry->next) {
 		if (!entry->line2 || entry->line2 == NON_UNIQUE)
 			continue;
 		i = binary_search(sequence, longest, entry);
-		entry->previous = i < 0 ? NULL : sequence[i];
+		entry->previous = i < 0 ? nullptr : sequence[i];
 		++i;
 		if (i <= anchor_i)
 			continue;
@@ -235,12 +235,12 @@ static struct entry *find_longest_common_sequence(struct hashmap *map)
 	/* No common unique lines were found */
 	if (!longest) {
 		xdl_free(sequence);
-		return NULL;
+		return nullptr;
 	}
 
 	/* Iterate starting at the last element, adjusting the "next" members */
 	entry = sequence[longest - 1];
-	entry->next = NULL;
+	entry->next = nullptr;
 	while (entry->previous) {
 		entry->previous->next = entry;
 		entry = entry->previous;

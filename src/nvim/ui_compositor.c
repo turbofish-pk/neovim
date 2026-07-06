@@ -243,14 +243,14 @@ bool ui_comp_set_grid(handle_T handle)
   if (curgrid->handle == handle) {
     return true;
   }
-  ScreenGrid *grid = NULL;
+  ScreenGrid *grid = nullptr;
   for (size_t i = 0; i < kv_size(layers); i++) {
     if (kv_A(layers, i)->handle == handle) {
       grid = kv_A(layers, i);
       break;
     }
   }
-  if (grid != NULL) {
+  if (grid != nullptr) {
     curgrid = grid;
     return true;
   }
@@ -328,7 +328,7 @@ ScreenGrid *ui_comp_mouse_focus(int row, int col)
       }
     }
   }
-  return NULL;
+  return nullptr;
 }
 
 /// Compute which grid is on top at supplied screen coordinates
@@ -375,7 +375,7 @@ static void compose_line(Integer row, Integer startcol, Integer endcol, LineFlag
   }
 
   int col = (int)startcol;
-  ScreenGrid *grid = NULL;
+  ScreenGrid *grid = nullptr;
   schar_T *bg_line = &default_grid.chars[default_grid.line_offset[row]
                                          + (size_t)startcol];
   sattr_T *bg_attrs = &default_grid.attrs[default_grid.line_offset[row]
@@ -405,7 +405,7 @@ static void compose_line(Integer row, Integer startcol, Integer endcol, LineFlag
     }
     until = MIN(until, (int)endcol);
 
-    assert(grid != NULL);
+    assert(grid != nullptr);
     assert(until > col);
     assert(until <= default_grid.cols);
     size_t n = (size_t)(until - col);

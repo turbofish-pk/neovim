@@ -195,9 +195,9 @@ void nvim_set_hl(uint64_t channel_id, Integer ns_id, String name, Dict(highlight
   }
 
   bool update = HAS_KEY(val, highlight, update) && val->update;
-  HlAttrs *base = NULL;
+  HlAttrs *base = nullptr;
   HlAttrs base_attrs;
-  if (update && hl_ns_get_attrs((int)ns_id, hl_id, NULL, &base_attrs)) {
+  if (update && hl_ns_get_attrs((int)ns_id, hl_id, nullptr, &base_attrs)) {
     base = &base_attrs;
   }
 
@@ -412,7 +412,7 @@ void nvim_input_mouse(String button, String action, String modifier, Integer gri
 {
   may_trigger_vim_suspend_resume(false);
 
-  if (button.data == NULL || action.data == NULL) {
+  if (button.data == nullptr || action.data == nullptr) {
     goto error;
   }
 
@@ -497,7 +497,7 @@ String nvim_replace_termcodes(String str, Boolean from_part, Boolean do_lt, Bool
 {
   if (str.size == 0) {
     // Empty string
-    return (String) { .data = NULL, .size = 0 };
+    return (String) { .data = nullptr, .size = 0 };
   }
 
   int flags = 0;
@@ -511,8 +511,8 @@ String nvim_replace_termcodes(String str, Boolean from_part, Boolean do_lt, Bool
     flags |= REPTERM_NO_SPECIAL;
   }
 
-  char *ptr = NULL;
-  replace_termcodes(str.data, str.size, &ptr, 0, flags, NULL, p_cpo);
+  char *ptr = nullptr;
+  replace_termcodes(str.data, str.size, &ptr, 0, flags, nullptr, p_cpo);
   return cstr_as_string(ptr);
 }
 
@@ -544,7 +544,7 @@ Object nvim_exec_lua(String code, Array args, Arena *arena, Error *err)
   FUNC_API_REMOTE_ONLY
 {
   // TODO(bfredl): convert directly from msgpack to lua and then back again
-  return nlua_exec(code, NULL, args, kRetObject, arena, err);
+  return nlua_exec(code, nullptr, args, kRetObject, arena, err);
 }
 
 /// Like |nvim_exec_lua()|, but can be called during |api-fast| contexts.
@@ -677,7 +677,7 @@ ArrayOf(String) nvim__get_runtime(ArrayOf(String) pat, Boolean all, Dict(runtime
   if (opts->do_source) {
     for (size_t i = 0; i < res.size; i++) {
       String name = res.items[i].data.string;
-      do_source(name.data, false, DOSO_NONE, NULL);
+      do_source(name.data, false, DOSO_NONE, nullptr);
     }
   }
 
@@ -744,14 +744,14 @@ Object nvim_get_var(String name, Arena *arena, Error *err)
   FUNC_API_SINCE(1)
 {
   dictitem_T *di = tv_dict_find(get_globvar_dict(), name.data, (ptrdiff_t)name.size);
-  if (di == NULL) {  // try to autoload script
+  if (di == nullptr) {  // try to autoload script
     bool found = script_autoload(name.data, name.size, false) && !aborting();
     VALIDATE(found, "Key not found: %s", name.data, {
       return (Object)OBJECT_INIT;
     });
     di = tv_dict_find(get_globvar_dict(), name.data, (ptrdiff_t)name.size);
   }
-  VALIDATE((di != NULL), "Key not found: %s", name.data, {
+  VALIDATE((di != nullptr), "Key not found: %s", name.data, {
     return (Object)OBJECT_INIT;
   });
   return vim_to_object(&di->di_tv, arena, true);
@@ -765,7 +765,7 @@ Object nvim_get_var(String name, Arena *arena, Error *err)
 void nvim_set_var(String name, Object value, Error *err)
   FUNC_API_SINCE(1)
 {
-  dict_set_var(get_globvar_dict(), name, value, false, false, NULL, err);
+  dict_set_var(get_globvar_dict(), name, value, false, false, nullptr, err);
 }
 
 /// Removes a global (g:) variable.
@@ -775,7 +775,7 @@ void nvim_set_var(String name, Object value, Error *err)
 void nvim_del_var(String name, Error *err)
   FUNC_API_SINCE(1)
 {
-  dict_set_var(get_globvar_dict(), name, NIL, true, false, NULL, err);
+  dict_set_var(get_globvar_dict(), name, NIL, true, false, nullptr, err);
 }
 
 /// Gets a v: variable.
@@ -797,7 +797,7 @@ Object nvim_get_vvar(String name, Arena *arena, Error *err)
 void nvim_set_vvar(String name, Object value, Error *err)
   FUNC_API_SINCE(6)
 {
-  dict_set_var(get_vimvar_dict(), name, value, false, false, NULL, err);
+  dict_set_var(get_vimvar_dict(), name, value, false, false, nullptr, err);
 }
 
 /// Prints a message given by a list of `[text, hl_group]` "chunks". Emits a |Progress| event if
@@ -849,7 +849,7 @@ Union(Integer, String) nvim_echo(ArrayOf(Tuple(String, *HLGroupID)) chunks, Bool
   char *kind = opts->kind.data;
   if (opts->verbose) {
     verbose_enter();
-  } else if (kind == NULL) {
+  } else if (kind == nullptr) {
     kind = opts->err ? "echoerr" : history ? "echomsg" : "echo";
   }
 
@@ -1052,9 +1052,9 @@ Buffer nvim_create_buf(Boolean listed, Boolean scratch, Error *err)
     // finish configuring it.
     block_autocmds();
 
-    buf_T *buf = buflist_new(NULL, NULL, 0,
+    buf_T *buf = buflist_new(nullptr, nullptr, 0,
                              BLN_NOOPT | BLN_NEW | (listed ? BLN_LISTED : 0));
-    if (buf == NULL) {
+    if (buf == nullptr) {
       unblock_autocmds();
       goto fail;
     }
@@ -1091,12 +1091,12 @@ Buffer nvim_create_buf(Boolean listed, Boolean scratch, Error *err)
 
     bufref_T bufref;
     set_bufref(&bufref, buf);
-    if (apply_autocmds(EVENT_BUFNEW, NULL, NULL, false, buf)
+    if (apply_autocmds(EVENT_BUFNEW, nullptr, nullptr, false, buf)
         && !bufref_valid(&bufref)) {
       goto fail;
     }
     if (listed
-        && apply_autocmds(EVENT_BUFADD, NULL, NULL, false, buf)
+        && apply_autocmds(EVENT_BUFADD, nullptr, nullptr, false, buf)
         && !bufref_valid(&bufref)) {
       goto fail;
     }
@@ -1207,7 +1207,7 @@ Integer nvim_open_term(Buffer buf, Dict(open_term) *opts, Error *err)
   channel_incref(chan);
   chan->term = terminal_alloc(b, topts);
   terminal_open(&chan->term, b);
-  if (chan->term != NULL) {
+  if (chan->term != nullptr) {
     terminal_check_size(chan->term);
   }
   channel_decref(chan);
@@ -1215,7 +1215,7 @@ Integer nvim_open_term(Buffer buf, Dict(open_term) *opts, Error *err)
   // Write buffer contents to channel. channel_send takes ownership of the
   // buffer so we do not need to free it.
   if (contents.size > 0) {
-    const char *error = NULL;
+    const char *error = nullptr;
     channel_send(chan->id, contents.items, contents.size, true, &error);
     VALIDATE(!error, "%s", error, {});
   }
@@ -1240,7 +1240,7 @@ static void term_write(const char *buf, size_t size, void *data)
   ADD_C(args, BUFFER_OBJ(terminal_buf(chan->term)));
   ADD_C(args, STRING_OBJ(((String){ .data = (char *)buf, .size = size })));
   textlock++;
-  nlua_call_ref(cb, "input", args, kRetNilBool, NULL, NULL);
+  nlua_call_ref(cb, "input", args, kRetNilBool, nullptr, nullptr);
   textlock--;
 }
 
@@ -1278,7 +1278,7 @@ static void term_close(void *data)
 void nvim_chan_send(Integer chan, String data, Error *err)
   FUNC_API_SINCE(7) FUNC_API_REMOTE_ONLY FUNC_API_LUA_ONLY
 {
-  const char *error = NULL;
+  const char *error = nullptr;
   if (!data.size) {
     return;
   }
@@ -1499,7 +1499,7 @@ DictOf(Integer) nvim_get_color_map(Arena *arena)
 {
   DictOf(Integer) colors = arena_dict(arena, ARRAY_SIZE(color_name_table));
 
-  for (int i = 0; color_name_table[i].name != NULL; i++) {
+  for (int i = 0; color_name_table[i].name != nullptr; i++) {
     PUT_C(colors, color_name_table[i].name, INTEGER_OBJ(color_name_table[i].color));
   }
   return colors;
@@ -1602,7 +1602,7 @@ DictAs(get_mode) nvim_get_mode(Arena *arena)
 ArrayOf(DictAs(get_keymap)) nvim_get_keymap(String mode, Arena *arena)
   FUNC_API_SINCE(3)
 {
-  return keymap_array(mode, NULL, arena);
+  return keymap_array(mode, nullptr, arena);
 }
 
 /// Sets a global |mapping| for the given mode.
@@ -1753,7 +1753,7 @@ void nvim_set_client_info(uint64_t channel_id, String name, Dict version, String
   PUT_C(info, "methods", DICT_OBJ(methods));
   PUT_C(info, "attributes", DICT_OBJ(attributes));
 
-  rpc_set_client_info(channel_id, copy_dict(info, NULL));
+  rpc_set_client_info(channel_id, copy_dict(info, nullptr));
 }
 
 /// Sets the detach flag for the channel.
@@ -1767,7 +1767,7 @@ void nvim__chan_set_detach(uint64_t channel_id, Boolean detach, Error *err)
   FUNC_API_SINCE(14) FUNC_API_REMOTE_ONLY
 {
   Channel *chan = find_channel(channel_id);
-  VALIDATE(chan != NULL, "%s", e_invchan, {
+  VALIDATE(chan != nullptr, "%s", e_invchan, {
     return;
   });
 
@@ -1784,7 +1784,7 @@ void nvim__cmdwin_set(String type, Buffer buf, Error *err)
 {
   if (type.size == 0 || buf == 0) {
     cmdwin_type = 0;
-    cmdwin_buf = NULL;
+    cmdwin_buf = nullptr;
     return;
   }
   buf_T *b = find_buffer_by_handle(buf, err);
@@ -1943,7 +1943,7 @@ Array nvim_get_proc_children(Integer pid, Arena *arena, Error *err)
   FUNC_API_SINCE(4)
 {
   Array rvobj = ARRAY_DICT_INIT;
-  int *proc_list = NULL;
+  int *proc_list = nullptr;
 
   VALIDATE_INT((pid > 0 && pid <= INT_MAX), "pid", pid, {
     goto end;
@@ -2048,7 +2048,7 @@ Array nvim__inspect_cell(Integer grid, Integer row, Integer col, Arena *arena, E
     g = &pum_grid;
   } else if (grid > 1) {
     win_T *wp = get_win_by_grid_handle((handle_T)grid);
-    VALIDATE_INT((wp != NULL && wp->w_grid_alloc.chars != NULL), "grid handle", grid, {
+    VALIDATE_INT((wp != nullptr && wp->w_grid_alloc.chars != nullptr), "grid handle", grid, {
       return ret;
     });
     g = &wp->w_grid_alloc;
@@ -2114,7 +2114,7 @@ Boolean nvim_del_mark(String name, Error *err)
              "mark name (must be file/uppercase)", name.data, {
     return res;
   });
-  res = set_mark(NULL, name, 0, 0, err);
+  res = set_mark(nullptr, name, 0, 0, err);
   return res;
 }
 
@@ -2162,7 +2162,7 @@ Tuple(Integer, Integer, Buffer, String) nvim_get_mark(String name, Dict(empty) *
     bufnr = 0;
   }
 
-  bool exists = filename != NULL;
+  bool exists = filename != nullptr;
   Integer row;
   Integer col;
 
@@ -2239,7 +2239,7 @@ DictAs(eval_statusline_ret) nvim_eval_statusline(String str, Dict(eval_statuslin
   if (HAS_KEY(opts, eval_statusline, fillchar)) {
     VALIDATE_EXP((*opts->fillchar.data != 0
                   && ((size_t)utfc_ptr2len(opts->fillchar.data) == opts->fillchar.size)),
-                 "fillchar", "single character", NULL, {
+                 "fillchar", "single character", nullptr, {
       return result;
     });
     int c;
@@ -2250,7 +2250,7 @@ DictAs(eval_statusline_ret) nvim_eval_statusline(String str, Dict(eval_statuslin
   int use_bools = (int)opts->use_winbar + (int)opts->use_tabline;
 
   win_T *wp = opts->use_tabline ? curwin : find_window_by_handle(window, err);
-  if (wp == NULL) {
+  if (wp == nullptr) {
     api_set_error(err, kErrorTypeException, "unknown winid %d", window);
     return result;
   }
@@ -2328,8 +2328,8 @@ DictAs(eval_statusline_ret) nvim_eval_statusline(String str, Dict(eval_statuslin
   wp->w_p_crb = false;
 
   int width = build_stl_str_hl(wp, buf, MAXPATHL, str.data, -1, 0, fillchar, maxwidth,
-                               opts->highlights ? &hltab : NULL, &hltab_len, NULL,
-                               statuscol_lnum ? &statuscol : NULL);
+                               opts->highlights ? &hltab : nullptr, &hltab_len, nullptr,
+                               statuscol_lnum ? &statuscol : nullptr);
 
   PUT_C(result, "width", INTEGER_OBJ(width));
 
@@ -2342,9 +2342,9 @@ DictAs(eval_statusline_ret) nvim_eval_statusline(String str, Dict(eval_statuslin
 
     // If first character doesn't have a defined highlight,
     // add the default highlight at the beginning of the highlight list
-    const char *dfltname = get_default_stl_hl(opts->use_tabline ? NULL : wp,
+    const char *dfltname = get_default_stl_hl(opts->use_tabline ? nullptr : wp,
                                               opts->use_winbar, stc_hl_id);
-    if (hltab->start == NULL || (hltab->start - buf) != 0) {
+    if (hltab->start == nullptr || (hltab->start - buf) != 0) {
       Dict hl_info = arena_dict(arena, 3);
       PUT_C(hl_info, "start", INTEGER_OBJ(0));
       PUT_C(hl_info, "group", CSTR_AS_OBJ(dfltname));
@@ -2354,10 +2354,10 @@ DictAs(eval_statusline_ret) nvim_eval_statusline(String str, Dict(eval_statuslin
       ADD_C(hl_values, DICT_OBJ(hl_info));
     }
 
-    for (stl_hlrec_t *sp = hltab; sp->start != NULL; sp++) {
+    for (stl_hlrec_t *sp = hltab; sp->start != nullptr; sp++) {
       const char *grpname;
       if (sp->userhl == 0) {
-        grpname = get_default_stl_hl(opts->use_tabline ? NULL : wp, opts->use_winbar, stc_hl_id);
+        grpname = get_default_stl_hl(opts->use_tabline ? nullptr : wp, opts->use_winbar, stc_hl_id);
       } else if (sp->userhl < 0) {
         grpname = syn_id2name(-sp->userhl);
       } else {
@@ -2438,7 +2438,7 @@ static void redraw_status(win_T *wp, Dict(redraw) *opts, bool *flush)
     if (opts->statusline) {
       win_redr_status(wp);
     }
-    win_check_ns_hl(NULL);
+    win_check_ns_hl(nullptr);
   }
 }
 
@@ -2468,8 +2468,8 @@ static void redraw_status(win_T *wp, Dict(redraw) *opts, bool *flush)
 void nvim__redraw(Dict(redraw) *opts, Error *err)
   FUNC_API_SINCE(12)
 {
-  win_T *win = NULL;
-  buf_T *buf = NULL;
+  win_T *win = nullptr;
+  buf_T *buf = nullptr;
 
   if (HAS_KEY(opts, redraw, win)) {
     win = find_window_by_handle(opts->win, err);
@@ -2479,7 +2479,7 @@ void nvim__redraw(Dict(redraw) *opts, Error *err)
   }
 
   if (HAS_KEY(opts, redraw, buf)) {
-    VALIDATE(win == NULL, "%s", "cannot use both 'buf' and 'win'", {
+    VALIDATE(win == nullptr, "%s", "cannot use both 'buf' and 'win'", {
       return;
     });
     buf = find_buffer_by_handle(opts->buf, err);
@@ -2488,7 +2488,7 @@ void nvim__redraw(Dict(redraw) *opts, Error *err)
     }
   }
 
-  unsigned count = (win != NULL) + (buf != NULL);
+  unsigned count = (win != nullptr) + (buf != nullptr);
   VALIDATE(xpopcount(opts->is_set__redraw_) > count, "%s", "at least one action required", {
     return;
   });
@@ -2499,9 +2499,9 @@ void nvim__redraw(Dict(redraw) *opts, Error *err)
     // the expectation is that this may be called by decoration providers whose
     // "on_win" callback may set "w_redr_top/bot".
     int type = opts->valid ? UPD_VALID : UPD_NOT_VALID;
-    if (win != NULL) {
+    if (win != nullptr) {
       redraw_later(win, type);
-    } else if (buf != NULL) {
+    } else if (buf != nullptr) {
       redraw_buf_later(buf, type);
     } else {
       redraw_all_later(type);
@@ -2559,9 +2559,9 @@ void nvim__redraw(Dict(redraw) *opts, Error *err)
   RedrawingDisabled = 0;
   p_lz = false;
   if (opts->statuscolumn || opts->statusline || opts->winbar) {
-    if (win == NULL) {
+    if (win == nullptr) {
       FOR_ALL_WINDOWS_IN_TAB(wp, curtab) {
-        if (buf == NULL || wp->w_buffer == buf) {
+        if (buf == nullptr || wp->w_buffer == buf) {
           redraw_status(wp, opts, &opts->flush);
         }
       }

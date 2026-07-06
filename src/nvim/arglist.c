@@ -127,7 +127,7 @@ void alist_new(void)
 #ifndef UNIX
 
 /// Expand the file names in the global argument list.
-/// If "fnum_list" is not NULL, use "fnum_list[fnum_len]" as a list of buffer
+/// If "fnum_list" is not nullptr, use "fnum_list[fnum_len]" as a list of buffer
 /// numbers to be re-used.
 void alist_expand(int *fnum_list, int fnum_len)
 {
@@ -180,7 +180,7 @@ void alist_set(alist_T *al, int count, char **files, int use_curbuf, int *fnum_l
 
       // May set buffer name of a buffer previously used for the
       // argument list, so that it's re-used by alist_add.
-      if (fnum_list != NULL && i < fnum_len) {
+      if (fnum_list != nullptr && i < fnum_len) {
         arglist_locked = true;
         buf_set_name(fnum_list[i], files[i]);
         arglist_locked = false;
@@ -207,7 +207,7 @@ void alist_add(alist_T *al, char *fname, int set_fnum)
 {
   win_T *wp = curwin;
 
-  if (fname == NULL) {          // don't add NULL file names
+  if (fname == nullptr) {          // don't add nullptr file names
     return;
   }
   if (check_arglist_locked() == FAIL) {
@@ -233,7 +233,7 @@ void alist_add(alist_T *al, char *fname, int set_fnum)
 void alist_slash_adjust(void)
 {
   for (int i = 0; i < GARGCOUNT; i++) {
-    if (GARGLIST[i].ae_fname != NULL) {
+    if (GARGLIST[i].ae_fname != nullptr) {
       slash_adjust(GARGLIST[i].ae_fname);
     }
   }
@@ -241,7 +241,7 @@ void alist_slash_adjust(void)
   FOR_ALL_TAB_WINDOWS(tp, wp) {
     if (wp->w_alist != &global_alist) {
       for (int i = 0; i < WARGCOUNT(wp); i++) {
-        if (WARGLIST(wp)[i].ae_fname != NULL) {
+        if (WARGLIST(wp)[i].ae_fname != nullptr) {
           slash_adjust(WARGLIST(wp)[i].ae_fname);
         }
       }
@@ -381,12 +381,12 @@ static void arglist_del_files(garray_T *alist_ga)
   regmatch.rm_ic = p_fic;     // ignore case when 'fileignorecase' is set
   for (int i = 0; i < alist_ga->ga_len && !got_int; i++) {
     char *p = ((char **)alist_ga->ga_data)[i];
-    p = file_pat_to_reg_pat(p, NULL, NULL, false);
-    if (p == NULL) {
+    p = file_pat_to_reg_pat(p, nullptr, nullptr, false);
+    if (p == nullptr) {
       break;
     }
     regmatch.regprog = vim_regcomp(p, magic_isset() ? RE_MAGIC : 0);
-    if (regmatch.regprog == NULL) {
+    if (regmatch.regprog == nullptr) {
       xfree(p);
       break;
     }
@@ -439,7 +439,7 @@ static int do_arglist(char *str, int what, int after, bool will_edit)
 
   // Set default argument for ":argadd" command.
   if (what == AL_ADD && *str == NUL) {
-    if (curbuf->b_ffname == NULL) {
+    if (curbuf->b_ffname == nullptr) {
       return FAIL;
     }
     str = curbuf->b_fname;
@@ -466,7 +466,7 @@ static int do_arglist(char *str, int what, int after, bool will_edit)
       xfree(exp_files);
     } else {
       assert(what == AL_SET);
-      alist_set(ALIST(curwin), exp_count, exp_files, will_edit, NULL, 0);
+      alist_set(ALIST(curwin), exp_count, exp_files, will_edit, nullptr, 0);
     }
   }
 
@@ -488,7 +488,7 @@ bool editing_arg_idx(win_T *win)
   return !(win->w_arg_idx >= WARGCOUNT(win)
            || (win->w_buffer->b_fnum
                != WARGLIST(win)[win->w_arg_idx].ae_fnum
-               && (win->w_buffer->b_ffname == NULL
+               && (win->w_buffer->b_ffname == nullptr
                    || !(path_full_compare(alist_name(&WARGLIST(win)[win->w_arg_idx]),
                                           win->w_buffer->b_ffname, true,
                                           true) & kEqualFiles))));
@@ -507,7 +507,7 @@ void check_arg_idx(win_T *win)
         && GARGCOUNT > 0
         && win->w_arg_idx < GARGCOUNT
         && (win->w_buffer->b_fnum == GARGLIST[GARGCOUNT - 1].ae_fnum
-            || (win->w_buffer->b_ffname != NULL
+            || (win->w_buffer->b_ffname != nullptr
                 && (path_full_compare(alist_name(&GARGLIST[GARGCOUNT - 1]),
                                       win->w_buffer->b_ffname, true, true)
                     & kEqualFiles)))) {
@@ -576,7 +576,7 @@ void ex_args(exarg_T *eap)
     ga_grow(gap, GARGCOUNT);
 
     for (int i = 0; i < GARGCOUNT; i++) {
-      if (GARGLIST[i].ae_fname != NULL) {
+      if (GARGLIST[i].ae_fname != nullptr) {
         AARGLIST(curwin->w_alist)[gap->ga_len].ae_fname = xstrdup(GARGLIST[i].ae_fname);
         AARGLIST(curwin->w_alist)[gap->ga_len].ae_fnum = GARGLIST[i].ae_fnum;
         gap->ga_len++;
@@ -680,7 +680,7 @@ void do_argfile(exarg_T *eap, int argn)
   // Edit the file; always use the last known line number.
   // When it fails (e.g. Abort for already edited file) restore the
   // argument index.
-  if (do_ecmd(0, alist_name(&ARGLIST[curwin->w_arg_idx]), NULL,
+  if (do_ecmd(0, alist_name(&ARGLIST[curwin->w_arg_idx]), nullptr,
               eap, ECMD_LAST,
               (buf_hide(curwin->w_buffer) ? ECMD_HIDE : 0)
               + (eap->forceit ? ECMD_FORCEIT : 0), curwin) == FAIL) {
@@ -762,7 +762,7 @@ void ex_argedit(exarg_T *eap)
 
   if (curwin->w_arg_idx == 0
       && (curbuf->b_ml.ml_flags & ML_EMPTY)
-      && (curbuf->b_ffname == NULL || curbuf_is_reusable)) {
+      && (curbuf->b_ffname == nullptr || curbuf_is_reusable)) {
     i = 0;
   }
   // Edit the argument.
@@ -837,7 +837,7 @@ void ex_argdelete(exarg_T *eap)
 char *get_arglist_name(expand_T *xp FUNC_ATTR_UNUSED, int idx)
 {
   if (idx >= ARGCOUNT) {
-    return NULL;
+    return nullptr;
   }
   return alist_name(&ARGLIST[idx]);
 }
@@ -847,7 +847,7 @@ char *alist_name(aentry_T *aep)
 {
   // Use the name from the associated buffer if it exists.
   buf_T *bp = buflist_findnr(aep->ae_fnum);
-  if (bp == NULL || bp->b_fname == NULL) {
+  if (bp == nullptr || bp->b_fname == nullptr) {
     return aep->ae_fname;
   }
   return bp->b_fname;
@@ -867,16 +867,16 @@ static void arg_all_close_unused_windows(arg_all_state_T *aall)
   // moving tabpages around in an autocommand may cause an endless loop
   tabpage_move_disallowed++;
   while (true) {
-    win_T *wpnext = NULL;
+    win_T *wpnext = nullptr;
     tabpage_T *tpnext = curtab->tp_next;
     // Try to close floating windows first
-    for (win_T *wp = lastwin->w_floating ? lastwin : firstwin; wp != NULL; wp = wpnext) {
+    for (win_T *wp = lastwin->w_floating ? lastwin : firstwin; wp != nullptr; wp = wpnext) {
       int i;
       wpnext = wp->w_floating
                ? wp->w_prev->w_floating ? wp->w_prev : firstwin
-               : (wp->w_next == NULL || wp->w_next->w_floating) ? NULL : wp->w_next;
+               : (wp->w_next == nullptr || wp->w_next->w_floating) ? nullptr : wp->w_next;
       buf_T *buf = wp->w_buffer;
-      if (buf->b_ffname == NULL
+      if (buf->b_ffname == nullptr
           || (!aall->keep_tabs
               && (buf->b_nwindows > 1 || wp->w_width != Columns
                   || (wp->w_floating && !is_aucmd_win(wp))))) {
@@ -901,7 +901,7 @@ static void arg_all_close_unused_windows(arg_all_state_T *aall)
             if (weight > (int)aall->opened[i]) {
               aall->opened[i] = (uint8_t)weight;
               if (i == 0) {
-                if (aall->new_curwin != NULL) {
+                if (aall->new_curwin != nullptr) {
                   aall->new_curwin->w_arg_idx = aall->opened_len;
                 }
                 aall->new_curwin = wp;
@@ -940,7 +940,7 @@ static void arg_all_close_unused_windows(arg_all_state_T *aall)
           }
           // don't close last window
           if (ONE_WINDOW
-              && (first_tabpage->tp_next == NULL || !aall->had_tab)) {
+              && (first_tabpage->tp_next == nullptr || !aall->had_tab)) {
             aall->use_firstwin = true;
           } else {
             win_close(wp, !buf_hide(buf) && !bufIsChanged(buf), false);
@@ -955,7 +955,7 @@ static void arg_all_close_unused_windows(arg_all_state_T *aall)
     }
 
     // Without the ":tab" modifier only do the current tab page.
-    if (aall->had_tab == 0 || tpnext == NULL) {
+    if (aall->had_tab == 0 || tpnext == nullptr) {
       break;
     }
 
@@ -976,7 +976,7 @@ static void arg_all_open_windows(arg_all_state_T *aall, int count)
   // ":tab drop file" should re-use an empty window to avoid "--remote-tab"
   // leaving an empty tab page when executed locally.
   if (aall->keep_tabs && buf_is_empty(curbuf) && curbuf->b_nwindows == 1
-      && curbuf->b_ffname == NULL && !curbuf->b_changed) {
+      && curbuf->b_ffname == nullptr && !curbuf->b_changed) {
     aall->use_firstwin = true;
     tab_drop_empty_window = true;
   }
@@ -1031,7 +1031,7 @@ static void arg_all_open_windows(arg_all_state_T *aall, int count)
         aall->new_curwin = curwin;
         aall->new_curtab = curtab;
       }
-      do_ecmd(0, alist_name(&AARGLIST(aall->alist)[i]), NULL, NULL, ECMD_ONE,
+      do_ecmd(0, alist_name(&AARGLIST(aall->alist)[i]), nullptr, nullptr, ECMD_ONE,
               ((buf_hide(curwin->w_buffer)
                 || bufIsChanged(curwin->w_buffer)) ? ECMD_HIDE : 0) + ECMD_OLDBUF,
               curwin);
@@ -1046,7 +1046,7 @@ static void arg_all_open_windows(arg_all_state_T *aall, int count)
     os_breakcheck();
 
     // When ":tab" was used open a new tab for a new window repeatedly.
-    if (aall->had_tab > 0 && tabpage_index(NULL) <= p_tpm) {
+    if (aall->had_tab > 0 && tabpage_index(nullptr) <= p_tpm) {
       cmdmod.cmod_tab = 9999;
     }
   }
@@ -1062,7 +1062,7 @@ static void do_arg_all(int count, int forceit, int keep_tabs)
   tabpage_T *last_curtab;
   bool prev_arglist_locked = arglist_locked;
 
-  assert(firstwin != NULL);  // satisfy coverity
+  assert(firstwin != nullptr);  // satisfy coverity
 
   if (ARGCOUNT <= 0) {
     // Don't give an error message.  We don't want it when the ":all"
@@ -1074,8 +1074,8 @@ static void do_arg_all(int count, int forceit, int keep_tabs)
   arg_all_state_T aall = {
     .use_firstwin = false,
     .had_tab = cmdmod.cmod_tab,
-    .new_curwin = NULL,
-    .new_curtab = NULL,
+    .new_curwin = nullptr,
+    .new_curtab = nullptr,
     .forceit = forceit,
     .keep_tabs = keep_tabs,
     .opened_len = ARGCOUNT,
@@ -1114,7 +1114,7 @@ static void do_arg_all(int count, int forceit, int keep_tabs)
   last_curwin = curwin;
   last_curtab = curtab;
   // lastwin may be aucmd_win
-  win_enter(lastwin_nofloating(NULL), false);
+  win_enter(lastwin_nofloating(nullptr), false);
 
   // Open up to "count" windows.
   arg_all_open_windows(&aall, count);
@@ -1167,7 +1167,7 @@ void ex_all(exarg_T *eap)
 /// Spaces and backslashes in the file names are escaped with a backslash.
 char *arg_all(void)
 {
-  char *retval = NULL;
+  char *retval = nullptr;
 
   // Do this loop two times:
   // first time: compute the total length
@@ -1176,12 +1176,12 @@ char *arg_all(void)
     int len = 0;
     for (int idx = 0; idx < ARGCOUNT; idx++) {
       char *p = alist_name(&ARGLIST[idx]);
-      if (p == NULL) {
+      if (p == nullptr) {
         continue;
       }
       if (len > 0) {
         // insert a space in between names
-        if (retval != NULL) {
+        if (retval != nullptr) {
           retval[len] = ' ';
         }
         len++;
@@ -1193,12 +1193,12 @@ char *arg_all(void)
 #endif
             || *p == '`') {
           // insert a backslash
-          if (retval != NULL) {
+          if (retval != nullptr) {
             retval[len] = '\\';
           }
           len++;
         }
-        if (retval != NULL) {
+        if (retval != nullptr) {
           retval[len] = *p;
         }
         len++;
@@ -1206,7 +1206,7 @@ char *arg_all(void)
     }
 
     // second time: break here
-    if (retval != NULL) {
+    if (retval != nullptr) {
       retval[len] = NUL;
       break;
     }
@@ -1231,7 +1231,7 @@ void f_argc(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
   } else {
     // use the argument list of the specified window
     win_T *wp = find_win_by_nr_or_id(&argvars[0]);
-    if (wp != NULL) {
+    if (wp != nullptr) {
       rettv->vval.v_number = WARGCOUNT(wp);
     } else {
       rettv->vval.v_number = -1;
@@ -1250,7 +1250,7 @@ void f_arglistid(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
 {
   rettv->vval.v_number = -1;
   win_T *wp = find_tabwin(&argvars[0], &argvars[1]);
-  if (wp != NULL) {
+  if (wp != nullptr) {
     rettv->vval.v_number = wp->w_alist->id;
   }
 }
@@ -1259,7 +1259,7 @@ void f_arglistid(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
 static void get_arglist_as_rettv(aentry_T *arglist, int argcount, typval_T *rettv)
 {
   tv_list_alloc_ret(rettv, argcount);
-  if (arglist != NULL) {
+  if (arglist != nullptr) {
     for (int idx = 0; idx < argcount; idx++) {
       tv_list_append_string(rettv->vval.v_list, alist_name(&arglist[idx]), -1);
     }
@@ -1269,7 +1269,7 @@ static void get_arglist_as_rettv(aentry_T *arglist, int argcount, typval_T *rett
 /// "argv(nr)" function
 void f_argv(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
 {
-  aentry_T *arglist = NULL;
+  aentry_T *arglist = nullptr;
   int argcount = -1;
 
   if (argvars[0].v_type == VAR_UNKNOWN) {
@@ -1286,7 +1286,7 @@ void f_argv(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
     argcount = GARGCOUNT;
   } else {
     win_T *wp = find_win_by_nr_or_id(&argvars[1]);
-    if (wp != NULL) {
+    if (wp != nullptr) {
       // Use the argument list of the specified window
       arglist = WARGLIST(wp);
       argcount = WARGCOUNT(wp);
@@ -1294,9 +1294,9 @@ void f_argv(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
   }
 
   rettv->v_type = VAR_STRING;
-  rettv->vval.v_string = NULL;
-  int idx = (int)tv_get_number_chk(&argvars[0], NULL);
-  if (arglist != NULL && idx >= 0 && idx < argcount) {
+  rettv->vval.v_string = nullptr;
+  int idx = (int)tv_get_number_chk(&argvars[0], nullptr);
+  if (arglist != nullptr && idx >= 0 && idx < argcount) {
     rettv->vval.v_string = xstrdup(alist_name(&arglist[idx]));
   } else if (idx == -1) {
     get_arglist_as_rettv(arglist, argcount, rettv);

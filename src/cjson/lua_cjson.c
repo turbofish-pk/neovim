@@ -88,7 +88,7 @@
 #define DEFAULT_DECODE_SKIP_COMMENTS 0
 #define DEFAULT_ENCODE_ESCAPE_FORWARD_SLASH 1
 #define DEFAULT_ENCODE_SKIP_UNSUPPORTED_VALUE_TYPES 0
-#define DEFAULT_ENCODE_INDENT NULL
+#define DEFAULT_ENCODE_INDENT nullptr
 #define DEFAULT_ENCODE_SORT_KEYS 0
 
 #ifdef DISABLE_INVALID_NUMBERS
@@ -151,7 +151,7 @@ static const char *json_token_type_name[] = {
     "T_WHITESPACE",
     "T_ERROR",
     "T_UNKNOWN",
-    NULL
+    nullptr
 };
 
 typedef struct {
@@ -265,34 +265,34 @@ static const char *char2escape[256] = {
     "\\u0014", "\\u0015", "\\u0016", "\\u0017",
     "\\u0018", "\\u0019", "\\u001a", "\\u001b",
     "\\u001c", "\\u001d", "\\u001e", "\\u001f",
-    NULL, NULL, "\\\"", NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, "\\\\", NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL, NULL, NULL, "\\u007f",
-    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+    nullptr, nullptr, "\\\"", nullptr, nullptr, nullptr, nullptr, nullptr,
+    nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+    nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+    nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+    nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+    nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+    nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+    nullptr, nullptr, nullptr, nullptr, "\\\\", nullptr, nullptr, nullptr,
+    nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+    nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+    nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+    nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, "\\u007f",
+    nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+    nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+    nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+    nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+    nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+    nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+    nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+    nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+    nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+    nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+    nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+    nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+    nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+    nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+    nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+    nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
 };
 
 /* ===== CONFIGURATION ===== */
@@ -350,7 +350,7 @@ static int json_integer_option(lua_State *l, int optindex, int *setting,
 static int json_enum_option(lua_State *l, int optindex, int *setting,
                             const char **options, int bool_true)
 {
-    static const char *bool_options[] = { "off", "on", NULL };
+    static const char *bool_options[] = { "off", "on", nullptr };
 
     if (!options) {
         options = bool_options;
@@ -361,7 +361,7 @@ static int json_enum_option(lua_State *l, int optindex, int *setting,
         if (bool_true && lua_isboolean(l, optindex))
             *setting = lua_toboolean(l, optindex) * bool_true;
         else
-            *setting = luaL_checkoption(l, optindex, NULL, options);
+            *setting = luaL_checkoption(l, optindex, nullptr, options);
     }
 
     if (bool_true && (*setting == 0 || *setting == bool_true))
@@ -396,7 +396,7 @@ static int json_cfg_encode_sparse_array(lua_State *l)
 {
     json_config_t *cfg = json_arg_init(l, 3);
 
-    json_enum_option(l, 1, &cfg->encode_sparse_convert, NULL, 1);
+    json_enum_option(l, 1, &cfg->encode_sparse_convert, nullptr, 1);
     json_integer_option(l, 2, &cfg->encode_sparse_ratio, 0, INT_MAX);
     json_integer_option(l, 3, &cfg->encode_sparse_safe, 0, INT_MAX);
 
@@ -442,7 +442,7 @@ static int json_cfg_encode_empty_table_as_object(lua_State *l)
 {
     json_config_t *cfg = json_arg_init(l, 1);
 
-    return json_enum_option(l, 1, &cfg->encode_empty_table_as_object, NULL, 1);
+    return json_enum_option(l, 1, &cfg->encode_empty_table_as_object, nullptr, 1);
 }
 */
 
@@ -452,7 +452,7 @@ static int json_cfg_decode_array_with_array_mt(lua_State *l)
 {
     json_config_t *cfg = json_arg_init(l, 1);
 
-    json_enum_option(l, 1, &cfg->decode_array_with_array_mt, NULL, 1);
+    json_enum_option(l, 1, &cfg->decode_array_with_array_mt, nullptr, 1);
 
     return 1;
 }
@@ -464,7 +464,7 @@ static int json_cfg_decode_skip_comments(lua_State *l)
 {
     json_config_t *cfg = json_arg_init(l, 1);
 
-    json_enum_option(l, 1, &cfg->decode_skip_comments, NULL, 1);
+    json_enum_option(l, 1, &cfg->decode_skip_comments, nullptr, 1);
 
     return 1;
 }
@@ -476,7 +476,7 @@ static int json_cfg_encode_skip_unsupported_value_types(lua_State *l)
 {
     json_config_t *cfg = json_arg_init(l, 1);
 
-    json_enum_option(l, 1, &cfg->encode_skip_unsupported_value_types, NULL, 1);
+    json_enum_option(l, 1, &cfg->encode_skip_unsupported_value_types, nullptr, 1);
 
     return 1;
 }
@@ -491,7 +491,7 @@ static int json_cfg_encode_keep_buffer(lua_State *l)
 
     old_value = cfg->encode_keep_buffer;
 
-    json_enum_option(l, 1, &cfg->encode_keep_buffer, NULL, 1);
+    json_enum_option(l, 1, &cfg->encode_keep_buffer, nullptr, 1);
 
     // Init / free the buffer if the setting has changed
     if (old_value ^ cfg->encode_keep_buffer) {
@@ -513,7 +513,7 @@ static int json_cfg_encode_indent(lua_State *l)
 
     json_string_option(l, 1, &cfg->encode_indent);
     // simplify further checking
-    if (cfg->encode_indent[0] == '\0') cfg->encode_indent = NULL;
+    if (cfg->encode_indent[0] == '\0') cfg->encode_indent = nullptr;
 
     return 1;
 }
@@ -534,7 +534,7 @@ void json_verify_invalid_number_setting(lua_State *l, int *setting)
 /*
 static int json_cfg_encode_invalid_numbers(lua_State *l)
 {
-    static const char *options[] = { "off", "on", "null", NULL };
+    static const char *options[] = { "off", "on", "null", nullptr };
     json_config_t *cfg = json_arg_init(l, 1);
 
     json_enum_option(l, 1, &cfg->encode_invalid_numbers, options, 1);
@@ -550,7 +550,7 @@ static int json_cfg_decode_invalid_numbers(lua_State *l)
 {
     json_config_t *cfg = json_arg_init(l, 1);
 
-    json_enum_option(l, 1, &cfg->decode_invalid_numbers, NULL, 1);
+    json_enum_option(l, 1, &cfg->decode_invalid_numbers, nullptr, 1);
 
     json_verify_invalid_number_setting(l, &cfg->encode_invalid_numbers);
 
@@ -564,11 +564,11 @@ static int json_cfg_encode_escape_forward_slash(lua_State *l)
     int            ret;
     json_config_t *cfg = json_arg_init(l, 1);
 
-    ret = json_enum_option(l, 1, &cfg->encode_escape_forward_slash, NULL, 1);
+    ret = json_enum_option(l, 1, &cfg->encode_escape_forward_slash, nullptr, 1);
     if (cfg->encode_escape_forward_slash) {
         char2escape['/'] = "\\/";
     } else {
-        char2escape['/'] = NULL;
+        char2escape['/'] = nullptr;
     }
     return ret;
 }
@@ -579,7 +579,7 @@ static int json_cfg_encode_sort_keys(lua_State *l)
 {
     json_config_t *cfg = json_arg_init(l, 1);
 
-    json_enum_option(l, 1, &cfg->encode_sort_keys, NULL, 1);
+    json_enum_option(l, 1, &cfg->encode_sort_keys, nullptr, 1);
 
     return 1;
 }
@@ -592,7 +592,7 @@ static int json_destroy_config(lua_State *l)
     cfg = (json_config_t *)lua_touserdata(l, 1);
     if (cfg)
         strbuf_free(&cfg->encode_buf);
-    cfg = NULL;
+    cfg = nullptr;
 
     return 0;
 }
@@ -1231,7 +1231,7 @@ static int json_encode(lua_State *l)
         lua_getfield(l, 2, "indent");
         if (!lua_isnil(l, -1)) {
             options.indent = luaL_checkstring(l, -1);
-            if (options.indent[0] == '\0') options.indent = NULL;
+            if (options.indent[0] == '\0') options.indent = nullptr;
         }
         lua_pop(l, 1);
 
@@ -1310,7 +1310,7 @@ static int decode_hex4(const char *hex)
 
     /* Convert ASCII hex digit to numeric digit
      * Note: this returns an error for invalid hex digits, including
-     *       NULL */
+     *       nullptr */
     for (i = 0; i < 4; i++) {
         digit[i] = hexdigit2int(hex[i]);
         if (digit[i] < 0) {
@@ -1952,7 +1952,7 @@ static void compat_luaL_setfuncs(lua_State *l, const luaL_Reg *reg, int nup)
     int i;
 
     luaL_checkstack(l, nup, "too many upvalues");
-    for (; reg->name != NULL; reg++) {  /* fill the table with given functions */
+    for (; reg->name != nullptr; reg++) {  /* fill the table with given functions */
         for (i = 0; i < nup; i++)  /* copy upvalues to the top */
             lua_pushvalue(l, -nup);
         lua_pushcclosure(l, reg->func, nup);  /* closure with those upvalues */
@@ -2016,7 +2016,7 @@ int lua_cjson_new(lua_State *l)
         { "encode_sort_keys", json_cfg_encode_sort_keys },
         */
         { "new", lua_cjson_new },
-        { NULL, NULL }
+        { nullptr, nullptr }
     };
 
     /* Initialise number conversions */
@@ -2098,7 +2098,7 @@ int lua_cjson_new(lua_State *l)
 /* Return cjson.safe module table */
 static int lua_cjson_safe_new(lua_State *l)
 {
-    const char *func[] = { "decode", "encode", NULL };
+    const char *func[] = { "decode", "encode", nullptr };
     int i;
 
     lua_cjson_new(l);

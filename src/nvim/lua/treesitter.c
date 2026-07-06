@@ -82,8 +82,8 @@ static char *read_file(const char *path, size_t *len)
   FUNC_ATTR_MALLOC
 {
   FILE *file = os_fopen(path, "r");
-  if (file == NULL) {
-    return NULL;
+  if (file == nullptr) {
+    return nullptr;
   }
   fseek(file, 0L, SEEK_END);
   *len = (size_t)ftell(file);
@@ -92,7 +92,7 @@ static char *read_file(const char *path, size_t *len)
   if (fread(data, *len, 1, file) != 1) {
     xfree(data);
     fclose(file);
-    return NULL;
+    return nullptr;
   }
   fclose(file);
   return data;
@@ -152,7 +152,7 @@ static const TSLanguage *load_language_from_object(lua_State *L, const char *pat
 
   TSLanguage *lang = lang_parser();
 
-  if (lang == NULL) {
+  if (lang == nullptr) {
     uv_dlclose(&lib);
     luaL_error(L, "Failed to load parser %s: internal error", path);
   }
@@ -165,15 +165,15 @@ static const TSLanguage *load_language_from_wasm(lua_State *L, const char *path,
 {
 #ifndef HAVE_WASMTIME
   luaL_error(L, "Not supported");
-  return NULL;
+  return nullptr;
 #else
-  if (wasmengine == NULL) {
+  if (wasmengine == nullptr) {
     wasmengine = wasm_engine_new();
   }
-  assert(wasmengine != NULL);
+  assert(wasmengine != nullptr);
 
   TSWasmError werr = { 0 };
-  if (ts_wasmstore == NULL) {
+  if (ts_wasmstore == nullptr) {
     ts_wasmstore = ts_wasm_store_new(wasmengine, &werr);
   }
 
@@ -184,7 +184,7 @@ static const TSLanguage *load_language_from_wasm(lua_State *L, const char *path,
   size_t file_size = 0;
   char *data = read_file(path, &file_size);
 
-  if (data == NULL) {
+  if (data == nullptr) {
     luaL_error(L, "Unable to read file", path);
   }
 
@@ -198,7 +198,7 @@ static const TSLanguage *load_language_from_wasm(lua_State *L, const char *path,
                werr.message);
   }
 
-  if (lang == NULL) {
+  if (lang == nullptr) {
     luaL_error(L, "Failed to load parser %s: internal error", path);
   }
 
@@ -299,7 +299,7 @@ static int tslua_inspect_lang(lua_State *L)
   {  // Fields
     uint32_t nfields = ts_language_field_count(lang);
     lua_createtable(L, (int)nfields, 1);  // [retval, fields]
-    // Field IDs go from 1 to nfields inclusive (extra index 0 maps to NULL)
+    // Field IDs go from 1 to nfields inclusive (extra index 0 maps to nullptr)
     for (uint32_t i = 1; i <= nfields; i++) {
       lua_pushstring(L, ts_language_field_name_for_id(lang, (TSFieldId)i));
       lua_rawseti(L, -2, (int)i);  // [retval, fields]
@@ -317,7 +317,7 @@ static int tslua_inspect_lang(lua_State *L)
   {  // Metadata
     const TSLanguageMetadata *meta = ts_language_metadata(lang);
 
-    if (meta != NULL) {
+    if (meta != nullptr) {
       lua_createtable(L, 0, 3);
 
       lua_pushinteger(L, meta->major_version);
@@ -371,7 +371,7 @@ static struct luaL_Reg parser_meta[] = {
   { "included_ranges", parser_get_ranges },
   { "_set_logger", parser_set_logger },
   { "_logger", parser_get_logger },
-  { NULL, NULL }
+  { nullptr, nullptr }
 };
 
 static int tslua_push_parser(lua_State *L)
@@ -383,7 +383,7 @@ static int tslua_push_parser(lua_State *L)
 
 #ifdef HAVE_WASMTIME
   if (ts_language_is_wasm(lang)) {
-    assert(wasmengine != NULL);
+    assert(wasmengine != nullptr);
     TSWasmError werr = { 0 };
     TSWasmStore *store = ts_wasm_store_new(wasmengine, &werr);
     if (werr.kind != TSWasmErrorKindNone) {
@@ -409,7 +409,7 @@ static int tslua_push_parser(lua_State *L)
 static TSParser *parser_check(lua_State *L, int index)
 {
   TSParser **ud = luaL_checkudata(L, index, TS_META_PARSER);
-  luaL_argcheck(L, *ud != NULL, index, "Parser has been deleted");
+  luaL_argcheck(L, *ud != nullptr, index, "Parser has been deleted");
   return *ud;
 }
 
@@ -430,7 +430,7 @@ static int parser_gc(lua_State *L)
   if (*ud) {
     logger_gc(ts_parser_logger(*ud));
     ts_parser_delete(*ud);
-    *ud = NULL;
+    *ud = nullptr;
   }
   return 0;
 }
@@ -521,7 +521,7 @@ TSTree *nts_parser_parse_buf(TSParser *p, const TSTree *old_tree, int bufnr, uin
     abort();
   }
 
-  TSInput input = (TSInput){ (void *)buf, input_cb, TSInputEncodingUTF8, NULL };
+  TSInput input = (TSInput){ (void *)buf, input_cb, TSInputEncodingUTF8, nullptr };
 
   if (timeout_ns == 0) {
     return ts_parser_parse(p, old_tree, input);
@@ -543,13 +543,13 @@ TSTree *nts_parser_parse_buf(TSParser *p, const TSTree *old_tree, int bufnr, uin
 static int parser_parse(lua_State *L)
 {
   TSParser *p = parser_check(L, 1);
-  const TSTree *old_tree = NULL;
+  const TSTree *old_tree = nullptr;
   if (!lua_isnil(L, 2)) {
     TSLuaTree *ud = luaL_checkudata(L, 2, TS_META_TREE);
-    old_tree = ud ? ud->tree : NULL;
+    old_tree = ud ? ud->tree : nullptr;
   }
 
-  TSTree *new_tree = NULL;
+  TSTree *new_tree = nullptr;
 
   // This switch is necessary because of the behavior of lua_isstring, that
   // consider numbers as strings...
@@ -794,7 +794,7 @@ static struct luaL_Reg tree_meta[] = {
   { "edit", tree_edit },
   { "included_ranges", tree_get_ranges },
   { "copy", tree_copy },
-  { NULL, NULL }
+  { nullptr, nullptr }
 };
 
 /// Push tree interface on to the lua stack.
@@ -803,7 +803,7 @@ static struct luaL_Reg tree_meta[] = {
 /// Lua. If needed use ts_tree_copy() in the caller.
 static void push_tree(lua_State *L, const TSTree *tree)
 {
-  if (tree == NULL) {
+  if (tree == nullptr) {
     lua_pushnil(L);
     return;
   }
@@ -944,7 +944,7 @@ static struct luaL_Reg node_meta[] = {
   { "byte_length", node_byte_length },
   { "equal", node_equal },
 
-  { NULL, NULL }
+  { nullptr, nullptr }
 };
 
 /// Push node interface on to the Lua stack
@@ -1216,7 +1216,7 @@ static int node_next_child(lua_State *L)
   push_node(L, child, lua_upvalueindex(2));
 
   const char *field = ts_node_field_name_for_child(source, *child_index);
-  if (field != NULL) {
+  if (field != nullptr) {
     lua_pushstring(L, field);
   } else {
     lua_pushnil(L);
@@ -1385,7 +1385,7 @@ static struct luaL_Reg querycursor_meta[] = {
   { "next_capture", querycursor_next_capture },
   { "next_match", querycursor_next_match },
   { "__gc", querycursor_gc },
-  { NULL, NULL }
+  { nullptr, nullptr }
 };
 
 static int tslua_push_querycursor(lua_State *L)
@@ -1506,7 +1506,7 @@ static int querycursor_gc(lua_State *L)
 static struct luaL_Reg querymatch_meta[] = {
   { "info", querymatch_info },
   { "captures", querymatch_captures },
-  { NULL, NULL }
+  { nullptr, nullptr }
 };
 
 static void push_querymatch(lua_State *L, TSQueryMatch *match, int uindex)
@@ -1557,7 +1557,7 @@ static struct luaL_Reg query_meta[] = {
   { "inspect", query_inspect },
   { "disable_capture", query_disable_capture },
   { "disable_pattern", query_disable_pattern },
-  { NULL, NULL }
+  { nullptr, nullptr }
 };
 
 static int tslua_parse_query(lua_State *L)
@@ -1612,14 +1612,14 @@ static void query_err_string(const char *src, int error_offset, TSQueryError err
 {
   int line_start = 0;
   int row = 0;
-  const char *error_line = NULL;
+  const char *error_line = nullptr;
   int error_line_len = 0;
 
   const char *end_str;
   do {
     const char *src_tmp = src + line_start;
     end_str = strchr(src_tmp, '\n');
-    int line_length = end_str != NULL ? (int)(end_str - src_tmp) : (int)strlen(src_tmp);
+    int line_length = end_str != nullptr ? (int)(end_str - src_tmp) : (int)strlen(src_tmp);
     int line_end = line_start + line_length;
     if (line_end > error_offset) {
       error_line = src_tmp;
@@ -1628,7 +1628,7 @@ static void query_err_string(const char *src, int error_offset, TSQueryError err
     }
     line_start = line_end + 1;
     row++;
-  } while (end_str != NULL);
+  } while (end_str != nullptr);
 
   int column = error_offset - line_start;
 
@@ -1777,7 +1777,7 @@ static int query_disable_pattern(lua_State *L)
 static void build_meta(lua_State *L, const char *tname, const luaL_Reg *meta)
 {
   if (luaL_newmetatable(L, tname)) {  // [meta]
-    luaL_register(L, NULL, meta);
+    luaL_register(L, nullptr, meta);
 
     lua_pushvalue(L, -1);  // [meta, meta]
     lua_setfield(L, -2, "__index");  // [meta]
@@ -1816,10 +1816,10 @@ static int tslua_get_minimum_language_version(lua_State *L)
 void nlua_treesitter_free(void)
 {
 #ifdef HAVE_WASMTIME
-  if (wasmengine != NULL) {
+  if (wasmengine != nullptr) {
     wasm_engine_delete(wasmengine);
   }
-  if (ts_wasmstore != NULL) {
+  if (ts_wasmstore != nullptr) {
     ts_wasm_store_delete(ts_wasmstore);
   }
 #endif

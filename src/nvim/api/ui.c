@@ -52,7 +52,7 @@ static PMap(uint64_t) connected_uis = MAP_INIT;
 static RemoteUI *get_ui_or_err(uint64_t chan_id, Error *err)
 {
   RemoteUI *ui = pmap_get(uint64_t)(&connected_uis, chan_id);
-  if (ui == NULL && err != NULL) {
+  if (ui == nullptr && err != nullptr) {
     api_set_error(err, kErrorTypeException, "UI not attached to channel: %" PRId64, chan_id);
   }
   return ui;
@@ -84,7 +84,7 @@ static void remote_ui_destroy(RemoteUI *ui)
 
 /// Removes the client on the given channel from the list of UIs.
 ///
-/// @param err  if non-NULL and there is no UI on the channel, set an error
+/// @param err  if non-nullptr and there is no UI on the channel, set an error
 /// @param send_error_exit  send an "error_exit" event with 0 status first
 void remote_ui_disconnect(uint64_t channel_id, Error *err, bool send_error_exit)
 {
@@ -98,11 +98,11 @@ void remote_ui_disconnect(uint64_t channel_id, Error *err, bool send_error_exit)
     push_call(ui, "error_exit", args);
     ui_flush_buf(ui, false);
   }
-  pmap_del(uint64_t)(&connected_uis, channel_id, NULL);
+  pmap_del(uint64_t)(&connected_uis, channel_id, nullptr);
   ui_detach_impl(ui, channel_id);
   Channel *chan = find_channel(channel_id);
   if (chan && chan->rpc.ui == ui) {
-    chan->rpc.ui = NULL;
+    chan->rpc.ui = nullptr;
   }
 
   remote_ui_destroy(ui);
@@ -185,20 +185,20 @@ void nvim_ui_attach(uint64_t channel_id, Integer width, Integer height, Dict opt
     ui->ui_ext[kUICmdline] = true;
   }
 
-  ui->cur_event = NULL;
+  ui->cur_event = nullptr;
   ui->hl_id = 0;
   ui->client_col = -1;
-  ui->nevents_pos = NULL;
+  ui->nevents_pos = nullptr;
   ui->nevents = 0;
   ui->flushed_events = false;
   ui->incomplete_event = false;
-  ui->ncalls_pos = NULL;
+  ui->ncalls_pos = nullptr;
   ui->ncalls = 0;
   ui->ncells_pending = 0;
   ui->packer = (PackerBuffer) {
-    .startptr = NULL,
-    .ptr = NULL,
-    .endptr = NULL,
+    .startptr = nullptr,
+    .ptr = nullptr,
+    .endptr = nullptr,
     .packer_flush = ui_flush_callback,
     .anydata = ui,
   };
@@ -510,8 +510,8 @@ static void flush_event(RemoteUI *ui)
 {
   if (ui->cur_event) {
     mpack_w2(&ui->ncalls_pos, 1 + ui->ncalls);
-    ui->cur_event = NULL;
-    ui->ncalls_pos = NULL;
+    ui->cur_event = nullptr;
+    ui->ncalls_pos = nullptr;
     ui->ncalls = 0;
   }
 }
@@ -530,7 +530,7 @@ static void prepare_call(RemoteUI *ui, const char *name)
     ui_flush_buf(ui, false);
   }
 
-  if (ui->packer.startptr == NULL) {
+  if (ui->packer.startptr == nullptr) {
     ui_alloc_buf(ui);
   }
 
@@ -546,7 +546,7 @@ static void prepare_call(RemoteUI *ui, const char *name)
       mpack_uint(buf, 2);
       mpack_str_small(buf, S_LEN("redraw"));
       ui->nevents_pos = mpack_array_dyn16(buf);
-      assert(ui->cur_event == NULL);
+      assert(ui->cur_event == nullptr);
     }
     flush_event(ui);
     ui->cur_event = name;
@@ -673,8 +673,8 @@ void remote_ui_hl_attr_define(RemoteUI *ui, Integer id, HlAttrs rgb_attrs, HlAtt
   ADD_C(args, INTEGER_OBJ(id));
   MAXSIZE_TEMP_DICT(rgb, HLATTRS_DICT_SIZE);
   MAXSIZE_TEMP_DICT(cterm, HLATTRS_DICT_SIZE);
-  hlattrs2dict(&rgb, NULL, rgb_attrs, true, false);
-  hlattrs2dict(&cterm, NULL, rgb_attrs, false, false);
+  hlattrs2dict(&rgb, nullptr, rgb_attrs, true, false);
+  hlattrs2dict(&cterm, nullptr, rgb_attrs, false, false);
 
   // URLs are not added in hlattrs2dict since they are used only by UIs and not by the highlight
   // system. So we add them here.
@@ -703,7 +703,7 @@ void remote_ui_highlight_set(RemoteUI *ui, int id)
 
   ui->hl_id = id;
   MAXSIZE_TEMP_DICT(dict, HLATTRS_DICT_SIZE);
-  hlattrs2dict(&dict, NULL, syn_attr2entry(id), ui->rgb, false);
+  hlattrs2dict(&dict, nullptr, syn_attr2entry(id), ui->rgb, false);
   MAXSIZE_TEMP_ARRAY(args, 1);
   ADD_C(args, DICT_OBJ(dict));
   push_call(ui, "highlight_set", args);
@@ -876,17 +876,17 @@ static void ui_flush_buf(RemoteUI *ui, bool incomplete_event)
   ui->incomplete_event = incomplete_event;
 
   flush_event(ui);
-  if (ui->nevents_pos != NULL) {
+  if (ui->nevents_pos != nullptr) {
     mpack_w2(&ui->nevents_pos, ui->nevents);
     ui->nevents = 0;
-    ui->nevents_pos = NULL;
+    ui->nevents_pos = nullptr;
   }
 
   WBuffer *buf = wstream_new_buffer(ui->packer.startptr, BUF_POS(ui), 1, free_block);
   rpc_write_raw(ui->channel_id, buf);
 
-  ui->packer.startptr = NULL;
-  ui->packer.ptr = NULL;
+  ui->packer.startptr = nullptr;
+  ui->packer.ptr = nullptr;
 
   // we have sent events to the client, but possibly not yet the final "flush" event.
   ui->flushed_events = true;
@@ -934,7 +934,7 @@ static Array translate_contents(RemoteUI *ui, Array contents, Arena *arena)
     int attr = (int)item.items[0].data.integer;
     if (attr) {
       Dict rgb_attrs = arena_dict(arena, HLATTRS_DICT_SIZE);
-      hlattrs2dict(&rgb_attrs, NULL, syn_attr2entry(attr), ui->rgb, false);
+      hlattrs2dict(&rgb_attrs, nullptr, syn_attr2entry(attr), ui->rgb, false);
       ADD_C(new_item, DICT_OBJ(rgb_attrs));
     } else {
       ADD_C(new_item, DICT_OBJ((Dict)ARRAY_DICT_INIT));

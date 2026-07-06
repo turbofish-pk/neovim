@@ -264,10 +264,10 @@ static int find_lcs(xpparam_t const *xpp, xdfenv_t *env,
 	index.env = env;
 	index.xpp = xpp;
 
-	index.records = NULL;
-	index.line_map = NULL;
+	index.records = nullptr;
+	index.line_map = nullptr;
 	/* in case of early xdl_cha_free() */
-	index.rcha.head = NULL;
+	index.rcha.head = nullptr;
 
 	index.table_bits = xdl_hashbits(count1);
 	sz = index.records_size = 1 << index.table_bits;

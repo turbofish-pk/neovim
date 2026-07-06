@@ -170,8 +170,8 @@ Object nvim_eval(String expr, Arena *arena, Error *err)
   int ok;
 
   TRY_WRAP(err, {
-    ok = eval0(expr.data, &rettv, NULL, &EVALARG_EVALUATE);
-    clear_evalarg(&EVALARG_EVALUATE, NULL);
+    ok = eval0(expr.data, &rettv, nullptr, &EVALARG_EVALUATE);
+    clear_evalarg(&EVALARG_EVALUATE, nullptr);
   });
 
   if (!ERROR_SET(err)) {
@@ -194,7 +194,7 @@ Object nvim_eval(String expr, Arena *arena, Error *err)
 ///
 /// @param fn Function name
 /// @param args Function arguments
-/// @param self `self` dict, or NULL for non-dict functions
+/// @param self `self` dict, or nullptr for non-dict functions
 /// @param[out] err Error details, if any
 /// @return Result of the function call
 static Object _call_function(String fn, Array args, dict_T *self, Arena *arena, Error *err)
@@ -263,7 +263,7 @@ static Object _call_function(String fn, Array args, dict_T *self, Arena *arena, 
 Object nvim_call_function(String fn, Array args, Arena *arena, Error *err)
   FUNC_API_SINCE(1)
 {
-  return _call_function(fn, args, NULL, arena, err);
+  return _call_function(fn, args, nullptr, arena, err);
 }
 
 /// Calls a Vimscript |Dictionary-function| with the given arguments.
@@ -286,8 +286,8 @@ Object nvim_call_dict_function(Object dict, String fn, Array args, Arena *arena,
   case kObjectTypeString: {
     int eval_ret;
     TRY_WRAP(err, {
-        eval_ret = eval0(dict.data.string.data, &rettv, NULL, &EVALARG_EVALUATE);
-        clear_evalarg(&EVALARG_EVALUATE, NULL);
+        eval_ret = eval0(dict.data.string.data, &rettv, nullptr, &EVALARG_EVALUATE);
+        clear_evalarg(&EVALARG_EVALUATE, nullptr);
       });
     if (ERROR_SET(err)) {
       return rv;
@@ -304,7 +304,7 @@ Object nvim_call_dict_function(Object dict, String fn, Array args, Arena *arena,
     object_to_vim(dict, &rettv, err);
     break;
   default:
-    VALIDATE_EXP(false, "dict argument", "String or Dict", NULL, {
+    VALIDATE_EXP(false, "dict argument", "String or Dict", nullptr, {
       return rv;
     });
   }
@@ -316,7 +316,7 @@ Object nvim_call_dict_function(Object dict, String fn, Array args, Arena *arena,
 
   if (fn.data && fn.size > 0 && dict.type != kObjectTypeDict) {
     dictitem_T *const di = tv_dict_find(self_dict, fn.data, (ptrdiff_t)fn.size);
-    VALIDATE(di != NULL, "Not found: %s", fn.data, {
+    VALIDATE(di != nullptr, "Not found: %s", fn.data, {
       goto end;
     });
     if (di->di_tv.v_type == VAR_PARTIAL) {
@@ -455,18 +455,18 @@ Dict nvim_parse_expression(String expr, String flags, Boolean hl, Arena *arena, 
       .size = expr.size,
       .allocated = false,
     },
-    { NULL, 0, false },
+    { nullptr, 0, false },
   };
   ParserLine *plines_p = parser_lines;
   ParserHighlight colors;
   kvi_init(colors);
-  ParserHighlight *const colors_p = (hl ? &colors : NULL);
+  ParserHighlight *const colors_p = (hl ? &colors : nullptr);
   ParserState pstate;
   viml_parser_init(&pstate, parser_simple_get_line, &plines_p, colors_p);
   ExprAST east = viml_pexpr_parse(&pstate, pflags);
 
   const size_t ret_size = (2  // "ast", "len"
-                           + (size_t)(east.err.msg != NULL)  // "error"
+                           + (size_t)(east.err.msg != nullptr)  // "error"
                            + (size_t)hl  // "highlight"
                            + 0);
 
@@ -474,7 +474,7 @@ Dict nvim_parse_expression(String expr, String flags, Boolean hl, Arena *arena, 
   PUT_C(ret, "len", INTEGER_OBJ((Integer)(pstate.pos.line == 1
                                           ? parser_lines[0].size
                                           : pstate.pos.col)));
-  if (east.err.msg != NULL) {
+  if (east.err.msg != nullptr) {
     Dict err_dict = arena_dict(arena, 2);
     PUT_C(err_dict, "message", CSTR_TO_ARENA_OBJ(arena, east.err.msg));
     PUT_C(err_dict, "arg", CBUF_TO_ARENA_OBJ(arena, east.err.arg, (size_t)east.err.arg_len));
@@ -507,13 +507,13 @@ Dict nvim_parse_expression(String expr, String flags, Boolean hl, Arena *arena, 
   while (kv_size(ast_conv_stack)) {
     ExprASTConvStackItem cur_item = kv_last(ast_conv_stack);
     ExprASTNode *const node = *cur_item.node_p;
-    if (node == NULL) {
+    if (node == nullptr) {
       assert(kv_size(ast_conv_stack) == 1);
       kv_drop(ast_conv_stack, 1);
     } else {
       if (cur_item.ret_node_p->type == kObjectTypeNil) {
         size_t items_size = (size_t)(3  // "type", "start" and "len"  // NOLINT(bugprone-misplaced-widening-cast)
-                                     + (node->children != NULL)  // "children"
+                                     + (node->children != nullptr)  // "children"
                                      + (node->type == kExprNodeOption
                                         || node->type == kExprNodePlainIdentifier)  // "scope"
                                      + (node->type == kExprNodeOption
@@ -533,8 +533,8 @@ Dict nvim_parse_expression(String expr, String flags, Boolean hl, Arena *arena, 
         *cur_item.ret_node_p = DICT_OBJ(ret_node);
       }
       Dict *ret_node = &cur_item.ret_node_p->data.dict;
-      if (node->children != NULL) {
-        const size_t num_children = 1 + (node->children->next != NULL);
+      if (node->children != nullptr) {
+        const size_t num_children = 1 + (node->children->next != nullptr);
         Array children_array = arena_array(arena, num_children);
         for (size_t i = 0; i < num_children; i++) {
           ADD_C(children_array, NIL);
@@ -544,7 +544,7 @@ Dict nvim_parse_expression(String expr, String flags, Boolean hl, Arena *arena, 
           .node_p = &node->children,
           .ret_node_p = &children_array.items[0],
         }));
-      } else if (node->next != NULL) {
+      } else if (node->next != nullptr) {
         // ret_node_p + 1 is valid: we're in a children_array (root node never
         // has "next"). kv_size > 1 confirms we're not at root.
         assert(kv_size(ast_conv_stack) > 1);
@@ -642,7 +642,7 @@ Dict nvim_parse_expression(String expr, String flags, Boolean hl, Arena *arena, 
         }
         assert(cur_item.ret_node_p->data.dict.size == cur_item.ret_node_p->data.dict.capacity);
         xfree(*cur_item.node_p);
-        *cur_item.node_p = NULL;
+        *cur_item.node_p = nullptr;
       }
     }
   }

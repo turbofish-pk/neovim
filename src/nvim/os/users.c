@@ -30,13 +30,13 @@
 static garray_T ga_users = GA_EMPTY_INIT_VALUE;
 
 // Add a user name to the list of users in garray_T *users.
-// Do nothing if user name is NULL or empty.
+// Do nothing if user name is nullptr or empty.
 static void add_user(garray_T *users, char *user, bool need_copy)
 {
-  char *user_copy = (user != NULL && need_copy)
+  char *user_copy = (user != nullptr && need_copy)
                     ? xstrdup(user) : user;
 
-  if (user_copy == NULL || *user_copy == NUL) {
+  if (user_copy == nullptr || *user_copy == NUL) {
     if (need_copy) {
       xfree(user_copy);
     }
@@ -49,7 +49,7 @@ static void add_user(garray_T *users, char *user, bool need_copy)
 // Return Ok for success, FAIL for failure.
 int os_get_usernames(garray_T *users)
 {
-  if (users == NULL) {
+  if (users == nullptr) {
     return FAIL;
   }
   ga_init(users, sizeof(char *), 20);
@@ -59,7 +59,7 @@ int os_get_usernames(garray_T *users)
     struct passwd *pw;
 
     setpwent();
-    while ((pw = getpwent()) != NULL) {
+    while ((pw = getpwent()) != nullptr) {
       add_user(users, pw->pw_name, true);
     }
     endpwent();
@@ -69,8 +69,8 @@ int os_get_usernames(garray_T *users)
     DWORD nusers = 0, ntotal = 0, i;
     PUSER_INFO_0 uinfo;
 
-    if (NetUserEnum(NULL, 0, 0, (LPBYTE *)&uinfo, MAX_PREFERRED_LENGTH,
-                    &nusers, &ntotal, NULL) == NERR_Success) {
+    if (NetUserEnum(nullptr, 0, 0, (LPBYTE *)&uinfo, MAX_PREFERRED_LENGTH,
+                    &nusers, &ntotal, nullptr) == NERR_Success) {
       for (i = 0; i < nusers; i++) {
         char *user;
         int conversion_result = utf16_to_utf8(uinfo[i].usri0_name, -1, &user);
@@ -95,7 +95,7 @@ int os_get_usernames(garray_T *users)
     // is a valid remote user name using getpwnam() and if it is, add it to
     // the list of user names.
 
-    if (user_env != NULL && *user_env != NUL) {
+    if (user_env != nullptr && *user_env != NUL) {
       int i;
 
       for (i = 0; i < users->ga_len; i++) {
@@ -109,7 +109,7 @@ int os_get_usernames(garray_T *users)
       if (i == users->ga_len) {
         struct passwd *pw = getpwnam(user_env);  // NOLINT
 
-        if (pw != NULL) {
+        if (pw != nullptr) {
           add_user(users, pw->pw_name, true);
         }
       }
@@ -148,8 +148,8 @@ int os_get_uname(uv_uid_t uid, char *s, size_t len)
 #ifdef HAVE_PWD_FUNCS
   struct passwd *pw;
 
-  if ((pw = getpwuid(uid)) != NULL  // NOLINT(runtime/threadsafe_fn)
-      && pw->pw_name != NULL && *(pw->pw_name) != NUL) {
+  if ((pw = getpwuid(uid)) != nullptr  // NOLINT(runtime/threadsafe_fn)
+      && pw->pw_name != nullptr && *(pw->pw_name) != NUL) {
     xstrlcpy(s, pw->pw_name, len);
     return OK;
   }
@@ -158,22 +158,22 @@ int os_get_uname(uv_uid_t uid, char *s, size_t len)
   return FAIL;  // a number is not a name
 }
 
-/// Gets the user directory for the given username, or NULL on failure.
+/// Gets the user directory for the given username, or nullptr on failure.
 ///
 /// Caller must free() the returned string.
 char *os_get_userdir(const char *name)
 {
 #ifdef HAVE_PWD_FUNCS
-  if (name == NULL || *name == NUL) {
-    return NULL;
+  if (name == nullptr || *name == NUL) {
+    return nullptr;
   }
   struct passwd *pw = getpwnam(name);  // NOLINT(runtime/threadsafe_fn)
-  if (pw != NULL) {
+  if (pw != nullptr) {
     // save the string from the static passwd entry into malloced memory
     return xstrdup(pw->pw_dir);
   }
 #endif
-  return NULL;
+  return nullptr;
 }
 
 #ifdef EXITFREE
@@ -208,7 +208,7 @@ char *get_users(expand_T *xp, int idx)
   if (idx < ga_users.ga_len) {
     return ((char **)ga_users.ga_data)[idx];
   }
-  return NULL;
+  return nullptr;
 }
 
 /// Check whether name matches a user name.

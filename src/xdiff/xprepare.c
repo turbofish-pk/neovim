@@ -170,11 +170,11 @@ static int xdl_prepare_ctx(unsigned int pass, mmfile_t *mf, long narec, xpparam_
 	char *rchg;
 	long *rindex;
 
-	ha = NULL;
-	rindex = NULL;
-	rchg = NULL;
-	rhash = NULL;
-	recs = NULL;
+	ha = nullptr;
+	rindex = nullptr;
+	rchg = nullptr;
+	rhash = nullptr;
+	recs = nullptr;
 
 	if (xdl_cha_init(&xdf->rcha, sizeof(xrecord_t), narec / 4 + 1) < 0)
 		goto abort;
@@ -192,7 +192,7 @@ static int xdl_prepare_ctx(unsigned int pass, mmfile_t *mf, long narec, xpparam_
 	}
 
 	nrec = 0;
-	if ((cur = blk = xdl_mmfile_first(mf, &bsize)) != NULL) {
+	if ((cur = blk = xdl_mmfile_first(mf, &bsize)) != nullptr) {
 		for (top = blk + bsize; cur < top; ) {
 			prev = cur;
 			hav = xdl_hash_record(&cur, top, xpp->flags);

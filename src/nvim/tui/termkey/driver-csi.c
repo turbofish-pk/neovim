@@ -31,7 +31,7 @@ static TermKeyResult handle_csi_ss3_full(TermKey *tk, TermKeyKey *key, int cmd,
     return TERMKEY_RES_NONE;
   }
 
-  if (nparams > 1 && params[1].param != NULL) {
+  if (nparams > 1 && params[1].param != nullptr) {
     int arg = 0;
     int subparam = 0;
     size_t nsubparams = 1;
@@ -113,7 +113,7 @@ static TermKeyResult handle_csifunc(TermKey *tk, TermKeyKey *key, int cmd, TermK
   TermKeyResult result = TERMKEY_RES_KEY;
   int args[3];
 
-  if (nparams > 1 && params[1].param != NULL) {
+  if (nparams > 1 && params[1].param != nullptr) {
     int subparam = 0;
     size_t nsubparams = 1;
     result = termkey_interpret_csi_param(params[1], &args[1], &subparam, &nsubparams);
@@ -135,13 +135,13 @@ static TermKeyResult handle_csifunc(TermKey *tk, TermKeyKey *key, int cmd, TermK
 
   key->type = TERMKEY_TYPE_KEYSYM;
 
-  result = termkey_interpret_csi_param(params[0], &args[0], NULL, NULL);
+  result = termkey_interpret_csi_param(params[0], &args[0], nullptr, nullptr);
   if (result != TERMKEY_RES_KEY) {
     return result;
   }
 
-  if (args[0] == 27 && nparams > 2 && params[2].param != NULL) {
-    result = termkey_interpret_csi_param(params[2], &args[2], NULL, NULL);
+  if (args[0] == 27 && nparams > 2 && params[2].param != nullptr) {
+    result = termkey_interpret_csi_param(params[2], &args[2], nullptr, nullptr);
     if (result != TERMKEY_RES_KEY) {
       return result;
     }
@@ -189,7 +189,7 @@ static TermKeyResult handle_csi_u(TermKey *tk, TermKeyKey *key, int cmd, TermKey
   switch (cmd) {
   case 'u': {
     int args[2];
-    if (nparams > 1 && params[1].param != NULL) {
+    if (nparams > 1 && params[1].param != nullptr) {
       int subparam = 0;
       size_t nsubparams = 1;
       if (termkey_interpret_csi_param(params[1], &args[1], &subparam,
@@ -209,7 +209,7 @@ static TermKeyResult handle_csi_u(TermKey *tk, TermKeyKey *key, int cmd, TermKey
       key->modifiers = 0;
     }
 
-    if (termkey_interpret_csi_param(params[0], &args[0], NULL, NULL) != TERMKEY_RES_KEY) {
+    if (termkey_interpret_csi_param(params[0], &args[0], nullptr, nullptr) != TERMKEY_RES_KEY) {
       return TERMKEY_RES_ERROR;
     }
 
@@ -247,7 +247,7 @@ static TermKeyResult handle_csi_m(TermKey *tk, TermKeyKey *key, int cmd, TermKey
 
   int args[3];
   for (size_t i = 0; i < 3; i++) {
-    if (termkey_interpret_csi_param(params[i], &args[i], NULL, NULL) != TERMKEY_RES_KEY) {
+    if (termkey_interpret_csi_param(params[i], &args[i], nullptr, nullptr) != TERMKEY_RES_KEY) {
       return TERMKEY_RES_ERROR;
     }
   }
@@ -362,11 +362,11 @@ static TermKeyResult handle_csi_R(TermKey *tk, TermKeyKey *key, int cmd, TermKey
       }
 
       int args[2];
-    if (termkey_interpret_csi_param(params[0], &args[0], NULL, NULL) != TERMKEY_RES_KEY) {
+    if (termkey_interpret_csi_param(params[0], &args[0], nullptr, nullptr) != TERMKEY_RES_KEY) {
       return TERMKEY_RES_ERROR;
     }
 
-    if (termkey_interpret_csi_param(params[1], &args[1], NULL, NULL) != TERMKEY_RES_KEY) {
+    if (termkey_interpret_csi_param(params[1], &args[1], nullptr, nullptr) != TERMKEY_RES_KEY) {
       return TERMKEY_RES_ERROR;
     }
 
@@ -402,11 +402,11 @@ static TermKeyResult handle_csi_y(TermKey *tk, TermKeyKey *key, int cmd, TermKey
       }
 
       int args[2];
-    if (termkey_interpret_csi_param(params[0], &args[0], NULL, NULL) != TERMKEY_RES_KEY) {
+    if (termkey_interpret_csi_param(params[0], &args[0], nullptr, nullptr) != TERMKEY_RES_KEY) {
       return TERMKEY_RES_ERROR;
     }
 
-    if (termkey_interpret_csi_param(params[1], &args[1], NULL, NULL) != TERMKEY_RES_KEY) {
+    if (termkey_interpret_csi_param(params[1], &args[1], nullptr, nullptr) != TERMKEY_RES_KEY) {
       return TERMKEY_RES_ERROR;
     }
 
@@ -501,7 +501,7 @@ static TermKeyResult parse_csi(TermKey *tk, size_t introlen, size_t *csi_len,
       }
     } else if (c == ';') {
       if (!present) {
-        params[argi].param = NULL;
+        params[argi].param = nullptr;
         params[argi].length = 0;
       } else {
         params[argi].length = (size_t)(&CHARAT(p) - params[argi].param);
@@ -549,11 +549,11 @@ TermKeyResult termkey_interpret_csi(TermKey *tk, const TermKeyKey *key, TermKeyC
 TermKeyResult termkey_interpret_csi_param(TermKeyCsiParam param, int *paramp, int subparams[],
                                           size_t *nsubparams)
 {
-  if (paramp == NULL) {
+  if (paramp == nullptr) {
     return TERMKEY_RES_ERROR;
   }
 
-  if (param.param == NULL) {
+  if (param.param == nullptr) {
     *paramp = -1;
     if (nsubparams) {
       *nsubparams = 0;
@@ -570,7 +570,7 @@ TermKeyResult termkey_interpret_csi_param(TermKeyCsiParam param, int *paramp, in
     if (c == ':') {
       if (length == 0) {
         *paramp = arg;
-      } else if (subparams != NULL) {
+      } else if (subparams != nullptr) {
         subparams[length - 1] = arg;
       }
 
@@ -585,7 +585,7 @@ TermKeyResult termkey_interpret_csi_param(TermKeyCsiParam param, int *paramp, in
 
   if (length == 0) {
     *paramp = arg;
-  } else if (subparams != NULL) {
+  } else if (subparams != nullptr) {
     subparams[length - 1] = arg;
   }
 
@@ -691,7 +691,7 @@ void *new_driver_csi(TermKey *tk, TerminfoEntry *term)
 {
   if (!keyinfo_initialised) {
     if (!register_keys()) {
-      return NULL;
+      return nullptr;
     }
   }
 
@@ -699,7 +699,7 @@ void *new_driver_csi(TermKey *tk, TerminfoEntry *term)
 
   csi->tk = tk;
   csi->saved_string_id = 0;
-  csi->saved_string = NULL;
+  csi->saved_string = nullptr;
 
   return csi;
 }

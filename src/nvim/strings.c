@@ -50,7 +50,7 @@ static const char e_positional_arg_num_type_inconsistent_str_str[]
 static const char e_invalid_format_specifier_str[]
   = N_("E1505: Invalid format specifier: %s");
 static const char e_aptypes_is_null_nr_str[]
-  = "E1507: Internal error: ap_types or ap_types[idx] is NULL: %d: %s";
+  = "E1507: Internal error: ap_types or ap_types[idx] is nullptr: %d: %s";
 
 static const char typename_unknown[] = N_("unknown");
 static const char typename_int[] = "int";
@@ -100,7 +100,7 @@ char *vim_strsave_escaped_ext(const char *string, const char *esc_chars, char cc
       p += l - 1;
       continue;
     }
-    if (vim_strchr(esc_chars, (uint8_t)(*p)) != NULL || (bsl && rem_backslash(p))) {
+    if (vim_strchr(esc_chars, (uint8_t)(*p)) != nullptr || (bsl && rem_backslash(p))) {
       length++;                         // count a backslash
     }
     length++;                           // count an ordinary char
@@ -116,7 +116,7 @@ char *vim_strsave_escaped_ext(const char *string, const char *esc_chars, char cc
       p += l - 1;                     // skip multibyte char
       continue;
     }
-    if (vim_strchr(esc_chars, (uint8_t)(*p)) != NULL || (bsl && rem_backslash(p))) {
+    if (vim_strchr(esc_chars, (uint8_t)(*p)) != nullptr || (bsl && rem_backslash(p))) {
       *p2++ = cc;
     }
     *p2++ = *p;
@@ -488,7 +488,7 @@ int vim_strnicmp(const char *s1, const char *s2, size_t len)
 bool striequal(const char *a, const char *b)
   FUNC_ATTR_PURE FUNC_ATTR_WARN_UNUSED_RESULT
 {
-  return (a == NULL && b == NULL) || (a && b && STRICMP(a, b) == 0);
+  return (a == nullptr && b == nullptr) || (a && b && STRICMP(a, b) == 0);
 }
 
 /// Compare two ASCII strings, for length "len", ignoring case, ignoring locale.
@@ -518,14 +518,14 @@ int vim_strnicmp_asc(const char *s1, const char *s2, size_t len)
 /// @param[in]  string  String to search in.
 /// @param[in]  c  Character to search for.
 ///
-/// @return Pointer to the first byte of the found character in string or NULL
+/// @return Pointer to the first byte of the found character in string or nullptr
 ///         if it was not found or character is invalid. NUL character is never
 ///         found, use `strlen()` instead.
 char *vim_strchr(const char *const string, const int c)
   FUNC_ATTR_NONNULL_ALL FUNC_ATTR_PURE FUNC_ATTR_WARN_UNUSED_RESULT
 {
   if (c <= 0) {
-    return NULL;
+    return nullptr;
   } else if (c < 0x80) {
     // NOLINTNEXTLINE(*-casting): remove once CI uses glibc 2.43
     return (char *)strchr(string, c);
@@ -552,11 +552,11 @@ void sort_strings(char **files, int count)
 }
 
 // Return true if string "s" contains a non-ASCII character (128 or higher).
-// When "s" is NULL false is returned.
+// When "s" is nullptr false is returned.
 bool has_non_ascii(const char *s)
   FUNC_ATTR_PURE
 {
-  if (s != NULL) {
+  if (s != nullptr) {
     for (const char *p = s; *p != NUL; p++) {
       if ((uint8_t)(*p) >= 128) {
         return true;
@@ -567,11 +567,11 @@ bool has_non_ascii(const char *s)
 }
 
 /// Return true if string "s" contains a non-ASCII character (128 or higher).
-/// When "s" is NULL false is returned.
+/// When "s" is nullptr false is returned.
 bool has_non_ascii_len(const char *const s, const size_t len)
   FUNC_ATTR_PURE
 {
-  if (s != NULL) {
+  if (s != nullptr) {
     for (size_t i = 0; i < len; i++) {
       if ((uint8_t)s[i] >= 128) {
         return true;
@@ -635,12 +635,12 @@ static varnumber_T tv_nr(typval_T *tvs, int *idxp)
 ///                      as ":echo" and stored in "*tofree". The caller must
 ///                      free "*tofree".
 ///
-/// @return String value or NULL in case of error.
+/// @return String value or nullptr in case of error.
 static const char *tv_str(typval_T *tvs, int *idxp, char **const tofree)
   FUNC_ATTR_NONNULL_ALL FUNC_ATTR_WARN_UNUSED_RESULT
 {
   int idx = *idxp - 1;
-  const char *s = NULL;
+  const char *s = nullptr;
 
   if (tvs[idx].v_type == VAR_UNKNOWN) {
     emsg(_(e_printf));
@@ -648,9 +648,9 @@ static const char *tv_str(typval_T *tvs, int *idxp, char **const tofree)
     (*idxp)++;
     if (tvs[idx].v_type == VAR_STRING || tvs[idx].v_type == VAR_NUMBER) {
       s = tv_get_string_chk(&tvs[idx]);
-      *tofree = NULL;
+      *tofree = nullptr;
     } else {
-      s = *tofree = encode_tv2echo(&tvs[idx], NULL);
+      s = *tofree = encode_tv2echo(&tvs[idx], nullptr);
     }
   }
   return s;
@@ -664,7 +664,7 @@ static const char *tv_str(typval_T *tvs, int *idxp, char **const tofree)
 /// @param[in]  tvs  List of typval_T values.
 /// @param[in,out]  idxp  Pointer to the index of the current value.
 ///
-/// @return Pointer stored in typval_T or NULL.
+/// @return Pointer stored in typval_T or nullptr.
 static const void *tv_ptr(const typval_T *const tvs, int *const idxp)
   FUNC_ATTR_NONNULL_ALL FUNC_ATTR_WARN_UNUSED_RESULT
 {
@@ -683,7 +683,7 @@ static const void *tv_ptr(const typval_T *const tvs, int *const idxp)
   const int idx = *idxp - 1;
   if (tvs[idx].v_type == VAR_UNKNOWN) {
     emsg(_(e_printf));
-    return NULL;
+    return nullptr;
   }
   (*idxp)++;
   return tvs[idx].vval.v_string;
@@ -743,7 +743,7 @@ static float_T tv_float(typval_T *const tvs, int *const idxp)
 // The locale is not used, the string is used as a byte string.  This is only
 // relevant for double-byte encodings where the second byte may be '%'.
 //
-// It is permitted for "str_m" to be zero, and it is permitted to specify NULL
+// It is permitted for "str_m" to be zero, and it is permitted to specify nullptr
 // pointer for resulting string argument if "str_m" is zero (as per ISO C99).
 //
 // The return value is the number of characters which would be generated
@@ -754,7 +754,7 @@ static float_T tv_float(typval_T *const tvs, int *const idxp)
 // the resulting string will be NUL-terminated.
 
 // vim_vsnprintf_typval() can be invoked with either "va_list" or a list of
-// "typval_T".  When the latter is not used it must be NULL.
+// "typval_T".  When the latter is not used it must be nullptr.
 
 /// Append a formatted value to the string
 ///
@@ -828,7 +828,7 @@ size_t vim_snprintf_safelen(char *str, size_t str_m, const char *fmt, ...)
   }
 
   va_start(ap, fmt);
-  str_l = vim_vsnprintf_typval(str, str_m, fmt, ap, NULL);
+  str_l = vim_vsnprintf_typval(str, str_m, fmt, ap, nullptr);
   va_end(ap);
 
   if (str_l < 0) {
@@ -840,7 +840,7 @@ size_t vim_snprintf_safelen(char *str, size_t str_m, const char *fmt, ...)
 
 int vim_vsnprintf(char *str, size_t str_m, const char *fmt, va_list ap)
 {
-  return vim_vsnprintf_typval(str, str_m, fmt, ap, NULL);
+  return vim_vsnprintf_typval(str, str_m, fmt, ap, nullptr);
 }
 
 enum {
@@ -925,7 +925,7 @@ static int format_typeof(const char *type)
     // value
 
     // 0 if numeric argument is zero (or if pointer is
-    // NULL for 'p'), +1 if greater than zero (or nonzero
+    // nullptr for 'p'), +1 if greater than zero (or nonzero
     // for unsigned arguments), -1 if negative (unsigned
     // argument is never negative)
 
@@ -1018,20 +1018,20 @@ static int adjust_types(const char ***ap_types, int arg, int *num_posarg, const 
     return FAIL;
   }
 
-  if (*ap_types == NULL || *num_posarg < arg) {
-    const char **new_types = *ap_types == NULL
+  if (*ap_types == nullptr || *num_posarg < arg) {
+    const char **new_types = *ap_types == nullptr
                              ? xcalloc((size_t)arg, sizeof(const char *))
                              : xrealloc(*ap_types, (size_t)arg * sizeof(const char *));
 
     for (int idx = *num_posarg; idx < arg; idx++) {
-      new_types[idx] = NULL;
+      new_types[idx] = nullptr;
     }
 
     *ap_types = new_types;
     *num_posarg = arg;
   }
 
-  if ((*ap_types)[arg - 1] != NULL) {
+  if ((*ap_types)[arg - 1] != nullptr) {
     if ((*ap_types)[arg - 1][0] == '*' || type[0] == '*') {
       const char *pt = type;
       if (pt[0] == '*') {
@@ -1102,7 +1102,7 @@ static int parse_fmt_types(const char ***ap_types, int *num_posarg, const char *
   FUNC_ATTR_NONNULL_ARG(1, 2)
 {
   const char *p = fmt;
-  const char *arg = NULL;
+  const char *arg = nullptr;
 
   int any_pos = 0;
   int any_arg = 0;
@@ -1115,7 +1115,7 @@ static int parse_fmt_types(const char ***ap_types, int *num_posarg, const char *
     } \
   } while (0);
 
-  if (p == NULL) {
+  if (p == nullptr) {
     return OK;
   }
 
@@ -1151,7 +1151,7 @@ static int parse_fmt_types(const char ***ap_types, int *num_posarg, const char *
         // Positional argument
         unsigned uj;
 
-        if (get_unsigned_int(pstart, &p, &uj, tvs != NULL) == FAIL) {
+        if (get_unsigned_int(pstart, &p, &uj, tvs != nullptr) == FAIL) {
           goto error;
         }
 
@@ -1194,7 +1194,7 @@ static int parse_fmt_types(const char ***ap_types, int *num_posarg, const char *
           // Positional argument field width
           unsigned uj;
 
-          if (get_unsigned_int(arg + 1, &p, &uj, tvs != NULL) == FAIL) {
+          if (get_unsigned_int(arg + 1, &p, &uj, tvs != nullptr) == FAIL) {
             goto error;
           }
 
@@ -1220,7 +1220,7 @@ static int parse_fmt_types(const char ***ap_types, int *num_posarg, const char *
         const char *digstart = p;
         unsigned uj;
 
-        if (get_unsigned_int(digstart, &p, &uj, tvs != NULL) == FAIL) {
+        if (get_unsigned_int(digstart, &p, &uj, tvs != nullptr) == FAIL) {
           goto error;
         }
 
@@ -1241,7 +1241,7 @@ static int parse_fmt_types(const char ***ap_types, int *num_posarg, const char *
             // Parse precision
             unsigned uj;
 
-            if (get_unsigned_int(arg + 1, &p, &uj, tvs != NULL) == FAIL) {
+            if (get_unsigned_int(arg + 1, &p, &uj, tvs != nullptr) == FAIL) {
               goto error;
             }
 
@@ -1268,7 +1268,7 @@ static int parse_fmt_types(const char ***ap_types, int *num_posarg, const char *
           const char *digstart = p;
           unsigned uj;
 
-          if (get_unsigned_int(digstart, &p, &uj, tvs != NULL) == FAIL) {
+          if (get_unsigned_int(digstart, &p, &uj, tvs != nullptr) == FAIL) {
             goto error;
           }
 
@@ -1345,12 +1345,12 @@ static int parse_fmt_types(const char ***ap_types, int *num_posarg, const char *
   }
 
   for (int arg_idx = 0; arg_idx < *num_posarg; arg_idx++) {
-    if ((*ap_types)[arg_idx] == NULL) {
+    if ((*ap_types)[arg_idx] == nullptr) {
       semsg(_(e_fmt_arg_nr_unused_str), arg_idx + 1, fmt);
       goto error;
     }
 
-    if (tvs != NULL && tvs[arg_idx].v_type == VAR_UNKNOWN) {
+    if (tvs != nullptr && tvs[arg_idx].v_type == VAR_UNKNOWN) {
       semsg(_(e_positional_nr_out_of_bounds_str), arg_idx + 1, fmt);
       goto error;
     }
@@ -1360,7 +1360,7 @@ static int parse_fmt_types(const char ***ap_types, int *num_posarg, const char *
 
 error:
   xfree(*ap_types);
-  *ap_types = NULL;
+  *ap_types = nullptr;
   *num_posarg = 0;
   return FAIL;
 }
@@ -1387,7 +1387,7 @@ static void skip_to_arg(const char **ap_types, va_list ap_start, va_list *ap, in
   }
 
   for (*arg_cur = arg_min; *arg_cur < *arg_idx - 1; (*arg_cur)++) {
-    if (ap_types == NULL || ap_types[*arg_cur] == NULL) {
+    if (ap_types == nullptr || ap_types[*arg_cur] == nullptr) {
       siemsg(e_aptypes_is_null_nr_str, fmt, *arg_cur);
       return;
     }
@@ -1464,9 +1464,9 @@ static void skip_to_arg(const char **ap_types, va_list ap_start, va_list *ap, in
 /// @param[out]  str  String to write to.
 /// @param[in]  str_m  String length.
 /// @param[in]  fmt  String format.
-/// @param[in]  ap  Values that should be formatted. Ignored if tvs is not NULL.
+/// @param[in]  ap  Values that should be formatted. Ignored if tvs is not nullptr.
 /// @param[in]  tvs  Values that should be formatted, for printf() Vimscript
-///                  function. Must be NULL in other cases.
+///                  function. Must be nullptr in other cases.
 ///
 /// @return Number of bytes excluding NUL byte that would be written to the
 ///         string if str_m was greater or equal to the return value.
@@ -1480,7 +1480,7 @@ int vim_vsnprintf_typval(char *str, size_t str_m, const char *fmt, va_list ap_st
   int num_posarg = 0;
   int arg_idx = 1;
   va_list ap;
-  const char **ap_types = NULL;
+  const char **ap_types = nullptr;
 
   if (parse_fmt_types(&ap_types, &num_posarg, fmt, tvs) == FAIL) {
     return 0;
@@ -1523,7 +1523,7 @@ int vim_vsnprintf_typval(char *str, size_t str_m, const char *fmt, va_list ap_st
       char tmp[TMP_LEN];
 
       // string address in case of string argument
-      const char *str_arg = NULL;
+      const char *str_arg = nullptr;
 
       // natural field width of arg without padding and sign
       size_t str_arg_l;
@@ -1544,7 +1544,7 @@ int vim_vsnprintf_typval(char *str, size_t str_m, const char *fmt, va_list ap_st
       char fmt_spec = NUL;
 
       // buffer for 's' and 'S' specs
-      char *tofree = NULL;
+      char *tofree = nullptr;
 
       // variable for positional arg
       int pos_arg = -1;
@@ -1564,7 +1564,7 @@ int vim_vsnprintf_typval(char *str, size_t str_m, const char *fmt, va_list ap_st
         const char *digstart = p;
         unsigned uj;
 
-        if (get_unsigned_int(digstart, &p, &uj, tvs != NULL) == FAIL) {
+        if (get_unsigned_int(digstart, &p, &uj, tvs != nullptr) == FAIL) {
           goto error;
         }
 
@@ -1606,7 +1606,7 @@ int vim_vsnprintf_typval(char *str, size_t str_m, const char *fmt, va_list ap_st
           // Positional argument field width
           unsigned uj;
 
-          if (get_unsigned_int(digstart, &p, &uj, tvs != NULL) == FAIL) {
+          if (get_unsigned_int(digstart, &p, &uj, tvs != nullptr) == FAIL) {
             goto error;
           }
 
@@ -1622,7 +1622,7 @@ int vim_vsnprintf_typval(char *str, size_t str_m, const char *fmt, va_list ap_st
                     va_arg(ap, int)));
 
         if (j > MAX_ALLOWED_STRING_WIDTH) {
-          if (tvs != NULL) {
+          if (tvs != nullptr) {
             format_overflow_error(digstart);
             goto error;
           } else {
@@ -1642,7 +1642,7 @@ int vim_vsnprintf_typval(char *str, size_t str_m, const char *fmt, va_list ap_st
         const char *digstart = p;
         unsigned uj;
 
-        if (get_unsigned_int(digstart, &p, &uj, tvs != NULL) == FAIL) {
+        if (get_unsigned_int(digstart, &p, &uj, tvs != nullptr) == FAIL) {
           goto error;
         }
 
@@ -1660,7 +1660,7 @@ int vim_vsnprintf_typval(char *str, size_t str_m, const char *fmt, va_list ap_st
           const char *digstart = p;
           unsigned uj;
 
-          if (get_unsigned_int(digstart, &p, &uj, tvs != NULL) == FAIL) {
+          if (get_unsigned_int(digstart, &p, &uj, tvs != nullptr) == FAIL) {
             goto error;
           }
 
@@ -1674,7 +1674,7 @@ int vim_vsnprintf_typval(char *str, size_t str_m, const char *fmt, va_list ap_st
             // positional argument
             unsigned uj;
 
-            if (get_unsigned_int(digstart, &p, &uj, tvs != NULL) == FAIL) {
+            if (get_unsigned_int(digstart, &p, &uj, tvs != nullptr) == FAIL) {
               goto error;
             }
 
@@ -1690,7 +1690,7 @@ int vim_vsnprintf_typval(char *str, size_t str_m, const char *fmt, va_list ap_st
                       va_arg(ap, int)));
 
           if (j > MAX_ALLOWED_STRING_WIDTH) {
-            if (tvs != NULL) {
+            if (tvs != nullptr) {
               format_overflow_error(digstart);
               goto error;
             } else {
@@ -1784,7 +1784,7 @@ int vim_vsnprintf_typval(char *str, size_t str_m, const char *fmt, va_list ap_st
                         va_arg(ap, const char *)));
 
           if (!str_arg) {
-            str_arg = "[NULL]";
+            str_arg = "[nullptr]";
             str_arg_l = 6;
           } else if (!precision_specified) {
             // make sure not to address string beyond the specified
@@ -1837,8 +1837,8 @@ int vim_vsnprintf_typval(char *str, size_t str_m, const char *fmt, va_list ap_st
         // u, b, B, o, x, X and p conversion specifiers imply
         // the value is unsigned; d implies a signed value
 
-        // 0 if numeric argument is zero (or if pointer is NULL for 'p'),
-        // +1 if greater than zero (or non NULL for 'p'),
+        // 0 if numeric argument is zero (or if pointer is nullptr for 'p'),
+        // +1 if greater than zero (or non nullptr for 'p'),
         // -1 if negative (unsigned argument is never negative)
         int arg_sign = 0;
 
@@ -1846,7 +1846,7 @@ int vim_vsnprintf_typval(char *str, size_t str_m, const char *fmt, va_list ap_st
         uintmax_t uarg = 0;
 
         // only defined for p conversion
-        const void *ptr_arg = NULL;
+        const void *ptr_arg = nullptr;
 
         if (fmt_spec == 'p') {
           ptr_arg = (tvs
@@ -2101,7 +2101,7 @@ int vim_vsnprintf_typval(char *str, size_t str_m, const char *fmt, va_list ap_st
         }
 
         if (xisinf(f)
-            || (strchr("fF", fmt_spec) != NULL && abs_f > 1.0e307)) {
+            || (strchr("fF", fmt_spec) != nullptr && abs_f > 1.0e307)) {
           xstrlcpy(tmp, infinity_str(f > 0.0, fmt_spec,
                                      force_sign, space_for_positive),
                    sizeof(tmp));
@@ -2166,7 +2166,7 @@ int vim_vsnprintf_typval(char *str, size_t str_m, const char *fmt, va_list ap_st
               }
             }
 
-            if (tp != NULL && !precision_specified) {
+            if (tp != nullptr && !precision_specified) {
               // remove trailing zeroes, but keep the one just after a dot
               while (tp > tmp + 2 && *tp == '0' && tp[-1] != '.') {
                 STRMOVE(tp, tp + 1);
@@ -2304,7 +2304,7 @@ int vim_vsnprintf_typval(char *str, size_t str_m, const char *fmt, va_list ap_st
     str[str_l <= str_m - 1 ? str_l : str_m - 1] = NUL;
   }
 
-  if (tvs != NULL
+  if (tvs != nullptr
       && tvs[num_posarg != 0 ? num_posarg : arg_idx - 1].v_type != VAR_UNKNOWN) {
     emsg(_("E767: Too many arguments to printf()"));
   }
@@ -2326,7 +2326,7 @@ int kv_do_printf(StringBuilder *str, const char *fmt, ...)
 
   va_list ap;
   va_start(ap, fmt);
-  int printed = vsnprintf(str->items ? str->items + str->size : NULL, remaining, fmt, ap);
+  int printed = vsnprintf(str->items ? str->items + str->size : nullptr, remaining, fmt, ap);
   va_end(ap);
 
   if (printed < 0) {
@@ -2336,7 +2336,7 @@ int kv_do_printf(StringBuilder *str, const char *fmt, ...)
   // printed string didn't fit, resize and try again
   if ((size_t)printed >= remaining) {
     kv_ensure_space(*str, (size_t)printed + 1);  // include space for NUL terminator at the end
-    assert(str->items != NULL);
+    assert(str->items != nullptr);
     va_start(ap, fmt);
     printed = vsnprintf(str->items + str->size, str->capacity - str->size, fmt, ap);
     va_end(ap);
@@ -2353,7 +2353,7 @@ String arena_printf(Arena *arena, const char *fmt, ...)
   FUNC_ATTR_PRINTF(2, 3)
 {
   size_t remaining = 0;
-  char *buf = NULL;
+  char *buf = nullptr;
   if (arena) {
     if (!arena->cur_blk) {
       arena_alloc_block(arena);
@@ -2408,7 +2408,7 @@ char *reverse_text(char *s)
   return rev;
 }
 
-/// Replace all occurrences of "what" with "rep" in "src". If no replacement happens then NULL is
+/// Replace all occurrences of "what" with "rep" in "src". If no replacement happens then nullptr is
 /// returned otherwise return a newly allocated string.
 ///
 /// @param[in] src  Source text
@@ -2423,19 +2423,19 @@ char *strrep(const char *src, const char *what, const char *rep)
 
   // Count occurrences
   size_t count = 0;
-  while ((pos = strstr(pos, what)) != NULL) {
+  while ((pos = strstr(pos, what)) != nullptr) {
     count++;
     pos += whatlen;
   }
 
   if (count == 0) {
-    return NULL;
+    return nullptr;
   }
 
   size_t replen = strlen(rep);
   char *ret = xmalloc(strlen(src) + count * (replen - whatlen) + 1);
   char *ptr = ret;
-  while ((pos = strstr(src, what)) != NULL) {
+  while ((pos = strstr(src, what)) != nullptr) {
     size_t idx = (size_t)(pos - src);
     memcpy(ptr, src, idx);
     ptr += idx;
@@ -2456,8 +2456,8 @@ static void byteidx_common(typval_T *argvars, typval_T *rettv, bool comp)
   rettv->vval.v_number = -1;
 
   const char *const str = tv_get_string_chk(&argvars[0]);
-  varnumber_T idx = tv_get_number_chk(&argvars[1], NULL);
-  if (str == NULL || idx < 0) {
+  varnumber_T idx = tv_get_number_chk(&argvars[1], nullptr);
+  if (str == nullptr || idx < 0) {
     return;
   }
 
@@ -2528,8 +2528,8 @@ void f_charidx(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
   }
 
   const char *const str = tv_get_string_chk(&argvars[0]);
-  varnumber_T idx = tv_get_number_chk(&argvars[1], NULL);
-  if (str == NULL || idx < 0) {
+  varnumber_T idx = tv_get_number_chk(&argvars[1], nullptr);
+  if (str == nullptr || idx < 0) {
     return;
   }
 
@@ -2619,7 +2619,7 @@ void f_str2nr(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
     break;
   }
   varnumber_T n;
-  vim_str2nr(p, NULL, NULL, what, &n, NULL, 0, false, NULL);
+  vim_str2nr(p, nullptr, nullptr, what, &n, nullptr, 0, false, nullptr);
   // Text after the number is silently ignored.
   if (isneg) {
     rettv->vval.v_number = -n;
@@ -2634,7 +2634,7 @@ void f_strgetchar(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
   rettv->vval.v_number = -1;
 
   const char *const str = tv_get_string_chk(&argvars[0]);
-  if (str == NULL) {
+  if (str == nullptr) {
     return;
   }
   bool error = false;
@@ -2665,7 +2665,7 @@ void f_stridx(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
   const char *const needle = tv_get_string_chk(&argvars[1]);
   const char *haystack = tv_get_string_buf_chk(&argvars[0], buf);
   const char *const haystack_start = haystack;
-  if (needle == NULL || haystack == NULL) {
+  if (needle == nullptr || haystack == nullptr) {
     return;  // Type error; errmsg already given.
   }
 
@@ -2683,7 +2683,7 @@ void f_stridx(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
   }
 
   const char *pos = strstr(haystack, needle);
-  if (pos != NULL) {
+  if (pos != nullptr) {
     rettv->vval.v_number = (varnumber_T)(pos - haystack_start);
   }
 }
@@ -2692,7 +2692,7 @@ void f_stridx(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
 void f_string(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
 {
   rettv->v_type = VAR_STRING;
-  rettv->vval.v_string = encode_tv2string(&argvars[0], NULL);
+  rettv->vval.v_string = encode_tv2string(&argvars[0], nullptr);
 }
 
 /// "strlen()" function
@@ -2921,7 +2921,7 @@ void f_strridx(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
   const char *const haystack = tv_get_string_buf_chk(&argvars[0], buf);
 
   rettv->vval.v_number = -1;
-  if (needle == NULL || haystack == NULL) {
+  if (needle == nullptr || haystack == nullptr) {
     return;  // Type error; errmsg already given.
   }
 
@@ -2929,7 +2929,7 @@ void f_strridx(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
   ptrdiff_t end_idx;
   if (argvars[2].v_type != VAR_UNKNOWN) {
     // Third argument: upper limit for index.
-    end_idx = (ptrdiff_t)tv_get_number_chk(&argvars[2], NULL);
+    end_idx = (ptrdiff_t)tv_get_number_chk(&argvars[2], nullptr);
     if (end_idx < 0) {
       return;  // Can never find a match.
     }
@@ -2937,21 +2937,21 @@ void f_strridx(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
     end_idx = (ptrdiff_t)haystack_len;
   }
 
-  const char *lastmatch = NULL;
+  const char *lastmatch = nullptr;
   if (*needle == NUL) {
     // Empty string matches past the end.
     lastmatch = haystack + end_idx;
   } else {
     for (const char *rest = haystack; *rest != NUL; rest++) {
       rest = strstr(rest, needle);
-      if (rest == NULL || rest > haystack + end_idx) {
+      if (rest == nullptr || rest > haystack + end_idx) {
         break;
       }
       lastmatch = rest;
     }
   }
 
-  if (lastmatch != NULL) {
+  if (lastmatch != nullptr) {
     rettv->vval.v_number = (varnumber_T)(lastmatch - haystack);
   }
 }
@@ -2980,8 +2980,8 @@ void f_utf16idx(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
   }
 
   const char *const str = tv_get_string_chk(&argvars[0]);
-  varnumber_T idx = tv_get_number_chk(&argvars[1], NULL);
-  if (str == NULL || idx < 0) {
+  varnumber_T idx = tv_get_number_chk(&argvars[1], nullptr);
+  if (str == nullptr || idx < 0) {
     return;
   }
 
@@ -3054,8 +3054,8 @@ void f_tr(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
 
   // Default return value: empty string.
   rettv->v_type = VAR_STRING;
-  rettv->vval.v_string = NULL;
-  if (fromstr == NULL || tostr == NULL) {
+  rettv->vval.v_string = nullptr;
+  if (fromstr == nullptr || tostr == nullptr) {
     return;  // Type error; errmsg already given.
   }
   garray_T ga;
@@ -3127,14 +3127,14 @@ void f_trim(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
   char buf1[NUMBUFLEN];
   char buf2[NUMBUFLEN];
   const char *head = tv_get_string_buf_chk(&argvars[0], buf1);
-  const char *mask = NULL;
+  const char *mask = nullptr;
   const char *prev;
   const char *p;
   int dir = 0;
 
   rettv->v_type = VAR_STRING;
-  rettv->vval.v_string = NULL;
-  if (head == NULL) {
+  rettv->vval.v_string = nullptr;
+  if (head == nullptr) {
     return;
   }
 
@@ -3145,7 +3145,7 @@ void f_trim(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
   if (argvars[1].v_type == VAR_STRING) {
     mask = tv_get_string_buf_chk(&argvars[1], buf2);
     if (*mask == NUL) {
-      mask = NULL;
+      mask = nullptr;
     }
 
     if (argvars[2].v_type != VAR_UNKNOWN) {
@@ -3166,7 +3166,7 @@ void f_trim(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
     // Trim leading characters
     while (*head != NUL) {
       int c1 = utf_ptr2char(head);
-      if (mask == NULL) {
+      if (mask == nullptr) {
         if (c1 > ' ' && c1 != 0xa0) {
           break;
         }
@@ -3191,7 +3191,7 @@ void f_trim(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
       prev = tail;
       MB_PTR_BACK(head, prev);
       int c1 = utf_ptr2char(prev);
-      if (mask == NULL) {
+      if (mask == nullptr) {
         if (c1 > ' ' && c1 != 0xa0) {
           break;
         }

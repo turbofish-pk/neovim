@@ -347,7 +347,7 @@ enc_alias_table[] = {
   { "950",             IDX_BIG5 },
   { "mac",             IDX_MACROMAN },
   { "mac-roman",       IDX_MACROMAN },
-  { NULL,              0 }
+  { nullptr,              0 }
 };
 
 /// Find encoding "name" in the list of canonical encoding names.
@@ -408,7 +408,7 @@ void remove_bom(char *s)
 {
   char *p = s;
 
-  while ((p = strchr(p, 0xef)) != NULL) {
+  while ((p = strchr(p, 0xef)) != nullptr) {
     if ((uint8_t)p[1] == 0xbb && (uint8_t)p[2] == 0xbf) {
       STRMOVE(p, p + 3);
     } else {
@@ -624,7 +624,7 @@ int utf_ptr2cells_len(const char *p, int size)
 
 /// Calculate the number of cells occupied by string `str`.
 ///
-/// @param str The source string, may not be NULL, must be a NUL-terminated
+/// @param str The source string, may not be nullptr, must be a NUL-terminated
 ///            string.
 /// @return The number of cells occupied by string `str`
 size_t mb_string2cells(const char *str)
@@ -640,7 +640,7 @@ size_t mb_string2cells(const char *str)
 
 /// Get the number of cells occupied by string `str` with maximum length `size`
 ///
-/// @param str The source string, may not be NULL, must be a NUL-terminated
+/// @param str The source string, may not be nullptr, must be a NUL-terminated
 ///            string.
 /// @param size maximum length of string. It will terminate on earlier NUL.
 /// @return The number of cells occupied by string `str`
@@ -1385,7 +1385,7 @@ int utf_fold(int a)
 
   utf8proc_int32_t result[1];
 
-  utf8proc_ssize_t res = utf8proc_decompose_char(a, result, 1, UTF8PROC_CASEFOLD, NULL);
+  utf8proc_ssize_t res = utf8proc_decompose_char(a, result, 1, UTF8PROC_CASEFOLD, nullptr);
 
   return (res == 1) ? result[0] : a;
 }
@@ -1535,7 +1535,7 @@ int utf_strnicmp(const char *s1, const char *s2, size_t n1, size_t n2)
 ///
 /// @param utf8  UTF-8 string.
 /// @param utf8len  Length of `utf8`. May be -1 if `utf8` is NUL-terminated.
-/// @param utf16[out,allocated]  NUL-terminated UTF-16 string, or NULL on error
+/// @param utf16[out,allocated]  NUL-terminated UTF-16 string, or nullptr on error
 /// @return 0 on success, or libuv error code
 int utf8_to_utf16(const char *utf8, int utf8len, wchar_t **utf16)
   FUNC_ATTR_NONNULL_ALL
@@ -1545,15 +1545,15 @@ int utf8_to_utf16(const char *utf8, int utf8len, wchar_t **utf16)
                                     0,     // dwFlags: must be 0 for UTF-8
                                     utf8,  // -1: process up to NUL
                                     utf8len,
-                                    NULL,
+                                    nullptr,
                                     0);    // 0: get length, don't convert
   if (bufsize == 0) {
-    *utf16 = NULL;
+    *utf16 = nullptr;
     return uv_translate_sys_error(GetLastError());
   }
 
   // Allocate the destination buffer adding an extra byte for the terminating
-  // NULL. If `utf8len` is not -1 MultiByteToWideChar will not add it, so
+  // nullptr. If `utf8len` is not -1 MultiByteToWideChar will not add it, so
   // we do it ourselves always, just in case.
   *utf16 = xmalloc(sizeof(wchar_t) * (bufsize + 1));
 
@@ -1572,7 +1572,7 @@ int utf8_to_utf16(const char *utf8, int utf8len, wchar_t **utf16)
 ///
 /// @param utf16  UTF-16 string.
 /// @param utf16len  Length of `utf16`. May be -1 if `utf16` is NUL-terminated.
-/// @param utf8[out,allocated]  NUL-terminated UTF-8 string, or NULL on error
+/// @param utf8[out,allocated]  NUL-terminated UTF-8 string, or nullptr on error
 /// @return 0 on success, or libuv error code
 int utf16_to_utf8(const wchar_t *utf16, int utf16len, char **utf8)
   FUNC_ATTR_NONNULL_ALL
@@ -1582,17 +1582,17 @@ int utf16_to_utf8(const wchar_t *utf16, int utf16len, char **utf8)
                                       0,
                                       utf16,
                                       utf16len,
-                                      NULL,
+                                      nullptr,
                                       0,
-                                      NULL,
-                                      NULL);
+                                      nullptr,
+                                      nullptr);
   if (bufsize == 0) {
-    *utf8 = NULL;
+    *utf8 = nullptr;
     return uv_translate_sys_error(GetLastError());
   }
 
   // Allocate the destination buffer adding an extra byte for the terminating
-  // NULL. If `utf16len` is not -1 WideCharToMultiByte will not add it, so
+  // nullptr. If `utf16len` is not -1 WideCharToMultiByte will not add it, so
   // we do it ourselves always, just in case.
   *utf8 = xmalloc(bufsize + 1);
 
@@ -1603,8 +1603,8 @@ int utf16_to_utf8(const wchar_t *utf16, int utf16len, char **utf8)
                                 utf16len,
                                 *utf8,
                                 bufsize,
-                                NULL,
-                                NULL);
+                                nullptr,
+                                nullptr);
   if (bufsize == 0) {
     XFREE_CLEAR(*utf8);
     return uv_translate_sys_error(GetLastError());
@@ -2097,7 +2097,7 @@ void utf_find_illegal(void)
 {
   pos_T pos = curwin->w_cursor;
   vimconv_T vimconv;
-  char *tofree = NULL;
+  char *tofree = nullptr;
 
   vimconv.vc_type = CONV_NONE;
   if (enc_canon_props(curbuf->b_p_fenc) & ENC_8BIT) {
@@ -2112,8 +2112,8 @@ void utf_find_illegal(void)
     char *p = get_cursor_pos_ptr();
     if (vimconv.vc_type != CONV_NONE) {
       xfree(tofree);
-      tofree = string_convert(&vimconv, p, NULL);
-      if (tofree == NULL) {
+      tofree = string_convert(&vimconv, p, nullptr);
+      if (tofree == nullptr) {
         break;
       }
       p = tofree;
@@ -2152,21 +2152,21 @@ void utf_find_illegal(void)
 
 theend:
   xfree(tofree);
-  convert_setup(&vimconv, NULL, NULL);
+  convert_setup(&vimconv, nullptr, nullptr);
 }
 
 /// @return  true if string "s" is a valid utf-8 string.
-/// When "end" is NULL stop at the first NUL.  Otherwise stop at "end".
+/// When "end" is nullptr stop at the first NUL.  Otherwise stop at "end".
 bool utf_valid_string(const char *s, const char *end)
 {
   const uint8_t *p = (uint8_t *)s;
 
-  while (end == NULL ? *p != NUL : p < (uint8_t *)end) {
+  while (end == nullptr ? *p != NUL : p < (uint8_t *)end) {
     int l = utf8len_tab_zero[*p];
     if (l == 0) {
       return false;  // invalid lead byte
     }
-    if (end != NULL && p + l > (uint8_t *)end) {
+    if (end != nullptr && p + l > (uint8_t *)end) {
       return false;  // incomplete byte sequence
     }
     p++;
@@ -2240,7 +2240,7 @@ int mb_charlen(const char *str)
   const char *p = str;
   int count;
 
-  if (p == NULL) {
+  if (p == nullptr) {
     return 0;
   }
 
@@ -2271,7 +2271,7 @@ int mb_charlen_len(const char *str, int len)
 /// @param[in,out]  pp  String to unescape. Is advanced to just after the bytes
 ///                     that form a multibyte character.
 ///
-/// @return Unescaped string if it is a multibyte character, NULL if no
+/// @return Unescaped string if it is a multibyte character, nullptr if no
 ///         multibyte character was found. Returns a static buffer, always one
 ///         and the same.
 const char *mb_unescape(const char **const pp)
@@ -2308,7 +2308,7 @@ const char *mb_unescape(const char **const pp)
       break;
     }
   }
-  return NULL;
+  return nullptr;
 }
 
 /// Skip the Vim specific head of a 'encoding' name.
@@ -2392,7 +2392,7 @@ char *enc_canonize(char *enc)
 /// Returns -1 when not found.
 static int enc_alias_search(const char *name)
 {
-  for (int i = 0; enc_alias_table[i].name != NULL; i++) {
+  for (int i = 0; enc_alias_table[i].name != nullptr; i++) {
     if (strcmp(name, enc_alias_table[i].name) == 0) {
       return enc_alias_table[i].canon;
     }
@@ -2405,7 +2405,7 @@ static int enc_alias_search(const char *name)
 #endif
 
 // Get the canonicalized encoding of the current locale.
-// Returns an allocated string when successful, NULL when not.
+// Returns an allocated string when successful, nullptr when not.
 char *enc_locale(void)
 {
   int i;
@@ -2417,7 +2417,7 @@ char *enc_locale(void)
   if (!(s = nl_langinfo(CODESET)) || *s == NUL)
 #endif
   {
-    if (!(s = setlocale(LC_CTYPE, NULL)) || *s == NUL) {
+    if (!(s = setlocale(LC_CTYPE, nullptr)) || *s == NUL) {
       if ((s = os_getenv_noalloc("LC_ALL"))) {
         if ((s = os_getenv_noalloc("LC_CTYPE"))) {
           s = os_getenv_noalloc("LANG");
@@ -2427,7 +2427,7 @@ char *enc_locale(void)
   }
 
   if (!s) {
-    return NULL;
+    return nullptr;
   }
 
   // The most generic locale format is:
@@ -2438,7 +2438,7 @@ char *enc_locale(void)
   // Exception: "ja_JP.EUC" == "euc-jp", "zh_CN.EUC" = "euc-cn",
   // "ko_KR.EUC" == "euc-kr"
   const char *p = vim_strchr(s, '.');
-  if (p != NULL) {
+  if (p != nullptr) {
     if (p > s + 2 && !STRNICMP(p + 1, "EUC", 3)
         && !isalnum((uint8_t)p[4]) && p[4] != '-' && p[-3] == '_') {
       // Copy "XY.EUC" to "euc-XY" to buf[10].
@@ -2486,12 +2486,12 @@ void *my_iconv_open(char *to, char *from)
     // Do a dummy iconv() call to check if it actually works.  There is a
     // version of iconv() on Linux that is broken.  We can't ignore it,
     // because it's wide-spread.  The symptoms are that after outputting
-    // the initial shift state the "to" pointer is NULL and conversion
+    // the initial shift state the "to" pointer is nullptr and conversion
     // stops for no apparent reason after about 8160 characters.
     char *p = tobuf;
     size_t tolen = ICONV_TESTLEN;
-    iconv(fd, NULL, NULL, &p, &tolen);
-    if (p == NULL) {
+    iconv(fd, nullptr, nullptr, &p, &tolen);
+    if (p == nullptr) {
       iconv_working = kBroken;
       iconv_close(fd);
       fd = (iconv_t)-1;
@@ -2504,17 +2504,17 @@ void *my_iconv_open(char *to, char *from)
 }
 
 // Convert the string "str[slen]" with iconv().
-// If "unconvlenp" is not NULL handle the string ending in an incomplete
+// If "unconvlenp" is not nullptr handle the string ending in an incomplete
 // sequence and set "*unconvlenp" to the length of it.
-// Returns the converted string in allocated memory.  NULL for an error.
-// If resultlenp is not NULL, sets it to the result length in bytes.
+// Returns the converted string in allocated memory.  nullptr for an error.
+// If resultlenp is not nullptr, sets it to the result length in bytes.
 static char *iconv_string(const vimconv_T *const vcp, const char *str, size_t slen,
                           size_t *unconvlenp, size_t *resultlenp)
 {
   char *to;
   size_t len = 0;
   size_t done = 0;
-  char *result = NULL;
+  char *result = nullptr;
 
   const char *from = str;
   size_t fromlen = slen;
@@ -2543,7 +2543,7 @@ static char *iconv_string(const vimconv_T *const vcp, const char *str, size_t sl
 
     // Check both ICONV_EINVAL and EINVAL, because the dynamically loaded
     // iconv library may use one of them.
-    if (!vcp->vc_fail && unconvlenp != NULL
+    if (!vcp->vc_fail && unconvlenp != nullptr
         && (ICONV_ERRNO == ICONV_EINVAL || ICONV_ERRNO == EINVAL)) {
       // Handle an incomplete sequence at the end.
       *to = NUL;
@@ -2574,7 +2574,7 @@ static char *iconv_string(const vimconv_T *const vcp, const char *str, size_t sl
     done = (size_t)(to - result);
   }
 
-  if (resultlenp != NULL && result != NULL) {
+  if (resultlenp != nullptr && result != nullptr) {
     *resultlenp = (size_t)(to - result);
   }
   return result;
@@ -2586,7 +2586,7 @@ void f_iconv(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
   vimconv_T vimconv;
 
   rettv->v_type = VAR_STRING;
-  rettv->vval.v_string = NULL;
+  rettv->vval.v_string = nullptr;
 
   const char *const str = tv_get_string(&argvars[0]);
   char buf1[NUMBUFLEN];
@@ -2600,10 +2600,10 @@ void f_iconv(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
   if (vimconv.vc_type == CONV_NONE) {
     rettv->vval.v_string = xstrdup(str);
   } else {
-    rettv->vval.v_string = string_convert(&vimconv, (char *)str, NULL);
+    rettv->vval.v_string = string_convert(&vimconv, (char *)str, nullptr);
   }
 
-  convert_setup(&vimconv, NULL, NULL);
+  convert_setup(&vimconv, nullptr, nullptr);
   xfree(from);
   xfree(to);
 }
@@ -2613,7 +2613,7 @@ void f_iconv(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
 /// vcp->vc_type must have been initialized to CONV_NONE.
 /// Note: cannot be used for conversion from/to ucs-2 and ucs-4 (will use utf-8
 /// instead).
-/// Afterwards invoke with "from" and "to" equal to NULL to cleanup.
+/// Afterwards invoke with "from" and "to" equal to nullptr to cleanup.
 ///
 /// @return  FAIL when conversion is not supported, OK otherwise.
 int convert_setup(vimconv_T *vcp, char *from, char *to)
@@ -2636,7 +2636,7 @@ int convert_setup_ext(vimconv_T *vcp, char *from, bool from_unicode_is_utf8, cha
   *vcp = (vimconv_T)MBYTE_NONE_CONV;
 
   // No conversion when one of the names is empty or they are equal.
-  if (from == NULL || *from == NUL || to == NULL || *to == NUL
+  if (from == nullptr || *from == NUL || to == nullptr || *to == NUL
       || strcmp(from, to) == 0) {
     return OK;
   }
@@ -2686,25 +2686,25 @@ int convert_setup_ext(vimconv_T *vcp, char *from, bool from_unicode_is_utf8, cha
 
 /// Convert text "ptr[*lenp]" according to "vcp".
 /// Returns the result in allocated memory and sets "*lenp".
-/// When "lenp" is NULL, use NUL terminated strings.
+/// When "lenp" is nullptr, use NUL terminated strings.
 /// Illegal chars are often changed to "?", unless vcp->vc_fail is set.
-/// When something goes wrong, NULL is returned and "*lenp" is unchanged.
+/// When something goes wrong, nullptr is returned and "*lenp" is unchanged.
 char *string_convert(const vimconv_T *const vcp, char *ptr, size_t *lenp)
 {
-  return string_convert_ext(vcp, ptr, lenp, NULL);
+  return string_convert_ext(vcp, ptr, lenp, nullptr);
 }
 
-// Like string_convert(), but when "unconvlenp" is not NULL and there are is
+// Like string_convert(), but when "unconvlenp" is not nullptr and there are is
 // an incomplete sequence at the end it is not converted and "*unconvlenp" is
 // set to the number of remaining bytes.
 char *string_convert_ext(const vimconv_T *const vcp, char *ptr, size_t *lenp, size_t *unconvlenp)
 {
-  uint8_t *retval = NULL;
+  uint8_t *retval = nullptr;
   uint8_t *d;
   int c;
 
   size_t len;
-  if (lenp == NULL) {
+  if (lenp == nullptr) {
     len = strlen(ptr);
   } else {
     len = *lenp;
@@ -2727,7 +2727,7 @@ char *string_convert_ext(const vimconv_T *const vcp, char *ptr, size_t *lenp, si
       }
     }
     *d = NUL;
-    if (lenp != NULL) {
+    if (lenp != nullptr) {
       *lenp = (size_t)(d - retval);
     }
     break;
@@ -2758,7 +2758,7 @@ char *string_convert_ext(const vimconv_T *const vcp, char *ptr, size_t *lenp, si
       d += utf_char2bytes(c, (char *)d);
     }
     *d = NUL;
-    if (lenp != NULL) {
+    if (lenp != nullptr) {
       *lenp = (size_t)(d - retval);
     }
     break;
@@ -2777,9 +2777,9 @@ char *string_convert_ext(const vimconv_T *const vcp, char *ptr, size_t *lenp, si
         if (l_w == 0) {
           // Illegal utf-8 byte cannot be converted
           xfree(retval);
-          return NULL;
+          return nullptr;
         }
-        if (unconvlenp != NULL && l_w > len - i) {
+        if (unconvlenp != nullptr && l_w > len - i) {
           // Incomplete sequence at the end.
           *unconvlenp = len - i;
           break;
@@ -2821,7 +2821,7 @@ char *string_convert_ext(const vimconv_T *const vcp, char *ptr, size_t *lenp, si
             *d++ = (uint8_t)c;
           } else if (vcp->vc_fail) {
             xfree(retval);
-            return NULL;
+            return nullptr;
           } else {
             *d++ = 0xbf;
             if (utf_char2cells(c) > 1) {
@@ -2833,7 +2833,7 @@ char *string_convert_ext(const vimconv_T *const vcp, char *ptr, size_t *lenp, si
       }
     }
     *d = NUL;
-    if (lenp != NULL) {
+    if (lenp != nullptr) {
       *lenp = (size_t)(d - retval);
     }
     break;
@@ -2853,7 +2853,7 @@ typedef struct {
   char width;
 } cw_interval_T;
 
-static cw_interval_T *cw_table = NULL;
+static cw_interval_T *cw_table = nullptr;
 static size_t cw_table_size = 0;
 
 /// Return the value of the cellwidth table for the character `c`.
@@ -2862,7 +2862,7 @@ static size_t cw_table_size = 0;
 /// @return 1 or 2 when `c` is in the cellwidth table, 0 if not.
 static int cw_value(int c)
 {
-  if (cw_table == NULL) {
+  if (cw_table == nullptr) {
     return 0;
   }
 
@@ -2900,13 +2900,13 @@ static int tv_nr_compare(const void *a1, const void *a2)
 /// "setcellwidths()" function
 void f_setcellwidths(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
 {
-  if (argvars[0].v_type != VAR_LIST || argvars[0].vval.v_list == NULL) {
+  if (argvars[0].v_type != VAR_LIST || argvars[0].vval.v_list == nullptr) {
     emsg(_(e_listreq));
     return;
   }
 
   const list_T *const l = argvars[0].vval.v_list;
-  cw_interval_T *table = NULL;
+  cw_interval_T *table = nullptr;
   const size_t table_size = (size_t)tv_list_len(l);
   if (table_size == 0) {
     // Clearing the table.
@@ -2922,7 +2922,7 @@ void f_setcellwidths(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
   TV_LIST_ITER_CONST(l, li, {
     const typval_T *const li_tv = TV_LIST_ITEM_TV(li);
 
-    if (li_tv->v_type != VAR_LIST || li_tv->vval.v_list == NULL) {
+    if (li_tv->v_type != VAR_LIST || li_tv->vval.v_list == nullptr) {
       semsg(_(e_list_item_nr_is_not_list), item);
       xfree((void *)ptrs);
       return;
@@ -2933,7 +2933,7 @@ void f_setcellwidths(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
     const listitem_T *lili = tv_list_first(li_l);
     int i;
     varnumber_T n1;
-    for (i = 0; lili != NULL; lili = TV_LIST_ITEM_NEXT(li_l, lili), i++) {
+    for (i = 0; lili != nullptr; lili = TV_LIST_ITEM_NEXT(li_l, lili), i++) {
       const typval_T *const lili_tv = TV_LIST_ITEM_TV(lili);
       if (lili_tv->v_type != VAR_NUMBER) {
         break;
@@ -3000,7 +3000,7 @@ update:
   // Check that the new value does not conflict with 'listchars' or
   // 'fillchars'.
   const char *const error = check_chars_options();
-  if (error != NULL) {
+  if (error != nullptr) {
     emsg(_(error));
     cw_table = cw_table_save;
     cw_table_size = cw_table_size_save;
@@ -3031,7 +3031,7 @@ void f_getcellwidths(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
 void f_charclass(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
 {
   if (tv_check_for_string_arg(argvars, 0) == FAIL
-      || argvars[0].vval.v_string == NULL) {
+      || argvars[0].vval.v_string == nullptr) {
     return;
   }
   rettv->vval.v_number = mb_get_class(argvars[0].vval.v_string);
@@ -3042,7 +3042,7 @@ void f_charclass(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
 char *get_encoding_name(expand_T *xp FUNC_ATTR_UNUSED, int idx)
 {
   if (idx >= (int)ARRAY_SIZE(enc_canon_table)) {
-    return NULL;
+    return nullptr;
   }
 
   return (char *)enc_canon_table[idx].name;

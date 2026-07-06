@@ -10,7 +10,7 @@ MPACK_API void mpack_parser_init(mpack_parser_t *parser,
     mpack_uint32_t capacity)
 {
   mpack_tokbuf_init(&parser->tokbuf);
-  parser->data.p = NULL;
+  parser->data.p = nullptr;
   parser->capacity = capacity ? capacity : MPACK_MAX_OBJECT_DEPTH;
   parser->size = 0;
   parser->exiting = 0;
@@ -154,8 +154,8 @@ static mpack_node_t *mpack_parser_push(mpack_parser_t *p)
   mpack_node_t *top;
   assert(parser->size < parser->capacity);
   top = parser->items + parser->size + 1;
-  top->data[0].p = NULL;
-  top->data[1].p = NULL;
+  top->data[0].p = nullptr;
+  top->data[1].p = nullptr;
   top->pos = 0;
   top->key_visited = 0;
   /* increase size and invoke callback, passing parent node if any */
@@ -172,7 +172,7 @@ static mpack_node_t *mpack_parser_pop(mpack_parser_t *p)
 
   if (top->tok.type > MPACK_TOKEN_CHUNK && top->pos < top->tok.length) {
     /* continue processing children */
-    return NULL;
+    return nullptr;
   }
 
   parent = MPACK_PARENT_NODE(top);

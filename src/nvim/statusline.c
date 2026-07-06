@@ -120,7 +120,7 @@ void win_redr_status(win_T *wp)
 
 void get_trans_bufname(buf_T *buf)
 {
-  if (buf_spname(buf) != NULL) {
+  if (buf_spname(buf) != nullptr) {
     xstrlcpy(NameBuff, buf_spname(buf), MAXPATHL);
   } else {
     home_replace(buf, buf->b_fname, NameBuff, MAXPATHL, true);
@@ -135,13 +135,13 @@ void get_trans_bufname(buf_T *buf)
 bool stl_connected(win_T *wp)
 {
   frame_T *fr = wp->w_frame;
-  while (fr->fr_parent != NULL) {
+  while (fr->fr_parent != nullptr) {
     if (fr->fr_parent->fr_layout == FR_COL) {
-      if (fr->fr_next != NULL) {
+      if (fr->fr_next != nullptr) {
         break;
       }
     } else {
-      if (fr->fr_next != NULL) {
+      if (fr->fr_next != nullptr) {
         return true;
       }
     }
@@ -156,7 +156,7 @@ bool stl_connected(win_T *wp)
 /// @param[in]  tpcd_size  Size of the table.
 void stl_clear_click_defs(StlClickDefinition *const click_defs, const size_t click_defs_size)
 {
-  if (click_defs != NULL) {
+  if (click_defs != nullptr) {
     for (size_t i = 0; i < click_defs_size; i++) {
       if (i == 0 || click_defs[i].func != click_defs[i - 1].func) {
         xfree(click_defs[i].func);
@@ -181,7 +181,7 @@ StlClickDefinition *stl_alloc_click_defs(StlClickDefinition *cdp, int width, siz
 void stl_fill_click_defs(StlClickDefinition *click_defs, StlClickRecord *click_recs,
                          const char *buf, int width, bool tabline)
 {
-  if (click_defs == NULL) {
+  if (click_defs == nullptr) {
     return;
   }
 
@@ -191,7 +191,7 @@ void stl_fill_click_defs(StlClickDefinition *click_defs, StlClickRecord *click_r
   StlClickDefinition cur_click_def = {
     .type = kStlClickDisabled,
   };
-  for (int i = 0; click_recs[i].start != NULL; i++) {
+  for (int i = 0; click_recs[i].start != nullptr; i++) {
     len += vim_strnsize(buf, (int)(click_recs[i].start - buf));
     assert(len <= width);
     if (col < len) {
@@ -221,7 +221,7 @@ void stl_fill_click_defs(StlClickDefinition *click_defs, StlClickRecord *click_r
 static bool did_show_ext_ruler = false;
 /// Redraws the statusline, winbar, ruler or tabline.
 ///
-/// @param wp  target window, NULL for 'tabline'
+/// @param wp  target window, nullptr for 'tabline'
 /// @param draw_winbar  redraw 'winbar'
 /// @param draw_ruler  redraw 'rulerformat'
 /// @param ui_event  emit UI-event instead of drawing
@@ -243,7 +243,7 @@ static void win_redr_stl_expr(win_T *wp, bool draw_winbar, bool draw_ruler, bool
 
   ScreenGrid *grid = wp && wp->w_floating && !is_stl_global ? &wp->w_grid_alloc : &default_grid;
 
-  if (!is_stl_global && wp != NULL && wp->w_config.hide) {
+  if (!is_stl_global && wp != nullptr && wp->w_config.hide) {
     return;  // unnecessary
   }
 
@@ -256,15 +256,15 @@ static void win_redr_stl_expr(win_T *wp, bool draw_winbar, bool draw_ruler, bool
   entered = true;
 
   // Restore actual curwin before redrawing.
-  win_T *save_curwin = autocmd_save_curwin ? win_find_by_handle(autocmd_save_curwin) : NULL;
-  win_T *restore_curwin = save_curwin != NULL ? curwin : NULL;
-  if (save_curwin != NULL) {
+  win_T *save_curwin = autocmd_save_curwin ? win_find_by_handle(autocmd_save_curwin) : nullptr;
+  win_T *restore_curwin = save_curwin != nullptr ? curwin : nullptr;
+  if (save_curwin != nullptr) {
     curwin = save_curwin;
     curbuf = curwin->w_buffer;
   }
 
   // setup environment for the task at hand
-  if (wp == NULL) {
+  if (wp == nullptr) {
     // Use 'tabline'.  Always at the first line of the screen.
     stl = p_tal;
     row = 0;
@@ -351,7 +351,7 @@ static void win_redr_stl_expr(win_T *wp, bool draw_winbar, bool draw_ruler, bool
 
   // Temporarily reset 'cursorbind', we don't want a side effect from moving
   // the cursor away and back.
-  win_T *ewp = wp == NULL ? curwin : wp;
+  win_T *ewp = wp == nullptr ? curwin : wp;
   int p_crb_save = ewp->w_p_crb;
   ewp->w_p_crb = false;
 
@@ -359,7 +359,7 @@ static void win_redr_stl_expr(win_T *wp, bool draw_winbar, bool draw_ruler, bool
   // might change the option value and free the memory.
   stl = xstrdup(stl);
   build_stl_str_hl(ewp, buf, sizeof(buf), stl, opt_idx, opt_scope,
-                   fillchar, maxwidth, &hltab, NULL, &tabtab, NULL);
+                   fillchar, maxwidth, &hltab, nullptr, &tabtab, nullptr);
 
   xfree(stl);
   ewp->w_p_crb = p_crb_save;
@@ -391,7 +391,7 @@ static void win_redr_stl_expr(win_T *wp, bool draw_winbar, bool draw_ruler, bool
     }
     p = sp->start;
 
-    if (p == NULL) {
+    if (p == nullptr) {
       break;
     } else if (sp->userhl == 0) {
       curattr = attr;
@@ -405,7 +405,7 @@ static void win_redr_stl_expr(win_T *wp, bool draw_winbar, bool draw_ruler, bool
       }
       curgroup = -sp->userhl;
     } else {
-      int *userhl = (wp != NULL && wp != curwin && wp->w_status_height != 0)
+      int *userhl = (wp != nullptr && wp != curwin && wp->w_status_height != 0)
                     ? highlight_stlnc : highlight_user;
       char userbuf[5] = "User";
       userbuf[4] = (char)sp->userhl + '0';
@@ -432,17 +432,17 @@ static void win_redr_stl_expr(win_T *wp, bool draw_winbar, bool draw_ruler, bool
 
   // Fill the tab_page_click_defs, w_status_click_defs or w_winbar_click_defs array for clicking
   // in the tab page line, status line or window bar
-  StlClickDefinition *click_defs = (wp == NULL) ? tab_page_click_defs
+  StlClickDefinition *click_defs = (wp == nullptr) ? tab_page_click_defs
                                                 : draw_winbar ? wp->w_winbar_click_defs
                                                               : wp->w_status_click_defs;
 
-  stl_fill_click_defs(click_defs, tabtab, buf, maxwidth, wp == NULL);
+  stl_fill_click_defs(click_defs, tabtab, buf, maxwidth, wp == nullptr);
 
 theend:
   entered = false;
 
   // Restore temporary autocmd curwin.
-  if (restore_curwin != NULL) {
+  if (restore_curwin != nullptr) {
     curwin = restore_curwin;
     curbuf = restore_curwin->w_buffer;
   }
@@ -471,7 +471,7 @@ void redraw_ruler(void)
 {
   static int did_ruler_col = -1;
   win_T *wp = !curwin->w_config.hide
-              && curwin->w_status_height == 0 ? curwin : lastwin_nofloating(NULL);
+              && curwin->w_status_height == 0 ? curwin : lastwin_nofloating(nullptr);
   bool is_stl_global = global_stl_height() > 0;
 
   // Check if ruler should be drawn, clear if it was drawn before.
@@ -496,7 +496,7 @@ void redraw_ruler(void)
 
   // Don't draw the ruler while doing insert-completion, it might overwrite
   // the (long) mode message.
-  if (wp->w_status_height == 0 && !is_stl_global && edit_submode != NULL) {
+  if (wp->w_status_height == 0 && !is_stl_global && edit_submode != nullptr) {
     return;
   }
 
@@ -516,7 +516,7 @@ void redraw_ruler(void)
   colnr_T virtcol = wp->w_virtcol;
   if (wp->w_p_list && wp->w_p_lcs_chars.tab1 == NUL) {
     wp->w_p_list = false;
-    getvvcol(wp, &wp->w_cursor, NULL, &virtcol, NULL, 0);
+    getvvcol(wp, &wp->w_cursor, nullptr, &virtcol, nullptr, 0);
     wp->w_p_list = true;
   }
 
@@ -665,7 +665,7 @@ void draw_tabline(void)
   int attr_fill = HL_ATTR(HLF_TPF);
   bool use_sep_chars = (t_colors < 8);
 
-  if (default_grid.chars == NULL) {
+  if (default_grid.chars == nullptr) {
     return;
   }
   redraw_tabline = false;
@@ -685,7 +685,7 @@ void draw_tabline(void)
 
   // Use the 'tabline' option if it's set.
   if (*p_tal != NUL) {
-    win_redr_stl_expr(NULL, false, false, false);
+    win_redr_stl_expr(nullptr, false, false, false);
   } else {
     int tabcount = 0;
     int col = 0;
@@ -731,7 +731,7 @@ void draw_tabline(void)
 
       bool modified = false;
 
-      for (wincount = 0; wp != NULL; wp = wp->w_next, wincount++) {
+      for (wincount = 0; wp != nullptr; wp = wp->w_next, wincount++) {
         if (!wp->w_config.focusable || wp->w_config.hide) {
           wincount--;
         } else if (bufIsChanged(wp->w_buffer)) {
@@ -781,7 +781,7 @@ void draw_tabline(void)
         tab_page_click_defs[scol++] = (StlClickDefinition) {
           .type = kStlClickTabSwitch,
           .tabnr = tabcount,
-          .func = NULL,
+          .func = nullptr,
         };
       }
     }
@@ -792,7 +792,7 @@ void draw_tabline(void)
       tab_page_click_defs[scol] = (StlClickDefinition) {
         .type = kStlClickTabSwitch,
         .tabnr = 0,
-        .func = NULL,
+        .func = nullptr,
       };
     }
 
@@ -816,7 +816,7 @@ void draw_tabline(void)
       tab_page_click_defs[Columns - 1] = (StlClickDefinition) {
         .type = kStlClickTabClose,
         .tabnr = 999,
-        .func = NULL,
+        .func = nullptr,
       };
     }
 
@@ -844,12 +844,12 @@ int build_statuscol_str(win_T *wp, linenr_T lnum, int relnum, int virtnum, char 
   StlClickRecord *clickrec;
   char *stc = xstrdup(wp->w_p_stc);
   int width = build_stl_str_hl(wp, buf, MAXPATHL, stc, kOptStatuscolumn, OPT_LOCAL, 0,
-                               stcp->width, &stcp->hlrec, NULL, &clickrec, stcp);
+                               stcp->width, &stcp->hlrec, nullptr, &clickrec, stcp);
   xfree(stc);
 
-  if (clickrec[0].start != NULL) {
-    StcClicks *clicks = map_put_ref(int, StcClicks)(wp->w_statuscol_click_defs, lnum, NULL, NULL);
-    StcClick *click_defs = map_put_ref(int, StcClick)(clicks, virtnum, NULL, NULL);
+  if (clickrec[0].start != nullptr) {
+    StcClicks *clicks = map_put_ref(int, StcClicks)(wp->w_statuscol_click_defs, lnum, nullptr, nullptr);
+    StcClick *click_defs = map_put_ref(int, StcClick)(clicks, virtnum, nullptr, nullptr);
     stl_clear_click_defs(click_defs->def, click_defs->size);
     click_defs->def = stl_alloc_click_defs(click_defs->def, width, &click_defs->size);
     stl_fill_click_defs(click_defs->def, clickrec, buf, width, false);
@@ -1089,9 +1089,9 @@ static void stl_expand(int *width, int target_width, StlPadding padding, int rem
 /// @param opt_scope  The scope corresponding to "opt_idx"
 /// @param fillchar  Character to use when filling empty space in the statusline
 /// @param maxwidth  The maximum width to make the statusline
-/// @param hltab  HL attributes (can be NULL)
-/// @param tabtab  Tab clicks definition (can be NULL)
-/// @param stcp  Status column attributes (can be NULL)
+/// @param hltab  HL attributes (can be nullptr)
+/// @param tabtab  Tab clicks definition (can be nullptr)
+/// @param stcp  Status column attributes (can be nullptr)
 ///
 /// @return  The final width of the statusline
 int build_stl_str_hl(win_T *wp, char *out, size_t outlen, char *fmt, OptIndex opt_idx,
@@ -1099,10 +1099,10 @@ int build_stl_str_hl(win_T *wp, char *out, size_t outlen, char *fmt, OptIndex op
                      size_t *hltab_len, StlClickRecord **tabtab, statuscol_T *stcp)
 {
   static size_t stl_items_len = 20;  // Initial value, grows as needed.
-  static stl_item_t *stl_items = NULL;
-  static int *stl_groupitems = NULL;
-  static stl_hlrec_t *stl_hltab = NULL;
-  static StlClickRecord *stl_tabtab = NULL;
+  static stl_item_t *stl_items = nullptr;
+  static int *stl_groupitems = nullptr;
+  static stl_hlrec_t *stl_hltab = nullptr;
+  static StlClickRecord *stl_tabtab = nullptr;
   static int curitem = 0;
 
 #define TMPLEN 70
@@ -1122,7 +1122,7 @@ int build_stl_str_hl(win_T *wp, char *out, size_t outlen, char *fmt, OptIndex op
     redraw_not_allowed = true;
   }
 
-  if (stl_items == NULL) {
+  if (stl_items == nullptr) {
     stl_items = xmalloc(sizeof(stl_item_t) * stl_items_len);
     stl_groupitems = xmalloc(sizeof(int) * stl_items_len);
 
@@ -1147,7 +1147,7 @@ int build_stl_str_hl(win_T *wp, char *out, size_t outlen, char *fmt, OptIndex op
     set_var(S_LEN("g:statusline_winid"), &tv, false);
 
     usefmt = eval_to_string_safe(fmt + 2, use_sandbox, false);
-    if (usefmt == NULL) {
+    if (usefmt == nullptr) {
       usefmt = fmt;
     }
 
@@ -1442,7 +1442,7 @@ int build_stl_str_hl(win_T *wp, char *out, size_t outlen, char *fmt, OptIndex op
       }
       stl_items[curitem].type = ClickFunc;
       stl_items[curitem].start = out_p;
-      stl_items[curitem].cmd = tabtab ? xmemdupz(t, (size_t)(fmt_p - t)) : NULL;
+      stl_items[curitem].cmd = tabtab ? xmemdupz(t, (size_t)(fmt_p - t)) : nullptr;
       stl_items[curitem].minwid = minwid;
       fmt_p++;
       curitem++;
@@ -1483,7 +1483,7 @@ int build_stl_str_hl(win_T *wp, char *out, size_t outlen, char *fmt, OptIndex op
 
     // An invalid item was specified.
     // Continue processing on the next character of the format string.
-    if (vim_strchr(STL_ALL, (uint8_t)(*fmt_p)) == NULL) {
+    if (vim_strchr(STL_ALL, (uint8_t)(*fmt_p)) == nullptr) {
       if (*fmt_p == NUL) {  // can happen with "%0"
         break;
       }
@@ -1499,7 +1499,7 @@ int build_stl_str_hl(win_T *wp, char *out, size_t outlen, char *fmt, OptIndex op
     bool itemisflag = false;
     bool fillable = true;
     int num = -1;
-    char *str = NULL;
+    char *str = nullptr;
     switch (opt) {
     case STL_FILEPATH:
     case STL_FULLPATH:
@@ -1508,7 +1508,7 @@ int build_stl_str_hl(win_T *wp, char *out, size_t outlen, char *fmt, OptIndex op
       // get replaced with the fillchar
       fillable = false;
       char *name = buf_spname(wp->w_buffer);
-      if (name != NULL) {
+      if (name != nullptr) {
         xstrlcpy(NameBuff, name, MAXPATHL);
       } else {
         char *t = (opt == STL_FULLPATH) ? wp->w_buffer->b_ffname
@@ -1589,7 +1589,7 @@ int build_stl_str_hl(win_T *wp, char *out, size_t outlen, char *fmt, OptIndex op
 
       // Check if the evaluated result is a number.
       // If so, convert the number to an int and free the string.
-      if (!zeropad && str != NULL && *str != NUL) {
+      if (!zeropad && str != nullptr && *str != NUL) {
         if (*skipdigits(str) == NUL) {
           num = atoi(str);
           XFREE_CLEAR(str);
@@ -1599,8 +1599,8 @@ int build_stl_str_hl(win_T *wp, char *out, size_t outlen, char *fmt, OptIndex op
 
       // If the output of the expression needs to be evaluated
       // replace the %{} block with the result of evaluation
-      if (reevaluate && str != NULL && *str != NUL
-          && strchr(str, '%') != NULL
+      if (reevaluate && str != nullptr && *str != NUL
+          && strchr(str, '%') != nullptr
           && evaldepth < MAX_STL_EVAL_DEPTH) {
         size_t parsed_usefmt = (size_t)(block_start - usefmt);
         size_t str_length = strlen(str);
@@ -1614,7 +1614,7 @@ int build_stl_str_hl(win_T *wp, char *out, size_t outlen, char *fmt, OptIndex op
         new_fmt_p = (char *)memcpy(new_fmt_p, "%}", 2) + 2;
         new_fmt_p = (char *)memcpy(new_fmt_p, fmt_p, fmt_length) + fmt_length;
         *new_fmt_p = 0;
-        new_fmt_p = NULL;
+        new_fmt_p = nullptr;
 
         if (usefmt != fmt) {
           xfree(usefmt);
@@ -1631,7 +1631,7 @@ int build_stl_str_hl(win_T *wp, char *out, size_t outlen, char *fmt, OptIndex op
     case STL_LINE:
       // Overload %l with v:(re)lnum for 'statuscolumn'. Place a sign when 'signcolumn'
       // is set to "number". Take care of alignment for 'number' + 'relativenumber'.
-      if (stcp != NULL && (wp->w_p_nu || wp->w_p_rnu) && get_vim_var_nr(VV_VIRTNUM) == 0) {
+      if (stcp != nullptr && (wp->w_p_nu || wp->w_p_rnu) && get_vim_var_nr(VV_VIRTNUM) == 0) {
         if (wp->w_maxscwidth == SCL_NUM && stcp->sattrs[0].text[0]) {
           goto stcsign;
         }
@@ -1642,7 +1642,7 @@ int build_stl_str_hl(win_T *wp, char *out, size_t outlen, char *fmt, OptIndex op
           stl_items[curitem].type = Separate;
           stl_items[curitem++].start = out_p;
         }
-      } else if (stcp == NULL) {
+      } else if (stcp == nullptr) {
         num = (wp->w_buffer->b_ml.ml_flags & ML_EMPTY) ? 0 : wp->w_cursor.lnum;
       }
       break;
@@ -1712,7 +1712,7 @@ int build_stl_str_hl(win_T *wp, char *out, size_t outlen, char *fmt, OptIndex op
       base = kNumBaseHexadecimal;
       FALLTHROUGH;
     case STL_OFFSET: {
-      int l = ml_find_line_or_offset(wp->w_buffer, wp->w_cursor.lnum, NULL,
+      int l = ml_find_line_or_offset(wp->w_buffer, wp->w_cursor.lnum, nullptr,
                                      false);
       num = (wp->w_buffer->b_ml.ml_flags & ML_EMPTY) || l < 0
             ? 0 : l + 1 + ((State & MODE_INSERT) == 0 && empty_line
@@ -1750,7 +1750,7 @@ int build_stl_str_hl(win_T *wp, char *out, size_t outlen, char *fmt, OptIndex op
     case STL_FOLDCOL:    // 'C' for 'statuscolumn'
     case STL_SIGNCOL: {  // 's' for 'statuscolumn'
 stcsign:
-      if (stcp == NULL) {
+      if (stcp == nullptr) {
         break;
       }
       int fdc = opt == STL_FOLDCOL ? compute_foldcolumn(wp, 0) : 0;
@@ -1765,7 +1765,7 @@ stcsign:
       if (fdc > 0) {
         schar_T fold_buf[9];
         fill_foldcolumn(wp, stcp->foldinfo, stcp->lnum, 0, fdc, get_vim_var_nr(VV_VIRTNUM) < 0,
-                        NULL, stcp->fold_vcol, fold_buf);
+                        nullptr, stcp->fold_vcol, fold_buf);
         stl_items[curitem].minwid = -(use_cursor_line_highlight(wp, lnum) ? HLF_CLF : HLF_FC);
         size_t buflen = 0;
         // TODO(bfredl): this is very backwards. we must support schar_T
@@ -1886,7 +1886,7 @@ stcsign:
     stl_items[curitem].type = Normal;
 
     // Copy the item string into the output buffer
-    if (str != NULL && *str) {
+    if (str != nullptr && *str) {
       // { Skip the leading `,` or ` ` if the item is a flag
       //  and the proper conditions are met
       char *t = str;
@@ -2053,7 +2053,7 @@ stcsign:
     }
 
     if (num >= 0 || (!itemisflag && str && *str)) {
-      prevchar_isflag = false;              // Item not NULL, but not a flag
+      prevchar_isflag = false;              // Item not nullptr, but not a flag
     }
 
     // Only free the string buffer if we allocated it.
@@ -2094,7 +2094,7 @@ stcsign:
   }
 
   // Store the info about highlighting.
-  if (hltab != NULL) {
+  if (hltab != nullptr) {
     *hltab = stl_hltab;
     stl_hlrec_t *sp = stl_hltab;
     for (int l = evalstart; l < curitem; l++) {
@@ -2109,7 +2109,7 @@ stcsign:
         sp++;
       }
     }
-    sp->start = NULL;
+    sp->start = nullptr;
     sp->userhl = 0;
   }
   if (hltab_len) {
@@ -2117,7 +2117,7 @@ stcsign:
   }
 
   // Store the info about tab pages labels.
-  if (tabtab != NULL) {
+  if (tabtab != nullptr) {
     *tabtab = stl_tabtab;
     StlClickRecord *cur_tab_rec = stl_tabtab;
     for (int l = evalstart; l < curitem; l++) {
@@ -2136,7 +2136,7 @@ stcsign:
           }
           cur_tab_rec->def.tabnr = tabnr;
         }
-        cur_tab_rec->def.func = NULL;
+        cur_tab_rec->def.func = nullptr;
         cur_tab_rec++;
       } else if (stl_items[l].type == ClickFunc) {
         cur_tab_rec->start = stl_items[l].start;
@@ -2146,10 +2146,10 @@ stcsign:
         cur_tab_rec++;
       }
     }
-    cur_tab_rec->start = NULL;
+    cur_tab_rec->start = nullptr;
     cur_tab_rec->def.type = kStlClickDisabled;
     cur_tab_rec->def.tabnr = 0;
-    cur_tab_rec->def.func = NULL;
+    cur_tab_rec->def.func = nullptr;
   }
 
   // Restore `curitem` to previous recursion level.

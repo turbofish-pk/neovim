@@ -38,7 +38,7 @@ static bool decor_provider_invoke(int provider_idx, const char *name, LuaRef ref
   Error err = ERROR_INIT;
 
   textlock++;
-  Object ret = nlua_call_ref(ref, name, args, res ? kRetMulti : kRetNilBool, NULL, &err);
+  Object ret = nlua_call_ref(ref, name, args, res ? kRetMulti : kRetNilBool, nullptr, &err);
   textlock--;
 
   // We get the provider here via an index in case the above call to nlua_call_ref causes
@@ -83,7 +83,7 @@ void decor_providers_invoke_spell(win_T *wp, int start_row, int start_col, int e
       ADD_C(args, INTEGER_OBJ(start_col));
       ADD_C(args, INTEGER_OBJ(end_row));
       ADD_C(args, INTEGER_OBJ(end_col));
-      decor_provider_invoke((int)i, "spell", p->spell_nav, args, true, NULL);
+      decor_provider_invoke((int)i, "spell", p->spell_nav, args, true, nullptr);
     }
   }
 }
@@ -99,7 +99,7 @@ bool decor_providers_invoke_conceal_line(win_T *wp, int row)
       ADD_C(args, INTEGER_OBJ(wp->handle));
       ADD_C(args, INTEGER_OBJ(wp->w_buffer->handle));
       ADD_C(args, INTEGER_OBJ(row));
-      decor_provider_invoke((int)i, "conceal_line", p->conceal_line, args, true, NULL);
+      decor_provider_invoke((int)i, "conceal_line", p->conceal_line, args, true, nullptr);
     }
   }
   return wp->w_buffer->b_marktree->n_keys > keys;
@@ -116,7 +116,7 @@ void decor_providers_start(void)
     if (p->state != kDecorProviderDisabled && p->redraw_start != LUA_NOREF) {
       MAXSIZE_TEMP_ARRAY(args, 2);
       ADD_C(args, INTEGER_OBJ((int)display_tick));
-      bool active = decor_provider_invoke((int)i, "start", p->redraw_start, args, true, NULL);
+      bool active = decor_provider_invoke((int)i, "start", p->redraw_start, args, true, nullptr);
       kv_A(decor_providers, i).state = active ? kDecorProviderActive : kDecorProviderRedrawDisabled;
     } else if (p->state != kDecorProviderDisabled) {
       kv_A(decor_providers, i).state = kDecorProviderActive;
@@ -160,7 +160,7 @@ void decor_providers_invoke_win(win_T *wp)
       ADD_C(args, INTEGER_OBJ(wp->w_topline - 1));
       ADD_C(args, INTEGER_OBJ(botline - 1));
       // TODO(bfredl): could skip a call if retval was interpreted like range?
-      if (!decor_provider_invoke((int)i, "win", p->redraw_win, args, true, NULL)) {
+      if (!decor_provider_invoke((int)i, "win", p->redraw_win, args, true, nullptr)) {
         kv_A(decor_providers, i).state = kDecorProviderWinDisabled;
       }
     }
@@ -184,7 +184,7 @@ void decor_providers_invoke_line(win_T *wp, int row)
       ADD_C(args, WINDOW_OBJ(wp->handle));
       ADD_C(args, BUFFER_OBJ(wp->w_buffer->handle));
       ADD_C(args, INTEGER_OBJ(row));
-      if (!decor_provider_invoke((int)i, "line", p->redraw_line, args, true, NULL)) {
+      if (!decor_provider_invoke((int)i, "line", p->redraw_line, args, true, nullptr)) {
         // return 'false' or error: skip rest of this window
         kv_A(decor_providers, i).state = kDecorProviderWinDisabled;
       }
@@ -260,7 +260,7 @@ void decor_providers_invoke_buf(buf_T *buf)
       MAXSIZE_TEMP_ARRAY(args, 2);
       ADD_C(args, BUFFER_OBJ(buf->handle));
       ADD_C(args, INTEGER_OBJ((int64_t)display_tick));
-      decor_provider_invoke((int)i, "buf", p->redraw_buf, args, true, NULL);
+      decor_provider_invoke((int)i, "buf", p->redraw_buf, args, true, nullptr);
     }
   }
 }
@@ -277,7 +277,7 @@ void decor_providers_invoke_end(void)
     if (p->state != kDecorProviderDisabled && p->redraw_end != LUA_NOREF) {
       MAXSIZE_TEMP_ARRAY(args, 1);
       ADD_C(args, INTEGER_OBJ((int)display_tick));
-      decor_provider_invoke((int)i, "end", p->redraw_end, args, true, NULL);
+      decor_provider_invoke((int)i, "end", p->redraw_end, args, true, nullptr);
     }
   }
   decor_check_to_be_deleted();
@@ -312,7 +312,7 @@ DecorProvider *get_decor_provider(NS ns_id, bool force)
   }
 
   if (!force) {
-    return NULL;
+    return nullptr;
   }
 
   DecorProvider *item = &kv_a(decor_providers, len);
@@ -323,7 +323,7 @@ DecorProvider *get_decor_provider(NS ns_id, bool force)
 
 void decor_provider_clear(DecorProvider *p)
 {
-  if (p == NULL) {
+  if (p == nullptr) {
     return;
   }
   NLUA_CLEAR_REF(p->redraw_start);

@@ -168,7 +168,7 @@ void tui_start(TUIData **tui_p, int *width, int *height, char **term, bool *rgb)
 {
   TUIData *tui = xcalloc(1, sizeof(TUIData));
   tui->is_starting = true;
-  tui->screenshot = NULL;
+  tui->screenshot = nullptr;
   tui->stopped = false;
   tui->loop = &main_loop;
   tui->url = -1;
@@ -376,7 +376,7 @@ static void apply_termdefs(TUIData *tui)
 
   Error lua_err = ERROR_INIT;
   Object rv = NLUA_EXEC_STATIC("return require('vim.tty')._get_termdefs()",
-                               (Array)ARRAY_DICT_INIT, kRetObject, NULL, &lua_err);
+                               (Array)ARRAY_DICT_INIT, kRetObject, nullptr, &lua_err);
   if (rv.type != kObjectTypeDict) {
     return;
   }
@@ -425,8 +425,8 @@ static void apply_termdefs(TUIData *tui)
                 kv.key.data);
         continue;
       }
-      *(const char **)dst = NULL;
-      *(const char **)(dst + sizeof(char *)) = NULL;
+      *(const char **)dst = nullptr;
+      *(const char **)(dst + sizeof(char *)) = nullptr;
 
       for (size_t key_map_idx = 0; key_map_idx < val.data.array.size;
            key_map_idx++) {
@@ -483,21 +483,21 @@ static void terminfo_start(TUIData *tui)
   tui->modes.resize_events = false;
   tui->modes.theme_updates = false;
   tui->showing_mode = SHAPE_IDX_N;
-  tui->terminfo_ext.enable_focus_reporting = NULL;
-  tui->terminfo_ext.disable_focus_reporting = NULL;
+  tui->terminfo_ext.enable_focus_reporting = nullptr;
+  tui->terminfo_ext.disable_focus_reporting = nullptr;
 
   tui->out_fd = STDOUT_FILENO;
   tui->out_isatty = os_isatty(tui->out_fd);
   tui->input.tui_data = tui;
 
   tui->ti_arena = (Arena)ARENA_EMPTY;
-  assert(tui->term == NULL);
+  assert(tui->term == nullptr);
 
   char *term = os_getenv("TERM");
 #ifdef MSWIN
-  const char *guessed_term = NULL;
+  const char *guessed_term = nullptr;
   os_tty_guess_term(&guessed_term, tui->out_fd);
-  if (term == NULL && guessed_term != NULL) {
+  if (term == nullptr && guessed_term != nullptr) {
     // TODO(bfredl): should be arena_strdup, make os_getenv ready for the BIG STAGE?
     term = xstrdup(guessed_term);
     os_setenv("TERM", guessed_term, 1);
@@ -538,7 +538,7 @@ static void terminfo_start(TUIData *tui)
   int konsolev = konsolev_env ? getdigits_int(&konsolev_end, false, 0)
                               : (konsole ? 1 : 0);
   bool wezterm = strequal(termprg, "WezTerm");
-  const char *weztermv = wezterm ? term_program_version_env : NULL;
+  const char *weztermv = wezterm ? term_program_version_env : nullptr;
   bool screen = terminfo_is_term_family(term, "screen");
   bool tmux = terminfo_is_term_family(term, "tmux") || os_env_exists("TMUX", true);
   tui->screen_or_tmux = screen || tmux;
@@ -550,7 +550,7 @@ static void terminfo_start(TUIData *tui)
   augment_terminfo(tui, term, vtev, konsolev, weztermv, iterm_env, nsterm);
   apply_termdefs(tui);
 
-#define TI_HAS(name) (tui->ti.defs[name] != NULL)
+#define TI_HAS(name) (tui->ti.defs[name] != nullptr)
   tui->can_change_scroll_region = TI_HAS(kTerm_change_scroll_region);
   // note: also gated by tui->has_left_and_right_margin_mode
   tui->can_set_lr_margin = TI_HAS(kTerm_set_lr_margin);
@@ -714,7 +714,7 @@ static void terminfo_stop(TUIData *tui)
 
   flush_buf(tui, kFlushBufFinal);
   uv_tty_reset_mode();
-  uv_close((uv_handle_t *)&tui->output_handle, NULL);
+  uv_close((uv_handle_t *)&tui->output_handle, nullptr);
   uv_run(&tui->write_loop, UV_RUN_DEFAULT);
   if (uv_loop_close(&tui->write_loop)) {
     abort();
@@ -722,14 +722,14 @@ static void terminfo_stop(TUIData *tui)
   arena_mem_free(arena_finish(&tui->ti_arena));
   // Avoid using freed memory.
   memset(&tui->ti, 0, sizeof(tui->ti));
-  tui->term = NULL;
+  tui->term = nullptr;
 }
 
 static void tui_terminal_start(TUIData *tui)
 {
   tui->print_attr_id = -1;
   terminfo_start(tui);
-  if (tui->input.loop == NULL) {
+  if (tui->input.loop == nullptr) {
     tinput_init(&tui->input, &main_loop, &tui->ti);
   }
   tui_guess_size(tui);
@@ -776,8 +776,8 @@ void tui_stop(TUIData *tui)
   stream_set_blocking(tui->input.in_fd, true);   // normalize stream (#2598)
   tinput_destroy(&tui->input);
   signal_watcher_stop(&tui->winch_handle);
-  signal_watcher_close(&tui->winch_handle, NULL);
-  uv_close((uv_handle_t *)&tui->startup_delay_timer, NULL);
+  signal_watcher_close(&tui->winch_handle, nullptr);
+  uv_close((uv_handle_t *)&tui->startup_delay_timer, nullptr);
 }
 
 /// Callback function called when the response to the Device Attributes (DA1)
@@ -905,7 +905,7 @@ static void update_attrs(TUIData *tui, int attr_id)
   bool has_any_underline = undercurl || underline
                            || underdouble || underdotted || underdashed;
 
-  if (tui->ti.defs[kTerm_set_attributes] != NULL) {
+  if (tui->ti.defs[kTerm_set_attributes] != nullptr) {
     if (bold || dim || blink || reverse || underline || standout) {
       TPVAR params[9] = { 0 };
       params[0].num = standout;
@@ -1630,7 +1630,7 @@ void tui_grid_scroll(TUIData *tui, Integer g, Integer startrow, Integer endrow, 
 int32_t tui_add_url(TUIData *tui, const char *url)
   FUNC_ATTR_NONNULL_ARG(1)
 {
-  if (url == NULL) {
+  if (url == nullptr) {
     return -1;
   }
 
@@ -1691,7 +1691,7 @@ void tui_ui_send(TUIData *tui, String content)
 {
   uv_write_t req;
   uv_buf_t buf = { .base = content.data, .len = UV_BUF_LEN(content.size) };
-  int ret = uv_write(&req, (uv_stream_t *)&tui->output_handle, &buf, 1, NULL);
+  int ret = uv_write(&req, (uv_stream_t *)&tui->output_handle, &buf, 1, nullptr);
   if (ret) {
     ELOG("uv_write failed: %s", uv_strerror(ret));
   }
@@ -1844,7 +1844,7 @@ void tui_set_icon(TUIData *tui, String icon)
 void tui_screenshot(TUIData *tui, String path)
 {
   FILE *f = fopen(path.data, "w");
-  if (f == NULL) {
+  if (f == nullptr) {
     return;
   }
 
@@ -1866,7 +1866,7 @@ void tui_screenshot(TUIData *tui, String path)
     }
   }
   flush_buf(tui, kFlushBufFinal);
-  tui->screenshot = NULL;
+  tui->screenshot = nullptr;
 
   fclose(f);
 }
@@ -1955,7 +1955,7 @@ void tui_raw_line(TUIData *tui, Integer g, Integer linerow, Integer startcol, In
 
 static void invalidate(TUIData *tui, int top, int bot, int left, int right)
 {
-  Rect *intersects = NULL;
+  Rect *intersects = nullptr;
 
   for (size_t i = 0; i < kv_size(tui->invalid_regions); i++) {
     Rect *r = &kv_A(tui->invalid_regions, i);
@@ -1995,8 +1995,8 @@ void tui_guess_size(TUIData *tui)
 {
   int width = 0;
   int height = 0;
-  char *lines = NULL;
-  char *columns = NULL;
+  char *lines = nullptr;
+  char *columns = nullptr;
 
   // 1 - try from a system call (ioctl/TIOCGWINSZ on unix)
   if (tui->out_isatty
@@ -2052,7 +2052,7 @@ static void out(TUIData *tui, const char *str, size_t len)
 
 static void out_len(TUIData *tui, const char *str)
 {
-  if (str != NULL) {
+  if (str != nullptr) {
     out(tui, str, strlen(str));
   }
 }
@@ -2099,7 +2099,7 @@ static void terminfo_print(TUIData *tui, TerminfoDef what, TPVAR *params)
   }
 
   const char *str = tui->ti.defs[what];
-  if (str == NULL || *str == NUL) {
+  if (str == nullptr || *str == NUL) {
     return;
   }
 
@@ -2348,7 +2348,7 @@ static void patch_terminfo_bugs(TUIData *tui, const char *term, const char *colo
 
   // Blacklist of terminals that cannot be trusted to report DECSCUSR support.
   if ((st || (vte_version != 0 && vte_version < 3900) || konsolev)) {
-    tui->ti.defs[kTerm_reset_cursor_style] = NULL;
+    tui->ti.defs[kTerm_reset_cursor_style] = nullptr;
   }
 
   // Dickey ncurses terminfo includes Ss/Se capabilities since 2011-07-14. So
@@ -2474,14 +2474,14 @@ static void augment_terminfo(TUIData *tui, const char *term, int vte_version, in
                            // per http://invisible-island.net/xterm/xterm.log.html#xterm_282
                            || true_xterm);
 
-  if (tui->ti.defs[kTerm_set_rgb_foreground] == NULL) {
+  if (tui->ti.defs[kTerm_set_rgb_foreground] == nullptr) {
     if (has_colon_rgb) {
       tui->ti.defs[kTerm_set_rgb_foreground] = "\x1b[38:2:%p1%d:%p2%d:%p3%dm";
     } else {
       tui->ti.defs[kTerm_set_rgb_foreground] = "\x1b[38;2;%p1%d;%p2%d;%p3%dm";
     }
   }
-  if (tui->ti.defs[kTerm_set_rgb_background] == NULL) {
+  if (tui->ti.defs[kTerm_set_rgb_background] == nullptr) {
     if (has_colon_rgb) {
       tui->ti.defs[kTerm_set_rgb_background] = "\x1b[48:2:%p1%d:%p2%d:%p3%dm";
     } else {
@@ -2489,7 +2489,7 @@ static void augment_terminfo(TUIData *tui, const char *term, int vte_version, in
     }
   }
 
-  if (tui->ti.defs[kTerm_set_cursor_color] == NULL) {
+  if (tui->ti.defs[kTerm_set_cursor_color] == nullptr) {
     if (iterm || iterm_pretending_xterm) {
       // FIXME: Bypassing tmux like this affects the cursor colour globally, in
       // all panes, which is not particularly desirable.  A better approach
@@ -2502,17 +2502,17 @@ static void augment_terminfo(TUIData *tui, const char *term, int vte_version, in
       tui->ti.defs[kTerm_set_cursor_color] = "\033]12;%p1%s\007";
     }
   }
-  if (tui->ti.defs[kTerm_set_cursor_color] != NULL) {
+  if (tui->ti.defs[kTerm_set_cursor_color] != nullptr) {
     // Some terminals supporting cursor color changing specify their Cs
     // capability to take a string parameter. Others take a numeric parameter.
     // If and only if the format string contains `%s` we assume a string
     // parameter. #20628
-    tui->set_cursor_color_as_str = strstr(tui->ti.defs[kTerm_set_cursor_color], "%s") != NULL;
+    tui->set_cursor_color_as_str = strstr(tui->ti.defs[kTerm_set_cursor_color], "%s") != nullptr;
 
     terminfo_set_if_empty(tui, kTerm_reset_cursor_color, "\x1b]112\x07");
   }
 
-  if (tui->ti.defs[kTerm_to_status_line] != NULL && tui->ti.defs[kTerm_from_status_line] != NULL) {
+  if (tui->ti.defs[kTerm_to_status_line] != nullptr && tui->ti.defs[kTerm_from_status_line] != nullptr) {
     tui->can_set_title = true;
   }
 
@@ -2526,9 +2526,9 @@ static void augment_terminfo(TUIData *tui, const char *term, int vte_version, in
 
   // Extended underline.
   // terminfo will have Smulx for this (but no support for colors yet).
-  if (tui->ti.defs[kTerm_set_underline_style] == NULL) {
+  if (tui->ti.defs[kTerm_set_underline_style] == nullptr) {
     if (vte_version >= 5102 || konsolev >= 221170
-        || tui->ti.Su || (weztermv != NULL && strcmp(weztermv, "20210203-095643") > 0)) {
+        || tui->ti.Su || (weztermv != nullptr && strcmp(weztermv, "20210203-095643") > 0)) {
       tui_enable_extended_underline(tui);
     }
   } else {
@@ -2591,7 +2591,7 @@ static void flush_buf(TUIData *tui, FlushBufFinish finish)
     // TODO(bfredl): zero-param terminfo strings should be pre-filtered so we can just
     // return a cached string here
     const char *str = tui->ti.defs[kTerm_cursor_invisible];
-    if (str != NULL) {
+    if (str != nullptr) {
       pre_len += terminfo_fmt(pre + pre_len, pre + sizeof(pre), str, null_params);
     }
   }
@@ -2607,7 +2607,7 @@ static void flush_buf(TUIData *tui, FlushBufFinish finish)
   // Once synchronized output has ended, or when it was not active, make the cursor
   // visible or invisible according to the current TUI state.
   if (!tui->sync_output_active) {
-    const char *str = NULL;
+    const char *str = nullptr;
     if (tui->is_invisible && !should_be_invisible) {
       str = tui->ti.defs[kTerm_cursor_normal];
       tui->is_invisible = false;
@@ -2615,7 +2615,7 @@ static void flush_buf(TUIData *tui, FlushBufFinish finish)
       str = tui->ti.defs[kTerm_cursor_invisible];
       tui->is_invisible = true;
     }
-    if (str != NULL) {
+    if (str != nullptr) {
       post_len += terminfo_fmt(post + post_len, post + sizeof(post), str, null_params);
     }
   }
@@ -2623,7 +2623,7 @@ static void flush_buf(TUIData *tui, FlushBufFinish finish)
   bufs[0].base = pre;
   bufs[0].len = UV_BUF_LEN(pre_len);
 
-  bufs[1].base = tui->buf_to_flush != NULL ? tui->buf_to_flush : tui->buf;
+  bufs[1].base = tui->buf_to_flush != nullptr ? tui->buf_to_flush : tui->buf;
   bufs[1].len = UV_BUF_LEN(tui->bufpos);
 
   bufs[2].base = post;
@@ -2639,14 +2639,14 @@ static void flush_buf(TUIData *tui, FlushBufFinish finish)
       nbufs--;  // Trim trailing zero-length buffers. https://github.com/libuv/libuv/issues/5182
     }
     if (nbufs > 0) {
-      int ret = uv_write(&req, (uv_stream_t *)&tui->output_handle, bufs, nbufs, NULL);
+      int ret = uv_write(&req, (uv_stream_t *)&tui->output_handle, bufs, nbufs, nullptr);
       if (ret) {
         ELOG("uv_write failed: %s", uv_strerror(ret));
       }
       uv_run(&tui->write_loop, UV_RUN_DEFAULT);
     }
   }
-  tui->buf_to_flush = NULL;
+  tui->buf_to_flush = nullptr;
   tui->bufpos = 0;
 }
 
@@ -2684,8 +2684,8 @@ static const char *tui_get_stty_erase(TermInput *input)
 static const char *tui_tk_ti_getstr(const char *name, const char *value, void *data)
 {
   TermInput *input = data;
-  static const char *stty_erase = NULL;
-  if (stty_erase == NULL) {
+  static const char *stty_erase = nullptr;
+  if (stty_erase == nullptr) {
     stty_erase = tui_get_stty_erase(input);
   }
 
@@ -2697,7 +2697,7 @@ static const char *tui_tk_ti_getstr(const char *name, const char *value, void *d
   } else if (strequal(name, "key_dc")) {
     DLOG("libtermkey:kdch1=%s", value);
     // Vim: "If <BS> and <DEL> are now the same, redefine <DEL>."
-    if (value != NULL && value != (char *)-1 && strequal(stty_erase, value)) {
+    if (value != nullptr && value != (char *)-1 && strequal(stty_erase, value)) {
       return stty_erase[0] == DEL ? CTRL_H_STR : DEL_STR;
     }
   } else if (strequal(name, "key_mouse")) {
@@ -2705,7 +2705,7 @@ static const char *tui_tk_ti_getstr(const char *name, const char *value, void *d
     // If key_mouse is found, libtermkey uses its terminfo driver (driver-ti.c)
     // for mouse input, which by accident only supports X10 protocol.
     // Force libtermkey to fallback to its CSI driver (driver-csi.c). #7948
-    return NULL;
+    return nullptr;
   }
 
   return value;

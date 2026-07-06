@@ -60,13 +60,13 @@ xdchange_t *xdl_get_hunk(xdchange_t **xscr, xdemitconf_t const *xecfg)
 	for (xchp = *xscr; xchp && xchp->ignore; xchp = xchp->next) {
 		xch = xchp->next;
 
-		if (xch == NULL ||
+		if (xch == nullptr ||
 		    xch->i1 - (xchp->i1 + xchp->chg1) >= max_ignorable)
 			*xscr = xch;
 	}
 
-	if (*xscr == NULL)
-		return NULL;
+	if (*xscr == nullptr)
+		return nullptr;
 
 	lxch = *xscr;
 
@@ -218,7 +218,7 @@ int xdl_emit_diff(xdfenv_t *xe, xdchange_t *xscr, xdemitcb_t *ecb,
 				i1 = xe->xdf1.nrec - 1;
 			}
 
-			fs1 = get_func_line(xe, xecfg, NULL, i1, -1);
+			fs1 = get_func_line(xe, xecfg, nullptr, i1, -1);
 			while (fs1 > 0 && !is_empty_rec(&xe->xdf1, fs1 - 1) &&
 			       !is_func_rec(&xe->xdf1, xecfg, fs1 - 1))
 				fs1--;
@@ -256,7 +256,7 @@ int xdl_emit_diff(xdfenv_t *xe, xdchange_t *xscr, xdemitcb_t *ecb,
 
 #if 0
 		if (xecfg->flags & XDL_EMIT_FUNCCONTEXT) {
-			long fe1 = get_func_line(xe, xecfg, NULL,
+			long fe1 = get_func_line(xe, xecfg, nullptr,
 						 xche->i1 + xche->chg1,
 						 xe->xdf1.nrec);
 			while (fe1 > 0 && is_empty_rec(&xe->xdf1, fe1 - 1))
@@ -277,7 +277,7 @@ int xdl_emit_diff(xdfenv_t *xe, xdchange_t *xscr, xdemitcb_t *ecb,
 				long l = XDL_MIN(xche->next->i1,
 						 xe->xdf1.nrec - 1);
 				if (l - xecfg->ctxlen <= e1 ||
-				    get_func_line(xe, xecfg, NULL, l, e1) < 0) {
+				    get_func_line(xe, xecfg, nullptr, l, e1) < 0) {
 					xche = xche->next;
 					goto post_context_calculation;
 				}

@@ -32,7 +32,7 @@ static void pty_proc_close_console(Stream *stream, void *data)
 {
   PtyProc *ptyproc = stream->internal_data;
   Proc *proc = (Proc *)ptyproc;
-  if (ptyproc->conpty == NULL) {
+  if (ptyproc->conpty == nullptr) {
     return;
   }
   // On Windows 11, closing a terminal immediately after opening it can leave orphan conhost
@@ -47,7 +47,7 @@ static void pty_proc_close_console(Stream *stream, void *data)
     uv_run(&proc->loop->uv, UV_RUN_ONCE);
   }
   uv_thread_detach(&tid);
-  ptyproc->conpty = NULL;
+  ptyproc->conpty = nullptr;
 }
 
 /// @returns zero on success, or negative error code.
@@ -56,23 +56,23 @@ int pty_proc_spawn(PtyProc *ptyproc)
 {
   Proc *proc = (Proc *)ptyproc;
   int status = 0;
-  conpty_t *conpty_object = NULL;
-  char *in_name = NULL;
-  char *out_name = NULL;
-  HANDLE proc_handle = NULL;
-  uv_connect_t *in_req = NULL;
-  uv_connect_t *out_req = NULL;
-  wchar_t *file = NULL;
-  wchar_t *cmd_line = NULL;
-  wchar_t *cwd = NULL;
-  wchar_t *env = NULL;
-  const char *emsg = NULL;
+  conpty_t *conpty_object = nullptr;
+  char *in_name = nullptr;
+  char *out_name = nullptr;
+  HANDLE proc_handle = nullptr;
+  uv_connect_t *in_req = nullptr;
+  uv_connect_t *out_req = nullptr;
+  wchar_t *file = nullptr;
+  wchar_t *cmd_line = nullptr;
+  wchar_t *cwd = nullptr;
+  wchar_t *env = nullptr;
+  const char *emsg = nullptr;
 
   assert(proc->err.s.closed);
 
   if (!os_has_conpty_working() || (conpty_object = os_conpty_init(&in_name,
                                                                   &out_name, ptyproc->width,
-                                                                  ptyproc->height)) == NULL) {
+                                                                  ptyproc->height)) == nullptr) {
     status = UV_ENOSYS;
     goto cleanup;
   }
@@ -93,7 +93,7 @@ int pty_proc_spawn(PtyProc *ptyproc)
                     pty_proc_connect_cb);
   }
 
-  if (proc->cwd != NULL) {
+  if (proc->cwd != nullptr) {
     status = utf8_to_utf16(proc->cwd, -1, &cwd);
     if (status != 0) {
       emsg = "utf8_to_utf16(proc->cwd) failed";
@@ -107,7 +107,7 @@ int pty_proc_spawn(PtyProc *ptyproc)
   // See https://www.microsoft.com/en-us/msrc/blog/2014/04/ms14-019-fixing-a-binary-hijacking-via-cmd-or-bat-file
   bool is_cmdexe = os_shell_is_cmdexe(proc->argv[0]);
   if (is_cmdexe) {
-    char *path = NULL;
+    char *path = nullptr;
     // TODO(ntdiary): Could put the search logic in one place.
     // See https://github.com/neovim/neovim/issues/36818#issuecomment-3977147445
     if (!os_can_exe(proc->argv[0], &path, true)) {
@@ -128,7 +128,7 @@ int pty_proc_spawn(PtyProc *ptyproc)
     goto cleanup;
   }
 
-  if (proc->env != NULL) {
+  if (proc->env != nullptr) {
     status = build_env_block(proc->env, &env);
   }
 
@@ -159,16 +159,16 @@ int pty_proc_spawn(PtyProc *ptyproc)
   }
 
   // Wait until pty_proc_connect_cb is called.
-  while ((in_req != NULL && in_req->handle != NULL)
-         || (out_req != NULL && out_req->handle != NULL)) {
+  while ((in_req != nullptr && in_req->handle != nullptr)
+         || (out_req != nullptr && out_req->handle != nullptr)) {
     uv_run(&proc->loop->uv, UV_RUN_ONCE);
   }
 
   proc->out.s.before_close_cb = pty_proc_close_console;
   ptyproc->conpty = conpty_object;
   ptyproc->proc_handle = proc_handle;
-  conpty_object = NULL;
-  proc_handle = NULL;
+  conpty_object = nullptr;
+  proc_handle = nullptr;
 
 cleanup:
   if (status) {
@@ -180,7 +180,7 @@ cleanup:
   os_conpty_free(conpty_object);
   xfree(in_name);
   xfree(out_name);
-  if (proc_handle != NULL) {
+  if (proc_handle != nullptr) {
     CloseHandle(proc_handle);
   }
   xfree(in_req);
@@ -220,13 +220,13 @@ void pty_proc_close(PtyProc *ptyproc)
 
   pty_proc_close_master(ptyproc);
 
-  if (ptyproc->finish_wait != NULL) {
-    UnregisterWaitEx(ptyproc->finish_wait, NULL);
-    ptyproc->finish_wait = NULL;
+  if (ptyproc->finish_wait != nullptr) {
+    UnregisterWaitEx(ptyproc->finish_wait, nullptr);
+    ptyproc->finish_wait = nullptr;
   }
-  if (ptyproc->proc_handle != NULL) {
+  if (ptyproc->proc_handle != nullptr) {
     CloseHandle(ptyproc->proc_handle);
-    ptyproc->proc_handle = NULL;
+    ptyproc->proc_handle = nullptr;
   }
 
   if (proc->internal_close_cb) {
@@ -248,7 +248,7 @@ static void pty_proc_connect_cb(uv_connect_t *req, int status)
   FUNC_ATTR_NONNULL_ALL
 {
   assert(status == 0);
-  req->handle = NULL;
+  req->handle = nullptr;
 }
 
 static void pty_proc_finish(void **argv)
@@ -335,13 +335,13 @@ static void quote_cmd_arg(char *dest, size_t dest_remaining, const char *src)
     return;
   }
 
-  if (NULL == strpbrk(src, " \t\"")) {
+  if (nullptr == strpbrk(src, " \t\"")) {
     // No quotation needed.
     xstrlcpy(dest, src, dest_remaining);
     return;
   }
 
-  if (NULL == strpbrk(src, "\"\\")) {
+  if (nullptr == strpbrk(src, "\"\\")) {
     // No embedded double quotes or backlashes, so I can just wrap quote marks.
     // around the whole thing.
     snprintf(dest, dest_remaining, "\"%s\"", src);
@@ -463,8 +463,8 @@ PtyProc pty_proc_init(Loop *loop, void *data)
   rv.proc = proc_init(loop, kProcTypePty, data);
   rv.width = 80;
   rv.height = 24;
-  rv.conpty = NULL;
-  rv.finish_wait = NULL;
-  rv.proc_handle = NULL;
+  rv.conpty = nullptr;
+  rv.finish_wait = nullptr;
+  rv.proc_handle = nullptr;
   return rv;
 }

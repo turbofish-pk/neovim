@@ -80,12 +80,12 @@ typedef struct {
 
 #include "event/multiqueue.c.generated.h"
 
-static Event NILEVENT = { .handler = NULL, .argv = { NULL } };
+static Event NILEVENT = { .handler = nullptr, .argv = { nullptr } };
 
 /// Creates a new root (parentless) queue, which may gain child queues via `multiqueue_new_child`.
 MultiQueue *multiqueue_new(PutCallback on_put, void *data)
 {
-  return _multiqueue_new(NULL, on_put, data);
+  return _multiqueue_new(nullptr, on_put, data);
 }
 
 /// Creates a new queue as a child of a `parent` queue.
@@ -94,7 +94,7 @@ MultiQueue *multiqueue_new_child(MultiQueue *parent)
 {
   assert(!parent->parent);  // parent cannot have a parent, more like a "root"
   parent->size++;
-  return _multiqueue_new(parent, NULL, NULL);
+  return _multiqueue_new(parent, nullptr, nullptr);
 }
 
 static MultiQueue *_multiqueue_new(MultiQueue *parent, PutCallback on_put, void *data)
@@ -193,7 +193,7 @@ size_t multiqueue_size(MultiQueue *self)
 /// @param remove   Remove the node from its queue, and free it.
 static Event multiqueueitem_get_event(MultiQueueItem *item, bool remove)
 {
-  assert(item != NULL);
+  assert(item != nullptr);
   Event ev;
   if (item->link) {
     // get the next node in the linked queue
@@ -212,7 +212,7 @@ static Event multiqueueitem_get_event(MultiQueueItem *item, bool remove)
     if (remove && item->data.item.parent_item) {
       QUEUE_REMOVE(&item->data.item.parent_item->node);
       xfree(item->data.item.parent_item);
-      item->data.item.parent_item = NULL;
+      item->data.item.parent_item = nullptr;
     }
     ev = item->data.item.event;
   }
@@ -237,7 +237,7 @@ static void multiqueue_push(MultiQueue *self, Event event)
   MultiQueueItem *item = xmalloc(sizeof(MultiQueueItem));
   item->link = false;
   item->data.item.event = event;
-  item->data.item.parent_item = NULL;
+  item->data.item.parent_item = nullptr;
   QUEUE_INSERT_TAIL(&self->headtail, &item->node);
   if (self->parent) {
     // push link node to the parent queue

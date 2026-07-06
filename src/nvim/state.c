@@ -76,7 +76,7 @@ getkey:
       ui_flush();
       // Call `input_get` directly to block for events or user input without consuming anything from
       // `os/input.c:input_buffer` or calling the mapping engine.
-      input_get(NULL, 0, -1, typebuf.tb_change_cnt, main_loop.events);
+      input_get(nullptr, 0, -1, typebuf.tb_change_cnt, main_loop.events);
       // If an event was put into the queue, we send K_EVENT directly.
       if (!input_available() && !multiqueue_empty(main_loop.events)) {
         key = K_EVENT;
@@ -275,7 +275,7 @@ void may_trigger_modechanged(void)
   // concatenate modes in format "old_mode:new_mode"
   vim_snprintf(pattern_buf, sizeof(pattern_buf), "%s:%s", last_mode, curr_mode);
 
-  apply_autocmds(EVENT_MODECHANGED, pattern_buf, NULL, false, curbuf);
+  apply_autocmds(EVENT_MODECHANGED, pattern_buf, nullptr, false, curbuf);
   STRCPY(last_mode, curr_mode);
 
   restore_v_event(v_event, &save_v_event);
@@ -307,7 +307,7 @@ void may_trigger_safestate(bool safe)
     DLOG(is_safe ? "SafeState: Start triggering" : "SafeState: Stop triggering");
   }
   if (is_safe) {
-    apply_autocmds(EVENT_SAFESTATE, NULL, NULL, false, curbuf);
+    apply_autocmds(EVENT_SAFESTATE, nullptr, nullptr, false, curbuf);
   }
   was_safe = is_safe;
 }
@@ -317,7 +317,7 @@ void may_trigger_safestate(bool safe)
 /// may_trigger_safestate().
 void state_no_longer_safe(const char *reason)
 {
-  if (was_safe && reason != NULL) {
+  if (was_safe && reason != nullptr) {
     DLOG("SafeState reset: %s", reason);
   }
   was_safe = false;

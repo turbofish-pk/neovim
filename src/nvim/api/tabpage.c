@@ -80,7 +80,7 @@ void nvim_tabpage_set_var(Tabpage tabpage, String name, Object value, Error *err
     return;
   }
 
-  dict_set_var(tab->tp_vars, name, value, false, false, NULL, err);
+  dict_set_var(tab->tp_vars, name, value, false, false, nullptr, err);
 }
 
 /// Removes a tab-scoped (t:) variable
@@ -97,7 +97,7 @@ void nvim_tabpage_del_var(Tabpage tabpage, String name, Error *err)
     return;
   }
 
-  dict_set_var(tab->tp_vars, name, NIL, true, false, NULL, err);
+  dict_set_var(tab->tp_vars, name, NIL, true, false, nullptr, err);
 }
 
 /// Gets the current window in a tabpage
@@ -184,7 +184,7 @@ Boolean nvim_tabpage_is_valid(Tabpage tabpage)
   FUNC_API_SINCE(1)
 {
   Error stub = ERROR_INIT;
-  Boolean ret = find_tab_by_handle(tabpage, &stub) != NULL;
+  Boolean ret = find_tab_by_handle(tabpage, &stub) != nullptr;
   api_clear_error(&stub);
   return ret;
 }
@@ -204,7 +204,7 @@ Tabpage nvim_open_tabpage(Buffer buf, Boolean enter, Dict(tabpage_config) *confi
 {
 #define HAS_KEY_X(d, key) HAS_KEY(d, tabpage_config, key)
   buf_T *b = find_buffer_by_handle(buf, err);
-  if (b == NULL) {
+  if (b == nullptr) {
     return 0;
   }
 
@@ -216,7 +216,7 @@ Tabpage nvim_open_tabpage(Buffer buf, Boolean enter, Dict(tabpage_config) *confi
   tabpage_T *tp;
   win_T *wp;
   TRY_WRAP(err, {
-    tp = win_new_tabpage(after + 1, NULL, enter, &wp);
+    tp = win_new_tabpage(after + 1, nullptr, enter, &wp);
   });
   if (!tp) {
     if (!ERROR_SET(err)) {  // set error maybe more specific

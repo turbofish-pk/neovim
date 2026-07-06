@@ -125,7 +125,7 @@ static PMap(int) kitty_key_map = MAP_INIT;
 
 void tinput_init(TermInput *input, Loop *loop, TerminfoEntry *ti)
 {
-  assert(input->loop == NULL);
+  assert(input->loop == nullptr);
   input->loop = loop;
   input->paste = 0;
   input->in_fd = STDIN_FILENO;
@@ -159,11 +159,11 @@ void tinput_init(TermInput *input, Loop *loop, TerminfoEntry *ti)
 void tinput_destroy(TermInput *input)
 {
   map_destroy(int, &kitty_key_map);
-  uv_close((uv_handle_t *)&input->timer_handle, NULL);
-  uv_close((uv_handle_t *)&input->bg_query_timer, NULL);
+  uv_close((uv_handle_t *)&input->timer_handle, nullptr);
+  uv_close((uv_handle_t *)&input->bg_query_timer, nullptr);
   rstream_may_close(&input->read_stream);
   termkey_destroy(input->tk);
-  input->loop = NULL;
+  input->loop = nullptr;
 }
 
 void tinput_start(TermInput *input)
@@ -574,9 +574,9 @@ static size_t handle_bracketed_paste(TermInput *input, const char *ptr, size_t s
 static void handle_term_response(TermInput *input, const TermKeyKey *key)
   FUNC_ATTR_NONNULL_ALL
 {
-  const char *str = NULL;
+  const char *str = nullptr;
   if (termkey_interpret_string(input->tk, key, &str) == TERMKEY_RES_KEY) {
-    assert(str != NULL);
+    assert(str != nullptr);
 
     // Handle DECRQSS SGR response for the query from tui_query_extended_underline().
     // Some terminals include "0" in the attribute list unconditionally; others don't.
@@ -622,7 +622,7 @@ static void handle_primary_device_attr(TermInput *input, TermKeyCsiParam *params
   if (input->callbacks.primary_device_attr) {
     void (*cb_save)(TUIData *) = input->callbacks.primary_device_attr;
     // Clear the callback before invoking it, as it may set a new callback. #34031
-    input->callbacks.primary_device_attr = NULL;
+    input->callbacks.primary_device_attr = nullptr;
     cb_save(input->tui_data);
   }
 
@@ -638,7 +638,7 @@ static void handle_primary_device_attr(TermInput *input, TermKeyCsiParam *params
 
   for (size_t i = 0; i < nparams; i++) {
     int arg;
-    if (termkey_interpret_csi_param(params[i], &arg, NULL, NULL) != TERMKEY_RES_KEY) {
+    if (termkey_interpret_csi_param(params[i], &arg, nullptr, nullptr) != TERMKEY_RES_KEY) {
       goto out;
     }
 
@@ -711,7 +711,7 @@ static void handle_unknown_csi(TermInput *input, const TermKeyKey *key)
       // We only care about the first 3 parameters, and we ignore subparameters
       int args[3];
       for (size_t i = 0; i < ARRAY_SIZE(args); i++) {
-        if (termkey_interpret_csi_param(params[i], &args[i], NULL, NULL) != TERMKEY_RES_KEY) {
+        if (termkey_interpret_csi_param(params[i], &args[i], nullptr, nullptr) != TERMKEY_RES_KEY) {
           return;
         }
       }
@@ -730,7 +730,7 @@ static void handle_unknown_csi(TermInput *input, const TermKeyKey *key)
       // ECMA-48 DSR
       // https://ecma-international.org/wp-content/uploads/ECMA-48_5th_edition_june_1991.pdf
       int arg;
-      if (termkey_interpret_csi_param(params[0], &arg, NULL, NULL) != TERMKEY_RES_KEY) {
+      if (termkey_interpret_csi_param(params[0], &arg, nullptr, nullptr) != TERMKEY_RES_KEY) {
         return;
       }
 
@@ -753,7 +753,7 @@ static void handle_unknown_csi(TermInput *input, const TermKeyKey *key)
       // contour terminal VT extensions, as described below.
       int args[2];
       for (size_t i = 0; i < ARRAY_SIZE(args); i++) {
-        if (termkey_interpret_csi_param(params[i], &args[i], NULL, NULL) != TERMKEY_RES_KEY) {
+        if (termkey_interpret_csi_param(params[i], &args[i], nullptr, nullptr) != TERMKEY_RES_KEY) {
           return;
         }
       }
@@ -877,7 +877,7 @@ static size_t tinput_read_cb(RStream *stream, const char *buf, size_t count_, vo
   tinput_flush(input);
 
   if (eof) {
-    loop_schedule_fast(&main_loop, event_create(tinput_done_event, NULL));
+    loop_schedule_fast(&main_loop, event_create(tinput_done_event, nullptr));
     return consumed;
   }
 

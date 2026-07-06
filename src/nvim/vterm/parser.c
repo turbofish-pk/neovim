@@ -41,10 +41,10 @@ static void do_csi(VTerm *vt, char command)
 #endif
 
   if (vt->parser.callbacks && vt->parser.callbacks->csi) {
-    if ((*vt->parser.callbacks->csi)(vt->parser.v.csi.leaderlen ? vt->parser.v.csi.leader : NULL,
+    if ((*vt->parser.callbacks->csi)(vt->parser.v.csi.leaderlen ? vt->parser.v.csi.leader : nullptr,
                                      vt->parser.v.csi.args,
                                      vt->parser.v.csi.argi,
-                                     vt->parser.intermedlen ? vt->parser.intermed : NULL,
+                                     vt->parser.intermedlen ? vt->parser.intermed : nullptr,
                                      command,
                                      vt->parser.cbdata)) {
       return;
@@ -140,7 +140,7 @@ size_t vterm_input_write(VTerm *vt, const char *bytes, size_t len)
   case CSI_INTERMED:
   case OSC_COMMAND:
   case DCS_COMMAND:
-    string_start = NULL;
+    string_start = nullptr;
     break;
   case OSC:
   case DCS_VTERM:
@@ -151,7 +151,7 @@ size_t vterm_input_write(VTerm *vt, const char *bytes, size_t len)
     break;
   }
 
-#define ENTER_STATE(st)        do { vt->parser.state = st; string_start = NULL; } while (0)
+#define ENTER_STATE(st)        do { vt->parser.state = st; string_start = nullptr; } while (0)
 #define ENTER_NORMAL_STATE()   ENTER_STATE(NORMAL)
 
 #define IS_STRING_STATE()      (vt->parser.state >= OSC_COMMAND)
@@ -217,7 +217,7 @@ size_t vterm_input_write(VTerm *vt, const char *bytes, size_t len)
         }
         vt->parser.in_esc = false;
       } else {
-        string_start = NULL;
+        string_start = nullptr;
         vt->parser.state = NORMAL;
       }
     }

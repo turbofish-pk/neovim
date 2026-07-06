@@ -23,7 +23,7 @@ static int nlua_base64_encode(lua_State *L)
   const char *src = lua_tolstring(L, 1, &src_len);
 
   const char *ret = base64_encode(src, src_len);
-  assert(ret != NULL);
+  assert(ret != nullptr);
   lua_pushstring(L, ret);
   xfree((void *)ret);
 
@@ -45,7 +45,7 @@ static int nlua_base64_decode(lua_State *L)
 
   size_t out_len = 0;
   const char *ret = base64_decode(src, src_len, &out_len);
-  if (ret == NULL) {
+  if (ret == nullptr) {
     return luaL_error(L, "Invalid input");
   }
 
@@ -58,12 +58,12 @@ static int nlua_base64_decode(lua_State *L)
 static const luaL_Reg base64_functions[] = {
   { "encode", nlua_base64_encode },
   { "decode", nlua_base64_decode },
-  { NULL, NULL },
+  { nullptr, nullptr },
 };
 
 int luaopen_base64(lua_State *L)
 {
   lua_newtable(L);
-  luaL_register(L, NULL, base64_functions);
+  luaL_register(L, nullptr, base64_functions);
   return 1;
 }

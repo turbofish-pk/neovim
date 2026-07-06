@@ -53,12 +53,12 @@ buf_T *api_buf_ensure_loaded(Buffer buf, Error *err)
 {
   buf_T *b = find_buffer_by_handle(buf, err);
   if (!b) {
-    return NULL;
+    return nullptr;
   }
 
-  if (b->b_ml.ml_mfp == NULL && !buf_ensure_loaded(b)) {
+  if (b->b_ml.ml_mfp == nullptr && !buf_ensure_loaded(b)) {
     api_set_error(err, kErrorTypeException, "Failed to load buffer");
-    return NULL;
+    return nullptr;
   }
 
   return b;
@@ -94,7 +94,7 @@ Integer nvim_buf_line_count(Buffer buf, Error *err)
   }
 
   // return sentinel value if the buffer isn't loaded
-  if (b->b_ml.ml_mfp == NULL) {
+  if (b->b_ml.ml_mfp == nullptr) {
     return 0;
   }
 
@@ -277,7 +277,7 @@ ArrayOf(String) nvim_buf_get_lines(uint64_t channel_id,
   }
 
   // return sentinel value if the buffer isn't loaded
-  if (b->b_ml.ml_mfp == NULL) {
+  if (b->b_ml.ml_mfp == nullptr) {
     init_line_array(lstate, &rv, 0, arena);
     return rv;
   }
@@ -352,7 +352,7 @@ void nvim_buf_set_lines(uint64_t channel_id, Buffer buf, Integer start, Integer 
   size_t new_len = replacement.size;
   size_t old_len = (size_t)(end - start);
   ptrdiff_t extra = 0;  // lines added to text, can be negative
-  char **lines = (new_len != 0) ? arena_alloc(arena, new_len * sizeof(char *), true) : NULL;
+  char **lines = (new_len != 0) ? arena_alloc(arena, new_len * sizeof(char *), true) : nullptr;
 
   for (size_t i = 0; i < new_len; i++) {
     const String l = replacement.items[i].data.string;
@@ -565,7 +565,7 @@ void nvim_buf_set_text(uint64_t channel_id, Buffer buf, Integer start_row, Integ
     firstlen += last_part_len;
   }
   char *first = arena_allocz(arena, firstlen);
-  char *last = NULL;
+  char *last = nullptr;
   memcpy(first, str_at_start, (size_t)start_col);
   memcpy(first + start_col, first_item.data, first_item.size);
   memchrsub(first + start_col, NUL, NL, first_item.size);
@@ -729,7 +729,7 @@ ArrayOf(String) nvim_buf_get_text(uint64_t channel_id, Buffer buf,
   }
 
   // return sentinel value if the buffer isn't loaded
-  if (b->b_ml.ml_mfp == NULL) {
+  if (b->b_ml.ml_mfp == nullptr) {
     init_line_array(lstate, &rv, 0, arena);
     return rv;
   }
@@ -813,7 +813,7 @@ Integer nvim_buf_get_offset(Buffer buf, Integer index, Error *err)
   }
 
   // return sentinel value if the buffer isn't loaded
-  if (b->b_ml.ml_mfp == NULL) {
+  if (b->b_ml.ml_mfp == nullptr) {
     return -1;
   }
 
@@ -821,7 +821,7 @@ Integer nvim_buf_get_offset(Buffer buf, Integer index, Error *err)
     return 0;
   });
 
-  return ml_find_line_or_offset(b, (int)index + 1, NULL, true);
+  return ml_find_line_or_offset(b, (int)index + 1, nullptr, true);
 }
 
 /// Gets a buffer-scoped (b:) variable.
@@ -901,7 +901,7 @@ void nvim_buf_del_keymap(uint64_t channel_id, Buffer buf, String mode, String lh
   FUNC_API_SINCE(6)
 {
   String rhs = { .data = "", .size = 0 };
-  modify_keymap(channel_id, buf, true, mode, lhs, rhs, NULL, err);
+  modify_keymap(channel_id, buf, true, mode, lhs, rhs, nullptr, err);
 }
 
 /// Sets a buffer-scoped (b:) variable
@@ -919,7 +919,7 @@ void nvim_buf_set_var(Buffer buf, String name, Object value, Error *err)
     return;
   }
 
-  dict_set_var(b->b_vars, name, value, false, false, NULL, err);
+  dict_set_var(b->b_vars, name, value, false, false, nullptr, err);
 }
 
 /// Removes a buffer-scoped (b:) variable
@@ -936,7 +936,7 @@ void nvim_buf_del_var(Buffer buf, String name, Error *err)
     return;
   }
 
-  dict_set_var(b->b_vars, name, NIL, true, false, NULL, err);
+  dict_set_var(b->b_vars, name, NIL, true, false, nullptr, err);
 }
 
 /// Gets the full/absolute filepath of the buffer, or the buffer name for non-file buffers.
@@ -950,7 +950,7 @@ String nvim_buf_get_name(Buffer buf, Error *err)
   String rv = STRING_INIT;
   buf_T *b = find_buffer_by_handle(buf, err);
 
-  if (!b || b->b_ffname == NULL) {
+  if (!b || b->b_ffname == nullptr) {
     return rv;
   }
 
@@ -1013,7 +1013,7 @@ Boolean nvim_buf_is_loaded(Buffer buf)
   Error stub = ERROR_INIT;
   buf_T *b = find_buffer_by_handle(buf, &stub);
   api_clear_error(&stub);
-  return b && b->b_ml.ml_mfp != NULL;
+  return b && b->b_ml.ml_mfp != nullptr;
 }
 
 /// Deletes a buffer and its metadata (like |:bwipeout|).
@@ -1065,7 +1065,7 @@ Boolean nvim_buf_is_valid(Buffer buf)
   FUNC_API_SINCE(1)
 {
   Error stub = ERROR_INIT;
-  Boolean ret = find_buffer_by_handle(buf, &stub) != NULL;
+  Boolean ret = find_buffer_by_handle(buf, &stub) != nullptr;
   api_clear_error(&stub);
   return ret;
 }
@@ -1093,10 +1093,10 @@ Boolean nvim_buf_del_mark(Buffer buf, String name, Error *err)
     return res;
   });
 
-  fmark_T *fm = mark_get(b, curwin, NULL, kMarkAllNoResolve, *name.data);
+  fmark_T *fm = mark_get(b, curwin, nullptr, kMarkAllNoResolve, *name.data);
 
-  // fm is NULL when there's no mark with the given name
-  VALIDATE_S((fm != NULL), "mark name", name.data, {
+  // fm is nullptr when there's no mark with the given name
+  VALIDATE_S((fm != nullptr), "mark name", name.data, {
     return res;
   });
 
@@ -1175,8 +1175,8 @@ ArrayOf(Integer, 2) nvim_buf_get_mark(Buffer buf, String name, Arena *arena, Err
   pos_T pos;
   char mark = *name.data;
 
-  fm = mark_get(b, curwin, NULL, kMarkAllNoResolve, mark);
-  VALIDATE_S((fm != NULL), "mark name", name.data, {
+  fm = mark_get(b, curwin, nullptr, kMarkAllNoResolve, mark);
+  VALIDATE_S((fm != nullptr), "mark name", name.data, {
     return rv;
   });
   // (0, 0) uppercase/file mark set in another buffer.
@@ -1225,7 +1225,7 @@ Object nvim_buf_call(Buffer buf, LuaRef fn, lua_State *lstate, Error *err)
     aucmd_prepbuf(&aco, b);
 
     Array args = ARRAY_DICT_INIT;
-    nlua_call_ref(fn, NULL, args, kRetMultiStack, NULL, err);
+    nlua_call_ref(fn, nullptr, args, kRetMultiStack, nullptr, err);
 
     aucmd_restbuf(&aco);
   });
@@ -1256,8 +1256,8 @@ Dict nvim__buf_stats(Buffer buf, Arena *arena, Error *err)
   PUT_C(rv, "dirty_bytes2", INTEGER_OBJ((Integer)b->deleted_bytes2));
   PUT_C(rv, "virt_blocks", INTEGER_OBJ((Integer)buf_meta_total(b, kMTMetaLines)));
 
-  u_header_T *uhp = NULL;
-  if (b->b_u_curhead != NULL) {
+  u_header_T *uhp = nullptr;
+  if (b->b_u_curhead != nullptr) {
     uhp = b->b_u_curhead;
   } else if (b->b_u_newhead) {
     uhp = b->b_u_newhead;
@@ -1384,10 +1384,10 @@ static void fix_cursor_cols(win_T *win, linenr_T start_row, colnr_T start_col, l
 }
 
 /// Initialise a string array either:
-/// - on the Lua stack (as a table) (if lstate is not NULL)
-/// - as an API array object (if lstate is NULL).
+/// - on the Lua stack (as a table) (if lstate is not nullptr)
+/// - as an API array object (if lstate is nullptr).
 ///
-/// @param lstate  Lua state. When NULL the Array is initialized instead.
+/// @param lstate  Lua state. When nullptr the Array is initialized instead.
 /// @param a       Array to initialize
 /// @param size    Size of array
 static inline void init_line_array(lua_State *lstate, Array *a, size_t size, Arena *arena)
@@ -1404,7 +1404,7 @@ static inline void init_line_array(lua_State *lstate, Array *a, size_t size, Are
 /// For Lua, a table of the correct size must be created first.
 /// API array objects must be pre allocated.
 ///
-/// @param lstate      Lua state. When NULL the Array is pushed to instead.
+/// @param lstate      Lua state. When nullptr the Array is pushed to instead.
 /// @param a           Array to push onto when not using Lua
 /// @param s           String to push
 /// @param len         Size of string
@@ -1447,8 +1447,8 @@ static void push_linestr(lua_State *lstate, Array *a, const char *s, size_t len,
 /// @param replace_nl Replace newlines ("\n") with NUL
 /// @param start Line number to start from
 /// @param start_idx First index to push to (only used for Lua)
-/// @param[out] l If not NULL, Lines are copied here
-/// @param[out] lstate If not NULL, Lines are pushed into a table onto the stack
+/// @param[out] l If not nullptr, Lines are copied here
+/// @param[out] lstate If not nullptr, Lines are pushed into a table onto the stack
 /// @param err[out] Error, if any
 /// @return true unless `err` was set
 void buf_collect_lines(buf_T *buf, size_t n, linenr_T start, int start_idx, bool replace_nl,

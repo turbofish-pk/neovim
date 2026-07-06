@@ -45,7 +45,7 @@ typedef struct {
 #define PRL_ITEM(si, idx)     (((sn_prl_T *)(si)->sn_prl_ga.ga_data)[(idx)])
 
 static proftime_T prof_wait_time;
-static char *startuptime_buf = NULL;  // --startuptime buffer
+static char *startuptime_buf = nullptr;  // --startuptime buffer
 
 /// Gets the current time.
 ///
@@ -224,7 +224,7 @@ int profile_cmp(proftime_T tm1, proftime_T tm2) FUNC_ATTR_CONST
   return profile_signed(tm2 - tm1) < 0 ? -1 : 1;
 }
 
-static char *profile_fname = NULL;
+static char *profile_fname = nullptr;
 
 /// Reset all profiling information.
 void profile_reset(void)
@@ -295,7 +295,7 @@ void ex_profile(exarg_T *eap)
 
   if (len == 5 && strncmp(eap->arg, "start", 5) == 0 && *e != NUL) {
     xfree(profile_fname);
-    profile_fname = expand_env_save_opt(e, true, NULL);
+    profile_fname = expand_env_save_opt(e, true, nullptr);
     do_profiling = PROF_YES;
     profile_set_wait(profile_zero());
     set_vim_var_nr(VV_PROFILING, 1);
@@ -339,7 +339,7 @@ static char *pexpand_cmds[] = {
   "pause",
   "start",
   "stop",
-  NULL
+  nullptr
 };
 
 /// Function given to ExpandGeneric() to obtain the profile command
@@ -351,7 +351,7 @@ char *get_profile_name(expand_T *xp, int idx)
   case PEXP_SUBCMD:
     return pexpand_cmds[idx];
   default:
-    return NULL;
+    return nullptr;
   }
 }
 
@@ -478,15 +478,15 @@ void func_do_profile(ufunc_T *fp)
     fp->uf_tm_self = profile_zero();
     fp->uf_tm_total = profile_zero();
 
-    if (fp->uf_tml_count == NULL) {
+    if (fp->uf_tml_count == nullptr) {
       fp->uf_tml_count = xcalloc((size_t)len, sizeof(int));
     }
 
-    if (fp->uf_tml_total == NULL) {
+    if (fp->uf_tml_total == nullptr) {
       fp->uf_tml_total = xcalloc((size_t)len, sizeof(proftime_T));
     }
 
-    if (fp->uf_tml_self == NULL) {
+    if (fp->uf_tml_self == nullptr) {
       fp->uf_tml_self = xcalloc((size_t)len, sizeof(proftime_T));
     }
 
@@ -506,7 +506,7 @@ void prof_child_enter(proftime_T *tm)
 {
   funccall_T *fc = get_current_funccal();
 
-  if (fc != NULL && fc->fc_func->uf_profiling) {
+  if (fc != nullptr && fc->fc_func->uf_profiling) {
     fc->fc_prof_child = profile_start();
   }
 
@@ -521,7 +521,7 @@ void prof_child_exit(proftime_T *tm)
 {
   funccall_T *fc = get_current_funccal();
 
-  if (fc != NULL && fc->fc_func->uf_profiling) {
+  if (fc != nullptr && fc->fc_func->uf_profiling) {
     fc->fc_prof_child = profile_end(fc->fc_prof_child);
     // don't count waiting time
     fc->fc_prof_child = profile_sub_wait(*tm, fc->fc_prof_child);
@@ -545,7 +545,7 @@ void func_line_start(void *cookie)
   if (fp->uf_profiling && SOURCING_LNUM >= 1 && SOURCING_LNUM <= fp->uf_lines.ga_len) {
     fp->uf_tml_idx = SOURCING_LNUM - 1;
     // Skip continuation lines.
-    while (fp->uf_tml_idx > 0 && FUNCLINE(fp, fp->uf_tml_idx) == NULL) {
+    while (fp->uf_tml_idx > 0 && FUNCLINE(fp, fp->uf_tml_idx) == nullptr) {
       fp->uf_tml_idx--;
     }
     fp->uf_tml_execed = false;
@@ -632,7 +632,7 @@ static void func_dump_profile(FILE *fd)
         fprintf(fd, "count  total (s)   self (s)\n");
 
         for (int i = 0; i < fp->uf_lines.ga_len; i++) {
-          if (FUNCLINE(fp, i) == NULL) {
+          if (FUNCLINE(fp, i) == nullptr) {
             continue;
           }
           prof_func_line(fd, fp->uf_tml_count[i],
@@ -720,7 +720,7 @@ static void script_dump_profile(FILE *fd)
       fprintf(fd, "count  total (s)   self (s)\n");
 
       FILE *sfd = os_fopen(si->sn_name, "r");
-      if (sfd == NULL) {
+      if (sfd == nullptr) {
         fprintf(fd, "Cannot open file!\n");
       } else {
         // Keep going till the end of file, so that trailing
@@ -768,12 +768,12 @@ static void script_dump_profile(FILE *fd)
 /// Dump the profiling info.
 void profile_dump(void)
 {
-  if (profile_fname == NULL) {
+  if (profile_fname == nullptr) {
     return;
   }
 
   FILE *fd = os_fopen(profile_fname, "w");
-  if (fd == NULL) {
+  if (fd == nullptr) {
     semsg(_(e_notopen), profile_fname);
   } else {
     script_dump_profile(fd);
@@ -897,7 +897,7 @@ static void time_diff(proftime_T then, proftime_T now)
 /// @param message the message that will be displayed
 void time_start(const char *message)
 {
-  if (time_fd == NULL) {
+  if (time_fd == nullptr) {
     return;
   }
 
@@ -908,7 +908,7 @@ void time_start(const char *message)
   fprintf(time_fd, " clock   self+sourced   self:  sourced script\n");
   fprintf(time_fd, " clock   elapsed:              other lines\n\n");
 
-  time_msg(message, NULL);
+  time_msg(message, nullptr);
 }
 
 /// Prints out timing info.
@@ -919,7 +919,7 @@ void time_start(const char *message)
 /// @param start only for do_source: start time
 void time_msg(const char *mesg, const proftime_T *start)
 {
-  if (time_fd == NULL) {
+  if (time_fd == nullptr) {
     return;
   }
 
@@ -928,7 +928,7 @@ void time_msg(const char *mesg, const proftime_T *start)
   time_diff(g_start_time, now);
 
   // if `start` was supplied, print the diff between `start` and `now`
-  if (start != NULL) {
+  if (start != nullptr) {
     fprintf(time_fd, "  ");
     time_diff(*start, now);
   }
@@ -950,7 +950,7 @@ void time_init(const char *fname, const char *proc_name)
 {
   const size_t bufsize = 8192;  // Big enough for the entire --startuptime report.
   time_fd = fopen(fname, "a");
-  if (time_fd == NULL) {
+  if (time_fd == nullptr) {
     fprintf(stderr, _(e_notopen), fname);
     return;
   }
@@ -962,7 +962,7 @@ void time_init(const char *fname, const char *proc_name)
   if (r != 0) {
     XFREE_CLEAR(startuptime_buf);
     fclose(time_fd);
-    time_fd = NULL;
+    time_fd = nullptr;
     fprintf(stderr, "time_init: setvbuf failed: %d %s", r, uv_err_name(r));
     return;
   }
@@ -972,15 +972,15 @@ void time_init(const char *fname, const char *proc_name)
 /// Flushes the startuptimes to disk for the current process
 void time_finish(void)
 {
-  if (time_fd == NULL) {
+  if (time_fd == nullptr) {
     return;
   }
-  assert(startuptime_buf != NULL);
+  assert(startuptime_buf != nullptr);
   TIME_MSG("--- NVIM STARTED ---\n");
 
   // flush buffer to disk
   fclose(time_fd);
-  time_fd = NULL;
+  time_fd = nullptr;
 
   XFREE_CLEAR(startuptime_buf);
 }

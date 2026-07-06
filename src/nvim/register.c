@@ -48,13 +48,13 @@
 #include "register.c.generated.h"
 
 // Keep the last expression line here, for repeating.
-static char *expr_line = NULL;
+static char *expr_line = nullptr;
 
 static int execreg_lastc = NUL;
 
 static yankreg_T y_regs[NUM_REGISTERS] = { 0 };
 
-static yankreg_T *y_previous = NULL;  // ptr to last written yankreg
+static yankreg_T *y_previous = nullptr;  // ptr to last written yankreg
 
 static const char e_register_char_cannot_contain_multiple_lines[]
   = N_("E883: Register '%c' cannot contain multiple lines");
@@ -62,7 +62,7 @@ static const char e_register_char_cannot_contain_multiple_lines[]
 /// @return the index of the register "" points to.
 int get_unname_register(void)
 {
-  return y_previous == NULL ? -1 : (int)(y_previous - &y_regs[0]);
+  return y_previous == nullptr ? -1 : (int)(y_previous - &y_regs[0]);
 }
 
 yankreg_T *get_y_register(int reg)
@@ -82,7 +82,7 @@ yankreg_T *get_y_previous(void)
 int get_expr_register(void)
 {
   char *new_line = getcmdline('=', 0, 0, true);
-  if (new_line == NULL) {
+  if (new_line == nullptr) {
     return NUL;
   }
   if (*new_line == NUL) {  // use previous line
@@ -103,13 +103,13 @@ void set_expr_line(char *new_line)
 
 /// Get the result of the '=' register expression.
 ///
-/// @return  a pointer to allocated memory, or NULL for failure.
+/// @return  a pointer to allocated memory, or nullptr for failure.
 char *get_expr_line(void)
 {
   static int nested = 0;
 
-  if (expr_line == NULL) {
-    return NULL;
+  if (expr_line == nullptr) {
+    return nullptr;
   }
 
   // Make a copy of the expression, because evaluating it may cause it to be
@@ -132,8 +132,8 @@ char *get_expr_line(void)
 /// Get the '=' register expression itself, without evaluating it.
 char *get_expr_line_src(void)
 {
-  if (expr_line == NULL) {
-    return NULL;
+  if (expr_line == nullptr) {
+    return nullptr;
   }
   return xstrdup(expr_line);
 }
@@ -148,7 +148,7 @@ char *get_expr_line_src(void)
 bool valid_yank_reg(int regname, bool writing)
 {
   if ((regname > 0 && ASCII_ISALNUM(regname))
-      || (!writing && vim_strchr("/#.%:=", regname) != NULL)
+      || (!writing && vim_strchr("/#.%:=", regname) != nullptr)
       || regname == '"'
       || regname == '-'
       || regname == '_'
@@ -173,26 +173,26 @@ int get_default_register_name(void)
 
 /// Iterate over registers `regs`.
 ///
-/// @param[in]   iter      Iterator. Pass NULL to start iteration.
+/// @param[in]   iter      Iterator. Pass nullptr to start iteration.
 /// @param[in]   regs      Registers list to be iterated.
 /// @param[out]  name      Register name.
 /// @param[out]  reg       Register contents.
 ///
 /// @return Pointer that must be passed to next `op_register_iter` call or
-///         NULL if iteration is over.
+///         nullptr if iteration is over.
 const void *op_reg_iter(const void *const iter, const yankreg_T *const regs, char *const name,
                         yankreg_T *const reg, bool *is_unnamed)
   FUNC_ATTR_NONNULL_ARG(3, 4, 5) FUNC_ATTR_WARN_UNUSED_RESULT
 {
   *name = NUL;
-  const yankreg_T *iter_reg = (iter == NULL
+  const yankreg_T *iter_reg = (iter == nullptr
                                ? &(regs[0])
                                : (const yankreg_T *const)iter);
   while (iter_reg - &(regs[0]) < NUM_SAVED_REGISTERS && reg_empty(iter_reg)) {
     iter_reg++;
   }
   if (iter_reg - &(regs[0]) == NUM_SAVED_REGISTERS || reg_empty(iter_reg)) {
-    return NULL;
+    return nullptr;
   }
   int iter_off = (int)(iter_reg - &(regs[0]));
   *name = (char)get_register_name(iter_off);
@@ -203,7 +203,7 @@ const void *op_reg_iter(const void *const iter, const yankreg_T *const regs, cha
       return (void *)iter_reg;
     }
   }
-  return NULL;
+  return nullptr;
 }
 
 /// Iterate over global registers.
@@ -255,12 +255,12 @@ bool op_reg_set(const char name, const yankreg_T reg, bool is_unnamed)
 ///
 /// @param[in]  name  Register name.
 ///
-/// @return Pointer to the register contents or NULL.
+/// @return Pointer to the register contents or nullptr.
 const yankreg_T *op_reg_get(const char name)
 {
   int i = op_reg_index(name);
   if (i == -1) {
-    return NULL;
+    return nullptr;
   }
   return &y_regs[i];
 }
@@ -325,11 +325,11 @@ yankreg_T *get_yank_register(int regname, int mode)
   } else if (mode == YREG_PUT && (regname == '*' || regname == '+')) {
     // in case clipboard not available and we aren't actually pasting,
     // return an empty register
-    static yankreg_T empty_reg = { .y_array = NULL };
+    static yankreg_T empty_reg = { .y_array = nullptr };
     return &empty_reg;
   } else if (mode != YREG_YANK
              && (regname == 0 || regname == '"' || regname == '*' || regname == '+')
-             && y_previous != NULL) {
+             && y_previous != nullptr) {
     // in case clipboard not available, paste from previous used register
     return y_previous;
   }
@@ -354,10 +354,10 @@ yankreg_T *get_yank_register(int regname, int mode)
 ///
 /// @param regname The name of the register used or 0 for the unnamed register
 /// @param reg Pointer to store yankreg_T* for the requested register. Will be
-///        set to NULL for invalid or blackhole registers.
+///        set to nullptr for invalid or blackhole registers.
 bool yank_register_mline(int regname, yankreg_T **reg)
 {
-  *reg = NULL;
+  *reg = nullptr;
   if (regname != 0 && !valid_yank_reg(regname, false)) {
     return false;
   }
@@ -378,11 +378,11 @@ yankreg_T *copy_register(int name)
   yankreg_T *copy = xmalloc(sizeof(yankreg_T));
   *copy = *reg;
   if (copy->y_size == 0) {
-    copy->y_array = NULL;
+    copy->y_array = nullptr;
   } else {
     copy->y_array = xcalloc(copy->y_size, sizeof(String));
     for (size_t i = 0; i < copy->y_size; i++) {
-      copy->y_array[i] = copy_string(reg->y_array[i], NULL);
+      copy->y_array[i] = copy_string(reg->y_array[i], nullptr);
     }
   }
   return copy;
@@ -406,7 +406,7 @@ static int stuff_yank(int regname, char *p)
 
   const size_t plen = strlen(p);
   yankreg_T *reg = get_yank_register(regname, YREG_YANK);
-  if (is_append_register(regname) && reg->y_array != NULL) {
+  if (is_append_register(regname) && reg->y_array != nullptr) {
     String *pp = &(reg->y_array[reg->y_size - 1]);
     const size_t tmplen = pp->size + plen;
     char *tmp = xmalloc(tmplen + 1);
@@ -418,7 +418,7 @@ static int stuff_yank(int regname, char *p)
     *pp = cbuf_as_string(tmp, tmplen);
   } else {
     free_register(reg);
-    reg->additional_data = NULL;
+    reg->additional_data = nullptr;
     reg->y_array = xmalloc(sizeof(String));
     reg->y_array[0] = cbuf_as_string(p, plen);
     reg->y_size = 1;
@@ -448,7 +448,7 @@ int do_record(int c)
       regname = c;
       retval = OK;
 
-      apply_autocmds(EVENT_RECORDINGENTER, NULL, NULL, false, curbuf);
+      apply_autocmds(EVENT_RECORDINGENTER, nullptr, nullptr, false, curbuf);
     }
   } else {  // stop recording
     save_v_event_T save_v_event;
@@ -457,7 +457,7 @@ int do_record(int c)
 
     // The recorded text contents.
     char *p = get_recorded();
-    if (p != NULL) {
+    if (p != nullptr) {
       // Remove escaping for K_SPECIAL in multi-byte chars.
       vim_unescape_ks(p);
       tv_dict_add_str(dict, S_LEN("regcontents"), p);
@@ -473,7 +473,7 @@ int do_record(int c)
     // Get the recorded key hits.  K_SPECIAL will be escaped, this
     // needs to be removed again to put it in a register.  exec_reg then
     // adds the escaping back later.
-    apply_autocmds(EVENT_RECORDINGLEAVE, NULL, NULL, false, curbuf);
+    apply_autocmds(EVENT_RECORDINGLEAVE, nullptr, nullptr, false, curbuf);
     restore_v_event(dict, &save_v_event);
     reg_recorded = reg_recording;
     reg_recording = 0;
@@ -482,7 +482,7 @@ int do_record(int c)
     } else {
       msg("", 0);
     }
-    if (p == NULL) {
+    if (p == nullptr) {
       retval = FAIL;
     } else {
       // We don't want to change the default register here, so save and
@@ -519,7 +519,7 @@ static int put_in_typebuf(char *s, bool esc, bool colon, int silent)
     } else {
       p = s;
     }
-    if (p == NULL) {
+    if (p == nullptr) {
       retval = FAIL;
     } else {
       retval = ins_typebuf(p, esc ? REMAP_NONE : REMAP_YES, 0, true, silent);
@@ -641,7 +641,7 @@ int do_execreg(int regname, int colon, int addcr, int silent)
   }
 
   if (regname == ':') {                 // use last command line
-    if (last_cmdline == NULL) {
+    if (last_cmdline == nullptr) {
       emsg(_(e_nolastcmd));
       return FAIL;
     }
@@ -664,14 +664,14 @@ int do_execreg(int regname, int colon, int addcr, int silent)
     xfree(p);
   } else if (regname == '=') {
     char *p = get_expr_line();
-    if (p == NULL) {
+    if (p == nullptr) {
       return FAIL;
     }
     retval = put_in_typebuf(p, true, colon, silent);
     xfree(p);
   } else if (regname == '.') {        // use last inserted text
     char *p = get_last_insert_save();
-    if (p == NULL) {
+    if (p == nullptr) {
       emsg(_(e_noinstext));
       return FAIL;
     }
@@ -679,7 +679,7 @@ int do_execreg(int regname, int colon, int addcr, int silent)
     xfree(p);
   } else {
     yankreg_T *reg = get_yank_register(regname, YREG_PASTE);
-    if (reg->y_array == NULL) {
+    if (reg->y_array == nullptr) {
       return FAIL;
     }
 
@@ -755,7 +755,7 @@ int insert_reg(int regname, yankreg_T *reg, bool literally_arg)
   if (regname == '.') {  // Insert last inserted text.
     retval = stuff_inserted(NUL, 1, true);
   } else if (get_spec_reg(regname, &arg, &allocated, true)) {
-    if (arg == NULL) {
+    if (arg == nullptr) {
       return FAIL;
     }
     stuffescaped(arg, literally);
@@ -763,10 +763,10 @@ int insert_reg(int regname, yankreg_T *reg, bool literally_arg)
       xfree(arg);
     }
   } else {  // Name or number register.
-    if (reg == NULL) {
+    if (reg == nullptr) {
       reg = get_yank_register(regname, YREG_PASTE);
     }
-    if (reg->y_array == NULL) {
+    if (reg->y_array == nullptr) {
       retval = FAIL;
     } else {
       for (size_t i = 0; i < reg->y_size; i++) {
@@ -788,7 +788,7 @@ int insert_reg(int regname, yankreg_T *reg, bool literally_arg)
 
           AppendCharToRedobuff(Ctrl_R);
           AppendCharToRedobuff(regname);
-          do_put(regname, NULL, dir, 1, PUT_CURSEND);
+          do_put(regname, nullptr, dir, 1, PUT_CURSEND);
         } else {
           stuffescaped(reg->y_array[i].data, literally);
           // Insert a newline between lines and after last line if
@@ -813,7 +813,7 @@ int insert_reg(int regname, yankreg_T *reg, bool literally_arg)
 /// @return  true if "regname" is a special register,
 bool get_spec_reg(int regname, char **argp, bool *allocated, bool errmsg)
 {
-  *argp = NULL;
+  *argp = nullptr;
   *allocated = false;
   switch (regname) {
   case '%':                     // file name
@@ -833,14 +833,14 @@ bool get_spec_reg(int regname, char **argp, bool *allocated, bool errmsg)
     return true;
 
   case ':':                     // last command line
-    if (last_cmdline == NULL && errmsg) {
+    if (last_cmdline == nullptr && errmsg) {
       emsg(_(e_nolastcmd));
     }
     *argp = last_cmdline;
     return true;
 
   case '/':                     // last search-pattern
-    if (last_search_pat() == NULL && errmsg) {
+    if (last_search_pat() == nullptr && errmsg) {
       emsg(_(e_noprevre));
     }
     *argp = last_search_pat();
@@ -849,7 +849,7 @@ bool get_spec_reg(int regname, char **argp, bool *allocated, bool errmsg)
   case '.':                     // last inserted text
     *argp = get_last_insert_save();
     *allocated = true;
-    if (*argp == NULL && errmsg) {
+    if (*argp == nullptr && errmsg) {
       emsg(_(e_noinstext));
     }
     return true;
@@ -860,7 +860,7 @@ bool get_spec_reg(int regname, char **argp, bool *allocated, bool errmsg)
       return false;
     }
     *argp = file_name_at_cursor(FNAME_MESS | FNAME_HYP | (regname == Ctrl_P ? FNAME_EXP : 0),
-                                1, NULL);
+                                1, nullptr);
     *allocated = true;
     return true;
 
@@ -871,8 +871,8 @@ bool get_spec_reg(int regname, char **argp, bool *allocated, bool errmsg)
     }
     size_t cnt = find_ident_under_cursor(argp, (regname == Ctrl_W
                                                 ? (FIND_IDENT|FIND_STRING)
-                                                : FIND_STRING), NULL);
-    *argp = cnt ? xmemdupz(*argp, cnt) : NULL;
+                                                : FIND_STRING), nullptr);
+    *argp = cnt ? xmemdupz(*argp, cnt) : nullptr;
     *allocated = true;
     return true;
 
@@ -908,7 +908,7 @@ bool cmdline_paste_reg(int regname, bool literally_arg, bool remcr)
   const bool literally = literally_arg || is_literal_register(regname);
 
   yankreg_T *reg = get_yank_register(regname, YREG_PASTE);
-  if (reg->y_array == NULL) {
+  if (reg->y_array == nullptr) {
     return FAIL;
   }
 
@@ -940,7 +940,7 @@ void shift_delete_registers(bool y_append)
   if (!y_append) {
     y_previous = &y_regs[1];
   }
-  y_regs[1].y_array = NULL;  // set register "1 to empty
+  y_regs[1].y_array = nullptr;  // set register "1 to empty
 }
 
 #ifdef EXITFREE
@@ -955,12 +955,12 @@ void clear_registers(void)
 /// Free contents of yankreg `reg`.
 /// Called for normal freeing and in case of error.
 ///
-/// @param reg  must not be NULL (but `reg->y_array` might be)
+/// @param reg  must not be nullptr (but `reg->y_array` might be)
 void free_register(yankreg_T *reg)
   FUNC_ATTR_NONNULL_ALL
 {
   XFREE_CLEAR(reg->additional_data);
-  if (reg->y_array == NULL) {
+  if (reg->y_array == nullptr) {
     return;
   }
 
@@ -1012,7 +1012,7 @@ void op_yank_reg(oparg_T *oap, bool message, yankreg_T *reg, bool append)
 
   yankreg_T *curr = reg;  // copy of current register
   // append to existing contents
-  if (append && reg->y_array != NULL) {
+  if (append && reg->y_array != nullptr) {
     reg = &newreg;
   } else {
     free_register(reg);  // free previously yanked lines
@@ -1035,7 +1035,7 @@ void op_yank_reg(oparg_T *oap, bool message, yankreg_T *reg, bool append)
   reg->y_type = yank_type;  // set the yank register type
   reg->y_width = 0;
   reg->y_array = xcalloc(yanklines, sizeof(String));
-  reg->additional_data = NULL;
+  reg->additional_data = nullptr;
   reg->timestamp = os_time();
 
   size_t y_idx = 0;  // index in y_array[]
@@ -1094,7 +1094,7 @@ void op_yank_reg(oparg_T *oap, bool message, yankreg_T *reg, bool append)
     // Concatenate the last line of the old block with the first line of
     // the new block, unless being Vi compatible.
     if (curr->y_type == kMTCharWise
-        && vim_strchr(p_cpo, CPO_REGAPPEND) == NULL) {
+        && vim_strchr(p_cpo, CPO_REGAPPEND) == nullptr) {
       char *pnew = xmalloc(curr->y_array[curr->y_size - 1].size
                            + reg->y_array[0].size + 1);
       j--;
@@ -1195,9 +1195,9 @@ size_t format_reg_type(MotionType reg_type, colnr_T reg_width, char *buf, size_t
 
 static void add_regtype_to_dict(yankreg_T *reg, dict_T *dict, char *buf, size_t bufsize)
 {
-  // "reg" is NULL when pasting a special register, which is charwise.
-  size_t len = format_reg_type(reg != NULL ? reg->y_type : kMTCharWise,
-                               reg != NULL ? reg->y_width : 0, buf, bufsize);
+  // "reg" is nullptr when pasting a special register, which is charwise.
+  size_t len = format_reg_type(reg != nullptr ? reg->y_type : kMTCharWise,
+                               reg != nullptr ? reg->y_width : 0, buf, bufsize);
   tv_dict_add_str_len(dict, S_LEN("regtype"), buf, (int)len);
 }
 
@@ -1253,7 +1253,7 @@ void do_autocmd_textyankpost(oparg_T *oap, yankreg_T *reg)
 
   tv_dict_set_keys_readonly(dict);
   textlock++;
-  apply_autocmds(EVENT_TEXTYANKPOST, NULL, NULL, false, curbuf);
+  apply_autocmds(EVENT_TEXTYANKPOST, nullptr, nullptr, false, curbuf);
   textlock--;
   restore_v_event(dict, &save_v_event);
 
@@ -1262,8 +1262,8 @@ void do_autocmd_textyankpost(oparg_T *oap, yankreg_T *reg)
 
 /// Trigger TextPutPre or TextPutPost autocommand.
 ///
-/// @param reg     May be NULL, if special register
-/// @param insert  Not NULL if special register, except '.'
+/// @param reg     May be nullptr, if special register
+/// @param insert  Not nullptr if special register, except '.'
 /// @param post    If Post or Pre
 /// @param dir     BACKWARD for 'P', FORWARD for 'p'
 static void put_do_autocmd(int regname, yankreg_T *reg, const String *insert, bool post,
@@ -1271,11 +1271,11 @@ static void put_do_autocmd(int regname, yankreg_T *reg, const String *insert, bo
 {
   static bool recursive = false;
 
-  if (recursive || (regname == '_' && reg == NULL)) {
+  if (recursive || (regname == '_' && reg == nullptr)) {
     return;
   }
 
-  if (regname != '.' && insert == NULL && reg == NULL) {
+  if (regname != '.' && insert == nullptr && reg == nullptr) {
     // Can happen when pasting text in normal mode in a terminal buffer
     return;
   }
@@ -1283,14 +1283,14 @@ static void put_do_autocmd(int regname, yankreg_T *reg, const String *insert, bo
   save_v_event_T save_v_event;
   dict_T *v_event = get_v_event(&save_v_event);
 
-  list_T *list = tv_list_alloc(reg != NULL ? (ptrdiff_t)reg->y_size : 1);
+  list_T *list = tv_list_alloc(reg != nullptr ? (ptrdiff_t)reg->y_size : 1);
 
   if (regname == '.') {
-    if (last_insert_ga.ga_data != NULL) {
+    if (last_insert_ga.ga_data != nullptr) {
       // Get the last inserted text to place in "regcontents"
       tv_list_append_string(list, last_insert_ga.ga_data, last_insert_ga.ga_len);
     }
-  } else if (insert != NULL) {
+  } else if (insert != nullptr) {
     tv_list_append_string(list, insert->data, (ssize_t)insert->size);
   } else {
     for (size_t n = 0; n < reg->y_size; n++) {
@@ -1325,9 +1325,9 @@ static void put_do_autocmd(int regname, yankreg_T *reg, const String *insert, bo
   recursive = true;
   textlock++;
   if (post) {
-    apply_autocmds(EVENT_TEXTPUTPOST, NULL, NULL, false, curbuf);
+    apply_autocmds(EVENT_TEXTPUTPOST, nullptr, nullptr, false, curbuf);
   } else {
-    apply_autocmds(EVENT_TEXTPUTPRE, NULL, NULL, false, curbuf);
+    apply_autocmds(EVENT_TEXTPUTPRE, nullptr, nullptr, false, curbuf);
   }
   textlock--;
   recursive = false;
@@ -1379,7 +1379,7 @@ void do_put(int regname, yankreg_T *reg, int dir, int count, int flags)
   size_t y_size;
   int y_width = 0;
   colnr_T vcol = 0;
-  String *y_array = NULL;
+  String *y_array = nullptr;
   linenr_T nr_lines = 0;
   bool allocated = false;
   const pos_T orig_start = curbuf->b_op_start;
@@ -1446,10 +1446,10 @@ void do_put(int regname, yankreg_T *reg, int dir, int count, int flags)
     // Since the text is not inserted into the buffer immediately, just call
     // TextPutPost after TextPutPre.
     if (has_event(EVENT_TEXTPUTPRE)) {
-      put_do_autocmd('.', NULL, NULL, false, dir);
+      put_do_autocmd('.', nullptr, nullptr, false, dir);
     }
     if (has_event(EVENT_TEXTPUTPOST)) {
-      put_do_autocmd('.', NULL, NULL, true, dir);
+      put_do_autocmd('.', nullptr, nullptr, true, dir);
     }
 
     if (has_textput_events && --add_last_insert == 0) {
@@ -1507,7 +1507,7 @@ void do_put(int regname, yankreg_T *reg, int dir, int count, int flags)
   // ':' (last command line), etc. we have to create a fake yank register.
   String insert_string = STRING_INIT;
   if (!reg && get_spec_reg(regname, &insert_string.data, &allocated, true)) {
-    if (insert_string.data == NULL) {
+    if (insert_string.data == nullptr) {
       return;
     }
   }
@@ -1520,7 +1520,7 @@ void do_put(int regname, yankreg_T *reg, int dir, int count, int flags)
     }
   }
 
-  if (insert_string.data != NULL) {
+  if (insert_string.data != nullptr) {
     insert_string.size = strlen(insert_string.data);
     y_type = kMTCharWise;
     if (regname == '=') {
@@ -1531,18 +1531,18 @@ void do_put(int regname, yankreg_T *reg, int dir, int count, int flags)
         y_size = 0;
         char *ptr = insert_string.data;
         size_t ptrlen = insert_string.size;
-        while (ptr != NULL) {
-          if (y_array != NULL) {
+        while (ptr != nullptr) {
+          if (y_array != nullptr) {
             y_array[y_size].data = ptr;
           }
           y_size++;
           char *tmp = vim_strchr(ptr, '\n');
-          if (tmp == NULL) {
-            if (y_array != NULL) {
+          if (tmp == nullptr) {
+            if (y_array != nullptr) {
               y_array[y_size - 1].size = ptrlen;
             }
           } else {
-            if (y_array != NULL) {
+            if (y_array != nullptr) {
               *tmp = NUL;
               y_array[y_size - 1].size = (size_t)(tmp - ptr);
               ptrlen -= y_array[y_size - 1].size + 1;
@@ -1556,7 +1556,7 @@ void do_put(int regname, yankreg_T *reg, int dir, int count, int flags)
           }
           ptr = tmp;
         }
-        if (y_array != NULL) {
+        if (y_array != nullptr) {
           break;
         }
         y_array = xmalloc(y_size * sizeof(String));
@@ -1566,23 +1566,23 @@ void do_put(int regname, yankreg_T *reg, int dir, int count, int flags)
       y_array = &insert_string;
     }
     if (has_event(EVENT_TEXTPUTPRE)) {
-      put_do_autocmd(regname, NULL, &insert_string, false, dir);
+      put_do_autocmd(regname, nullptr, &insert_string, false, dir);
     }
   } else {
     if (has_event(EVENT_TEXTPUTPRE)) {
       yankreg_T *const save_reg = reg;
-      if (reg == NULL) {
+      if (reg == nullptr) {
         // Make sure to call this before we set the variables, as setreg()
         // may be called and invalidate them.
         reg = get_yank_register(regname, YREG_PASTE);
       }
-      put_do_autocmd(regname, reg, NULL, false, dir);
+      put_do_autocmd(regname, reg, nullptr, false, dir);
       reg = save_reg;
     }
     // in case of replacing visually selected text
     // the yankreg might already have been saved to avoid
     // just restoring the deleted text.
-    if (reg == NULL) {
+    if (reg == nullptr) {
       reg = get_yank_register(regname, YREG_PASTE);
     }
 
@@ -1639,7 +1639,7 @@ void do_put(int regname, yankreg_T *reg, int dir, int count, int flags)
     y_type = kMTLineWise;
   }
 
-  if (y_size == 0 || y_array == NULL) {
+  if (y_size == 0 || y_array == nullptr) {
     semsg(_("E353: Nothing in register %s"),
           regname == 0 ? "\"" : transchar(regname));
     goto end;
@@ -1656,9 +1656,9 @@ void do_put(int regname, yankreg_T *reg, int dir, int count, int flags)
     // Correct line number for closed fold.  Don't move the cursor yet,
     // u_save() uses it.
     if (dir == BACKWARD) {
-      hasFolding(curwin, lnum, &lnum, NULL);
+      hasFolding(curwin, lnum, &lnum, nullptr);
     } else {
-      hasFolding(curwin, lnum, NULL, &lnum);
+      hasFolding(curwin, lnum, nullptr, &lnum);
     }
     if (dir == FORWARD) {
       lnum++;
@@ -1709,16 +1709,16 @@ void do_put(int regname, yankreg_T *reg, int dir, int count, int flags)
 
     if (dir == FORWARD && c != NUL) {
       if (cur_ve_flags == kOptVeFlagAll) {
-        getvcol(curwin, &curwin->w_cursor, &col, NULL, &endcol2, 0);
+        getvcol(curwin, &curwin->w_cursor, &col, nullptr, &endcol2, 0);
       } else {
-        getvcol(curwin, &curwin->w_cursor, NULL, NULL, &col, 0);
+        getvcol(curwin, &curwin->w_cursor, nullptr, nullptr, &col, 0);
       }
 
       // move to start of next multi-byte character
       curwin->w_cursor.col += utfc_ptr2len(get_cursor_pos_ptr());
       col++;
     } else {
-      getvcol(curwin, &curwin->w_cursor, &col, NULL, &endcol2, 0);
+      getvcol(curwin, &curwin->w_cursor, &col, nullptr, &endcol2, 0);
     }
 
     col += curwin->w_cursor.coladd;
@@ -1926,7 +1926,7 @@ void do_put(int regname, yankreg_T *reg, int dir, int count, int flags)
             .col = col,
             .coladd = 0,
           };
-          getvcol(curwin, &pos, NULL, &vcol, NULL, 0);
+          getvcol(curwin, &pos, nullptr, &vcol, nullptr, 0);
         }
       }
 
@@ -2195,10 +2195,10 @@ end:
   }
 
   if (has_event(EVENT_TEXTPUTPOST)) {
-    if (insert_string.data == NULL) {
-      put_do_autocmd(regname, reg, NULL, true, dir);
+    if (insert_string.data == nullptr) {
+      put_do_autocmd(regname, reg, nullptr, true, dir);
     } else {
-      put_do_autocmd(regname, NULL, &insert_string, true, dir);
+      put_do_autocmd(regname, nullptr, &insert_string, true, dir);
     }
   }
 
@@ -2247,8 +2247,8 @@ void ex_display(exarg_T *eap)
   char *arg = eap->arg;
   int type;
 
-  if (arg != NULL && *arg == NUL) {
-    arg = NULL;
+  if (arg != nullptr && *arg == NUL) {
+    arg = nullptr;
   }
   int hl_id = HLF_8;
 
@@ -2258,11 +2258,11 @@ void ex_display(exarg_T *eap)
   msg_puts_title(_("\nType Name Content"));
   for (int i = -1; i < NUM_REGISTERS && !got_int; i++) {
     int name = get_register_name(i);
-    if (arg != NULL && vim_strchr(arg, name) == NULL) {
+    if (arg != nullptr && vim_strchr(arg, name) == nullptr) {
       continue;             // did not ask for this register
     }
 
-    switch (get_reg_type(name, NULL)) {
+    switch (get_reg_type(name, nullptr)) {
     case kMTLineWise:
       type = 'l'; break;
     case kMTCharWise:
@@ -2272,7 +2272,7 @@ void ex_display(exarg_T *eap)
     }
 
     if (i == -1) {
-      if (y_previous != NULL) {
+      if (y_previous != nullptr) {
         yb = y_previous;
       } else {
         yb = &(y_regs[0]);
@@ -2289,7 +2289,7 @@ void ex_display(exarg_T *eap)
                  // pointer can be freed
     }
 
-    if (yb->y_array != NULL) {
+    if (yb->y_array != nullptr) {
       bool do_show = false;
 
       for (size_t j = 0; !do_show && j < yb->y_size; j++) {
@@ -2328,30 +2328,30 @@ void ex_display(exarg_T *eap)
 
   // display last inserted text
   String insert = get_last_insert();
-  if ((p = insert.data) != NULL
-      && (arg == NULL || vim_strchr(arg, '.') != NULL) && !got_int
+  if ((p = insert.data) != nullptr
+      && (arg == nullptr || vim_strchr(arg, '.') != nullptr) && !got_int
       && !message_filtered(p)) {
     msg_puts("\n  c  \".   ");
     dis_msg(p, true);
   }
 
   // display last command line
-  if (last_cmdline != NULL && (arg == NULL || vim_strchr(arg, ':') != NULL)
+  if (last_cmdline != nullptr && (arg == nullptr || vim_strchr(arg, ':') != nullptr)
       && !got_int && !message_filtered(last_cmdline)) {
     msg_puts("\n  c  \":   ");
     dis_msg(last_cmdline, false);
   }
 
   // display current file name
-  if (curbuf->b_fname != NULL
-      && (arg == NULL || vim_strchr(arg, '%') != NULL) && !got_int
+  if (curbuf->b_fname != nullptr
+      && (arg == nullptr || vim_strchr(arg, '%') != nullptr) && !got_int
       && !message_filtered(curbuf->b_fname)) {
     msg_puts("\n  c  \"%   ");
     dis_msg(curbuf->b_fname, false);
   }
 
   // display alternate file name
-  if ((arg == NULL || vim_strchr(arg, '#') != NULL) && !got_int) {
+  if ((arg == nullptr || vim_strchr(arg, '#') != nullptr) && !got_int) {
     char *fname;
     linenr_T dummy;
 
@@ -2362,15 +2362,15 @@ void ex_display(exarg_T *eap)
   }
 
   // display last search pattern
-  if (last_search_pat() != NULL
-      && (arg == NULL || vim_strchr(arg, '/') != NULL) && !got_int
+  if (last_search_pat() != nullptr
+      && (arg == nullptr || vim_strchr(arg, '/') != nullptr) && !got_int
       && !message_filtered(last_search_pat())) {
     msg_puts("\n  c  \"/   ");
     dis_msg(last_search_pat(), false);
   }
 
   // display last used expression
-  if (expr_line != NULL && (arg == NULL || vim_strchr(arg, '=') != NULL)
+  if (expr_line != nullptr && (arg == nullptr || vim_strchr(arg, '=') != nullptr)
       && !got_int && !message_filtered(expr_line)) {
     msg_puts("\n  c  \"=   ");
     dis_msg(expr_line, false);
@@ -2405,8 +2405,8 @@ MotionType get_reg_type(int regname, colnr_T *reg_width)
 
   yankreg_T *reg = get_yank_register(regname, YREG_PASTE);
 
-  if (reg->y_array != NULL) {
-    if (reg_width != NULL && reg->y_type == kMTBlockWise) {
+  if (reg->y_array != nullptr) {
+    if (reg_width != nullptr && reg->y_type == kMTBlockWise) {
       *reg_width = reg->y_width;
     }
     return reg->y_type;
@@ -2436,13 +2436,13 @@ static void *get_reg_wrap_one_line(char *s, int flags)
 ///
 /// @returns The contents of the register as an allocated string.
 /// @returns A linked list when `flags` contains @ref kGRegList.
-/// @returns NULL for error.
+/// @returns nullptr for error.
 void *get_reg_contents(int regname, int flags)
 {
   // Don't allow using an expression register inside an expression.
   if (regname == '=') {
     if (flags & kGRegNoExpr) {
-      return NULL;
+      return nullptr;
     }
     if (flags & kGRegExprSrc) {
       return get_reg_wrap_one_line(get_expr_line_src(), flags);
@@ -2456,14 +2456,14 @@ void *get_reg_contents(int regname, int flags)
 
   // check for valid regname
   if (regname != NUL && !valid_yank_reg(regname, false)) {
-    return NULL;
+    return nullptr;
   }
 
   char *retval;
   bool allocated;
   if (get_spec_reg(regname, &retval, &allocated, false)) {
-    if (retval == NULL) {
-      return NULL;
+    if (retval == nullptr) {
+      return nullptr;
     }
     if (allocated) {
       return get_reg_wrap_one_line(retval, flags);
@@ -2472,8 +2472,8 @@ void *get_reg_contents(int regname, int flags)
   }
 
   yankreg_T *reg = get_yank_register(regname, YREG_PUT);
-  if (reg->y_array == NULL) {
-    return NULL;
+  if (reg->y_array == nullptr) {
+    return nullptr;
   }
 
   if (flags & kGRegList) {
@@ -2517,7 +2517,7 @@ static yankreg_T *init_write_reg(int name, yankreg_T **old_y_previous, bool must
 {
   if (!valid_yank_reg(name, true)) {  // check for valid reg name
     emsg_invreg(name);
-    return NULL;
+    return nullptr;
   }
 
   // Don't want to change the current (unnamed) register.
@@ -2544,7 +2544,7 @@ static void str_to_reg(yankreg_T *y_ptr, MotionType yank_type, const char *str, 
                        colnr_T blocklen, bool str_list)
   FUNC_ATTR_NONNULL_ALL
 {
-  if (y_ptr->y_array == NULL) {  // NULL means empty register
+  if (y_ptr->y_array == nullptr) {  // nullptr means empty register
     y_ptr->y_size = 0;
   }
 
@@ -2560,7 +2560,7 @@ static void str_to_reg(yankreg_T *y_ptr, MotionType yank_type, const char *str, 
 
   // Count the number of lines within the string
   if (str_list) {
-    for (char **ss = (char **)str; *ss != NULL; ss++) {
+    for (char **ss = (char **)str; *ss != nullptr; ss++) {
       newlines++;
     }
   } else {
@@ -2592,7 +2592,7 @@ static void str_to_reg(yankreg_T *y_ptr, MotionType yank_type, const char *str, 
 
   // Find the end of each line and save it into the array.
   if (str_list) {
-    for (char **ss = (char **)str; *ss != NULL; ss++, lnum++) {
+    for (char **ss = (char **)str; *ss != nullptr; ss++, lnum++) {
       pp[lnum] = cstr_to_string(*ss);
       if (yank_type == kMTBlockWise) {
         size_t charlen = mb_string2cells(*ss);
@@ -2681,9 +2681,9 @@ void write_reg_contents_lst(int name, char **strings, bool must_append, MotionTy
 {
   if (name == '/' || name == '=' || name == '#') {
     char *s = strings[0];
-    if (strings[0] == NULL) {
+    if (strings[0] == nullptr) {
       s = "";
-    } else if (strings[1] != NULL) {
+    } else if (strings[1] != nullptr) {
       semsg(_(e_register_char_cannot_contain_multiple_lines), name);
       return;
     }
@@ -2749,13 +2749,13 @@ void write_reg_contents_ex(int name, const char *str, ssize_t len, bool must_app
       int num = atoi(str);
 
       buf = buflist_findnr(num);
-      if (buf == NULL) {
+      if (buf == nullptr) {
         semsg(_(e_nobufnr), (int64_t)num);
       }
     } else {
       buf = buflist_findnr(buflist_findpat(str, str + len, true, false, false));
     }
-    if (buf == NULL) {
+    if (buf == nullptr) {
       return;
     }
     curwin->w_alt_fnum = buf->b_fnum;
@@ -2839,7 +2839,7 @@ bool prepare_yankreg_from_object(yankreg_T *reg, String regtype, size_t lines)
     }
   }
 
-  reg->additional_data = NULL;
+  reg->additional_data = nullptr;
   reg->timestamp = 0;
   return true;
 }

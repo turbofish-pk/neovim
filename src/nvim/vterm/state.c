@@ -91,12 +91,12 @@ static VTermState *vterm_state_new(VTerm *vt)
 
   state->mouse_protocol = MOUSE_X10;
 
-  state->callbacks = NULL;
-  state->cbdata = NULL;
+  state->callbacks = nullptr;
+  state->cbdata = nullptr;
 
-  state->selection.callbacks = NULL;
-  state->selection.user = NULL;
-  state->selection.buffer = NULL;
+  state->selection.callbacks = nullptr;
+  state->selection.user = nullptr;
+  state->selection.buffer = nullptr;
 
   vterm_state_newpen(state);
 
@@ -1842,7 +1842,7 @@ static void osc_selection(VTermState *state, VTermStringFragment frag)
     // Clear selection if we're already finished but didn't do anything
     if (frag.final && state->selection.callbacks->set) {
       (*state->selection.callbacks->set)(state->tmp.selection.mask, (VTermStringFragment){
-        .str = NULL,
+        .str = nullptr,
         .len = 0,
         .initial = state->tmp.selection.state != SELECTION_SET,
         .final = true,
@@ -1910,7 +1910,7 @@ static void osc_selection(VTermState *state, VTermStringFragment frag)
           state->tmp.selection.state = SELECTION_INVALID;
           if (state->selection.callbacks->set) {
             (*state->selection.callbacks->set)(state->tmp.selection.mask, (VTermStringFragment){
-              .str = NULL,
+              .str = nullptr,
               .len = 0,
               .initial = true,
               .final = true,
@@ -2364,8 +2364,8 @@ void vterm_state_set_callbacks(VTermState *state, const VTermStateCallbacks *cal
       (*state->callbacks->initpen)(state->cbdata);
     }
   } else {
-    state->callbacks = NULL;
-    state->cbdata = NULL;
+    state->callbacks = nullptr;
+    state->cbdata = nullptr;
   }
 }
 
@@ -2376,8 +2376,8 @@ void vterm_state_set_unrecognised_fallbacks(VTermState *state, const VTermStateF
     state->fallbacks = fallbacks;
     state->fbdata = user;
   } else {
-    state->fallbacks = NULL;
-    state->fbdata = NULL;
+    state->fallbacks = nullptr;
+    state->fbdata = nullptr;
   }
 }
 

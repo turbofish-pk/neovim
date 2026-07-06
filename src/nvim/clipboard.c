@@ -26,14 +26,14 @@ static bool clipboard_didwarn = false;
 /// @param quiet Suppress error messages
 /// @param writing if we're setting the contents of the clipboard
 ///
-/// @returns the yankreg that should be written into, or `NULL`
+/// @returns the yankreg that should be written into, or `nullptr`
 /// if the register isn't a clipboard or provider isn't available.
 yankreg_T *adjust_clipboard_name(int *name, bool quiet, bool writing)
 {
 #define MSG_NO_CLIP "clipboard: No provider. " \
   "Try \":checkhealth\" or \":h clipboard\"."
 
-  yankreg_T *target = NULL;
+  yankreg_T *target = nullptr;
   bool explicit_cb_reg = (*name == '*' || *name == '+');
   bool implicit_cb_reg = (*name == NUL) && (cb_flags & (kOptCbFlagUnnamed | kOptCbFlagUnnamedplus));
   if (!explicit_cb_reg && !implicit_cb_reg) {
@@ -88,7 +88,7 @@ bool get_clipboard(int name, yankreg_T **target, bool quiet)
   bool errmsg = true;
 
   yankreg_T *reg = adjust_clipboard_name(&name, quiet, false);
-  if (reg == NULL) {
+  if (reg == nullptr) {
     return false;
   }
   free_register(reg);
@@ -108,7 +108,7 @@ bool get_clipboard(int name, yankreg_T **target, bool quiet)
   }
 
   list_T *res = result.vval.v_list;
-  list_T *lines = NULL;
+  list_T *lines = nullptr;
   if (tv_list_len(res) == 2
       && TV_LIST_ITEM_TV(tv_list_first(res))->v_type == VAR_LIST) {
     lines = TV_LIST_ITEM_TV(tv_list_first(res))->vval.v_list;
@@ -116,7 +116,7 @@ bool get_clipboard(int name, yankreg_T **target, bool quiet)
       goto err;
     }
     char *regtype = TV_LIST_ITEM_TV(tv_list_last(res))->vval.v_string;
-    if (regtype == NULL || strlen(regtype) > 1) {
+    if (regtype == nullptr || strlen(regtype) > 1) {
       goto err;
     }
     switch (regtype[0]) {
@@ -147,7 +147,7 @@ bool get_clipboard(int name, yankreg_T **target, bool quiet)
   reg->y_array = xcalloc((size_t)tv_list_len(lines), sizeof(String));
   reg->y_size = (size_t)tv_list_len(lines);
   reg->y_width = 0;  // Will be updated by update_yankreg_width() below.
-  reg->additional_data = NULL;
+  reg->additional_data = nullptr;
   reg->timestamp = 0;
   // Timestamp is not saved for clipboard registers because clipboard registers
   // are not saved in the ShaDa file.
@@ -158,7 +158,7 @@ bool get_clipboard(int name, yankreg_T **target, bool quiet)
       goto err;
     }
     const char *s = TV_LIST_ITEM_TV(li)->vval.v_string;
-    reg->y_array[tv_idx++] = cstr_to_string(s != NULL ? s : "");
+    reg->y_array[tv_idx++] = cstr_to_string(s != nullptr ? s : "");
   });
 
   if (reg->y_size > 0 && reg->y_array[reg->y_size - 1].size == 0) {
@@ -189,9 +189,9 @@ err:
     }
     xfree(reg->y_array);
   }
-  reg->y_array = NULL;
+  reg->y_array = nullptr;
   reg->y_size = 0;
-  reg->additional_data = NULL;
+  reg->additional_data = nullptr;
   reg->timestamp = 0;
   if (errmsg) {
     emsg("clipboard: provider returned invalid data");
@@ -216,14 +216,14 @@ void set_clipboard(int name, yankreg_T *reg)
   switch (reg->y_type) {
   case kMTLineWise:
     regtype = 'V';
-    tv_list_append_string(lines, NULL, 0);
+    tv_list_append_string(lines, nullptr, 0);
     break;
   case kMTCharWise:
     regtype = 'v';
     break;
   case kMTBlockWise:
     regtype = 'b';
-    tv_list_append_string(lines, NULL, 0);
+    tv_list_append_string(lines, nullptr, 0);
     break;
   case kMTUnknown:
     abort();

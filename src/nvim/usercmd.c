@@ -39,7 +39,7 @@
 
 #include "usercmd.c.generated.h"
 
-garray_T ucmds = { 0, 0, sizeof(ucmd_T), 4, NULL };
+garray_T ucmds = { 0, 0, sizeof(ucmd_T), 4, nullptr };
 
 static const char e_argument_required_for_str[]
   = N_("E179: Argument required for %s");
@@ -115,18 +115,18 @@ static struct {
   { ADDR_WINDOWS, "windows", "win" },
   { ADDR_QUICKFIX, "quickfix", "qf" },
   { ADDR_OTHER, "other", "?" },
-  { ADDR_NONE, NULL, NULL }
+  { ADDR_NONE, nullptr, nullptr }
 };
 
 /// Search for a user command that matches "eap->cmd".
 /// Return cmdidx in "eap->cmdidx", flags in "eap->argt", idx in "eap->useridx".
 /// Return a pointer to just after the command.
-/// Return NULL if there is no matching command.
+/// Return nullptr if there is no matching command.
 ///
 /// @param *p      end of the command (possibly including count)
 /// @param full    set to true for a full match
-/// @param xp      used for completion, NULL otherwise
-/// @param complp  completion flags or NULL
+/// @param xp      used for completion, nullptr otherwise
+/// @param complp  completion flags or nullptr
 char *find_ucmd(exarg_T *eap, char *p, int *full, expand_T *xp, int *complp)
 {
   int len = (int)(p - eap->cmd);
@@ -154,7 +154,7 @@ char *find_ucmd(exarg_T *eap, char *p, int *full, expand_T *xp, int *complp)
         // global command is a full match.
         if (k == len && found && *np != NUL) {
           if (gap == &ucmds) {
-            return NULL;
+            return nullptr;
           }
           amb_local = true;
         }
@@ -178,10 +178,10 @@ char *find_ucmd(exarg_T *eap, char *p, int *full, expand_T *xp, int *complp)
           eap->useridx = j;
           eap->addr_type = uc->uc_addr_type;
 
-          if (complp != NULL) {
+          if (complp != nullptr) {
             *complp = uc->uc_compl;
           }
-          if (xp != NULL) {
+          if (xp != nullptr) {
             xp->xp_luaref = uc->uc_compl_luaref;
             xp->xp_arg = uc->uc_compl_arg;
             xp->xp_script_ctx = uc->uc_script_ctx;
@@ -191,7 +191,7 @@ char *find_ucmd(exarg_T *eap, char *p, int *full, expand_T *xp, int *complp)
           // if this is an exact match.
           matchlen = k;
           if (k == len && *np == NUL) {
-            if (full != NULL) {
+            if (full != nullptr) {
               *full = true;
             }
             amb_local = false;
@@ -210,10 +210,10 @@ char *find_ucmd(exarg_T *eap, char *p, int *full, expand_T *xp, int *complp)
 
   // Only found ambiguous matches.
   if (amb_local) {
-    if (xp != NULL) {
+    if (xp != nullptr) {
       xp->xp_context = EXPAND_UNSUCCESSFUL;
     }
-    return NULL;
+    return nullptr;
   }
 
   // The match we found may be followed immediately by a number.  Move "p"
@@ -237,11 +237,11 @@ const char *set_context_in_user_cmd(expand_T *xp, const char *arg_in)
     if (*p == NUL) {
       // Cursor is still in the attribute.
       p = strchr(arg, '=');
-      if (p == NULL) {
+      if (p == nullptr) {
         // No "=", so complete attribute names.
         xp->xp_context = EXPAND_USER_CMD_FLAGS;
         xp->xp_pattern = (char *)arg;
-        return NULL;
+        return nullptr;
       }
 
       // For the -complete, -nargs and -addr attributes, we complete
@@ -249,17 +249,17 @@ const char *set_context_in_user_cmd(expand_T *xp, const char *arg_in)
       if (STRNICMP(arg, "complete", (size_t)(p - arg)) == 0) {
         xp->xp_context = EXPAND_USER_COMPLETE;
         xp->xp_pattern = (char *)p + 1;
-        return NULL;
+        return nullptr;
       } else if (STRNICMP(arg, "nargs", (size_t)(p - arg)) == 0) {
         xp->xp_context = EXPAND_USER_NARGS;
         xp->xp_pattern = (char *)p + 1;
-        return NULL;
+        return nullptr;
       } else if (STRNICMP(arg, "addr", (size_t)(p - arg)) == 0) {
         xp->xp_context = EXPAND_USER_ADDR_TYPE;
         xp->xp_pattern = (char *)p + 1;
-        return NULL;
+        return nullptr;
       }
-      return NULL;
+      return nullptr;
     }
     arg = skipwhite(p);
   }
@@ -269,7 +269,7 @@ const char *set_context_in_user_cmd(expand_T *xp, const char *arg_in)
   if (*p == NUL) {
     xp->xp_context = EXPAND_USER_COMMANDS;
     xp->xp_pattern = (char *)arg;
-    return NULL;
+    return nullptr;
   }
 
   // And finally comes a normal command.
@@ -281,12 +281,12 @@ const char *set_context_in_user_cmdarg(const char *cmd FUNC_ATTR_UNUSED, const c
                                        uint32_t argt, int context, expand_T *xp, bool forceit)
 {
   if (context == EXPAND_NOTHING) {
-    return NULL;
+    return nullptr;
   }
 
   if (argt & EX_XFILE) {
     // EX_XFILE: file names are handled before this call.
-    return NULL;
+    return nullptr;
   }
 
   if (context == EXPAND_MENUS) {
@@ -315,12 +315,12 @@ const char *set_context_in_user_cmdarg(const char *cmd FUNC_ATTR_UNUSED, const c
   xp->xp_pattern = (char *)arg;
   xp->xp_context = context;
 
-  return NULL;
+  return nullptr;
 }
 
 char *expand_user_command_name(int idx)
 {
-  return get_user_commands(NULL, idx - CMD_SIZE);
+  return get_user_commands(nullptr, idx - CMD_SIZE);
 }
 
 /// Function given to ExpandGeneric() to obtain the list of user command names.
@@ -346,13 +346,13 @@ char *get_user_commands(expand_T *xp FUNC_ATTR_UNUSED, int idx)
     }
     return name;
   }
-  return NULL;
+  return nullptr;
 }
 
 /// Get the name of user command "idx".  "cmdidx" can be CMD_USER or
 /// CMD_USER_BUF.
 ///
-/// @return  NULL if the command is not found.
+/// @return  nullptr if the command is not found.
 char *get_user_command_name(int idx, int cmdidx)
 {
   if (cmdidx == CMD_USER && idx < ucmds.ga_len) {
@@ -366,7 +366,7 @@ char *get_user_command_name(int idx, int cmdidx)
       return USER_CMD_GA(&buf->b_ucmds, idx)->uc_name;
     }
   }
-  return NULL;
+  return nullptr;
 }
 
 /// Function given to ExpandGeneric() to obtain the list of user address type names.
@@ -385,7 +385,7 @@ char *get_user_cmd_flags(expand_T *xp, int idx)
                                     "keepscript" };
 
   if (idx >= (int)ARRAY_SIZE(user_cmd_flags)) {
-    return NULL;
+    return nullptr;
   }
   return user_cmd_flags[idx];
 }
@@ -396,7 +396,7 @@ char *get_user_cmd_nargs(expand_T *xp, int idx)
   static char *user_cmd_nargs[] = { "0", "1", "_", "*", "?", "+" };
 
   if (idx >= (int)ARRAY_SIZE(user_cmd_nargs)) {
-    return NULL;
+    return nullptr;
   }
   return user_cmd_nargs[idx];
 }
@@ -404,7 +404,7 @@ char *get_user_cmd_nargs(expand_T *xp, int idx)
 static char *get_command_complete(int arg)
 {
   if (arg < 0 || arg >= (int)(ARRAY_SIZE(command_complete))) {
-    return NULL;
+    return nullptr;
   }
   return (char *)command_complete[arg];
 }
@@ -413,10 +413,10 @@ static char *get_command_complete(int arg)
 char *get_user_cmd_complete(expand_T *xp, int idx)
 {
   if (idx >= (int)ARRAY_SIZE(command_complete)) {
-    return NULL;
+    return nullptr;
   }
   char *cmd_compl = get_command_complete(idx);
-  if (cmd_compl == NULL || idx == EXPAND_USER_LUA) {
+  if (cmd_compl == nullptr || idx == EXPAND_USER_LUA) {
     return "";
   }
   return cmd_compl;
@@ -424,12 +424,12 @@ char *get_user_cmd_complete(expand_T *xp, int idx)
 
 /// Get the name of completion type "expand" as an allocated string.
 /// "compl_arg" is the function name for "custom" and "customlist" types.
-/// Returns NULL if no completion is available.
+/// Returns nullptr if no completion is available.
 char *cmdcomplete_type_to_str(int expand, const char *compl_arg)
 {
   char *cmd_compl = get_command_complete(expand);
-  if (cmd_compl == NULL || expand == EXPAND_USER_LUA) {
-    return NULL;
+  if (cmd_compl == nullptr || expand == EXPAND_USER_LUA) {
+    return nullptr;
   }
 
   if (expand == EXPAND_USER_LIST || expand == EXPAND_USER_DEFINED) {
@@ -453,7 +453,7 @@ int cmdcomplete_str_to_type(const char *complete_str)
 
   for (int i = 0; i < (int)(ARRAY_SIZE(command_complete)); i++) {
     char *cmd_compl = get_command_complete(i);
-    if (cmd_compl == NULL) {
+    if (cmd_compl == nullptr) {
       continue;
     }
     if (strcmp(complete_str, command_complete[i]) == 0) {
@@ -599,7 +599,7 @@ static void uc_list(char *name, size_t name_len)
 
       // Completion
       char *cmd_compl = get_command_complete(cmd->uc_compl);
-      if (cmd_compl != NULL) {
+      if (cmd_compl != nullptr) {
         int rc = snprintf(IObuff + len, IOSIZE - len, "%s", get_command_complete(cmd->uc_compl));
         assert(rc > 0);
         len += (size_t)rc;
@@ -613,7 +613,7 @@ static void uc_list(char *name, size_t name_len)
       msg_outtrans(IObuff, 0, false);
 
       if (cmd->uc_luaref != LUA_NOREF) {
-        char *fn = nlua_funcref_str(cmd->uc_luaref, NULL);
+        char *fn = nlua_funcref_str(cmd->uc_luaref, nullptr);
         msg_puts_hl(fn, HLF_8, false);
         xfree(fn);
         // put the description on a new line
@@ -679,7 +679,7 @@ int parse_addr_type_arg(char *value, int vallen, cmd_addr_T *addr_type_arg)
 int parse_compl_arg(const char *value, int vallen, int *complp, uint32_t *argt, char **compl_arg)
   FUNC_ATTR_NONNULL_ALL
 {
-  const char *arg = NULL;
+  const char *arg = nullptr;
   size_t arglen = 0;
   int valend = vallen;
 
@@ -695,7 +695,7 @@ int parse_compl_arg(const char *value, int vallen, int *complp, uint32_t *argt, 
 
   int i;
   for (i = 0; i < (int)ARRAY_SIZE(command_complete); i++) {
-    if (get_command_complete(i) == NULL) {
+    if (get_command_complete(i) == nullptr) {
       continue;
     }
     if ((int)strlen(command_complete[i]) == valend
@@ -717,18 +717,18 @@ int parse_compl_arg(const char *value, int vallen, int *complp, uint32_t *argt, 
   }
 
   if (*complp != EXPAND_USER_DEFINED && *complp != EXPAND_USER_LIST
-      && arg != NULL) {
+      && arg != nullptr) {
     emsg(_("E468: Completion argument only allowed for custom completion"));
     return FAIL;
   }
 
   if ((*complp == EXPAND_USER_DEFINED || *complp == EXPAND_USER_LIST)
-      && arg == NULL) {
+      && arg == nullptr) {
     emsg(_("E467: Custom completion requires a function argument"));
     return FAIL;
   }
 
-  if (arg != NULL) {
+  if (arg != nullptr) {
     *compl_arg = xstrnsave(arg, arglen);
   }
   return OK;
@@ -755,7 +755,7 @@ static int uc_scan_attr(char *attr, size_t len, uint32_t *argt, int *def, int *f
   } else if (STRNICMP(attr, "bar", len) == 0) {
     *argt |= EX_TRLBAR;
   } else {
-    char *val = NULL;
+    char *val = nullptr;
     size_t vallen = 0;
     size_t attrlen = len;
 
@@ -795,7 +795,7 @@ wrong_nargs:
       *argt |= EX_RANGE;
       if (vallen == 1 && *val == '%') {
         *argt |= EX_DFLALL;
-      } else if (val != NULL) {
+      } else if (val != nullptr) {
         char *p = val;
         if (*def >= 0) {
 two_count:
@@ -823,7 +823,7 @@ invalid_count:
         *addr_type_arg = ADDR_OTHER;
       }
 
-      if (val != NULL) {
+      if (val != nullptr) {
         char *p = val;
         if (*def >= 0) {
           goto two_count;
@@ -838,7 +838,7 @@ invalid_count:
 
       *def = MAX(*def, 0);
     } else if (STRNICMP(attr, "complete", attrlen) == 0) {
-      if (val == NULL) {
+      if (val == nullptr) {
         semsg(_(e_argument_required_for_str), "-complete");
         return FAIL;
       }
@@ -849,7 +849,7 @@ invalid_count:
       }
     } else if (STRNICMP(attr, "addr", attrlen) == 0) {
       *argt |= EX_RANGE;
-      if (val == NULL) {
+      if (val == nullptr) {
         semsg(_(e_argument_required_for_str), "-addr");
         return FAIL;
       }
@@ -874,7 +874,7 @@ invalid_count:
 /// Check for a valid user command name
 ///
 /// If the given {name} is valid, then a pointer to the end of the valid name is returned.
-/// Otherwise, returns NULL.
+/// Otherwise, returns nullptr.
 char *uc_validate_name(char *name)
 {
   if (ASCII_ISALPHA(*name)) {
@@ -883,7 +883,7 @@ char *uc_validate_name(char *name)
     }
   }
   if (!ends_excmd(*name) && !ascii_iswhite(*name)) {
-    return NULL;
+    return nullptr;
   }
 
   return name;
@@ -900,13 +900,13 @@ int uc_add_command(char *name, size_t name_len, const char *rep, uint32_t argt, 
                    bool force)
   FUNC_ATTR_NONNULL_ARG(1, 3)
 {
-  ucmd_T *cmd = NULL;
+  ucmd_T *cmd = nullptr;
   int cmp = 1;
-  char *rep_buf = NULL;
+  char *rep_buf = nullptr;
   garray_T *gap;
 
-  replace_termcodes(rep, strlen(rep), &rep_buf, 0, 0, NULL, p_cpo);
-  if (rep_buf == NULL) {
+  replace_termcodes(rep, strlen(rep), &rep_buf, 0, 0, nullptr, p_cpo);
+  if (rep_buf == nullptr) {
     // Can't replace termcodes - try using the string as is
     rep_buf = xstrdup(rep);
   }
@@ -977,7 +977,7 @@ int uc_add_command(char *name, size_t name_len, const char *rep, uint32_t argt, 
   }
 
   cmd->uc_rep = rep_buf;
-  cmd->uc_desc = (desc != NULL && *desc != NUL) ? xstrdup(desc) : NULL;
+  cmd->uc_desc = (desc != nullptr && *desc != NUL) ? xstrdup(desc) : nullptr;
   cmd->uc_argt = argt;
   cmd->uc_def = def;
   cmd->uc_compl = context;
@@ -1009,7 +1009,7 @@ void ex_command(exarg_T *eap)
   int def = -1;
   int flags = 0;
   int context = EXPAND_NOTHING;
-  char *compl_arg = NULL;
+  char *compl_arg = nullptr;
   cmd_addr_T addr_type_arg = ADDR_NONE;
   int has_attr = (eap->arg[0] == '-');
 
@@ -1048,7 +1048,7 @@ void ex_command(exarg_T *eap)
     emsg(_(e_complete_used_without_allowing_arguments));
   } else {
     uc_add_command(name, name_len, p, argt, def, flags, context, compl_arg, LUA_NOREF, LUA_NOREF,
-                   addr_type_arg, LUA_NOREF, NULL, eap->forceit);
+                   addr_type_arg, LUA_NOREF, nullptr, eap->forceit);
 
     return;  // success
   }
@@ -1062,7 +1062,7 @@ theend:
 void ex_comclear(exarg_T *eap)
 {
   uc_clear(&ucmds);
-  if (curbuf != NULL) {
+  if (curbuf != nullptr) {
     uc_clear(&curbuf->b_ucmds);
   }
 }
@@ -1087,7 +1087,7 @@ void uc_clear(garray_T *gap)
 void ex_delcommand(exarg_T *eap)
 {
   int i = 0;
-  ucmd_T *cmd = NULL;
+  ucmd_T *cmd = nullptr;
   int res = -1;
   const char *arg = eap->arg;
   bool buffer_only = false;
@@ -1192,7 +1192,7 @@ static char *uc_split_args(const char *arg, char **args, const size_t *arglens, 
 {
   // Precalculate length
   int len = 2;   // Initial and final quotes
-  if (args == NULL) {
+  if (args == nullptr) {
     const char *p = arg;
 
     while (*p) {
@@ -1246,7 +1246,7 @@ static char *uc_split_args(const char *arg, char **args, const size_t *arglens, 
   char *q = buf;
   *q++ = '"';
 
-  if (args == NULL) {
+  if (args == nullptr) {
     const char *p = arg;
     while (*p) {
       if (p[0] == '\\' && p[1] == '\\') {
@@ -1308,7 +1308,7 @@ static size_t add_cmd_modifier(char *buf, char *mod_str, bool *multi_mods)
     result++;
   }
 
-  if (buf != NULL) {
+  if (buf != nullptr) {
     if (*multi_mods) {
       strcat(buf, " ");
     }
@@ -1370,7 +1370,7 @@ size_t add_win_cmd_modifiers(char *buf, const cmdmod_T *cmod, bool *multi_mods)
 }
 
 /// Generate text for the "cmod" command modifiers.
-/// If "buf" is NULL just return the length.
+/// If "buf" is nullptr just return the length.
 size_t uc_mods(char *buf, const cmdmod_T *cmod, bool quote)
 {
   size_t result = 0;
@@ -1396,7 +1396,7 @@ size_t uc_mods(char *buf, const cmdmod_T *cmod, bool quote)
   };
 
   result = quote ? 2 : 0;
-  if (buf != NULL) {
+  if (buf != nullptr) {
     if (quote) {
       *buf++ = '"';
     }
@@ -1430,7 +1430,7 @@ size_t uc_mods(char *buf, const cmdmod_T *cmod, bool quote)
   // flags from cmod->cmod_split
   result += add_win_cmd_modifiers(buf, cmod, &multi_mods);
 
-  if (quote && buf != NULL) {
+  if (quote && buf != nullptr) {
     buf += result - 2;
     *buf = '"';
   }
@@ -1468,7 +1468,7 @@ static size_t uc_check_code(char *code, size_t len, char *buf, ucmd_T *cmd, exar
     ct_NONE,
   } type = ct_NONE;
 
-  if ((vim_strchr("qQfF", (uint8_t)(*p)) != NULL) && p[1] == '-') {
+  if ((vim_strchr("qQfF", (uint8_t)(*p)) != nullptr) && p[1] == '-') {
     quote = (*p == 'q' || *p == 'Q') ? 1 : 2;
     p += 2;
     l -= 2;
@@ -1503,7 +1503,7 @@ static size_t uc_check_code(char *code, size_t len, char *buf, ucmd_T *cmd, exar
     if (*eap->arg == NUL) {
       if (quote == 1) {
         result = 2;
-        if (buf != NULL) {
+        if (buf != nullptr) {
           STRCPY(buf, "''");
         }
       } else {
@@ -1521,7 +1521,7 @@ static size_t uc_check_code(char *code, size_t len, char *buf, ucmd_T *cmd, exar
     switch (quote) {
     case 0:     // No quoting, no splitting
       result = strlen(eap->arg);
-      if (buf != NULL) {
+      if (buf != nullptr) {
         STRCPY(buf, eap->arg);
       }
       break;
@@ -1533,7 +1533,7 @@ static size_t uc_check_code(char *code, size_t len, char *buf, ucmd_T *cmd, exar
         }
       }
 
-      if (buf != NULL) {
+      if (buf != nullptr) {
         *buf++ = '"';
         for (p = eap->arg; *p; p++) {
           if (*p == '\\' || *p == '"') {
@@ -1547,12 +1547,12 @@ static size_t uc_check_code(char *code, size_t len, char *buf, ucmd_T *cmd, exar
       break;
     case 2:     // Quote and split (<f-args>)
       // This is hard, so only do it once, and cache the result
-      if (*split_buf == NULL) {
+      if (*split_buf == nullptr) {
         *split_buf = uc_split_args(eap->arg, eap->args, eap->arglens, eap->argc, split_len);
       }
 
       result = *split_len;
-      if (buf != NULL && result != 0) {
+      if (buf != nullptr && result != 0) {
         STRCPY(buf, *split_buf);
       }
 
@@ -1565,7 +1565,7 @@ static size_t uc_check_code(char *code, size_t len, char *buf, ucmd_T *cmd, exar
     if (quote) {
       result += 2;
     }
-    if (buf != NULL) {
+    if (buf != nullptr) {
       if (quote) {
         *buf++ = '"';
       }
@@ -1600,7 +1600,7 @@ static size_t uc_check_code(char *code, size_t len, char *buf, ucmd_T *cmd, exar
       result += 2;
     }
 
-    if (buf != NULL) {
+    if (buf != nullptr) {
       if (quote) {
         *buf++ = '"';
       }
@@ -1623,7 +1623,7 @@ static size_t uc_check_code(char *code, size_t len, char *buf, ucmd_T *cmd, exar
     if (quote) {
       result += 2;
     }
-    if (buf != NULL) {
+    if (buf != nullptr) {
       if (quote) {
         *buf++ = '\'';
       }
@@ -1638,7 +1638,7 @@ static size_t uc_check_code(char *code, size_t len, char *buf, ucmd_T *cmd, exar
 
   case ct_LT:
     result = 1;
-    if (buf != NULL) {
+    if (buf != nullptr) {
       *buf = '<';
     }
     break;
@@ -1646,7 +1646,7 @@ static size_t uc_check_code(char *code, size_t len, char *buf, ucmd_T *cmd, exar
   default:
     // Not recognized: just copy the '<' and return -1.
     result = (size_t)-1;
-    if (buf != NULL) {
+    if (buf != nullptr) {
       *buf = '<';
     }
     break;
@@ -1657,10 +1657,10 @@ static size_t uc_check_code(char *code, size_t len, char *buf, ucmd_T *cmd, exar
 
 int do_ucmd(exarg_T *eap, bool preview)
 {
-  char *end = NULL;
+  char *end = nullptr;
 
   size_t split_len = 0;
-  char *split_buf = NULL;
+  char *split_buf = nullptr;
   ucmd_T *cmd;
 
   if (eap->cmdidx == CMD_USER) {
@@ -1680,9 +1680,9 @@ int do_ucmd(exarg_T *eap, bool preview)
   }
 
   // Replace <> in the command by the arguments.
-  // First round: "buf" is NULL, compute length, allocate "buf".
+  // First round: "buf" is nullptr, compute length, allocate "buf".
   // Second round: copy result into "buf".
-  char *buf = NULL;
+  char *buf = nullptr;
   while (true) {
     char *p = cmd->uc_rep;        // source
     char *q = buf;                // destination
@@ -1690,14 +1690,14 @@ int do_ucmd(exarg_T *eap, bool preview)
 
     while (true) {
       char *start = vim_strchr(p, '<');
-      if (start != NULL) {
+      if (start != nullptr) {
         end = vim_strchr(start + 1, '>');
       }
-      if (buf != NULL) {
+      if (buf != nullptr) {
         char *ksp;
         for (ksp = p; *ksp != NUL && (uint8_t)(*ksp) != K_SPECIAL; ksp++) {}
         if ((uint8_t)(*ksp) == K_SPECIAL
-            && (start == NULL || ksp < start || end == NULL)
+            && (start == nullptr || ksp < start || end == nullptr)
             && ((uint8_t)ksp[1] == KS_SPECIAL && ksp[2] == KE_FILLER)) {
           // K_SPECIAL has been put in the buffer as K_SPECIAL
           // KS_SPECIAL KE_FILLER, like for mappings, but
@@ -1714,7 +1714,7 @@ int do_ucmd(exarg_T *eap, bool preview)
       }
 
       // break if no <item> is found
-      if (start == NULL || end == NULL) {
+      if (start == nullptr || end == nullptr) {
         break;
       }
 
@@ -1723,7 +1723,7 @@ int do_ucmd(exarg_T *eap, bool preview)
 
       // Take everything up to the '<'
       size_t len = (size_t)(start - p);
-      if (buf == NULL) {
+      if (buf == nullptr) {
         totlen += len;
       } else {
         memmove(q, p, len);
@@ -1738,13 +1738,13 @@ int do_ucmd(exarg_T *eap, bool preview)
       } else {
         p = end;
       }
-      if (buf == NULL) {
+      if (buf == nullptr) {
         totlen += len;
       } else {
         q += len;
       }
     }
-    if (buf != NULL) {              // second time here, finished
+    if (buf != nullptr) {              // second time here, finished
       STRCPY(q, p);
       break;
     }
@@ -1775,14 +1775,14 @@ int do_ucmd(exarg_T *eap, bool preview)
 }
 
 /// Gets a map of maps describing user-commands defined for buffer `buf` or
-/// defined globally if `buf` is NULL.
+/// defined globally if `buf` is nullptr.
 ///
-/// @param buf  Buffer to inspect, or NULL to get global commands.
+/// @param buf  Buffer to inspect, or nullptr to get global commands.
 ///
 /// @return Map of maps describing commands
 Dict commands_array(buf_T *buf, Arena *arena)
 {
-  garray_T *gap = (buf == NULL) ? &ucmds : &buf->b_ucmds;
+  garray_T *gap = (buf == nullptr) ? &ucmds : &buf->b_ucmds;
 
   Dict rv = arena_dict(arena, (size_t)gap->ga_len);
   for (int i = 0; i < gap->ga_len; i++) {
@@ -1827,9 +1827,9 @@ Dict commands_array(buf_T *buf, Arena *arena)
       PUT_C(d, "complete", LUAREF_OBJ(api_new_luaref(cmd->uc_compl_luaref)));
     } else {
       char *cmd_compl = get_command_complete(cmd->uc_compl);
-      PUT_C(d, "complete", (cmd_compl == NULL ? NIL : CSTR_AS_OBJ(cmd_compl)));
+      PUT_C(d, "complete", (cmd_compl == nullptr ? NIL : CSTR_AS_OBJ(cmd_compl)));
     }
-    PUT_C(d, "complete_arg", cmd->uc_compl_arg == NULL
+    PUT_C(d, "complete_arg", cmd->uc_compl_arg == nullptr
           ? NIL : CSTR_AS_OBJ(cmd->uc_compl_arg));
 
     Object obj = NIL;

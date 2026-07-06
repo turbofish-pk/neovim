@@ -55,7 +55,7 @@ static const char e_digraph_setlist_argument_must_be_list_of_lists_with_two_item
 
 #include "digraph.c.generated.h"
 // digraphs added by the user
-static garray_T user_digraphs = { 0, 0, (int)sizeof(digr_T), 10, NULL };
+static garray_T user_digraphs = { 0, 0, (int)sizeof(digr_T), 10, nullptr };
 
 /// Note: Characters marked with XX are not included literally, because some
 /// compilers cannot handle them (Amiga SAS/C is the most picky one).
@@ -1490,7 +1490,7 @@ int do_digraph(int c)
 }
 
 /// Find a digraph for "val".  If found return the string to display it.
-/// If not found return NULL.
+/// If not found return nullptr.
 char *get_digraph_for_char(int val_arg)
 {
   const int val = val_arg;
@@ -1513,7 +1513,7 @@ char *get_digraph_for_char(int val_arg)
       dp++;
     }
   }
-  return NULL;
+  return nullptr;
 }
 
 /// Get a digraph.  Used after typing CTRL-K on the command line or in normal
@@ -1729,7 +1729,7 @@ void listdigraphs(bool use_headers)
     tmp.result = getexactdigraph(tmp.char1, tmp.char2, false);
 
     if (tmp.result != 0 && tmp.result != tmp.char2) {
-      printdigraph(&tmp, use_headers ? &previous : NULL);
+      printdigraph(&tmp, use_headers ? &previous : nullptr);
     }
     dp++;
     fast_breakcheck();
@@ -1741,7 +1741,7 @@ void listdigraphs(bool use_headers)
       digraph_header(_("Custom"));
     }
     previous = -1;
-    printdigraph(dp, NULL);
+    printdigraph(dp, nullptr);
     fast_breakcheck();
     dp++;
   }
@@ -1821,7 +1821,7 @@ static struct dg_header_entry {
   { DG_START_KATAKANA, N_("Katakana") },
   { DG_START_BOPOMOFO, N_("Bopomofo") },
   { DG_START_OTHER3, N_("Other") },
-  { 0xfffffff, NULL },
+  { 0xfffffff, nullptr },
 };
 
 static void printdigraph(const digr_T *dp, result_T *previous)
@@ -1834,8 +1834,8 @@ static void printdigraph(const digr_T *dp, result_T *previous)
     return;
   }
 
-  if (previous != NULL) {
-    for (int i = 0; header_table[i].dg_header != NULL; i++) {
+  if (previous != nullptr) {
+    for (int i = 0; header_table[i].dg_header != nullptr; i++) {
       if (*previous < header_table[i].dg_start
           && dp->result >= header_table[i].dg_start
           && dp->result < header_table[i + 1].dg_start) {
@@ -1887,7 +1887,7 @@ static int get_digraph_chars(const typval_T *arg, int *char1, int *char2)
   const char *chars = tv_get_string_buf_chk(arg, buf_chars);
   const char *p = chars;
 
-  if (p != NULL) {
+  if (p != nullptr) {
     if (*p != NUL) {
       *char1 = mb_cptr2char_adv(&p);
       if (*p != NUL) {
@@ -1914,7 +1914,7 @@ static bool digraph_set_common(const typval_T *argchars, const typval_T *argdigr
 
   char buf_digraph[NUMBUFLEN];
   const char *digraph = tv_get_string_buf_chk(argdigraph, buf_digraph);
-  if (digraph == NULL) {
+  if (digraph == nullptr) {
     return false;
   }
   const char *p = digraph;
@@ -1932,10 +1932,10 @@ static bool digraph_set_common(const typval_T *argchars, const typval_T *argdigr
 void f_digraph_get(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
 {
   rettv->v_type = VAR_STRING;
-  rettv->vval.v_string = NULL;  // Return empty string for failure
+  rettv->vval.v_string = nullptr;  // Return empty string for failure
   const char *digraphs = tv_get_string_chk(&argvars[0]);
 
-  if (digraphs == NULL) {
+  if (digraphs == nullptr) {
     return;
   }
   if (strlen(digraphs) != 2) {
@@ -1993,7 +1993,7 @@ void f_digraph_setlist(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
   }
 
   list_T *pl = argvars[0].vval.v_list;
-  if (pl == NULL) {
+  if (pl == nullptr) {
     // Empty list always results in success.
     rettv->vval.v_bool = kBoolVarTrue;
     return;
@@ -2006,7 +2006,7 @@ void f_digraph_setlist(typval_T *argvars, typval_T *rettv, EvalFuncData fptr)
     }
 
     list_T *l = TV_LIST_ITEM_TV(pli)->vval.v_list;
-    if (l == NULL || tv_list_len(l) != 2) {
+    if (l == nullptr || tv_list_len(l) != 2) {
       emsg(_(e_digraph_setlist_argument_must_be_list_of_lists_with_two_items));
       return;
     }
@@ -2030,7 +2030,7 @@ typedef struct {
 
 /// Set up key mapping tables for the 'keymap' option.
 ///
-/// @return NULL if OK, an error message for failure.  This only needs to be
+/// @return nullptr if OK, an error message for failure.  This only needs to be
 ///         used when setting the option, not later when the value has already
 ///         been checked.
 char *keymap_init(void)
@@ -2065,7 +2065,7 @@ char *keymap_init(void)
     xfree(buf);
   }
 
-  return NULL;
+  return nullptr;
 }
 
 /// ":loadkeymap" command: load the following lines as the keymap.
@@ -2095,7 +2095,7 @@ void ex_loadkeymap(exarg_T *eap)
   while (true) {
     char *line = eap->ea_getline(0, eap->cookie, 0, true);
 
-    if (line == NULL) {
+    if (line == nullptr) {
       break;
     }
 
@@ -2200,7 +2200,7 @@ int get_keymap_str(win_T *wp, char *fmt, char *buf, int len)
   emsg_skip--;
   curbuf = old_curbuf;
   curwin = old_curwin;
-  if (p == NULL || *p == NUL) {
+  if (p == nullptr || *p == NUL) {
     if (wp->w_buffer->b_kmap_state & KEYMAP_LOADED) {
       p = wp->w_buffer->b_p_keymap;
     } else {

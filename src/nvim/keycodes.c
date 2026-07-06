@@ -457,7 +457,7 @@ int find_special_key(const char **const srcp, const size_t src_len, int *const m
     if (end - bp > 3 && bp[0] == 't' && bp[1] == '_') {
       bp += 3;  // skip t_xx, xx may be '-' or '>'
     } else if (end - bp > 4 && STRNICMP(bp, "char-", 5) == 0) {
-      vim_str2nr(bp + 5, NULL, &l, STR2NR_ALL, NULL, NULL, 0, true, NULL);
+      vim_str2nr(bp + 5, nullptr, &l, STR2NR_ALL, nullptr, nullptr, 0, true, nullptr);
       if (l == 0) {
         emsg(_(e_invarg));
         return 0;
@@ -488,7 +488,7 @@ int find_special_key(const char **const srcp, const size_t src_len, int *const m
       if (STRNICMP(last_dash + 1, "char-", 5) == 0
           && ascii_isdigit(last_dash[6])) {
         // <Char-123> or <Char-033> or <Char-0x33>
-        vim_str2nr(last_dash + 6, NULL, &l, STR2NR_ALL, NULL, &n, 0, true, NULL);
+        vim_str2nr(last_dash + 6, nullptr, &l, STR2NR_ALL, nullptr, &n, 0, true, nullptr);
         if (l == 0) {
           emsg(_(e_invarg));
           return 0;
@@ -548,7 +548,7 @@ int find_special_key(const char **const srcp, const size_t src_len, int *const m
 /// Try to include modifiers (except alt/meta) in the key.
 /// Changes "Shift-a" to 'A', "Ctrl-@" to <Nul>, etc.
 /// @param[in]  simplify  if false, don't do Ctrl
-/// @param[out]  did_simplify  set when it is not NULL and "simplify" is true and
+/// @param[out]  did_simplify  set when it is not nullptr and "simplify" is true and
 ///                            Ctrl is removed from modifiers
 static int extract_modifiers(int key, int *modp, const bool simplify, bool *const did_simplify)
 {
@@ -575,7 +575,7 @@ static int extract_modifiers(int key, int *modp, const bool simplify, bool *cons
     if (key == NUL) {  // <C-@> is <Nul>
       key = K_ZERO;
     }
-    if (did_simplify != NULL) {
+    if (did_simplify != nullptr) {
       *did_simplify = true;
     }
   }
@@ -653,15 +653,15 @@ int get_mouse_button(int code, bool *is_click, bool *is_drag)
 /// @param[in]  from  What characters to replace.
 /// @param[in]  from_len  Length of the "from" argument.
 /// @param[out]  bufp  Location where results were saved in case of success (allocated).
-///                    If `*bufp` is non-NULL, it will be used directly,
+///                    If `*bufp` is non-nullptr, it will be used directly,
 ///                    and is assumed to be 128 bytes long (enough for transcoding LHS of mapping),
-///                    and will be set to NULL in case of failure.
+///                    and will be set to nullptr in case of failure.
 /// @param[in]  sid_arg  Script ID to use for <SID>, or 0 to use current_sctx
 /// @param[in]  flags  REPTERM_FROM_PART    see above
 ///                    REPTERM_DO_LT        also translate <lt>
 ///                    REPTERM_NO_SPECIAL   do not accept <key> notation
 ///                    REPTERM_NO_SIMPLIFY  do not simplify <C-H> into 0x08, etc.
-/// @param[out]  did_simplify  set when some <C-H> code was simplified, unless it is NULL.
+/// @param[out]  did_simplify  set when some <C-H> code was simplified, unless it is nullptr.
 /// @param[in]  cpo_val  The value of 'cpoptions' to use. Only CPO_BSLASH matters.
 ///
 /// @return  The same as what `*bufp` is set to.
@@ -674,10 +674,10 @@ char *replace_termcodes(const char *const from, const size_t from_len, char **co
   const char *const end = from + from_len - 1;
 
   // backslash is a special character
-  const bool do_backslash = (vim_strchr(cpo_val, CPO_BSLASH) == NULL);
+  const bool do_backslash = (vim_strchr(cpo_val, CPO_BSLASH) == nullptr);
   const bool do_special = !(flags & REPTERM_NO_SPECIAL);
 
-  bool allocated = (*bufp == NULL);
+  bool allocated = (*bufp == nullptr);
 
   // Allocate space for the translation.  Worst case a single character is
   // replaced by 6 bytes (shifted special key), plus a NUL at the end.
@@ -689,7 +689,7 @@ char *replace_termcodes(const char *const from, const size_t from_len, char **co
   // Copy each byte from *from to result[dlen]
   while (src <= end) {
     if (!allocated && dlen + 64 > buf_len) {
-      return NULL;
+      return nullptr;
     }
     // Check for special <> keycodes, like "<C-S-LeftMouse>"
     if (do_special && ((flags & REPTERM_DO_LT) || ((end - src) >= 3
@@ -737,12 +737,12 @@ char *replace_termcodes(const char *const from, const size_t from_len, char **co
         p = get_var_value("g:maplocalleader");
       } else {
         len = 0;
-        p = NULL;
+        p = nullptr;
       }
 
       if (len != 0) {
         // Allow up to 8 * 6 characters for "mapleader".
-        if (p == NULL || *p == NUL || strlen(p) > 8 * 6) {
+        if (p == nullptr || *p == NUL || strlen(p) > 8 * 6) {
           s = "\\";
         } else {
           s = p;

@@ -23,14 +23,14 @@ typedef struct {
 void wstream_init_fd(Loop *loop, Stream *stream, int fd, size_t maxmem)
   FUNC_ATTR_NONNULL_ARG(1) FUNC_ATTR_NONNULL_ARG(2)
 {
-  stream_init(loop, stream, fd, NULL);
+  stream_init(loop, stream, fd, nullptr);
   wstream_init(stream, maxmem);
 }
 
 void wstream_init_stream(Stream *stream, uv_stream_t *uvstream, size_t maxmem)
   FUNC_ATTR_NONNULL_ARG(1) FUNC_ATTR_NONNULL_ARG(2)
 {
-  stream_init(NULL, stream, -1, uvstream);
+  stream_init(nullptr, stream, -1, uvstream);
   wstream_init(stream, maxmem);
 }
 
@@ -80,13 +80,13 @@ int wstream_write(Stream *stream, WBuffer *buffer)
     uv_fs_t req;
 
     // Synchronous write
-    err = uv_fs_write(stream->uv.idle.loop, &req, stream->fd, &uvbuf, 1, stream->fpos, NULL);
+    err = uv_fs_write(stream->uv.idle.loop, &req, stream->fd, &uvbuf, 1, stream->fpos, nullptr);
 
     uv_fs_req_cleanup(&req);
 
     wstream_release_wbuffer(buffer);
 
-    assert(stream->write_cb == NULL);
+    assert(stream->write_cb == nullptr);
 
     stream->fpos += MAX(req.result, 0);
     return req.result > 0 ? 0 : err != 0 ? err : UV_UNKNOWN;

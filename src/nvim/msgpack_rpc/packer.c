@@ -177,7 +177,7 @@ void mpack_handle(ObjectType type, handle_T handle, PackerBuffer *packer)
 
 void mpack_object(Object *obj, PackerBuffer *packer)
 {
-  mpack_object_inner(obj, NULL, 0, packer);
+  mpack_object_inner(obj, nullptr, 0, packer);
 }
 
 void mpack_object_array(Array arr, PackerBuffer *packer)
@@ -185,7 +185,7 @@ void mpack_object_array(Array arr, PackerBuffer *packer)
   mpack_array(&packer->ptr, (uint32_t)arr.size);
   if (arr.size > 0) {
     Object container = ARRAY_OBJ(arr);
-    mpack_object_inner(&arr.items[0], arr.size > 1 ? &container : NULL, 1, packer);
+    mpack_object_inner(&arr.items[0], arr.size > 1 ? &container : nullptr, 1, packer);
   }
 }
 
@@ -274,7 +274,7 @@ void mpack_object_inner(Object *current, Object *container, size_t container_idx
       Array arr = container->data.array;
       current = &arr.items[container_idx++];
       if (container_idx >= arr.size) {
-        container = NULL;
+        container = nullptr;
       }
     } else {
       Dict dict = container->data.dict;
@@ -283,7 +283,7 @@ void mpack_object_inner(Object *current, Object *container, size_t container_idx
       mpack_str(it->key, packer);
       current = &it->value;
       if (container_idx >= dict.size) {
-        container = NULL;
+        container = nullptr;
       }
     }
   }

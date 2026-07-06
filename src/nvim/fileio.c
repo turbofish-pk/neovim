@@ -153,7 +153,7 @@ void filemess(buf_T *buf, char *name, char *s)
 /// 2. Each block is filled with characters from the file with a single read().
 /// 3. The lines are inserted in the buffer with ml_append().
 ///
-/// (caller must check that fname != NULL, unless READ_STDIN is used)
+/// (caller must check that fname != nullptr, unless READ_STDIN is used)
 ///
 /// "lines_to_skip" is the number of lines that must be skipped
 /// "lines_to_read" is the number of lines that are appended
@@ -170,7 +170,7 @@ void filemess(buf_T *buf, char *name, char *s)
 /// READ_KEEP_UNDO  don't clear undo info or read it from a file
 /// READ_FIFO    read from fifo/socket instead of a file
 ///
-/// @param eap  can be NULL!
+/// @param eap  can be nullptr!
 ///
 /// @return     FAIL for failure, NOTDONE for directory (failure), or OK
 int readfile(char *fname, char *sfname, linenr_T from, linenr_T lines_to_skip,
@@ -183,19 +183,19 @@ int readfile(char *fname, char *sfname, linenr_T from, linenr_T lines_to_skip,
   bool read_stdin = (flags & READ_STDIN);
   bool read_buffer = (flags & READ_BUFFER);
   bool read_fifo = (flags & READ_FIFO);
-  bool set_options = newfile || read_buffer || (eap != NULL && eap->read_edit);
+  bool set_options = newfile || read_buffer || (eap != nullptr && eap->read_edit);
   linenr_T read_buf_lnum = 1;           // next line to read from curbuf
   colnr_T read_buf_col = 0;             // next char to read from this line
   char c;
   linenr_T lnum = from;
-  char *ptr = NULL;              // pointer into read buffer
-  char *buffer = NULL;           // read buffer
-  char *new_buffer = NULL;       // init to shut up gcc
-  char *line_start = NULL;       // init to shut up gcc
+  char *ptr = nullptr;              // pointer into read buffer
+  char *buffer = nullptr;           // read buffer
+  char *new_buffer = nullptr;       // init to shut up gcc
+  char *line_start = nullptr;       // init to shut up gcc
   int wasempty;                         // buffer was empty before reading
   colnr_T len;
   ptrdiff_t size = 0;
-  uint8_t *p = NULL;
+  uint8_t *p = nullptr;
   off_T filesize = 0;
   bool skip_read = false;
   context_sha256_T sha_ctx;
@@ -225,11 +225,11 @@ int readfile(char *fname, char *sfname, linenr_T from, linenr_T lines_to_skip,
   int bad_char_behavior = BAD_REPLACE;
   // BAD_KEEP, BAD_DROP or character to
   // replace with
-  char *tmpname = NULL;          // name of 'charconvert' output file
+  char *tmpname = nullptr;          // name of 'charconvert' output file
   int fio_flags = 0;
   char *fenc;                    // fileencoding to use
   bool fenc_alloced;                    // fenc_next is in allocated memory
-  char *fenc_next = NULL;        // next item in 'fencs' or NULL
+  char *fenc_next = nullptr;        // next item in 'fencs' or nullptr
   bool advance_fenc = false;
   int real_size = 0;
   iconv_t iconv_fd = (iconv_t)-1;       // descriptor for iconv() or -1
@@ -255,10 +255,10 @@ int readfile(char *fname, char *sfname, linenr_T from, linenr_T lines_to_skip,
   // BF_NOTEDITED is set to reflect this.
   // Don't do this for a read from a filter.
   // Only do this when 'cpoptions' contains the 'f' flag.
-  if (curbuf->b_ffname == NULL
+  if (curbuf->b_ffname == nullptr
       && !filtering
-      && fname != NULL
-      && vim_strchr(p_cpo, CPO_FNAMER) != NULL
+      && fname != nullptr
+      && vim_strchr(p_cpo, CPO_FNAMER) != nullptr
       && !(flags & READ_DUMMY)) {
     if (set_rw_fname(fname, sfname) == FAIL) {
       goto theend;
@@ -286,7 +286,7 @@ int readfile(char *fname, char *sfname, linenr_T from, linenr_T lines_to_skip,
   // Avoids problems with networks and when directory names are changed.
   // Don't do this for Windows, a "cd" in a sub-shell may have moved us to
   // another directory, which we don't detect.
-  if (sfname == NULL) {
+  if (sfname == nullptr) {
     sfname = fname;
   }
 #ifdef UNIX
@@ -303,7 +303,7 @@ int readfile(char *fname, char *sfname, linenr_T from, linenr_T lines_to_skip,
     curbuf->b_op_start.col = 0;
 
     if (newfile) {
-      if (apply_autocmds_exarg(EVENT_BUFREADCMD, NULL, sfname,
+      if (apply_autocmds_exarg(EVENT_BUFREADCMD, nullptr, sfname,
                                false, curbuf, eap)) {
         retval = OK;
         if (aborting()) {
@@ -321,7 +321,7 @@ int readfile(char *fname, char *sfname, linenr_T from, linenr_T lines_to_skip,
         goto theend;
       }
     } else if (apply_autocmds_exarg(EVENT_FILEREADCMD, sfname, sfname,
-                                    false, NULL, eap)) {
+                                    false, nullptr, eap)) {
       retval = aborting() ? FAIL : OK;
       goto theend;
     }
@@ -342,7 +342,7 @@ int readfile(char *fname, char *sfname, linenr_T from, linenr_T lines_to_skip,
     msg_scroll = true;          // don't overwrite previous file message
   }
   // If the name is too long we might crash further on, quit here.
-  if (fname != NULL && *fname != NUL) {
+  if (fname != nullptr && *fname != NUL) {
     size_t fnamelen = strlen(fname);
 
     // If the name is too long we might crash further on, quit here.
@@ -367,7 +367,7 @@ int readfile(char *fname, char *sfname, linenr_T from, linenr_T lines_to_skip,
     }
   }
 
-  if (!read_stdin && fname != NULL) {
+  if (!read_stdin && fname != nullptr) {
     perm = os_getperm(fname);
   }
 
@@ -490,7 +490,7 @@ int readfile(char *fname, char *sfname, linenr_T from, linenr_T lines_to_skip,
       // edited before and deleted.  Get the old marks.
       check_marks_read();
       // Set forced 'fileencoding'.
-      if (eap != NULL) {
+      if (eap != nullptr) {
         set_forced_fenc(eap);
       }
       apply_autocmds_exarg(EVENT_BUFNEWFILE, sfname, sfname,
@@ -557,8 +557,8 @@ int readfile(char *fname, char *sfname, linenr_T from, linenr_T lines_to_skip,
     }
 #ifdef UNIX
     // Set swap file protection bits after creating it.
-    if (swap_mode > 0 && curbuf->b_ml.ml_mfp != NULL
-        && curbuf->b_ml.ml_mfp->mf_fname != NULL) {
+    if (swap_mode > 0 && curbuf->b_ml.ml_mfp != nullptr
+        && curbuf->b_ml.ml_mfp->mf_fname != nullptr) {
       const char *swap_fname = curbuf->b_ml.ml_mfp->mf_fname;
 
       // If the group-read bit is set but not the world-read bit, then
@@ -598,9 +598,9 @@ int readfile(char *fname, char *sfname, linenr_T from, linenr_T lines_to_skip,
   curbuf->b_op_start.lnum = ((from == 0) ? 1 : from);
   curbuf->b_op_start.col = 0;
 
-  int try_mac = (vim_strchr(p_ffs, 'm') != NULL);
-  int try_dos = (vim_strchr(p_ffs, 'd') != NULL);
-  int try_unix = (vim_strchr(p_ffs, 'x') != NULL);
+  int try_mac = (vim_strchr(p_ffs, 'm') != nullptr);
+  int try_dos = (vim_strchr(p_ffs, 'd') != nullptr);
+  int try_unix = (vim_strchr(p_ffs, 'x') != nullptr);
 
   if (!read_buffer) {
     int m = msg_scroll;
@@ -617,23 +617,23 @@ int readfile(char *fname, char *sfname, linenr_T from, linenr_T lines_to_skip,
     // output was done.
     msg_scroll = true;
     if (filtering) {
-      apply_autocmds_exarg(EVENT_FILTERREADPRE, NULL, sfname,
+      apply_autocmds_exarg(EVENT_FILTERREADPRE, nullptr, sfname,
                            false, curbuf, eap);
     } else if (read_stdin) {
-      apply_autocmds_exarg(EVENT_STDINREADPRE, NULL, sfname,
+      apply_autocmds_exarg(EVENT_STDINREADPRE, nullptr, sfname,
                            false, curbuf, eap);
     } else if (newfile) {
-      apply_autocmds_exarg(EVENT_BUFREADPRE, NULL, sfname,
+      apply_autocmds_exarg(EVENT_BUFREADPRE, nullptr, sfname,
                            false, curbuf, eap);
     } else {
       apply_autocmds_exarg(EVENT_FILEREADPRE, sfname, sfname,
-                           false, NULL, eap);
+                           false, nullptr, eap);
     }
 
     // autocommands may have changed it
-    try_mac = (vim_strchr(p_ffs, 'm') != NULL);
-    try_dos = (vim_strchr(p_ffs, 'd') != NULL);
-    try_unix = (vim_strchr(p_ffs, 'x') != NULL);
+    try_mac = (vim_strchr(p_ffs, 'm') != nullptr);
+    try_dos = (vim_strchr(p_ffs, 'd') != nullptr);
+    try_unix = (vim_strchr(p_ffs, 'x') != nullptr);
     curbuf->b_op_start = orig_start;
 
     if (msg_scrolled == n) {
@@ -683,7 +683,7 @@ int readfile(char *fname, char *sfname, linenr_T from, linenr_T lines_to_skip,
   linecnt = curbuf->b_ml.ml_line_count;
 
   // "++bad=" argument.
-  if (eap != NULL && eap->bad_char != 0) {
+  if (eap != nullptr && eap->bad_char != 0) {
     bad_char_behavior = eap->bad_char;
     if (set_options) {
       curbuf->b_bad_char = eap->bad_char;
@@ -693,7 +693,7 @@ int readfile(char *fname, char *sfname, linenr_T from, linenr_T lines_to_skip,
   }
 
   // Decide which 'encoding' to use or use first.
-  if (eap != NULL && eap->force_enc != 0) {
+  if (eap != nullptr && eap->force_enc != 0) {
     fenc = enc_canonize(eap->cmd + eap->force_enc);
     fenc_alloced = true;
     keep_dest_enc = true;
@@ -731,7 +731,7 @@ int readfile(char *fname, char *sfname, linenr_T from, linenr_T lines_to_skip,
   // "keep_fileformat" Don't reset "fileformat".
   //
   // Other status indicators:
-  // "tmpname"  When != NULL did conversion with 'charconvert'.
+  // "tmpname"  When != nullptr did conversion with 'charconvert'.
   //                    Output file has to be deleted afterwards.
   // "iconv_fd" When != -1 did conversion with iconv().
 retry:
@@ -762,7 +762,7 @@ retry:
   if (keep_fileformat) {
     keep_fileformat = false;
   } else {
-    if (eap != NULL && eap->force_ff != 0) {
+    if (eap != nullptr && eap->force_ff != 0) {
       fileformat = get_fileformat_force(curbuf, eap);
       try_unix = try_dos = try_mac = false;
     } else if (curbuf->b_p_bin) {
@@ -785,7 +785,7 @@ retry:
     // Try the next entry in 'fileencodings'.
     advance_fenc = false;
 
-    if (eap != NULL && eap->force_enc != 0) {
+    if (eap != nullptr && eap->force_enc != 0) {
       // Conversion given with "++cc=" wasn't possible, read
       // without conversion.
       notconverted = true;
@@ -799,14 +799,14 @@ retry:
       if (fenc_alloced) {
         xfree(fenc);
       }
-      if (fenc_next != NULL) {
+      if (fenc_next != nullptr) {
         fenc = next_fenc(&fenc_next, &fenc_alloced);
       } else {
         fenc = "";
         fenc_alloced = false;
       }
     }
-    if (tmpname != NULL) {
+    if (tmpname != nullptr) {
       os_remove(tmpname);  // delete converted file
       XFREE_CLEAR(tmpname);
     }
@@ -845,9 +845,9 @@ retry:
       did_iconv = false;
       // Skip conversion when it's already done (retry for wrong
       // "fileformat").
-      if (tmpname == NULL) {
+      if (tmpname == nullptr) {
         tmpname = readfile_charconvert(fname, fenc, &fd);
-        if (tmpname == NULL) {
+        if (tmpname == nullptr) {
           // Conversion failed.  Try another one.
           advance_fenc = true;
           if (fd < 0) {
@@ -881,7 +881,7 @@ retry:
     read_count = lines_to_read;
     conv_restlen = 0;
     read_undo_file = (newfile && (flags & READ_KEEP_UNDO) == 0
-                      && curbuf->b_ffname != NULL
+                      && curbuf->b_ffname != nullptr
                       && curbuf->b_p_udf
                       && !filtering
                       && !read_fifo
@@ -922,7 +922,7 @@ retry:
             break;
           }
         }
-        if (new_buffer == NULL) {
+        if (new_buffer == nullptr) {
           error = true;
           break;
         }
@@ -1073,19 +1073,19 @@ retry:
       if ((filesize == 0)
           && (fio_flags == FIO_UCSBOM
               || (!curbuf->b_p_bomb
-                  && tmpname == NULL
+                  && tmpname == nullptr
                   && (*fenc == 'u' || *fenc == NUL)))) {
         char *ccname;
         int blen = 0;
 
         // no BOM detection in a short file or in binary mode
         if (size < 2 || curbuf->b_p_bin) {
-          ccname = NULL;
+          ccname = nullptr;
         } else {
           ccname = check_for_bom(ptr, (int)size, &blen,
                                  fio_flags == FIO_UCSBOM ? FIO_ALL : get_fio_flags(fenc));
         }
-        if (ccname != NULL) {
+        if (ccname != nullptr) {
           // Remove BOM from the text
           filesize += blen;
           size -= blen;
@@ -1097,7 +1097,7 @@ retry:
         }
 
         if (fio_flags == FIO_UCSBOM) {
-          if (ccname == NULL) {
+          if (ccname == nullptr) {
             // No BOM detected: retry with next encoding.
             advance_fenc = true;
           } else {
@@ -1172,7 +1172,7 @@ retry:
 
       if (fio_flags != 0) {
         unsigned u8c;
-        char *tail = NULL;
+        char *tail = nullptr;
 
         // Convert Unicode or Latin1 to UTF-8.
         // Go from end to start through the buffer, because the number
@@ -1189,7 +1189,7 @@ retry:
               tail--;
             }
             if (tail + utf_byte2len(*tail) <= ptr + size) {
-              tail = NULL;
+              tail = nullptr;
             } else {
               p = (uint8_t *)tail;
             }
@@ -1225,7 +1225,7 @@ retry:
 
         // If there is a trailing incomplete sequence move it to
         // conv_rest[].
-        if (tail != NULL) {
+        if (tail != nullptr) {
           conv_restlen = (int)((ptr + size) - tail);
           memmove(conv_rest, tail, (size_t)conv_restlen);
           size -= conv_restlen;
@@ -1554,10 +1554,10 @@ rewind_retry:
         char *nl = memchr(ptr, NL, (size_t)(end - ptr));
         char *nul_scan;
 
-        if (nl == NULL) {
+        if (nl == nullptr) {
           // No more newlines in buffer.
           // Replace any NUL bytes with NL in remaining data.
-          while ((nul_scan = memchr(ptr, NUL, (size_t)(end - ptr))) != NULL) {
+          while ((nul_scan = memchr(ptr, NUL, (size_t)(end - ptr))) != nullptr) {
             *nul_scan = NL;
             ptr = nul_scan + 1;
           }
@@ -1568,7 +1568,7 @@ rewind_retry:
         // Replace NUL bytes with NL before the newline.
         {
           char *scan = ptr;
-          while ((nul_scan = memchr(scan, NUL, (size_t)(nl - scan))) != NULL) {
+          while ((nul_scan = memchr(scan, NUL, (size_t)(nl - scan))) != nullptr) {
             *nul_scan = NL;
             scan = nul_scan + 1;
           }
@@ -1706,7 +1706,7 @@ failed:
     }
   }
 
-  if (tmpname != NULL) {
+  if (tmpname != nullptr) {
     os_remove(tmpname);  // delete converted file
     xfree(tmpname);
   }
@@ -1816,7 +1816,7 @@ failed:
       msg_add_lines(c, linecnt, filesize);
 
       XFREE_CLEAR(keep_msg);
-      p = NULL;
+      p = nullptr;
       msg_scrolled_ign = true;
 
       if (!read_stdin && !read_buffer) {
@@ -1887,10 +1887,10 @@ failed:
     uint8_t hash[UNDO_HASH_SIZE];
 
     sha256_finish(&sha_ctx, hash);
-    u_read_undo(NULL, hash, fname);
+    u_read_undo(nullptr, hash, fname);
   }
 
-  if (!read_stdin && !read_fifo && (!read_buffer || sfname != NULL)) {
+  if (!read_stdin && !read_fifo && (!read_buffer || sfname != nullptr)) {
     int m = msg_scroll;
     int n = msg_scrolled;
 
@@ -1905,10 +1905,10 @@ failed:
     // output was done.
     msg_scroll = true;
     if (filtering) {
-      apply_autocmds_exarg(EVENT_FILTERREADPOST, NULL, sfname,
+      apply_autocmds_exarg(EVENT_FILTERREADPOST, nullptr, sfname,
                            false, curbuf, eap);
-    } else if (newfile || (read_buffer && sfname != NULL)) {
-      apply_autocmds_exarg(EVENT_BUFREADPOST, NULL, sfname,
+    } else if (newfile || (read_buffer && sfname != nullptr)) {
+      apply_autocmds_exarg(EVENT_BUFREADPOST, nullptr, sfname,
                            false, curbuf, eap);
       if (!curbuf->b_au_did_filetype && *curbuf->b_p_ft != NUL) {
         // EVENT_FILETYPE was not triggered but the buffer already has a
@@ -1917,7 +1917,7 @@ failed:
       }
     } else {
       apply_autocmds_exarg(EVENT_FILEREADPOST, sfname, sfname,
-                           false, NULL, eap);
+                           false, nullptr, eap);
     }
     if (msg_scrolled == n) {
       msg_scroll = m;
@@ -1932,7 +1932,7 @@ failed:
   }
 
 theend:
-  if (curbuf->b_ml.ml_mfp != NULL
+  if (curbuf->b_ml.ml_mfp != nullptr
       && curbuf->b_ml.ml_mfp->mf_dirty == MF_DIRTY_YES_NOSYNC) {
     // OK to sync the swap file now
     curbuf->b_ml.ml_mfp->mf_dirty = MF_DIRTY_YES;
@@ -2000,7 +2000,7 @@ void set_file_options(bool set_options, exarg_T *eap)
 {
   // set default 'fileformat'
   if (set_options) {
-    if (eap != NULL && eap->force_ff != 0) {
+    if (eap != nullptr && eap->force_ff != 0) {
       set_fileformat(get_fileformat_force(curbuf, eap), OPT_LOCAL);
     } else if (*p_ffs != NUL) {
       set_fileformat(default_fileformat(), OPT_LOCAL);
@@ -2008,7 +2008,7 @@ void set_file_options(bool set_options, exarg_T *eap)
   }
 
   // set or reset 'binary'
-  if (eap != NULL && eap->force_bin != 0) {
+  if (eap != nullptr && eap->force_bin != 0) {
     int oldval = curbuf->b_p_bin;
 
     curbuf->b_p_bin = (eap->force_bin == FORCE_BIN);
@@ -2031,8 +2031,8 @@ void set_forced_fenc(exarg_T *eap)
 /// Find next fileencoding to use from 'fileencodings'.
 /// "pp" points to fenc_next.  It's advanced to the next item.
 /// When there are no more items, an empty string is returned and *pp is set to
-/// NULL.
-/// When *pp is not set to NULL, the result is in allocated memory and "alloced"
+/// nullptr.
+/// When *pp is not set to nullptr, the result is in allocated memory and "alloced"
 /// is set to true.
 static char *next_fenc(char **pp, bool *alloced)
   FUNC_ATTR_NONNULL_ALL FUNC_ATTR_NONNULL_RET
@@ -2041,11 +2041,11 @@ static char *next_fenc(char **pp, bool *alloced)
 
   *alloced = false;
   if (**pp == NUL) {
-    *pp = NULL;
+    *pp = nullptr;
     return "";
   }
   char *p = vim_strchr(*pp, ',');
-  if (p == NULL) {
+  if (p == nullptr) {
     r = enc_canonize(*pp);
     *pp += strlen(*pp);
   } else {
@@ -2068,13 +2068,13 @@ static char *next_fenc(char **pp, bool *alloced)
 /// @param fdp    in/out: file descriptor of file
 ///
 /// @return       name of the resulting converted file (the caller should delete it after reading it).
-///               Returns NULL if the conversion failed ("*fdp" is not set) .
+///               Returns nullptr if the conversion failed ("*fdp" is not set) .
 static char *readfile_charconvert(char *fname, char *fenc, int *fdp)
 {
-  char *errmsg = NULL;
+  char *errmsg = nullptr;
 
   char *tmpname = vim_tempname();
-  if (tmpname == NULL) {
+  if (tmpname == nullptr) {
     errmsg = _("Can't find temp file for conversion");
   } else {
     close(*fdp);                // close the input file, ignore errors
@@ -2083,16 +2083,16 @@ static char *readfile_charconvert(char *fname, char *fenc, int *fdp)
                          fname, tmpname) == FAIL) {
       errmsg = _("Conversion with 'charconvert' failed");
     }
-    if (errmsg == NULL && (*fdp = os_open(tmpname, O_RDONLY, 0)) < 0) {
+    if (errmsg == nullptr && (*fdp = os_open(tmpname, O_RDONLY, 0)) < 0) {
       errmsg = _("can't read output of 'charconvert'");
     }
   }
 
-  if (errmsg != NULL) {
+  if (errmsg != nullptr) {
     // Don't use emsg(), it breaks mappings, the retry with
     // another type of conversion might still work.
     msg(errmsg, 0);
-    if (tmpname != NULL) {
+    if (tmpname != nullptr) {
       os_remove(tmpname);  // delete converted file
       XFREE_CLEAR(tmpname);
     }
@@ -2114,9 +2114,9 @@ int set_rw_fname(char *fname, char *sfname)
 
   // It's like the unnamed buffer is deleted....
   if (curbuf->b_p_bl) {
-    apply_autocmds(EVENT_BUFDELETE, NULL, NULL, false, curbuf);
+    apply_autocmds(EVENT_BUFDELETE, nullptr, nullptr, false, curbuf);
   }
-  apply_autocmds(EVENT_BUFWIPEOUT, NULL, NULL, false, curbuf);
+  apply_autocmds(EVENT_BUFWIPEOUT, nullptr, nullptr, false, curbuf);
   if (aborting()) {         // autocmds may abort script processing
     return FAIL;
   }
@@ -2131,9 +2131,9 @@ int set_rw_fname(char *fname, char *sfname)
   }
 
   // ....and a new named one is created
-  apply_autocmds(EVENT_BUFNEW, NULL, NULL, false, curbuf);
+  apply_autocmds(EVENT_BUFNEW, nullptr, nullptr, false, curbuf);
   if (curbuf->b_p_bl) {
-    apply_autocmds(EVENT_BUFADD, NULL, NULL, false, curbuf);
+    apply_autocmds(EVENT_BUFADD, nullptr, nullptr, false, curbuf);
   }
   if (aborting()) {         // autocmds may abort script processing
     return FAIL;
@@ -2142,7 +2142,7 @@ int set_rw_fname(char *fname, char *sfname)
   // Do filetype detection now if 'filetype' is empty.
   if (*curbuf->b_p_ft == NUL) {
     if (augroup_exists("filetypedetect")) {
-      do_doautocmd("filetypedetect BufRead", false, NULL);
+      do_doautocmd("filetypedetect BufRead", false, nullptr);
     }
     do_modelines(0);
   }
@@ -2162,7 +2162,7 @@ void add_quoted_fname(char *const ret_buf, const size_t bufsize, const buf_T *co
                       const char *fname)
   FUNC_ATTR_NONNULL_ARG(1)
 {
-  if (fname == NULL) {
+  if (fname == nullptr) {
     fname = "-stdin-";
   }
   size_t len = 0;
@@ -2307,11 +2307,11 @@ int get_fio_flags(const char *name)
 /// "size" must be at least 2.
 ///
 /// @return  the name of the encoding and set "*lenp" to the length or,
-///          NULL when no BOM found.
+///          nullptr when no BOM found.
 static char *check_for_bom(const char *p_in, int size, int *lenp, int flags)
 {
   const uint8_t *p = (const uint8_t *)p_in;
-  char *name = NULL;
+  char *name = nullptr;
   int len = 2;
 
   if (p[0] == 0xef && p[1] == 0xbb && size >= 3 && p[2] == 0xbf
@@ -2360,21 +2360,21 @@ static char *check_for_bom(const char *p_in, int size, int *lenp, int flags)
 /// name.
 void shorten_buf_fname(buf_T *buf, char *dirname, int force)
 {
-  if (buf->b_fname != NULL
+  if (buf->b_fname != nullptr
       && !bt_nofilename(buf)
       && !path_with_url(buf->b_fname)
       && (force
-          || buf->b_sfname == NULL
+          || buf->b_sfname == nullptr
           || path_is_absolute(buf->b_sfname))) {
     if (buf->b_sfname != buf->b_ffname) {
       XFREE_CLEAR(buf->b_sfname);
     }
     char *p = path_shorten_fname(buf->b_ffname, dirname);
-    if (p != NULL) {
+    if (p != nullptr) {
       buf->b_sfname = xstrdup(p);
       buf->b_fname = buf->b_sfname;
     }
-    if (p == NULL) {
+    if (p == nullptr) {
       buf->b_fname = buf->b_ffname;
     }
   }
@@ -2400,17 +2400,17 @@ void shorten_fnames(int force)
 /// Get new filename ended by given extension.
 ///
 /// @param fname        The original filename.
-///                     If NULL, use current directory name and ext to
+///                     If nullptr, use current directory name and ext to
 ///                     compute new filename.
 /// @param ext          The extension to add to the filename.
 ///                     4 chars max if prefixed with a dot, 3 otherwise.
 /// @param prepend_dot  If true, prefix ext with a dot.
 ///                     Does nothing if ext already starts with a dot, or
-///                     if fname is NULL.
+///                     if fname is nullptr.
 ///
 /// @return [allocated] - A new filename, made up from:
-///                       * fname + ext, if fname not NULL.
-///                       * current dir + ext, if fname is NULL.
+///                       * fname + ext, if fname not nullptr.
+///                       * current dir + ext, if fname is nullptr.
 ///                       Result is guaranteed to:
 ///                       * be ended by <ext>.
 ///                       * have a basename with at most BASENAMELEN chars:
@@ -2419,7 +2419,7 @@ void shorten_fnames(int force)
 ///                         replaced by "_" if necessary. If that can't be done
 ///                         because truncated value of original filename was
 ///                         made of all underscores, replace first "_" by "v".
-///                     - NULL, if fname is NULL and there was a problem trying
+///                     - nullptr, if fname is nullptr and there was a problem trying
 ///                       to get current directory.
 char *modname(const char *fname, const char *ext, bool prepend_dot)
   FUNC_ATTR_NONNULL_ARG(2)
@@ -2430,12 +2430,12 @@ char *modname(const char *fname, const char *ext, bool prepend_dot)
 
   // If there is no file name we must get the name of the current directory
   // (we need the full path in case :cd is used).
-  if (fname == NULL || *fname == NUL) {
+  if (fname == nullptr || *fname == NUL) {
     retval = xmalloc(MAXPATHL + extlen + 3);  // +3 for PATHSEP, "_" (Win), NUL
     if (os_dirname(retval, MAXPATHL) == FAIL
         || strlen(retval) == 0) {
       xfree(retval);
-      return NULL;
+      return nullptr;
     }
     add_pathsep(retval);
     fnamelen = strlen(retval);
@@ -2448,7 +2448,7 @@ char *modname(const char *fname, const char *ext, bool prepend_dot)
 
   // Search backwards until we hit a '/', '\' or ':'.
   // Then truncate what is after the '/', '\' or ':' to BASENAMELEN characters.
-  char *ptr = NULL;
+  char *ptr = nullptr;
   for (ptr = retval + fnamelen; ptr > retval; MB_PTR_BACK(retval, ptr)) {
     if (vim_ispathsep(*ptr)) {
       ptr++;
@@ -2478,7 +2478,7 @@ char *modname(const char *fname, const char *ext, bool prepend_dot)
 
   // Check that, after appending the extension, the file name is really
   // different.
-  if (fname != NULL && strcmp(fname, retval) == 0) {
+  if (fname != nullptr && strcmp(fname, retval) == 0) {
     // we search for a character that can be replaced by '_'
     while (--s >= ptr) {
       if (*s != '_') {
@@ -2519,7 +2519,7 @@ bool vim_fgets(char *buf, int size, FILE *fp)
   do {
     errno = 0;
     retval = fgets(buf, size, fp);
-  } while (retval == NULL && errno == EINTR && ferror(fp));
+  } while (retval == nullptr && errno == EINTR && ferror(fp));
 
   if (buf[size - 2] != NUL && buf[size - 2] != '\n') {
     char tbuf[200];
@@ -2531,12 +2531,12 @@ bool vim_fgets(char *buf, int size, FILE *fp)
       tbuf[sizeof(tbuf) - 2] = NUL;
       errno = 0;
       retval = fgets(tbuf, sizeof(tbuf), fp);
-      if (retval == NULL && (feof(fp) || errno != EINTR)) {
+      if (retval == nullptr && (feof(fp) || errno != EINTR)) {
         break;
       }
     } while (tbuf[sizeof(tbuf) - 2] != NUL && tbuf[sizeof(tbuf) - 2] != '\n');
   }
-  return retval == NULL;
+  return retval == nullptr;
 }
 
 /// Read 2 bytes from "fd" and turn them into an int, MSB first.
@@ -2627,7 +2627,7 @@ time_t get8ctime(FILE *fd)
 
 /// Reads a string of length "cnt" from "fd" into allocated memory.
 ///
-/// @return  pointer to the string or NULL when unable to read that many bytes.
+/// @return  pointer to the string or nullptr when unable to read that many bytes.
 char *read_string(FILE *fd, size_t cnt)
 {
   char *str = xmallocz(cnt);
@@ -2635,7 +2635,7 @@ char *read_string(FILE *fd, size_t cnt)
     int c = getc(fd);
     if (c == EOF) {
       xfree(str);
-      return NULL;
+      return nullptr;
     }
     str[i] = (char)c;
   }
@@ -2764,7 +2764,7 @@ int vim_rename(const char *from, const char *to)
 /// Return FAIL for failure, OK for success.
 int vim_copyfile(const char *from, const char *to)
 {
-  char *errmsg = NULL;
+  char *errmsg = nullptr;
 
 #ifdef HAVE_READLINK
   FileInfo from_info;
@@ -2794,7 +2794,7 @@ int vim_copyfile(const char *from, const char *to)
 
   os_set_acl(to, acl);
   os_free_acl(acl);
-  if (errmsg != NULL) {
+  if (errmsg != nullptr) {
     semsg(errmsg, to);
     return FAIL;
   }
@@ -2910,7 +2910,7 @@ int buf_check_timestamp(buf_T *buf)
   FUNC_ATTR_NONNULL_ALL
 {
   int retval = 0;
-  char *mesg = NULL;
+  char *mesg = nullptr;
   char *mesg2 = "";
   bool helpmesg = false;
 
@@ -2932,8 +2932,8 @@ int buf_check_timestamp(buf_T *buf)
   // 'buftype' is set, we are in the middle of a save or being called
   // recursively: ignore this buffer.
   if (buf->terminal
-      || buf->b_ffname == NULL
-      || buf->b_ml.ml_mfp == NULL
+      || buf->b_ffname == nullptr
+      || buf->b_ml.ml_mfp == nullptr
       || !bt_normal(buf)
       || buf->b_saving
       || busy) {
@@ -3057,7 +3057,7 @@ int buf_check_timestamp(buf_T *buf)
     can_reload = true;
   }
 
-  if (mesg != NULL) {
+  if (mesg != nullptr) {
     char *path = home_replace_save(buf, buf->b_fname);
     if (!helpmesg) {
       mesg2 = "";
@@ -3075,7 +3075,7 @@ int buf_check_timestamp(buf_T *buf)
       }
       switch (do_dialog(VIM_WARNING, _("Warning"), tbuf,
                         _("&OK\n&Load File\nLoad File &and Options"),
-                        1, NULL, true)) {
+                        1, nullptr, true)) {
       case 2:
         reload = RELOAD_NORMAL;
         break;
@@ -3113,12 +3113,12 @@ int buf_check_timestamp(buf_T *buf)
   if (reload != RELOAD_NONE) {
     // Reload the buffer.
     buf_reload(buf, orig_mode, reload == RELOAD_DETECT);
-    if (bufref_valid(&bufref) && buf->b_p_udf && buf->b_ffname != NULL) {
+    if (bufref_valid(&bufref) && buf->b_p_udf && buf->b_ffname != nullptr) {
       uint8_t hash[UNDO_HASH_SIZE];
 
       // Any existing undo file is unusable, write it now.
       u_compute_hash(buf, hash);
-      u_write_undo(NULL, false, buf, hash);
+      u_write_undo(nullptr, false, buf, hash);
     }
   }
 
@@ -3172,12 +3172,12 @@ void buf_reload(buf_T *buf, int orig_mode, bool reload_options)
   // the old contents.  Can't use memory only, the file might be
   // too big.  Use a hidden buffer to move the buffer contents to.
   if (buf_is_empty(curbuf) || saved == FAIL) {
-    savebuf = NULL;
+    savebuf = nullptr;
   } else {
     // Allocate a buffer without putting it in the buffer list.
-    savebuf = buflist_new(NULL, NULL, 1, BLN_DUMMY);
+    savebuf = buflist_new(nullptr, nullptr, 1, BLN_DUMMY);
     set_bufref(&bufref, savebuf);
-    if (savebuf != NULL && buf == curbuf) {
+    if (savebuf != nullptr && buf == curbuf) {
       // Open the memline.
       curbuf = savebuf;
       curwin->w_buffer = savebuf;
@@ -3185,7 +3185,7 @@ void buf_reload(buf_T *buf, int orig_mode, bool reload_options)
       curbuf = buf;
       curwin->w_buffer = buf;
     }
-    if (savebuf == NULL || saved == FAIL || buf != curbuf
+    if (savebuf == nullptr || saved == FAIL || buf != curbuf
         || move_lines(buf, savebuf) == FAIL) {
       semsg(_("E462: Could not prepare for reloading \"%s\""),
             buf->b_fname);
@@ -3201,7 +3201,7 @@ void buf_reload(buf_T *buf, int orig_mode, bool reload_options)
       if (!aborting()) {
         semsg(_("E321: Could not reload \"%s\""), buf->b_fname);
       }
-      if (savebuf != NULL && bufref_valid(&bufref) && buf == curbuf) {
+      if (savebuf != nullptr && bufref_valid(&bufref) && buf == curbuf) {
         // Put the text back from the save buffer.  First
         // delete any lines that readfile() added.
         while (!buf_is_empty(curbuf)) {
@@ -3226,7 +3226,7 @@ void buf_reload(buf_T *buf, int orig_mode, bool reload_options)
   }
   xfree(ea.cmd);
 
-  if (savebuf != NULL && bufref_valid(&bufref)) {
+  if (savebuf != nullptr && bufref_valid(&bufref)) {
     wipe_buffer(savebuf, false);
   }
 
@@ -3299,9 +3299,9 @@ void forward_slash(char *fname)
 #endif
 
 /// Path to Nvim's own temp dir. Ends in a slash.
-static char *vim_tempdir = NULL;
+static char *vim_tempdir = nullptr;
 #ifdef HAVE_DIRFD_AND_FLOCK
-static DIR *vim_tempdir_dp = NULL;  ///< File descriptor of temp dir
+static DIR *vim_tempdir_dp = nullptr;  ///< File descriptor of temp dir
 #endif
 
 /// Creates a directory for private use by this instance of Nvim, trying each of
@@ -3417,12 +3417,12 @@ int readdir_core(garray_T *gap, const char *path, void *context, CheckItem check
 
   while (true) {
     const char *p = os_scandir_next(&dir);
-    if (p == NULL) {
+    if (p == nullptr) {
       break;
     }
 
     bool ignore = (p[0] == '.' && (p[1] == NUL || (p[1] == '.' && p[2] == NUL)));
-    if (!ignore && checkitem != NULL) {
+    if (!ignore && checkitem != nullptr) {
       varnumber_T r = checkitem(context, p);
       if (r < 0) {
         break;
@@ -3460,7 +3460,7 @@ int delete_recursive(const char *name)
   if (os_isrealdir(name)) {
     char *exp = xstrdup(name);
     garray_T ga;
-    if (readdir_core(&ga, exp, NULL, NULL) == OK) {
+    if (readdir_core(&ga, exp, nullptr, nullptr) == OK) {
       int len = snprintf(NameBuff, MAXPATHL, "%s/", exp);
 
       for (int i = 0; i < ga.ga_len; i++) {
@@ -3492,12 +3492,12 @@ int delete_recursive(const char *name)
 /// to be auto-cleaned.
 static void vim_opentempdir(void)
 {
-  if (vim_tempdir_dp != NULL) {
+  if (vim_tempdir_dp != nullptr) {
     return;
   }
 
   DIR *dp = opendir(vim_tempdir);
-  if (dp == NULL) {
+  if (dp == nullptr) {
     return;
   }
 
@@ -3508,19 +3508,19 @@ static void vim_opentempdir(void)
 /// Close temporary directory - it automatically release file lock.
 static void vim_closetempdir(void)
 {
-  if (vim_tempdir_dp == NULL) {
+  if (vim_tempdir_dp == nullptr) {
     return;
   }
 
   closedir(vim_tempdir_dp);
-  vim_tempdir_dp = NULL;
+  vim_tempdir_dp = nullptr;
 }
 #endif
 
 /// Delete the temp directory and all files it contains.
 void vim_deltempdir(void)
 {
-  if (vim_tempdir == NULL) {
+  if (vim_tempdir == nullptr) {
     return;
   }
 
@@ -3539,8 +3539,8 @@ void vim_deltempdir(void)
 char *vim_gettempdir(void)
 {
   static int notfound = 0;
-  if (vim_tempdir == NULL || !os_isdir(vim_tempdir)) {
-    if (vim_tempdir != NULL) {
+  if (vim_tempdir == nullptr || !os_isdir(vim_tempdir)) {
+    if (vim_tempdir != nullptr) {
       notfound++;
       if (notfound == 1) {
         ELOG("tempdir disappeared (antivirus or broken cleanup job?): %s", vim_tempdir);
@@ -3565,7 +3565,7 @@ char *vim_gettempdir(void)
 static bool vim_settempdir(char *tempdir)
 {
   char *buf = verbose_try_malloc(MAXPATHL + 2);
-  if (buf == NULL) {
+  if (buf == nullptr) {
     return false;
   }
 
@@ -3594,7 +3594,7 @@ static bool vim_settempdir(char *tempdir)
 ///
 /// @note The temp file is NOT created.
 ///
-/// @return  pointer to the temp file name or NULL if Nvim can't create
+/// @return  pointer to the temp file name or nullptr if Nvim can't create
 ///          temporary directory for its own temporary files.
 char *vim_tempname(void)
 {
@@ -3603,7 +3603,7 @@ char *vim_tempname(void)
 
   char *tempdir = vim_gettempdir();
   if (!tempdir) {
-    return NULL;
+    return nullptr;
   }
 
   // There is no need to check if the file exists, because we own the directory
@@ -3613,16 +3613,16 @@ char *vim_tempname(void)
   return xmemdupz(templ, (size_t)itmplen);
 }
 
-/// Tries matching a filename with a "pattern" ("prog" is NULL), or use the
-/// precompiled regprog "prog" ("pattern" is NULL).  That avoids calling
+/// Tries matching a filename with a "pattern" ("prog" is nullptr), or use the
+/// precompiled regprog "prog" ("pattern" is nullptr).  That avoids calling
 /// vim_regcomp() often.
 ///
 /// Used for autocommands and 'wildignore'.
 ///
 /// @param pattern pattern to match with
-/// @param prog pre-compiled regprog or NULL
+/// @param prog pre-compiled regprog or nullptr
 /// @param fname full path of the file name
-/// @param sfname short file name or NULL
+/// @param sfname short file name or nullptr
 /// @param tail tail of the path
 /// @param allow_dirs Allow matching with dir
 ///
@@ -3634,22 +3634,22 @@ bool match_file_pat(char *pattern, regprog_T **prog, char *fname, char *sfname, 
   bool result = false;
 
   regmatch.rm_ic = p_fic;   // ignore case if 'fileignorecase' is set
-  regmatch.regprog = prog != NULL ? *prog : vim_regcomp(pattern, RE_MAGIC);
+  regmatch.regprog = prog != nullptr ? *prog : vim_regcomp(pattern, RE_MAGIC);
 
   // Try for a match with the pattern with:
   // 1. the full file name, when the pattern has a '/'.
   // 2. the short file name, when the pattern has a '/'.
   // 3. the tail of the file name, when the pattern has no '/'.
-  if (regmatch.regprog != NULL
+  if (regmatch.regprog != nullptr
       && ((allow_dirs
            && (vim_regexec(&regmatch, fname, 0)
-               || (sfname != NULL
+               || (sfname != nullptr
                    && vim_regexec(&regmatch, sfname, 0))))
           || (!allow_dirs && vim_regexec(&regmatch, tail, 0)))) {
     result = true;
   }
 
-  if (prog != NULL) {
+  if (prog != nullptr) {
     *prog = regmatch.regprog;
   } else {
     vim_regfree(regmatch.regprog);
@@ -3659,7 +3659,7 @@ bool match_file_pat(char *pattern, regprog_T **prog, char *fname, char *sfname, 
 
 /// Check if a file matches with a pattern in "list".
 /// "list" is a comma-separated list of patterns, like 'wildignore'.
-/// "sfname" is the short file name or NULL, "ffname" the long file name.
+/// "sfname" is the short file name or nullptr, "ffname" the long file name.
 ///
 /// @param list list of patterns to match
 /// @param sfname short file name
@@ -3677,11 +3677,11 @@ bool match_file_list(char *list, char *sfname, char *ffname)
     char buf[MAXPATHL];
     copy_option_part(&p, buf, ARRAY_SIZE(buf), ",");
     char allow_dirs;
-    char *regpat = file_pat_to_reg_pat(buf, NULL, &allow_dirs, false);
-    if (regpat == NULL) {
+    char *regpat = file_pat_to_reg_pat(buf, nullptr, &allow_dirs, false);
+    if (regpat == nullptr) {
       break;
     }
-    bool match = match_file_pat(regpat, NULL, ffname, sfname, tail, (int)allow_dirs);
+    bool match = match_file_pat(regpat, nullptr, ffname, sfname, tail, (int)allow_dirs);
     xfree(regpat);
     if (match) {
       return true;
@@ -3696,20 +3696,20 @@ bool match_file_list(char *list, char *sfname, char *ffname)
 /// allow_dirs, otherwise false is put there -- webb.
 /// Handle backslashes before special characters, like "\*" and "\ ".
 ///
-/// @param pat_end     first char after pattern or NULL
+/// @param pat_end     first char after pattern or nullptr
 /// @param allow_dirs  Result passed back out in here
 /// @param no_bslash   Don't use a backward slash as pathsep
 ///                    (only makes a difference when BACKSLASH_IN_FILENAME in defined)
 ///
-/// @return            NULL on failure.
+/// @return            nullptr on failure.
 char *file_pat_to_reg_pat(const char *pat, const char *pat_end, char *allow_dirs, int no_bslash)
   FUNC_ATTR_NONNULL_ARG(1)
 {
-  if (allow_dirs != NULL) {
+  if (allow_dirs != nullptr) {
     *allow_dirs = false;
   }
 
-  if (pat_end == NULL) {
+  if (pat_end == nullptr) {
     pat_end = pat + strlen(pat);
   }
 
@@ -3794,7 +3794,7 @@ char *file_pat_to_reg_pat(const char *pat, const char *pat_end, char *allow_dirs
           reg_pat[i++] = '\\';
           reg_pat[i++] = '/';
           reg_pat[i++] = ']';
-          if (allow_dirs != NULL) {
+          if (allow_dirs != nullptr) {
             *allow_dirs = true;
           }
           break;
@@ -3820,7 +3820,7 @@ char *file_pat_to_reg_pat(const char *pat, const char *pat_end, char *allow_dirs
         reg_pat[i++] = '{';
         p += 2;
       } else {
-        if (allow_dirs != NULL && vim_ispathsep(*p)
+        if (allow_dirs != nullptr && vim_ispathsep(*p)
             && (!BACKSLASH_IN_FILENAME_BOOL || (!no_bslash || *p != '\\'))) {
           *allow_dirs = true;
         }
@@ -3834,7 +3834,7 @@ char *file_pat_to_reg_pat(const char *pat, const char *pat_end, char *allow_dirs
       reg_pat[i++] = '\\';
       reg_pat[i++] = '/';
       reg_pat[i++] = ']';
-      if (allow_dirs != NULL) {
+      if (allow_dirs != nullptr) {
         *allow_dirs = true;
       }
       break;
@@ -3858,7 +3858,7 @@ char *file_pat_to_reg_pat(const char *pat, const char *pat_end, char *allow_dirs
       }
       break;
     default:
-      if (allow_dirs != NULL && vim_ispathsep(*p)) {
+      if (allow_dirs != nullptr && vim_ispathsep(*p)) {
         *allow_dirs = true;
       }
       reg_pat[i++] = *p;

@@ -20,7 +20,7 @@ void ga_clear(garray_T *gap)
   xfree(gap->ga_data);
 
   // Initialize growing array without resetting itemsize or growsize
-  gap->ga_data = NULL;
+  gap->ga_data = nullptr;
   gap->ga_maxlen = 0;
   gap->ga_len = 0;
 }
@@ -40,7 +40,7 @@ void ga_clear_strings(garray_T *gap)
 /// @param growsize
 void ga_init(garray_T *gap, int itemsize, int growsize)
 {
-  gap->ga_data = NULL;
+  gap->ga_data = nullptr;
   gap->ga_maxlen = 0;
   gap->ga_len = 0;
   gap->ga_itemsize = itemsize;
@@ -160,7 +160,7 @@ char *ga_concat_strings(const garray_T *gap, const char *sep)
 }
 
 /// Concatenate a string to a growarray which contains characters.
-/// When "s" is NULL does not do anything.
+/// When "s" is nullptr does not do anything.
 ///
 /// WARNING:
 /// - Does NOT copy the NUL at the end!
@@ -170,7 +170,7 @@ char *ga_concat_strings(const garray_T *gap, const char *sep)
 /// @param s
 void ga_concat(garray_T *gap, const char *restrict s)
 {
-  if (s == NULL) {
+  if (s == nullptr) {
     return;
   }
 
