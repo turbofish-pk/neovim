@@ -6,6 +6,7 @@ import re
 dir_root = Path(os.getcwd())
 dir_src = dir_root / "src"
 dir_nvim = dir_root / "nvim"
+dir_runtime = dir_root / "runtime"
 
 
 def main() -> None:
@@ -470,7 +471,101 @@ def delete_files() -> None:
         dir_root / "runtime/syntax/zir.vim",
         dir_root / "runtime/syntax/zserio.vim",
     ]
+    keymaps = [
+        "hebrew_cp1255.vim",
+        "russian-jcukenwin.vim",
+        "arabic_buckwalter.vim",
+        "hebrew_iso-8859-8.vim",
+        "russian-typograph.vim",
+        "arabic_utf-8.vim",
+        "hebrewp_cp1255.vim",
+        "russian-yawerty.vim",
+        "arabic.vim",
+        "hebrewp_iso-8859-8.vim",
+        "serbian_cp1250.vim",
+        "armenian-eastern_utf-8.vim",
+        "hebrewp_utf-8.vim",
+        "serbian_cp1251.vim",
+        "armenian-western_utf-8.vim",
+        "hebrewp.vim",
+        "serbian_iso-8859-2.vim",
+        "azerbaijani.vim",
+        "hebrew_utf-8.vim",
+        "serbian_iso-8859-5.vim",
+        "belarusian-jcuken.vim",
+        "hebrew.vim",
+        "serbian-latin_utf-8.vim",
+        "brazilian_portuguese-abnt.vim",
+        "kana.vim",
+        "serbian-latin.vim",
+        "brazilian_portuguese-compact.vim",
+        "kazakh-jcuken.vim",
+        "serbian_utf-8.vim",
+        "bulgarian-bds.vim",
+        "korean-dubeolsik_utf-8.vim",
+        "serbian.vim",
+        "bulgarian-phonetic.vim",
+        "korean.vim",
+        "sinhala-phonetic_utf-8.vim",
+        "canfr-win.vim",
+        "lithuanian-baltic.vim",
+        "sinhala.vim",
+        "croatian_cp1250.vim",
+        "magyar_utf-8.vim",
+        "slovak_cp1250.vim",
+        "croatian_iso-8859-2.vim",
+        "mongolian_utf-8.vim",
+        "slovak_iso-8859-2.vim",
+        "croatian_utf-8.vim",
+        "oldturkic-orkhon_utf-8.vim",
+        "slovak_utf-8.vim",
+        "croatian.vim",
+        "oldturkic-yenisei_utf-8.vim",
+        "slovak.vim",
+        "czech_utf-8.vim",
+        "persian-iranian_utf-8.vim",
+        "tamil_tscii.vim",
+        "czech.vim",
+        "persian.vim",
+        "thaana-phonetic_utf-8.vim",
+        "dvorak.vim",
+        "pinyin.vim",
+        "thaana.vim",
+        "esperanto_utf-8.vim",
+        "polish-slash_cp1250.vim",
+        "turkish-f.vim",
+        "esperanto.vim",
+        "polish-slash_cp852.vim",
+        "turkish-q.vim",
+        "french-azerty.vim",
+        "polish-slash_iso-8859-2.vim",
+        "ukrainian-dvorak.vim",
+        "georgian-qwerty.vim",
+        "polish-slash_utf-8.vim",
+        "ukrainian-enhanced.vim",
+        "polish-slash.vim",
+        "ukrainian-jcuken.vim",
+        "vietnamese-telex_utf-8.vim",
+        "russian-dvorak.vim",
+        "vietnamese-viqr_utf-8.vim",
+        "russian-jcukenmac.vim",
+        "vietnamese-vni_utf-8.vim",
+        "russian-jcuken.vim",
+        "russian-jcukenwintype.vim",
+    ]
 
+    file_list_delete.extend([dir_runtime / "keymap" / fn for fn in keymaps])
+
+    providers = [
+        "node.vim",
+        "perl.vim",
+        "python3.vim",
+        "ruby.vim",
+        "script_host.rb",
+    ]
+    file_list_delete.extend(
+        [dir_runtime / "autoload/provider" / fn for fn in providers]
+    )
     for fn in file_list_delete:
         if not fn.exists():
             continue
