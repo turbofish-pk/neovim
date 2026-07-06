@@ -103,12 +103,6 @@ install_helper(
   FILES ${GENERATED_SYN_VIM}
   DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/nvim/runtime/syntax/vim)
 
-if(NOT APPLE)
-  install_helper(
-    FILES ${CMAKE_CURRENT_SOURCE_DIR}/org.neovim.nvim.desktop
-    DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/applications)
-endif()
-
 install_helper(
   FILES ${CMAKE_CURRENT_SOURCE_DIR}/nvim.png
   DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/icons/hicolor/128x128/apps)

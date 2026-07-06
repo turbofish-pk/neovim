@@ -15,10 +15,9 @@
       "name": "external_deps",
       "description": "Build neovim with external deps on ubuntu",
       "cacheVariables": {
-        "USE_BUNDLED":"OFF",
-        "USE_BUNDLED_TS":"ON",
-        "USE_BUNDLED_UTF8PROC":"ON",
-        "ENABLE_WASMTIME":"OFF"
+        "USE_BUNDLED": "OFF",
+        "USE_BUNDLED_TS": "ON",
+        "USE_BUNDLED_UTF8PROC": "ON"
       },
       "inherits": ["base"]
     }

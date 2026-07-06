@@ -150,7 +150,7 @@ Each pull request must pass the automated builds on [GitHub Actions].
 - CI runs [ASan] and other analyzers.
     - To run valgrind locally: `VALGRIND=1 make test`
     - To run ASan/UBSan locally: `CC=clang make CMAKE_FLAGS="-DENABLE_ASAN_UBSAN=ON"`.
-      Note that MSVC requires Release or RelWithDebInfo build type to work properly.
+
 - The [lint](#lint) build checks that the code is formatted correctly and
   passes various linter checks.
 - To see CI results faster in your PR, you can temporarily set `TEST_FILE` in

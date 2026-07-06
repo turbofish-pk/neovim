@@ -1,7 +1,5 @@
 add_library(test_lib INTERFACE)
-if(WIN32)
-  target_compile_definitions(test_lib INTERFACE MSWIN)
-endif()
+
 target_link_libraries(test_lib INTERFACE nvim_bin)
 
 add_executable(tty-test EXCLUDE_FROM_ALL tty-test.c)

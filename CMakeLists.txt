@@ -7,16 +7,15 @@
 #     - verbose output: cmake --build build --verbose
 
 # Version should match the tested CMAKE_URL in .github/workflows/build.yml.
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 4.2)
 
 project(nvim C)
+set(CMAKE_C_STANDARD 23)
+set(CMAKE_C_STANDARD_REQUIRED ON)
+set(CMAKE_C_EXTENSIONS ON) # Optional: Set to ON if you want GNU/vendor extensions
 
 if(POLICY CMP0135)
   cmake_policy(SET CMP0135 NEW)
-endif()
-
-if(XCODE)
-  message(FATAL_ERROR [[Xcode generator is not supported. Use "Ninja" or "Unix Makefiles" instead]])
 endif()
 
 # Point CMake at any custom modules we may ship
@@ -28,7 +27,6 @@ include(CheckLibraryExists)
 include(ExternalProject)
 include(FindPackageHandleStandardArgs)
 include(GNUInstallDirs)
-
 include(Deps)
 include(Find)
 include(InstallHelpers)
@@ -57,83 +55,44 @@ set(VTERM_TEST_FILE ${PROJECT_BINARY_DIR}/test/vterm_test_output)
 
 file(GLOB DOCFILES CONFIGURE_DEPENDS ${PROJECT_SOURCE_DIR}/runtime/doc/*.txt)
 
-if(NOT CI_BUILD)
-  set(CMAKE_INSTALL_MESSAGE NEVER)
-endif()
+set(CMAKE_INSTALL_MESSAGE NEVER)
 
-if(${CMAKE_VERSION} VERSION_LESS 3.20)
-  set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-endif()
-
-if(${CMAKE_VERSION} VERSION_GREATER_EQUAL 3.26)
-  set(COPY_DIRECTORY copy_directory_if_different)
-else()
-  set(COPY_DIRECTORY copy_directory)
-endif()
+set(COPY_DIRECTORY copy_directory_if_different)
 
 # Prefer our bundled versions of dependencies.
-if(DEFINED ENV{DEPS_BUILD_DIR})
-  set(DEPS_PREFIX "$ENV{DEPS_BUILD_DIR}/usr" CACHE PATH "Path prefix for finding dependencies")
-else()
-  set(DEPS_PREFIX "${CMAKE_CURRENT_SOURCE_DIR}/.deps/usr" CACHE PATH "Path prefix for finding dependencies")
-  # When running from within CLion or Visual Studio,
-  # build bundled dependencies automatically.
-  if(NOT EXISTS ${DEPS_PREFIX}
-     AND (DEFINED ENV{CLION_IDE}
-          OR DEFINED ENV{VisualStudioEdition}))
-    message(STATUS "Building dependencies...")
-    set(DEPS_BUILD_DIR ${PROJECT_BINARY_DIR}/.deps)
-    file(MAKE_DIRECTORY ${DEPS_BUILD_DIR})
-    execute_process(
-      COMMAND ${CMAKE_COMMAND} -G ${CMAKE_GENERATOR}
-        -D CMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}
-        -D CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
-        -D CMAKE_C_COMPILER=${CMAKE_C_COMPILER}
-        -D CMAKE_C_FLAGS=${CMAKE_C_FLAGS}
-        -D CMAKE_C_FLAGS_DEBUG=${CMAKE_C_FLAGS_DEBUG}
-        -D CMAKE_C_FLAGS_MINSIZEREL=${CMAKE_C_FLAGS_MINSIZEREL}
-        -D CMAKE_C_FLAGS_RELWITHDEBINFO=${CMAKE_C_FLAGS_RELWITHDEBINFO}
-        -D CMAKE_C_FLAGS_RELEASE=${CMAKE_C_FLAGS_RELEASE}
-        -D CMAKE_MAKE_PROGRAM=${CMAKE_MAKE_PROGRAM}
-        ${PROJECT_SOURCE_DIR}/cmake.deps
-      WORKING_DIRECTORY ${DEPS_BUILD_DIR})
-    execute_process(
-      COMMAND ${CMAKE_COMMAND} --build ${DEPS_BUILD_DIR}
-        --config ${CMAKE_BUILD_TYPE})
-    set(DEPS_PREFIX ${DEPS_BUILD_DIR}/usr)
-  endif()
+set(DEPS_PREFIX "${CMAKE_CURRENT_SOURCE_DIR}/.deps/usr" CACHE PATH "Path prefix for finding dependencies")
+# When running from within CLion or Visual Studio,
+# build bundled dependencies automatically.
+if(NOT EXISTS ${DEPS_PREFIX}
+   AND (DEFINED ENV{CLION_IDE}
+        OR DEFINED ENV{VisualStudioEdition}))
+  message(STATUS "Building dependencies...")
+  set(DEPS_BUILD_DIR ${PROJECT_BINARY_DIR}/.deps)
+  file(MAKE_DIRECTORY ${DEPS_BUILD_DIR})
+  execute_process(
+    COMMAND ${CMAKE_COMMAND} -G ${CMAKE_GENERATOR}
+      -D CMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}
+      -D CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+      -D CMAKE_C_COMPILER=${CMAKE_C_COMPILER}
+      -D CMAKE_C_FLAGS=${CMAKE_C_FLAGS}
+      -D CMAKE_C_FLAGS_DEBUG=${CMAKE_C_FLAGS_DEBUG}
+      -D CMAKE_C_FLAGS_MINSIZEREL=${CMAKE_C_FLAGS_MINSIZEREL}
+      -D CMAKE_C_FLAGS_RELWITHDEBINFO=${CMAKE_C_FLAGS_RELWITHDEBINFO}
+      -D CMAKE_C_FLAGS_RELEASE=${CMAKE_C_FLAGS_RELEASE}
+      -D CMAKE_MAKE_PROGRAM=${CMAKE_MAKE_PROGRAM}
+      ${PROJECT_SOURCE_DIR}/cmake.deps
+    WORKING_DIRECTORY ${DEPS_BUILD_DIR})
+  execute_process(
+    COMMAND ${CMAKE_COMMAND} --build ${DEPS_BUILD_DIR}
+      --config ${CMAKE_BUILD_TYPE})
+  set(DEPS_PREFIX ${DEPS_BUILD_DIR}/usr)
 endif()
 
 list(INSERT CMAKE_PREFIX_PATH 0 ${DEPS_PREFIX})
 
-if(APPLE)
-  # If the macOS deployment target is not set manually (via $MACOSX_DEPLOYMENT_TARGET),
-  # fall back to local system version. Needs to be done both here and in cmake.deps.
-  if(NOT CMAKE_OSX_DEPLOYMENT_TARGET)
-    execute_process(COMMAND sw_vers -productVersion
-                    OUTPUT_VARIABLE MACOS_VERSION
-                    OUTPUT_STRIP_TRAILING_WHITESPACE)
-    set(CMAKE_OSX_DEPLOYMENT_TARGET "${MACOS_VERSION}")
-  endif()
-  message(STATUS "Using deployment target ${CMAKE_OSX_DEPLOYMENT_TARGET}")
-endif()
-
-if(WIN32 OR APPLE)
-  # Handle case-insensitive filenames for Windows and Mac.
-  set(CASE_INSENSITIVE_FILENAME TRUE)
-endif()
-
-if (MINGW)
-  # Disable LTO by default as it may not compile
-  # See https://github.com/Alexpux/MINGW-packages/issues/3516
-  # and https://github.com/neovim/neovim/pull/8654#issuecomment-402316672
-  option(ENABLE_LTO "enable link time optimization" OFF)
-else()
-  option(ENABLE_LTO "enable link time optimization" ON)
-endif()
+option(ENABLE_LTO "enable link time optimization" ON)
 option(ENABLE_LIBINTL "enable libintl" ON)
 option(ENABLE_UNIBILIUM "enable unibilium" ON)
-option(ENABLE_WASMTIME "enable wasmtime" OFF)
 
 message(STATUS "CMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}")
 
@@ -186,14 +145,14 @@ foreach(CFGNAME ${CMAKE_CONFIGURATION_TYPES})
   set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_${CFGNAME} ${CMAKE_BINARY_DIR}/lib)
 endforeach()
 
-if(NOT PREFER_LUA)
-  find_program(LUA_PRG NAMES luajit)
-endif()
-find_program(LUA_PRG NAMES lua5.1 lua5.2 lua)
+find_program(LUA_PRG NAMES luajit)
+
 mark_as_advanced(LUA_PRG)
+
 if(NOT LUA_PRG)
-  message(FATAL_ERROR "Failed to find a Lua 5.1-compatible interpreter")
+  message(FATAL_ERROR "LuaJIT not found. Please install LuaJIT to proceed.")
 endif()
+
 message(STATUS "Using Lua interpreter: ${LUA_PRG}")
 
 # Some of the code generation still relies on stable table ordering in order to
@@ -201,19 +160,13 @@ message(STATUS "Using Lua interpreter: ${LUA_PRG}")
 # funcs_metadata.generated.h and ui_events_metadata.generated.h. This should
 # ideally be fixed in the generators, but until then as a workaround you may provide
 # a specific lua implementation that provides the needed stability by setting LUA_GEN_PRG:
-if(NOT LUA_GEN_PRG)
-  set(LUA_GEN_PRG "${LUA_PRG}" CACHE FILEPATH "Path to the lua used for code generation.")
-endif()
+set(LUA_GEN_PRG "${LUA_PRG}" CACHE FILEPATH "Path to the lua used for code generation.")
+
 mark_as_advanced(LUA_GEN_PRG)
 message(STATUS "Using Lua interpreter for code generation: ${LUA_GEN_PRG}")
 
-option(COMPILE_LUA "Pre-compile Lua sources into bytecode (for sources that are included in the binary)" ON)
+# option(COMPILE_LUA "Pre-compile Lua sources into bytecode (for sources that are included in the binary)" ON)
 
-# Lint
-option(CI_LINT "Abort if lint programs not found" OFF)
-if(CI_LINT)
-  set(LINT_REQUIRED "REQUIRED")
-endif()
 find_program(SHELLCHECK_PRG shellcheck ${LINT_REQUIRED})
 mark_as_advanced(SHELLCHECK_PRG)
 find_program(STYLUA_PRG stylua ${LINT_REQUIRED})

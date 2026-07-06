@@ -15,12 +15,6 @@ set_target_properties(nvim_bin
 #-------------------------------------------------------------------------------
 
 add_library(nlua0 MODULE)
-if(WIN32)
-  target_compile_definitions(nlua0 PUBLIC LUA_BUILD_AS_DLL LUA_LIB)
-  set_target_properties(nlua0 PROPERTIES ENABLE_EXPORTS TRUE)
-elseif(APPLE)
-  target_link_options(nlua0 PRIVATE -undefined dynamic_lookup)
-endif()
 
 # TODO(dundargoc): unittest stops working if I create an pseudo-imported
 # library "luv" as with the other dependencies. Figure out why and fix.
@@ -52,37 +46,20 @@ if(ENABLE_UNIBILIUM)
   target_link_libraries(main_lib INTERFACE unibilium)
 endif()
 
-if(ENABLE_WASMTIME)
-  find_package(Wasmtime 36.0 EXACT REQUIRED)
-  target_link_libraries(main_lib INTERFACE wasmtime)
-  target_compile_definitions(nvim_bin PRIVATE HAVE_WASMTIME)
-endif()
-
 # The unit test lib requires LuaJIT; it will be skipped if LuaJIT is missing.
 option(PREFER_LUA "Prefer Lua over LuaJIT in the nvim executable." OFF)
-if(PREFER_LUA)
-  find_package(Lua 5.1 EXACT REQUIRED)
-  target_include_directories(main_lib SYSTEM BEFORE INTERFACE ${LUA_INCLUDE_DIR})
-  target_include_directories(nlua0 SYSTEM BEFORE PUBLIC ${LUA_INCLUDE_DIR})
-  target_link_libraries(main_lib INTERFACE ${LUA_LIBRARIES})
-  # Passive (not REQUIRED): if LUAJIT_FOUND is not set, fixtures for unittests is skipped.
-  find_package(Luajit)
-else()
-  find_package(Luajit REQUIRED)
-  target_include_directories(main_lib SYSTEM BEFORE INTERFACE ${LUAJIT_INCLUDE_DIR})
-  target_link_libraries(main_lib INTERFACE ${LUAJIT_LIBRARY})
-  target_include_directories(nlua0 SYSTEM BEFORE PUBLIC ${LUAJIT_INCLUDE_DIR})
-  if(WIN32 OR CYGWIN)
-    target_link_libraries(nlua0 PUBLIC ${LUAJIT_LIBRARY})
-  endif()
-endif()
+
+find_package(Luajit REQUIRED)
+target_include_directories(main_lib SYSTEM BEFORE INTERFACE ${LUAJIT_INCLUDE_DIR})
+target_link_libraries(main_lib INTERFACE ${LUAJIT_LIBRARY})
+target_include_directories(nlua0 SYSTEM BEFORE PUBLIC ${LUAJIT_INCLUDE_DIR})
 
 #-------------------------------------------------------------------------------
 # Compiler and linker options
 #-------------------------------------------------------------------------------
 
-if(NOT MSVC)
-  target_compile_options(main_lib INTERFACE -Wall -Wextra -pedantic -Wno-unused-parameter
+
+target_compile_options(main_lib INTERFACE -Wall -Wextra -pedantic -Wno-unused-parameter
     -Wstrict-prototypes -std=gnu99 -Wshadow -Wconversion -Wvla
     -Wdouble-promotion
     -Wmissing-noreturn
@@ -91,90 +68,40 @@ if(NOT MSVC)
     -Wno-unused-function # because #35129
     -fsigned-char)
 
-  # For O_CLOEXEC, O_DIRECTORY, and O_NOFOLLOW flags on older systems
-  # (pre POSIX.1-2008: glibc 2.11 and earlier). #4042
-  # For ptsname(). #6743
-  target_compile_definitions(main_lib INTERFACE _GNU_SOURCE)
-endif()
+# For O_CLOEXEC, O_DIRECTORY, and O_NOFOLLOW flags on older systems
+# (pre POSIX.1-2008: glibc 2.11 and earlier). #4042
+# For ptsname(). #6743
+target_compile_definitions(main_lib INTERFACE _GNU_SOURCE)
+
 
 # -fstack-protector breaks Mingw-w64 builds
-if(NOT MINGW AND NOT CMAKE_SYSTEM_NAME STREQUAL "Haiku")
-  check_c_compiler_flag(-fstack-protector-strong HAS_FSTACK_PROTECTOR_STRONG_FLAG)
-  if(HAS_FSTACK_PROTECTOR_STRONG_FLAG)
-    target_compile_options(main_lib INTERFACE -fstack-protector-strong)
-    target_link_libraries(main_lib INTERFACE -fstack-protector-strong)
-  else()
-    check_c_compiler_flag(-fstack-protector HAS_FSTACK_PROTECTOR_FLAG)
-    if(HAS_FSTACK_PROTECTOR_FLAG)
-      target_compile_options(main_lib INTERFACE -fstack-protector --param ssp-buffer-size=4)
-      target_link_libraries(main_lib INTERFACE -fstack-protector --param ssp-buffer-size=4)
-    endif()
+check_c_compiler_flag(-fstack-protector-strong HAS_FSTACK_PROTECTOR_STRONG_FLAG)
+if(HAS_FSTACK_PROTECTOR_STRONG_FLAG)
+  target_compile_options(main_lib INTERFACE -fstack-protector-strong)
+  target_link_libraries(main_lib INTERFACE -fstack-protector-strong)
+else()
+  check_c_compiler_flag(-fstack-protector HAS_FSTACK_PROTECTOR_FLAG)
+  if(HAS_FSTACK_PROTECTOR_FLAG)
+    target_compile_options(main_lib INTERFACE -fstack-protector --param ssp-buffer-size=4)
+    target_link_libraries(main_lib INTERFACE -fstack-protector --param ssp-buffer-size=4)
   endif()
 endif()
 
+
 # Compiler specific options
-if(MSVC)
-  target_compile_options(main_lib INTERFACE -W3)
-
-  # Disable warnings that give too many false positives.
-  target_compile_options(main_lib INTERFACE -wd4311 -wd4146 -wd4003 -wd4715)
-  target_compile_definitions(main_lib INTERFACE _CRT_SECURE_NO_WARNINGS _CRT_NONSTDC_NO_DEPRECATE)
-
-  target_sources(main_lib INTERFACE ${CMAKE_CURRENT_LIST_DIR}/os/nvim.manifest)
-elseif(MINGW)
-  # Use POSIX compatible stdio in Mingw
-  target_compile_definitions(main_lib INTERFACE __USE_MINGW_ANSI_STDIO)
-
-  # wrapper for nvim.manifest
-  target_sources(main_lib INTERFACE ${CMAKE_CURRENT_LIST_DIR}/os/nvim.rc)
-elseif(CMAKE_C_COMPILER_ID STREQUAL "GNU")
-  target_compile_options(main_lib INTERFACE
+target_compile_options(main_lib INTERFACE
     -Wno-conversion
     -fno-common
     $<$<CONFIG:Release>:-Wno-unused-result>
     $<$<CONFIG:RelWithDebInfo>:-Wno-unused-result>
     $<$<CONFIG:MinSizeRel>:-Wno-unused-result>)
 
-  target_link_options(nvim_bin PRIVATE -Wno-free-nonheap-object) # see #37250
-elseif(CMAKE_C_COMPILER_ID MATCHES "Clang")
-  # On FreeBSD 64 math.h uses unguarded C11 extension, which taints clang
-  # 3.4.1 used there.
-  # on GNU/Linux, glibc 2.43 is tainted with c11 features when you use _GNU_SOURCE
-  if(CMAKE_SYSTEM_NAME STREQUAL "FreeBSD" OR CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    target_compile_options(main_lib INTERFACE -Wno-c11-extensions)
-  endif()
-
-  # workaround for clang-11 on macOS, supported on later versions
-  if(NOT APPLE AND NOT CMAKE_CROSSCOMPILING)
-    target_link_libraries(nvim_bin PRIVATE -Wl,--no-undefined)
-  endif()
-endif()
+target_link_options(nvim_bin PRIVATE -Wno-free-nonheap-object) # see #37250
 
 # Platform specific options
-if(UNIX)
-  target_link_libraries(main_lib INTERFACE m)
-  if (CMAKE_SYSTEM_NAME STREQUAL "Haiku")
-    target_link_libraries(main_lib INTERFACE bsd)
-    target_link_libraries(nvim_bin PRIVATE -lnetwork)
-  elseif (NOT CMAKE_SYSTEM_NAME STREQUAL "SunOS" AND NOT CMAKE_CROSSCOMPILING)
-    target_link_libraries(main_lib INTERFACE util)
-  endif()
-endif()
 
-if(CMAKE_SYSTEM_NAME MATCHES "Windows")
-  target_compile_definitions(main_lib INTERFACE _WIN32_WINNT=0x0602 MSWIN WIN32_LEAN_AND_MEAN)
-  target_link_libraries(main_lib INTERFACE netapi32)
-elseif(CMAKE_SYSTEM_NAME MATCHES "Darwin")
-  target_link_libraries(nvim_bin PRIVATE "-framework CoreServices")
-
-  # Actually export symbols - symbols may not be visible even though
-  # ENABLE_EXPORTS is set. https://github.com/neovim/neovim/issues/25295
-  target_link_options(nvim_bin PRIVATE "-Wl,-export_dynamic")
-elseif(CMAKE_SYSTEM_NAME MATCHES "OpenBSD")
-  target_link_libraries(main_lib INTERFACE pthread c++abi)
-elseif(CMAKE_SYSTEM_NAME STREQUAL "SunOS")
-  target_link_libraries(nvim_bin PRIVATE -lsocket)
-endif()
+target_link_libraries(main_lib INTERFACE m)
+target_link_libraries(main_lib INTERFACE util)
 
 check_c_compiler_flag(-Wimplicit-fallthrough HAVE_WIMPLICIT_FALLTHROUGH_FLAG)
 if(HAVE_WIMPLICIT_FALLTHROUGH_FLAG)
@@ -214,18 +141,13 @@ endif()
 
 if(ENABLE_ASAN_UBSAN)
   message(STATUS "Enabling address sanitizer and undefined behavior sanitizer for nvim.")
-  if(NOT MSVC)
-    if(CI_BUILD)
-      # Try to recover from all sanitize issues so we get reports about all failures
-      target_compile_options(nvim_bin PRIVATE -fsanitize-recover=all)
-    else()
-      target_compile_options(nvim_bin PRIVATE -fno-sanitize-recover=all)
-    endif()
-    target_compile_options(nvim_bin PRIVATE
+
+  target_compile_options(nvim_bin PRIVATE -fno-sanitize-recover=all)
+
+  target_compile_options(nvim_bin PRIVATE
       -fno-omit-frame-pointer
       -fno-optimize-sibling-calls
       -fsanitize=undefined)
-  endif()
 
   target_compile_options(nvim_bin PRIVATE -fsanitize=address)
   target_link_libraries(nvim_bin PRIVATE -fsanitize=address -fsanitize=undefined)
@@ -246,16 +168,6 @@ if(ENABLE_TSAN)
   message(STATUS "Enabling thread sanitizer for nvim.")
   target_compile_options(nvim_bin PRIVATE -fsanitize=thread -fPIE)
   target_link_libraries(nvim_bin PRIVATE -fsanitize=thread)
-endif()
-
-option(CI_BUILD "CI, extra flags will be set" OFF)
-if(CI_BUILD)
-  message(STATUS "CI build enabled")
-  if(MSVC)
-    target_compile_options(main_lib INTERFACE -WX)
-  else()
-    target_compile_options(main_lib INTERFACE -Werror)
-  endif()
 endif()
 
 option(ENABLE_IWYU "Run include-what-you-use with the compiler." OFF)
@@ -364,9 +276,7 @@ foreach(core_source ${LUA_CORE_MODULE_SOURCES})
 endforeach()
 
 set(LUA_BLOB_COMPILE_FLAG)
-if(COMPILE_LUA AND NOT WIN32)
-  set(LUA_BLOB_COMPILE_FLAG -c)
-endif()
+set(LUA_BLOB_COMPILE_FLAG -c)
 
 file(GLOB API_HEADERS CONFIGURE_DEPENDS api/*.h)
 list(REMOVE_ITEM API_HEADERS ${CMAKE_CURRENT_LIST_DIR}/api/ui_events.in.h)
@@ -392,21 +302,9 @@ file(GLOB EXTERNAL_HEADERS CONFIGURE_DEPENDS ../xdiff/*.h ../mpack/*.h ../cjson/
 
 file(GLOB NLUA0_SOURCES CONFIGURE_DEPENDS ../mpack/*.c)
 
-if(PREFER_LUA)
-  # luajit not used, use a vendored copy of the bit module
-  list(APPEND EXTERNAL_SOURCES ${PROJECT_SOURCE_DIR}/src/bit.c)
-  list(APPEND NLUA0_SOURCES ${PROJECT_SOURCE_DIR}/src/bit.c)
-  target_compile_definitions(main_lib INTERFACE NVIM_VENDOR_BIT)
-endif()
-
 # Inlined external projects, we don't maintain it. #9306
-if(MSVC)
-  set_source_files_properties(
-    ${EXTERNAL_SOURCES} PROPERTIES COMPILE_OPTIONS "-wd4090;-wd4244;-wd4267")
-else()
-  set_source_files_properties(
+set_source_files_properties(
     ${EXTERNAL_SOURCES} PROPERTIES COMPILE_OPTIONS "-Wno-conversion;-Wno-missing-noreturn;-Wno-missing-format-attribute;-Wno-double-promotion;-Wno-strict-prototypes;-Wno-misleading-indentation;-Wno-sign-compare;-Wno-implicit-fallthrough;-Wno-missing-prototypes;-Wno-missing-field-initializers")
-endif()
 
 list(APPEND NLUA0_SOURCES ${PROJECT_SOURCE_DIR}/src/nlua0.c)
 
@@ -446,34 +344,10 @@ list(APPEND UNCRUSTIFY_NVIM_SOURCES
   ${PROJECT_SOURCE_DIR}/src/wasm_stubs.c
 )
 
-foreach(sfile ${NVIM_SOURCES})
-  get_filename_component(f ${sfile} NAME)
-  if(WIN32 AND ${f} MATCHES "^(pty_proc_unix.c)$")
-    list(REMOVE_ITEM NVIM_SOURCES ${sfile})
-  endif()
-  if(NOT WIN32 AND ${f} MATCHES "^(pty_proc_win.c)$")
-    list(REMOVE_ITEM NVIM_SOURCES ${sfile})
-  endif()
-  if(NOT WIN32 AND ${f} MATCHES "^(pty_conpty_win.c)$")
-    list(REMOVE_ITEM NVIM_SOURCES ${sfile})
-  endif()
-  if(NOT WIN32 AND ${f} MATCHES "^(os_win_console.c)$")
-    list(REMOVE_ITEM NVIM_SOURCES ${sfile})
-  endif()
-endforeach()
+list(FILTER NVIM_SOURCES EXCLUDE REGEX "pty_proc_win\\.c|pty_conpty_win\\.c|os_win_console\\.c")
 
-foreach(hfile ${NVIM_HEADERS})
-  get_filename_component(f ${hfile} NAME)
-  if(WIN32 AND ${f} MATCHES "^(unix_defs.h)$")
-    list(REMOVE_ITEM NVIM_HEADERS ${hfile})
-  endif()
-  if(WIN32 AND ${f} MATCHES "^(pty_proc_unix.h)$")
-    list(REMOVE_ITEM NVIM_HEADERS ${hfile})
-  endif()
-  if(NOT WIN32 AND ${f} MATCHES "^(win_defs.h)$")
-    list(REMOVE_ITEM NVIM_HEADERS ${hfile})
-  endif()
-endforeach()
+# Filter out Windows-specific headers
+list(FILTER NVIM_HEADERS EXCLUDE REGEX "win_defs\\.h")
 
 list(APPEND LINT_NVIM_SOURCES ${NVIM_SOURCES} ${NVIM_HEADERS})
 list(APPEND LINT_NVIM_SOURCES
@@ -481,14 +355,8 @@ list(APPEND LINT_NVIM_SOURCES
   ${PROJECT_SOURCE_DIR}/src/xxd/xxd.c
 )
 
-# Log level (NVIM_LOG_DEBUG in log.h)
-if(CI_BUILD)
-  # Don't debug log on CI, it gets too verbose in the main build log.
-  # TODO(bfredl): debug log level also exposes some errors with EXITFREE in ASAN build.
-else()
-  # Minimize logging for release-type builds.
-  target_compile_definitions(nvim_bin PRIVATE $<$<CONFIG:Debug>:NVIM_LOG_DEBUG>)
-endif()
+# Minimize logging for release-type builds.
+target_compile_definitions(nvim_bin PRIVATE $<$<CONFIG:Debug>:NVIM_LOG_DEBUG>)
 
 if(ENABLE_ASAN_UBSAN OR ENABLE_MSAN OR ENABLE_TSAN)
   target_compile_definitions(main_lib INTERFACE EXITFREE)
@@ -744,13 +612,9 @@ foreach(hfile ${NVIM_GENERATED_FOR_HEADERS})
   endif()
 endforeach()
 
-if(PREFER_LUA)
-  message(STATUS "luajit not used, skipping unit tests")
-else()
-  file(GLOB UNIT_TEST_FIXTURES CONFIGURE_DEPENDS ${PROJECT_SOURCE_DIR}/test/unit/fixtures/*.c)
-  target_sources(nvim_bin PRIVATE ${UNIT_TEST_FIXTURES})
-  target_compile_definitions(nvim_bin PRIVATE UNIT_TESTING)
-endif()
+file(GLOB UNIT_TEST_FIXTURES CONFIGURE_DEPENDS ${PROJECT_SOURCE_DIR}/test/unit/fixtures/*.c)
+target_sources(nvim_bin PRIVATE ${UNIT_TEST_FIXTURES})
+target_compile_definitions(nvim_bin PRIVATE UNIT_TESTING)
 
 target_sources(main_lib INTERFACE
   ${NVIM_GENERATED_FOR_SOURCES}
@@ -760,12 +624,6 @@ target_sources(main_lib INTERFACE
   ${EXTERNAL_SOURCES}
   ${EXTERNAL_HEADERS})
 
-if(WIN32)
-  # add windows resource file pointing to the neovim icon
-  # this makes the icon appear for the neovim exe and associated filetypes
-  target_sources(nvim_bin PRIVATE ${NVIM_RUNTIME_DIR}/windows_icon.rc)
-endif()
-
 target_sources(nlua0 PUBLIC ${NLUA0_SOURCES})
 
 if(STATIC_BUILD)
@@ -774,9 +632,6 @@ endif()
 target_link_libraries(nvim_bin PRIVATE main_lib PUBLIC libuv)
 
 install_helper(TARGETS nvim_bin)
-if(MSVC)
-  install(FILES $<TARGET_PDB_FILE:nvim_bin> DESTINATION ${CMAKE_INSTALL_BINDIR} OPTIONAL)
-endif()
 
 if(ENABLE_LTO)
   include(CheckIPOSupported)
@@ -790,44 +645,6 @@ if(ENABLE_LTO)
 endif()
 
 add_custom_target(nvim_runtime_deps)
-if(WIN32)
-  # Copy DLLs and third-party tools to bin/ and install them along with nvim
-  add_custom_command(TARGET nvim_runtime_deps
-    POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E ${COPY_DIRECTORY} ${PROJECT_BINARY_DIR}/windows_runtime_deps/
-      ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
-  install(DIRECTORY ${PROJECT_BINARY_DIR}/windows_runtime_deps/
-    DESTINATION ${CMAKE_INSTALL_BINDIR})
-
-  add_custom_target(nvim_dll_deps DEPENDS nvim_bin
-    COMMAND ${CMAKE_COMMAND} -E make_directory ${PROJECT_BINARY_DIR}/windows_runtime_deps
-    COMMAND ${CMAKE_COMMAND}
-      -D CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}
-      -D BINARY="${PROJECT_BINARY_DIR}/bin/nvim${CMAKE_EXECUTABLE_SUFFIX}"
-      -D DST=${PROJECT_BINARY_DIR}/windows_runtime_deps
-      -D CI_BUILD=${CI_BUILD}
-      -P ${PROJECT_SOURCE_DIR}/cmake/WindowsDllCopy.cmake)
-  add_dependencies(nvim_runtime_deps nvim_dll_deps)
-
-  # A CMake script is used for copying the files to avoid the
-  # "command line is too long" error that occurs when Ninja tries running
-  # a command that exceeds the length limit (8191 characters) on Windows.
-  # See https://developercommunity.visualstudio.com/content/problem/212207/file-open-cmake-the-command-line-is-too-long.html
-  set(EXTERNAL_BLOBS_SCRIPT
-    "file(MAKE_DIRECTORY \"${PROJECT_BINARY_DIR}/windows_runtime_deps/platforms\")")
-  foreach(DEP_FILE IN ITEMS
-      win32yank.exe
-  )
-  get_filename_component(DEP_FILE_DIR ${DEP_FILE} DIRECTORY)
-  set(EXTERNAL_BLOBS_SCRIPT "${EXTERNAL_BLOBS_SCRIPT}\n"
-    "file(COPY \"${DEPS_PREFIX}/bin/${DEP_FILE}\"
-    DESTINATION \"${PROJECT_BINARY_DIR}/windows_runtime_deps/${DEP_FILE_DIR}\")")
-  endforeach()
-  file(WRITE ${PROJECT_BINARY_DIR}/external_blobs.cmake ${EXTERNAL_BLOBS_SCRIPT})
-  add_custom_target(external_blobs
-    COMMAND ${CMAKE_COMMAND} -P ${PROJECT_BINARY_DIR}/external_blobs.cmake)
-  add_dependencies(nvim_runtime_deps external_blobs)
-endif()
 
 file(MAKE_DIRECTORY ${BINARY_LIB_DIR})
 
@@ -839,35 +656,22 @@ if(EXISTS ${DEPS_PREFIX}/lib/nvim/parser)
     COMMAND ${CMAKE_COMMAND} -E ${COPY_DIRECTORY} ${DEPS_PREFIX}/lib/nvim/parser ${BINARY_LIB_DIR}/parser)
 endif()
 
-if(CYGWIN)
-  if(NOT PREFER_LUA)
-    add_custom_command(
-      TARGET nvim_runtime_deps
-      POST_BUILD
-      COMMAND ${CMAKE_COMMAND} -E copy ${DEPS_PREFIX}/bin/cyglua51.dll ${PROJECT_BINARY_DIR}/bin)
-    install(PROGRAMS ${PROJECT_BINARY_DIR}/bin/cyglua51.dll DESTINATION ${CMAKE_INSTALL_BINDIR})
-  endif()
-endif()
-
 install(DIRECTORY ${BINARY_LIB_DIR}
   DESTINATION ${CMAKE_INSTALL_LIBDIR}
   USE_SOURCE_PERMISSIONS)
 
-if(NOT PREFER_LUA)
-  # install luajit runtime files if bundled
-  if(EXISTS ${LUAJIT_RUNTIME_DIR})
-    install(DIRECTORY ${LUAJIT_RUNTIME_DIR}
+# install luajit runtime files if bundled
+if(EXISTS ${LUAJIT_RUNTIME_DIR})
+  install(DIRECTORY ${LUAJIT_RUNTIME_DIR}
       DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/nvim/runtime/lua
       USE_SOURCE_PERMISSIONS)
-  endif()
 endif()
 
+
 add_library(libnvim STATIC EXCLUDE_FROM_ALL)
-if(MSVC)
-  set(LIBNVIM_NAME libnvim)
-else()
-  set(LIBNVIM_NAME nvim)
-endif()
+
+set(LIBNVIM_NAME nvim)
+
 set_target_properties(
   libnvim
   PROPERTIES
@@ -883,17 +687,13 @@ target_link_libraries(libnvim PRIVATE main_lib PUBLIC libuv)
 find_program(CLANG_TIDY_PRG clang-tidy)
 mark_as_advanced(CLANG_TIDY_PRG)
 set(EXCLUDE_CLANG_TIDY typval_encode.c.h ui_events.in.h xxd/xxd.c)
-if(WIN32)
-  list(APPEND EXCLUDE_CLANG_TIDY
-    os/pty_proc_unix.h
-    os/unix_defs.h)
-else()
-  list(APPEND EXCLUDE_CLANG_TIDY
+
+list(APPEND EXCLUDE_CLANG_TIDY
     os/win_defs.h
     os/pty_proc_win.h
     os/pty_conpty_win.h
     os/os_win_console.h)
-endif()
+
 add_glob_target(
   TARGET lintc-clang-tidy
   COMMAND ${CLANG_TIDY_PRG}
@@ -904,9 +704,7 @@ add_glob_target(
 # The checks we ignore are meant to be removed eventually, but we can only
 # enable each warning after we fix all instances of that specific warning as to
 # not break CI.
-if(APPLE)
-  string(APPEND CLANG_ANALYZER_IGNORE "-clang-analyzer-core.NonNullParamChecker,")
-endif()
+
 add_glob_target(
   TARGET clang-analyzer
   COMMAND ${CLANG_TIDY_PRG}
@@ -935,11 +733,8 @@ add_dependencies(copy_compile_commands nvim_bin)
 add_dependencies(lintc-clang-tidy copy_compile_commands)
 add_dependencies(clang-analyzer copy_compile_commands)
 
-if(CI_BUILD)
-  set(LINT_OUTPUT_FORMAT gh_action)
-else()
-  set(LINT_OUTPUT_FORMAT vs7)
-endif()
+set(LINT_OUTPUT_FORMAT vs7)
+
 add_glob_target(
   TARGET lintc-clint
   COMMAND $<TARGET_FILE:nvim_bin>

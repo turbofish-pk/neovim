@@ -14,9 +14,4 @@ add_library(wasmtime INTERFACE)
 target_include_directories(wasmtime SYSTEM BEFORE INTERFACE ${WASMTIME_INCLUDE_DIR})
 target_link_libraries(wasmtime INTERFACE ${WASMTIME_LIBRARY})
 
-if(MSVC)
-  target_compile_options(wasmtime INTERFACE -DWASM_API_EXTERN= -DWASI_API_EXTERN=)
-  target_link_libraries(wasmtime INTERFACE ws2_32 advapi32 userenv ntdll shell32 ole32 bcrypt)
-endif()
-
 mark_as_advanced(WASMTIME_INCLUDE_DIR WASMTIME_LIBRARY)

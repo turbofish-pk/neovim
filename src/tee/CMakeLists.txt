@@ -4,9 +4,3 @@ add_executable(tee tee.c)
 set_target_properties(tee PROPERTIES
   RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
 )
-
-if(WIN32)
-  install(TARGETS tee
-    RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
-  )
-endif()

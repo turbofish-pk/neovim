@@ -38,17 +38,6 @@ if(HAVE_LIBSENDFILE)
   list(APPEND LIBUV_LIBRARIES sendfile)
 endif()
 
-if(WIN32)
-  # check_library_exists() does not work for Win32 API calls in X86 due to name
-  # mangling calling conventions
-  list(APPEND LIBUV_LIBRARIES
-    iphlpapi
-    psapi
-    userenv
-    ws2_32
-    dbghelp)
-endif()
-
 find_package(Threads)
 if(Threads_FOUND)
   # TODO: Fix the cmake file to properly handle static deps for bundled builds.

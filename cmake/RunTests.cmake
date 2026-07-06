@@ -76,10 +76,8 @@ endif()
 
 set(ENV{SYSTEM_NAME} ${CMAKE_HOST_SYSTEM_NAME})  # used by test/testutil.lua.
 
-if(NOT WIN32)
-  # Tests assume POSIX "sh" and may fail if SHELL=fish. #24941 #6172
-  set(ENV{SHELL} sh)
-endif()
+# Tests assume POSIX "sh" and may fail if SHELL=fish. #24941 #6172
+set(ENV{SHELL} sh)
 
 execute_process(
   COMMAND ${NVIM_PRG} -l ${ROOT_DIR}/test/runner.lua -X${TEST_XDG_PREFIX} -v

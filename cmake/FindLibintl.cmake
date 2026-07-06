@@ -1,18 +1,6 @@
 include(CheckCSourceCompiles)
 include(CheckVariableExists)
 
-# Append custom gettext path to CMAKE_PREFIX_PATH
-# if installed via Mac Homebrew
-if (APPLE)
-    find_program(HOMEBREW_PRG brew)
-    if (EXISTS ${HOMEBREW_PRG})
-        execute_process(COMMAND ${HOMEBREW_PRG} --prefix gettext
-            OUTPUT_STRIP_TRAILING_WHITESPACE
-            OUTPUT_VARIABLE HOMEBREW_GETTEXT_PREFIX)
-        list(APPEND CMAKE_PREFIX_PATH "${HOMEBREW_GETTEXT_PREFIX}")
-    endif()
-endif()
-
 find_path(LIBINTL_INCLUDE_DIR
     NAMES libintl.h
     PATH_SUFFIXES gettext
@@ -30,18 +18,8 @@ endif()
 if (LIBINTL_LIBRARY)
   list(APPEND CMAKE_REQUIRED_LIBRARIES "${LIBINTL_LIBRARY}")
 endif()
-if (MSVC)
-  list(APPEND CMAKE_REQUIRED_LIBRARIES ${ICONV_LIBRARY})
-endif()
 
-# On macOS, if libintl is a static library then we also need
-# to link libiconv and CoreFoundation.
 get_filename_component(LibIntl_EXT "${LIBINTL_LIBRARY}" EXT)
-if (APPLE AND (LibIntl_EXT STREQUAL ".a"))
-  set(LibIntl_STATIC TRUE)
-  find_library(CoreFoundation_FRAMEWORK CoreFoundation)
-  list(APPEND CMAKE_REQUIRED_LIBRARIES "${ICONV_LIBRARY}" "${CoreFoundation_FRAMEWORK}")
-endif()
 
 check_c_source_compiles("
 #include <libintl.h>
@@ -53,9 +31,7 @@ int main(int argc, char** argv) {
   bind_textdomain_codeset(\"foo\", \"bar\");
   textdomain(\"foo\");
 }" HAVE_WORKING_LIBINTL)
-if (MSVC)
-  list(REMOVE_ITEM CMAKE_REQUIRED_LIBRARIES ${ICONV_LIBRARY})
-endif()
+
 if (LibIntl_STATIC)
   list(REMOVE_ITEM CMAKE_REQUIRED_LIBRARIES  "${ICONV_LIBRARY}" "${CoreFoundation_FRAMEWORK}")
 endif()
