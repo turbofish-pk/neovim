@@ -10,7 +10,6 @@
 
 #include "klib/kvec.h"
 #include "nvim/api/buffer.h"
-#include "nvim/api/deprecated.h"
 #include "nvim/api/keysets_defs.h"
 #include "nvim/api/private/converter.h"
 #include "nvim/api/private/defs.h"
@@ -88,6 +87,75 @@
 #include "nvim/window.h"
 
 #include "api/vim.c.generated.h"
+
+static int64_t convert_index(int64_t index)
+{
+  return index < 0 ? index - 1 : index;
+}
+/// Gets a buffer line
+///
+/// @deprecated use nvim_buf_get_lines instead.
+///             for positive indices (including 0) use
+///                 "nvim_buf_get_lines(buffer, index, index+1, true)"
+///             for negative indices use
+///                 "nvim_buf_get_lines(buffer, index-1, index, true)"
+///
+/// @param buffer   Buffer id
+/// @param index    Line index
+/// @param[out] err Error details, if any
+/// @return Line string
+String buffer_get_line(Buffer buffer, Integer index, Arena *arena, Error *err)
+  FUNC_API_DEPRECATED_SINCE(1)
+{
+  String rv = { .size = 0 };
+
+  index = convert_index(index);
+  Array slice = nvim_buf_get_lines(0, buffer, index, index + 1, true, arena, NULL, err);
+
+  if (!ERROR_SET(err) && slice.size) {
+    rv = slice.items[0].data.string;
+  }
+
+  return rv;
+}
+/// Sets a buffer line
+///
+/// @deprecated use nvim_buf_set_lines instead.
+///             for positive indices use
+///                 "nvim_buf_set_lines(buffer, index, index+1, true, [line])"
+///             for negative indices use
+///                 "nvim_buf_set_lines(buffer, index-1, index, true, [line])"
+///
+/// @param buffer   Buffer id
+/// @param index    Line index
+/// @param line     Contents of the new line
+/// @param[out] err Error details, if any
+void buffer_set_line(Buffer buffer, Integer index, String line, Arena *arena, Error *err)
+  FUNC_API_DEPRECATED_SINCE(1)
+{
+  Object l = STRING_OBJ(line);
+  Array array = { .items = &l, .size = 1 };
+  index = convert_index(index);
+  nvim_buf_set_lines(0, buffer, index, index + 1, true,  array, arena, err);
+}
+
+/// Deletes a buffer line
+///
+/// @deprecated use nvim_buf_set_lines instead.
+///             for positive indices use
+///                 "nvim_buf_set_lines(buffer, index, index+1, true, [])"
+///             for negative indices use
+///                 "nvim_buf_set_lines(buffer, index-1, index, true, [])"
+/// @param buffer   buffer id
+/// @param index    line index
+/// @param[out] err Error details, if any
+void buffer_del_line(Buffer buffer, Integer index, Arena *arena, Error *err)
+  FUNC_API_DEPRECATED_SINCE(1)
+{
+  Array array = ARRAY_DICT_INIT;
+  index = convert_index(index);
+  nvim_buf_set_lines(0, buffer, index, index + 1, true, array, arena, err);
+}
 
 /// Gets a highlight group by name
 ///
